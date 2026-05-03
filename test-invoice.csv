@@ -1,6 +1,7 @@
 invoice_number,company,email,amount,vat,status
-INV-2026-001,Acme BV,finance@acme.nl,1200,252,ready
-INV-2026-002,Beta BV,wrong-email,850,178.50,ready
-,Delta BV,billing@delta.nl,500,105,ready
-INV-2026-004,Gamma BV,admin@gamma.nl,abc,84,ready
-INV-2026-005,Omega BV,finance@omega.nl,1000,1200,ready
+INV-001,Acme BV,finance@acme.nl,1200,252,paid
+INV-002,Beta BV,wrong-email,850,178.5,paid
+INV-003,Gamma BV,admin@gamma.nl,-50,-10,refund
+INV-004,Delta BV,,500,105,paid
+INV-005,Omega BV,finance@omega.nl,1000,9999,paid
+INV-006,Zeta BV,finance@zeta.nl,0,0,draft
