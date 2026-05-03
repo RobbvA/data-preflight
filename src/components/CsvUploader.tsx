@@ -5,8 +5,15 @@ import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
 import {
   getMissingExpectedInvoiceFields,
   validateRows,
+  type ValidationIssue,
 } from "@/lib/validateRows";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
+
+type InvoicePreviewItem = {
+  rowIndex: number;
+  row: CsvRow;
+  issues: ValidationIssue[];
+};
 
 export function CsvUploader() {
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -15,6 +22,9 @@ export function CsvUploader() {
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedBlockedRowIndex, setSelectedBlockedRowIndex] = useState<
+    number | null
+  >(null);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -23,6 +33,7 @@ export function CsvUploader() {
     setError(null);
     setIsLoading(true);
     setFileName(file.name);
+    setSelectedBlockedRowIndex(null);
 
     try {
       const parsedRows = await parseCsvFile(file);
@@ -45,6 +56,7 @@ export function CsvUploader() {
       setRows([]);
       setHeaders([]);
       setSelectedFields([]);
+      setSelectedBlockedRowIndex(null);
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +69,7 @@ export function CsvUploader() {
     setSelectedFields([]);
     setError(null);
     setIsLoading(false);
+    setSelectedBlockedRowIndex(null);
   }
 
   function toggleField(field: string) {
@@ -67,6 +80,8 @@ export function CsvUploader() {
 
       return [...currentFields, field];
     });
+
+    setSelectedBlockedRowIndex(null);
   }
 
   const selectedRows = useMemo(() => {
@@ -90,14 +105,44 @@ export function CsvUploader() {
   }, [headers]);
 
   const issuesByRow = useMemo(() => {
-    return validationResult.issues.reduce<Record<number, number>>(
+    return validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
       (accumulator, issue) => {
-        accumulator[issue.rowIndex] = (accumulator[issue.rowIndex] ?? 0) + 1;
+        accumulator[issue.rowIndex] = [
+          ...(accumulator[issue.rowIndex] ?? []),
+          issue,
+        ];
         return accumulator;
       },
       {},
     );
   }, [validationResult.issues]);
+
+  const cleanInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return selectedRows
+      .map((row, index) => ({
+        rowIndex: index + 1,
+        row,
+        issues: issuesByRow[index + 1] ?? [],
+      }))
+      .filter((item) => item.issues.length === 0);
+  }, [selectedRows, issuesByRow]);
+
+  const blockedInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return selectedRows
+      .map((row, index) => ({
+        rowIndex: index + 1,
+        row,
+        issues: issuesByRow[index + 1] ?? [],
+      }))
+      .filter((item) =>
+        item.issues.some((issue) => issue.severity === "critical"),
+      );
+  }, [selectedRows, issuesByRow]);
+
+  const selectedBlockedInvoice =
+    blockedInvoiceItems.find(
+      (item) => item.rowIndex === selectedBlockedRowIndex,
+    ) ?? null;
 
   const warningCount = validationResult.issues.filter(
     (issue) => issue.severity === "warning",
@@ -233,17 +278,83 @@ export function CsvUploader() {
             <DataSetPreview
               title="Clean invoices"
               description="These rows passed the current validation rules and are ready for export."
-              rows={validationResult.cleanRows}
+              items={cleanInvoiceItems}
               emptyMessage="No clean invoices yet."
             />
 
             <DataSetPreview
               title="Blocked invoices"
-              description="These rows contain critical issues and should be fixed before import."
-              rows={validationResult.errorRows}
+              description="Click a blocked invoice to inspect its issues."
+              items={blockedInvoiceItems}
               emptyMessage="No blocked invoices."
-              issuesByRow={issuesByRow}
+              selectedRowIndex={selectedBlockedRowIndex}
+              onSelectItem={setSelectedBlockedRowIndex}
             />
+          </section>
+        )}
+
+        {selectedBlockedInvoice && (
+          <section className="rounded-xl border border-red-500/30 bg-red-500/10 p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">
+                  Blocked invoice detail
+                </h2>
+                <p className="mt-1 text-sm text-red-200">
+                  Row {selectedBlockedInvoice.rowIndex} has{" "}
+                  {selectedBlockedInvoice.issues.length} issue
+                  {selectedBlockedInvoice.issues.length === 1 ? "" : "s"} that
+                  should be fixed before import.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedBlockedRowIndex(null)}
+                className="text-sm text-red-200 underline underline-offset-4 hover:text-red-100"
+              >
+                Close detail
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+              <div className="rounded-lg border border-red-500/20 bg-slate-950 p-4">
+                <h3 className="text-sm font-semibold text-slate-200">
+                  Invoice data
+                </h3>
+                <pre className="mt-3 overflow-auto text-xs text-slate-300">
+                  {JSON.stringify(selectedBlockedInvoice.row, null, 2)}
+                </pre>
+              </div>
+
+              <div className="space-y-3">
+                {selectedBlockedInvoice.issues.map((issue) => (
+                  <div
+                    key={`${issue.rowIndex}-${issue.field}-${issue.type}`}
+                    className="rounded-lg border border-red-500/20 bg-slate-950 p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-slate-300">
+                        {issue.severity}
+                      </span>
+                      <span className="text-sm text-slate-400">
+                        Field: {issue.field}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-3 font-semibold">{issue.problem}</h3>
+                    <p className="mt-2 text-sm text-slate-300">
+                      <span className="font-medium text-slate-100">Why:</span>{" "}
+                      {issue.why}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-300">
+                      <span className="font-medium text-slate-100">Fix:</span>{" "}
+                      {issue.fix}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </section>
         )}
 
@@ -370,42 +481,40 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
 function DataSetPreview({
   title,
   description,
-  rows,
+  items,
   emptyMessage,
-  issuesByRow,
+  selectedRowIndex,
+  onSelectItem,
 }: {
   title: string;
   description: string;
-  rows: CsvRow[];
+  items: InvoicePreviewItem[];
   emptyMessage: string;
-  issuesByRow?: Record<number, number>;
+  selectedRowIndex?: number | null;
+  onSelectItem?: (rowIndex: number) => void;
 }) {
   return (
     <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
       <h2 className="text-xl font-semibold">{title}</h2>
       <p className="mt-1 text-sm text-slate-400">{description}</p>
 
-      {rows.length === 0 ? (
+      {items.length === 0 ? (
         <p className="mt-4 rounded-lg bg-slate-950 p-4 text-sm text-slate-400">
           {emptyMessage}
         </p>
       ) : (
         <div className="mt-4 max-h-[360px] space-y-3 overflow-auto">
-          {rows.map((row, index) => {
-            const displayIndex = index + 1;
-            const issueCount = issuesByRow?.[displayIndex];
-
-            return (
-              <div
-                key={`${title}-${index}`}
-                className="rounded-lg border border-slate-800 bg-slate-950 p-4"
-              >
+          {items.map((item) => {
+            const isSelected = selectedRowIndex === item.rowIndex;
+            const issueCount = item.issues.length;
+            const cardContent = (
+              <>
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="text-sm font-medium">
-                    {row.invoice_number || `Row ${displayIndex}`}
+                    {item.row.invoice_number || `Row ${item.rowIndex}`}
                   </p>
 
-                  {issueCount && (
+                  {issueCount > 0 && (
                     <span className="rounded-full border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-300">
                       {issueCount} issue{issueCount === 1 ? "" : "s"}
                     </span>
@@ -413,9 +522,35 @@ function DataSetPreview({
                 </div>
 
                 <pre className="overflow-auto text-xs text-slate-300">
-                  {JSON.stringify(row, null, 2)}
+                  {JSON.stringify(item.row, null, 2)}
                 </pre>
-              </div>
+              </>
+            );
+
+            if (!onSelectItem) {
+              return (
+                <div
+                  key={`${title}-${item.rowIndex}`}
+                  className="rounded-lg border border-slate-800 bg-slate-950 p-4"
+                >
+                  {cardContent}
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={`${title}-${item.rowIndex}`}
+                type="button"
+                onClick={() => onSelectItem(item.rowIndex)}
+                className={`w-full rounded-lg border p-4 text-left transition ${
+                  isSelected
+                    ? "border-red-400 bg-red-500/10"
+                    : "border-slate-800 bg-slate-950 hover:border-red-500/40"
+                }`}
+              >
+                {cardContent}
+              </button>
             );
           })}
         </div>
