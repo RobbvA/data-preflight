@@ -1,0 +1,4 @@
+name,email,company,amount
+John Doe,john@example.com,Acme BV,1200
+Jane Smith,jane@example.com,Beta BV,850
+Wrong User,wrong-email,Gamma BV,abc
