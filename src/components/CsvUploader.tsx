@@ -10,19 +10,50 @@ export function CsvUploader() {
   const [fileName, setFileName] = useState("");
   const [headers, setHeaders] = useState<string[]>([]);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setError(null);
+    setIsLoading(true);
     setFileName(file.name);
 
-    const parsedRows = await parseCsvFile(file);
-    const detectedHeaders = Object.keys(parsedRows[0] ?? {});
+    try {
+      const parsedRows = await parseCsvFile(file);
 
-    setRows(parsedRows);
-    setHeaders(detectedHeaders);
-    setSelectedFields(detectedHeaders);
+      if (parsedRows.length === 0) {
+        throw new Error("CSV file is empty.");
+      }
+
+      const detectedHeaders = Object.keys(parsedRows[0] ?? {});
+
+      if (detectedHeaders.length === 0) {
+        throw new Error("CSV file has no headers.");
+      }
+
+      setRows(parsedRows);
+      setHeaders(detectedHeaders);
+      setSelectedFields(detectedHeaders);
+    } catch {
+      setError("Failed to parse CSV file. Please check the file format.");
+      setRows([]);
+      setHeaders([]);
+      setSelectedFields([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function resetFlow() {
+    setRows([]);
+    setFileName("");
+    setHeaders([]);
+    setSelectedFields([]);
+    setError(null);
+    setIsLoading(false);
   }
 
   function toggleField(field: string) {
@@ -82,13 +113,34 @@ export function CsvUploader() {
             type="file"
             accept=".csv"
             onChange={handleFileChange}
-            className="mt-4 block w-full text-sm text-slate-300"
+            disabled={isLoading}
+            className="mt-4 block w-full text-sm text-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
           />
 
-          {fileName && (
+          {isLoading && (
+            <p className="mt-3 text-sm text-slate-400">Processing file...</p>
+          )}
+
+          {fileName && !isLoading && (
             <p className="mt-3 text-sm text-slate-400">
               Selected file: {fileName}
             </p>
+          )}
+
+          {error && (
+            <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
+          {(rows.length > 0 || error || fileName) && (
+            <button
+              type="button"
+              onClick={resetFlow}
+              className="mt-4 text-sm text-slate-400 underline underline-offset-4 hover:text-slate-200"
+            >
+              Reset
+            </button>
           )}
         </section>
 
