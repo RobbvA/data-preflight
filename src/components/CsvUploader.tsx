@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
+import { validateRows } from "@/lib/validateRows";
 
 export function CsvUploader() {
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -44,6 +45,10 @@ export function CsvUploader() {
       return selectedRow;
     });
   }, [rows, selectedFields]);
+
+  const validationErrors = useMemo(() => {
+    return validateRows(selectedRows);
+  }, [selectedRows]);
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
@@ -111,6 +116,61 @@ export function CsvUploader() {
             <pre className="mt-4 max-h-[500px] overflow-auto rounded-lg bg-slate-950 p-4 text-sm text-slate-300">
               {JSON.stringify(selectedRows, null, 2)}
             </pre>
+          </section>
+        )}
+
+        {selectedRows.length > 0 && (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-xl font-semibold">Validation results</h2>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-lg bg-slate-950 p-4">
+                <p className="text-sm text-slate-400">Total rows</p>
+                <p className="mt-1 text-2xl font-bold">{selectedRows.length}</p>
+              </div>
+
+              <div className="rounded-lg bg-slate-950 p-4">
+                <p className="text-sm text-slate-400">Errors</p>
+                <p className="mt-1 text-2xl font-bold">
+                  {validationErrors.length}
+                </p>
+              </div>
+
+              <div className="rounded-lg bg-slate-950 p-4">
+                <p className="text-sm text-slate-400">Status</p>
+                <p className="mt-1 text-2xl font-bold">
+                  {validationErrors.length === 0 ? "Clean" : "Needs review"}
+                </p>
+              </div>
+            </div>
+
+            {validationErrors.length > 0 && (
+              <div className="mt-6 overflow-x-auto">
+                <table className="w-full border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400">
+                      <th className="py-2 pr-4">Row</th>
+                      <th className="py-2 pr-4">Field</th>
+                      <th className="py-2 pr-4">Type</th>
+                      <th className="py-2 pr-4">Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {validationErrors.map((error) => (
+                      <tr
+                        key={`${error.rowIndex}-${error.field}-${error.type}`}
+                        className="border-b border-slate-800"
+                      >
+                        <td className="py-2 pr-4">{error.rowIndex}</td>
+                        <td className="py-2 pr-4">{error.field}</td>
+                        <td className="py-2 pr-4">{error.type}</td>
+                        <td className="py-2 pr-4">{error.message}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
         )}
       </div>
