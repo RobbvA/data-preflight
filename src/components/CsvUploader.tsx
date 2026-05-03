@@ -46,18 +46,29 @@ export function CsvUploader() {
     });
   }, [rows, selectedFields]);
 
-  const validationErrors = useMemo(() => {
+  const validationResult = useMemo(() => {
     return validateRows(selectedRows);
   }, [selectedRows]);
 
+  const warningCount = validationResult.issues.filter(
+    (issue) => issue.severity === "warning",
+  ).length;
+
+  const criticalCount = validationResult.issues.filter(
+    (issue) => issue.severity === "critical",
+  ).length;
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto max-w-5xl space-y-8">
+      <div className="mx-auto max-w-6xl space-y-8">
         <section>
-          <h1 className="text-3xl font-bold">DataPreflight</h1>
-          <p className="mt-2 text-slate-400">
-            Upload a CSV file, detect fields, and choose what should continue
-            through the pipeline.
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-slate-500">
+            Data trust layer
+          </p>
+          <h1 className="mt-2 text-3xl font-bold">DataPreflight</h1>
+          <p className="mt-2 max-w-2xl text-slate-400">
+            Upload a CSV file, select the fields you need, and inspect what is
+            safe to export before data enters another system.
           </p>
         </section>
 
@@ -84,7 +95,7 @@ export function CsvUploader() {
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-xl font-semibold">Detected fields</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Select which fields should be included in the output.
+              Select which fields should continue through the preflight check.
             </p>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
@@ -107,73 +118,104 @@ export function CsvUploader() {
 
         {selectedRows.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-xl font-semibold">Preflight summary</h2>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              <SummaryCard label="Total rows" value={selectedRows.length} />
+              <SummaryCard
+                label="Clean rows"
+                value={validationResult.cleanRows.length}
+              />
+              <SummaryCard
+                label="Error rows"
+                value={validationResult.errorRows.length}
+              />
+              <SummaryCard label="Critical issues" value={criticalCount} />
+              <SummaryCard label="Warnings" value={warningCount} />
+            </div>
+          </section>
+        )}
+
+        {selectedRows.length > 0 && (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-xl font-semibold">Selected data preview</h2>
             <p className="mt-1 text-sm text-slate-400">
               Total rows: {selectedRows.length} | Selected fields:{" "}
               {selectedFields.length}
             </p>
 
-            <pre className="mt-4 max-h-[500px] overflow-auto rounded-lg bg-slate-950 p-4 text-sm text-slate-300">
+            <pre className="mt-4 max-h-[360px] overflow-auto rounded-lg bg-slate-950 p-4 text-sm text-slate-300">
               {JSON.stringify(selectedRows, null, 2)}
             </pre>
           </section>
         )}
 
-        {selectedRows.length > 0 && (
+        {validationResult.issues.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Validation results</h2>
+            <h2 className="text-xl font-semibold">Explainable issues</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Every issue explains what went wrong, why it matters, and how to
+              fix it.
+            </p>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-lg bg-slate-950 p-4">
-                <p className="text-sm text-slate-400">Total rows</p>
-                <p className="mt-1 text-2xl font-bold">{selectedRows.length}</p>
-              </div>
-
-              <div className="rounded-lg bg-slate-950 p-4">
-                <p className="text-sm text-slate-400">Errors</p>
-                <p className="mt-1 text-2xl font-bold">
-                  {validationErrors.length}
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-slate-950 p-4">
-                <p className="text-sm text-slate-400">Status</p>
-                <p className="mt-1 text-2xl font-bold">
-                  {validationErrors.length === 0 ? "Clean" : "Needs review"}
-                </p>
-              </div>
-            </div>
-
-            {validationErrors.length > 0 && (
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-800 text-slate-400">
-                      <th className="py-2 pr-4">Row</th>
-                      <th className="py-2 pr-4">Field</th>
-                      <th className="py-2 pr-4">Type</th>
-                      <th className="py-2 pr-4">Message</th>
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400">
+                    <th className="py-2 pr-4">Row</th>
+                    <th className="py-2 pr-4">Field</th>
+                    <th className="py-2 pr-4">Severity</th>
+                    <th className="py-2 pr-4">Problem</th>
+                    <th className="py-2 pr-4">Why</th>
+                    <th className="py-2 pr-4">Fix</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {validationResult.issues.map((issue) => (
+                    <tr
+                      key={`${issue.rowIndex}-${issue.field}-${issue.type}`}
+                      className="border-b border-slate-800 align-top"
+                    >
+                      <td className="py-3 pr-4">{issue.rowIndex}</td>
+                      <td className="py-3 pr-4">{issue.field}</td>
+                      <td className="py-3 pr-4">
+                        <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase">
+                          {issue.severity}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">{issue.problem}</td>
+                      <td className="max-w-xs py-3 pr-4 text-slate-300">
+                        {issue.why}
+                      </td>
+                      <td className="max-w-xs py-3 pr-4 text-slate-300">
+                        {issue.fix}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {validationErrors.map((error) => (
-                      <tr
-                        key={`${error.rowIndex}-${error.field}-${error.type}`}
-                        className="border-b border-slate-800"
-                      >
-                        <td className="py-2 pr-4">{error.rowIndex}</td>
-                        <td className="py-2 pr-4">{error.field}</td>
-                        <td className="py-2 pr-4">{error.type}</td>
-                        <td className="py-2 pr-4">{error.message}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {selectedRows.length > 0 && validationResult.issues.length === 0 && (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-xl font-semibold">No issues found</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              All selected rows passed the current validation rules.
+            </p>
           </section>
         )}
       </div>
     </main>
+  );
+}
+
+function SummaryCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg bg-slate-950 p-4">
+      <p className="text-sm text-slate-400">{label}</p>
+      <p className="mt-1 text-2xl font-bold">{value}</p>
+    </div>
   );
 }
