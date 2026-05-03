@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
 import { validateRows } from "@/lib/validateRows";
+import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 export function CsvUploader() {
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -204,6 +205,52 @@ export function CsvUploader() {
             <p className="mt-1 text-sm text-slate-400">
               All selected rows passed the current validation rules.
             </p>
+          </section>
+        )}
+
+        {selectedRows.length > 0 && (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-xl font-semibold">Export</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Download clean rows, export the issue report, or copy clean JSON.
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  downloadCsv("clean.csv", validationResult.cleanRows)
+                }
+                disabled={validationResult.cleanRows.length === 0}
+                className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Download clean.csv
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  downloadErrorCsv("errors.csv", validationResult.issues)
+                }
+                disabled={validationResult.issues.length === 0}
+                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Download errors.csv
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    JSON.stringify(validationResult.cleanRows, null, 2),
+                  )
+                }
+                disabled={validationResult.cleanRows.length === 0}
+                className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Copy clean JSON
+              </button>
+            </div>
           </section>
         )}
       </div>
