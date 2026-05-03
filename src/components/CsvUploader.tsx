@@ -89,6 +89,16 @@ export function CsvUploader() {
     return getMissingExpectedInvoiceFields(headers);
   }, [headers]);
 
+  const issuesByRow = useMemo(() => {
+    return validationResult.issues.reduce<Record<number, number>>(
+      (accumulator, issue) => {
+        accumulator[issue.rowIndex] = (accumulator[issue.rowIndex] ?? 0) + 1;
+        return accumulator;
+      },
+      {},
+    );
+  }, [validationResult.issues]);
+
   const warningCount = validationResult.issues.filter(
     (issue) => issue.severity === "warning",
   ).length;
@@ -219,16 +229,21 @@ export function CsvUploader() {
         )}
 
         {selectedRows.length > 0 && (
-          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Selected invoice preview</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              Total invoices: {selectedRows.length} | Selected fields:{" "}
-              {selectedFields.length}
-            </p>
+          <section className="grid gap-6 lg:grid-cols-2">
+            <DataSetPreview
+              title="Clean invoices"
+              description="These rows passed the current validation rules and are ready for export."
+              rows={validationResult.cleanRows}
+              emptyMessage="No clean invoices yet."
+            />
 
-            <pre className="mt-4 max-h-[360px] overflow-auto rounded-lg bg-slate-950 p-4 text-sm text-slate-300">
-              {JSON.stringify(selectedRows, null, 2)}
-            </pre>
+            <DataSetPreview
+              title="Blocked invoices"
+              description="These rows contain critical issues and should be fixed before import."
+              rows={validationResult.errorRows}
+              emptyMessage="No blocked invoices."
+              issuesByRow={issuesByRow}
+            />
           </section>
         )}
 
@@ -349,5 +364,62 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
       <p className="text-sm text-slate-400">{label}</p>
       <p className="mt-1 text-2xl font-bold">{value}</p>
     </div>
+  );
+}
+
+function DataSetPreview({
+  title,
+  description,
+  rows,
+  emptyMessage,
+  issuesByRow,
+}: {
+  title: string;
+  description: string;
+  rows: CsvRow[];
+  emptyMessage: string;
+  issuesByRow?: Record<number, number>;
+}) {
+  return (
+    <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+      <h2 className="text-xl font-semibold">{title}</h2>
+      <p className="mt-1 text-sm text-slate-400">{description}</p>
+
+      {rows.length === 0 ? (
+        <p className="mt-4 rounded-lg bg-slate-950 p-4 text-sm text-slate-400">
+          {emptyMessage}
+        </p>
+      ) : (
+        <div className="mt-4 max-h-[360px] space-y-3 overflow-auto">
+          {rows.map((row, index) => {
+            const displayIndex = index + 1;
+            const issueCount = issuesByRow?.[displayIndex];
+
+            return (
+              <div
+                key={`${title}-${index}`}
+                className="rounded-lg border border-slate-800 bg-slate-950 p-4"
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">
+                    {row.invoice_number || `Row ${displayIndex}`}
+                  </p>
+
+                  {issueCount && (
+                    <span className="rounded-full border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-300">
+                      {issueCount} issue{issueCount === 1 ? "" : "s"}
+                    </span>
+                  )}
+                </div>
+
+                <pre className="overflow-auto text-xs text-slate-300">
+                  {JSON.stringify(row, null, 2)}
+                </pre>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
