@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
-import { validateRows } from "@/lib/validateRows";
+import {
+  getMissingExpectedInvoiceFields,
+  validateRows,
+} from "@/lib/validateRows";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 export function CsvUploader() {
@@ -82,6 +85,10 @@ export function CsvUploader() {
     return validateRows(selectedRows);
   }, [selectedRows]);
 
+  const missingExpectedFields = useMemo(() => {
+    return getMissingExpectedInvoiceFields(headers);
+  }, [headers]);
+
   const warningCount = validationResult.issues.filter(
     (issue) => issue.severity === "warning",
   ).length;
@@ -95,18 +102,19 @@ export function CsvUploader() {
       <div className="mx-auto max-w-6xl space-y-8">
         <section>
           <p className="text-sm font-medium uppercase tracking-[0.25em] text-slate-500">
-            Data trust layer
+            Invoice data preflight
           </p>
           <h1 className="mt-2 text-3xl font-bold">DataPreflight</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
-            Upload a CSV file, select the fields you need, and inspect what is
-            safe to export before data enters another system.
+            Validate invoice CSV data before importing it into an accounting
+            system. Select the fields you need, inspect issues, and export clean
+            invoice data.
           </p>
         </section>
 
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
           <label className="block text-sm font-medium text-slate-300">
-            Upload CSV
+            Upload invoice CSV
           </label>
 
           <input
@@ -146,9 +154,30 @@ export function CsvUploader() {
 
         {headers.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-xl font-semibold">Invoice mode</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Expected invoice fields: invoice_number, company, email, amount,
+              vat.
+            </p>
+
+            {missingExpectedFields.length > 0 ? (
+              <div className="mt-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+                Missing expected fields: {missingExpectedFields.join(", ")}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
+                All expected invoice fields were detected.
+              </div>
+            )}
+          </section>
+        )}
+
+        {headers.length > 0 && (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-xl font-semibold">Detected fields</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Select which fields should continue through the preflight check.
+              Select which fields should continue through the invoice preflight
+              check.
             </p>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
@@ -174,13 +203,13 @@ export function CsvUploader() {
             <h2 className="text-xl font-semibold">Preflight summary</h2>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <SummaryCard label="Total rows" value={selectedRows.length} />
+              <SummaryCard label="Total invoices" value={selectedRows.length} />
               <SummaryCard
-                label="Clean rows"
+                label="Ready for import"
                 value={validationResult.cleanRows.length}
               />
               <SummaryCard
-                label="Error rows"
+                label="Blocked invoices"
                 value={validationResult.errorRows.length}
               />
               <SummaryCard label="Critical issues" value={criticalCount} />
@@ -191,9 +220,9 @@ export function CsvUploader() {
 
         {selectedRows.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Selected data preview</h2>
+            <h2 className="text-xl font-semibold">Selected invoice preview</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Total rows: {selectedRows.length} | Selected fields:{" "}
+              Total invoices: {selectedRows.length} | Selected fields:{" "}
               {selectedFields.length}
             </p>
 
@@ -207,8 +236,8 @@ export function CsvUploader() {
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-xl font-semibold">Explainable issues</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Every issue explains what went wrong, why it matters, and how to
-              fix it.
+              Every invoice issue explains what went wrong, why it matters, and
+              how to fix it before import.
             </p>
 
             <div className="mt-6 overflow-x-auto">
@@ -253,9 +282,9 @@ export function CsvUploader() {
 
         {selectedRows.length > 0 && validationResult.issues.length === 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">No issues found</h2>
+            <h2 className="text-xl font-semibold">No invoice issues found</h2>
             <p className="mt-1 text-sm text-slate-400">
-              All selected rows passed the current validation rules.
+              All selected invoices passed the current validation rules.
             </p>
           </section>
         )}
@@ -264,30 +293,34 @@ export function CsvUploader() {
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-xl font-semibold">Export</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Download clean rows, export the issue report, or copy clean JSON.
+              Download clean invoice rows, export the issue report, or copy
+              clean invoice JSON.
             </p>
 
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() =>
-                  downloadCsv("clean.csv", validationResult.cleanRows)
+                  downloadCsv("clean-invoices.csv", validationResult.cleanRows)
                 }
                 disabled={validationResult.cleanRows.length === 0}
                 className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Download clean.csv
+                Download clean-invoices.csv
               </button>
 
               <button
                 type="button"
                 onClick={() =>
-                  downloadErrorCsv("errors.csv", validationResult.issues)
+                  downloadErrorCsv(
+                    "invoice-errors.csv",
+                    validationResult.issues,
+                  )
                 }
                 disabled={validationResult.issues.length === 0}
                 className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Download errors.csv
+                Download invoice-errors.csv
               </button>
 
               <button
@@ -300,7 +333,7 @@ export function CsvUploader() {
                 disabled={validationResult.cleanRows.length === 0}
                 className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Copy clean JSON
+                Copy clean invoice JSON
               </button>
             </div>
           </section>

@@ -5,7 +5,13 @@ export type Severity = "critical" | "warning";
 export type ValidationIssue = {
   rowIndex: number;
   field: string;
-  type: "required" | "email" | "number" | "empty-row";
+  type:
+    | "required"
+    | "email"
+    | "number"
+    | "empty-row"
+    | "vat-higher-than-amount"
+    | "missing-expected-field";
   problem: string;
   why: string;
   fix: string;
@@ -17,6 +23,14 @@ export type ValidationResult = {
   cleanRows: CsvRow[];
   errorRows: CsvRow[];
 };
+
+const expectedInvoiceFields = [
+  "invoice_number",
+  "company",
+  "email",
+  "amount",
+  "vat",
+];
 
 export function validateRows(rows: CsvRow[]): ValidationResult {
   const issues: ValidationIssue[] = [];
@@ -40,6 +54,10 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
     cleanRows,
     errorRows,
   };
+}
+
+export function getMissingExpectedInvoiceFields(headers: string[]) {
+  return expectedInvoiceFields.filter((field) => !headers.includes(field));
 }
 
 function validateRow(row: CsvRow, rowIndex: number): ValidationIssue[] {
@@ -70,7 +88,7 @@ function validateRow(row: CsvRow, rowIndex: number): ValidationIssue[] {
         field,
         type: "required",
         problem: "Missing value",
-        why: `The field "${field}" is empty, so this row may fail when imported into another system.`,
+        why: `The field "${field}" is empty, so this invoice may fail when imported into an accounting system.`,
         fix: `Add a value for "${field}" or deselect this field if it is not needed.`,
         severity: "critical",
       });
@@ -85,7 +103,7 @@ function validateRow(row: CsvRow, rowIndex: number): ValidationIssue[] {
         type: "email",
         problem: "Invalid email",
         why: `"${trimmedValue}" does not match a valid email format.`,
-        fix: "Use an email format like name@example.com.",
+        fix: "Use an email format like finance@example.com.",
         severity: "critical",
       });
     }
@@ -102,6 +120,27 @@ function validateRow(row: CsvRow, rowIndex: number): ValidationIssue[] {
       });
     }
   });
+
+  const amount = Number(row.amount);
+  const vat = Number(row.vat);
+
+  if (
+    row.amount &&
+    row.vat &&
+    !Number.isNaN(amount) &&
+    !Number.isNaN(vat) &&
+    vat > amount
+  ) {
+    issues.push({
+      rowIndex,
+      field: "vat",
+      type: "vat-higher-than-amount",
+      problem: "VAT is higher than amount",
+      why: `VAT value ${vat} is higher than invoice amount ${amount}, which is usually incorrect.`,
+      fix: "Check whether amount and VAT were entered in the correct fields.",
+      severity: "warning",
+    });
+  }
 
   return issues;
 }
