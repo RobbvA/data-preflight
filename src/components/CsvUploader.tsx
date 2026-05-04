@@ -164,6 +164,14 @@ export function CsvUploader() {
     (issue) => issue.severity === "critical",
   ).length;
 
+  const blockedCount = validationResult.errorRows.length;
+  const cleanCount = validationResult.cleanRows.length;
+
+  const hasSuspiciousVat = validationResult.issues.some(
+    (issue) =>
+      issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
+  );
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
       <div className="mx-auto max-w-6xl space-y-8">
@@ -178,6 +186,47 @@ export function CsvUploader() {
             invoice data.
           </p>
         </section>
+
+        {selectedRows.length > 0 && (
+          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+            <h2 className="text-xl font-semibold">Import readiness</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              High-level insight before exporting invoice data.
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+              {blockedCount > 0 && (
+                <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-red-300">
+                  ⚠️ {blockedCount} blocked
+                </span>
+              )}
+
+              {warningCount > 0 && (
+                <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-yellow-200">
+                  ⚠️ {warningCount} warning{warningCount === 1 ? "" : "s"}
+                </span>
+              )}
+
+              {cleanCount > 0 && (
+                <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-200">
+                  ✅ {cleanCount} ready
+                </span>
+              )}
+
+              {hasSuspiciousVat && (
+                <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-purple-200">
+                  ⚠️ VAT anomalies detected
+                </span>
+              )}
+
+              {blockedCount === 0 && warningCount === 0 && cleanCount > 0 && (
+                <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-200">
+                  All selected invoices are ready for import
+                </span>
+              )}
+            </div>
+          </section>
+        )}
 
         <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
           <label className="block text-sm font-medium text-slate-300">
