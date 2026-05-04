@@ -2,11 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
-import {
-  getMissingExpectedInvoiceFields,
-  validateRows,
-  type ValidationIssue,
-} from "@/lib/validateRows";
+import { validateRows, type ValidationIssue } from "@/lib/validateRows";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 type InvoicePreviewItem = {
@@ -15,11 +11,33 @@ type InvoicePreviewItem = {
   issues: ValidationIssue[];
 };
 
+type FieldMapping = {
+  invoice_number: string;
+  company: string;
+  email: string;
+  amount: string;
+  vat: string;
+};
+
+const expectedInvoiceFields: Array<keyof FieldMapping> = [
+  "invoice_number",
+  "company",
+  "email",
+  "amount",
+  "vat",
+];
+
 export function CsvUploader() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [fileName, setFileName] = useState("");
   const [headers, setHeaders] = useState<string[]>([]);
-  const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [fieldMapping, setFieldMapping] = useState<FieldMapping>({
+    invoice_number: "",
+    company: "",
+    email: "",
+    amount: "",
+    vat: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlockedRowIndex, setSelectedBlockedRowIndex] = useState<
@@ -52,12 +70,12 @@ export function CsvUploader() {
 
       setRows(parsedRows);
       setHeaders(detectedHeaders);
-      setSelectedFields(detectedHeaders);
+      setFieldMapping(createSuggestedMapping(detectedHeaders));
     } catch {
       setError("Failed to parse CSV file. Please check the file format.");
       setRows([]);
       setHeaders([]);
-      setSelectedFields([]);
+      setFieldMapping(createEmptyMapping());
       setSelectedBlockedRowIndex(null);
       setShowOnlyBlocked(false);
     } finally {
@@ -69,21 +87,21 @@ export function CsvUploader() {
     setRows([]);
     setFileName("");
     setHeaders([]);
-    setSelectedFields([]);
+    setFieldMapping(createEmptyMapping());
     setError(null);
     setIsLoading(false);
     setSelectedBlockedRowIndex(null);
     setShowOnlyBlocked(false);
   }
 
-  function toggleField(field: string) {
-    setSelectedFields((currentFields) => {
-      if (currentFields.includes(field)) {
-        return currentFields.filter((item) => item !== field);
-      }
-
-      return [...currentFields, field];
-    });
+  function updateFieldMapping(
+    targetField: keyof FieldMapping,
+    sourceField: string,
+  ) {
+    setFieldMapping((currentMapping) => ({
+      ...currentMapping,
+      [targetField]: sourceField,
+    }));
 
     setSelectedBlockedRowIndex(null);
   }
@@ -95,23 +113,24 @@ export function CsvUploader() {
 
   const selectedRows = useMemo(() => {
     return rows.map((row) => {
-      const selectedRow: CsvRow = {};
+      const mappedRow: CsvRow = {};
 
-      selectedFields.forEach((field) => {
-        selectedRow[field] = row[field] ?? "";
+      expectedInvoiceFields.forEach((targetField) => {
+        const sourceField = fieldMapping[targetField];
+        mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
       });
 
-      return selectedRow;
+      return mappedRow;
     });
-  }, [rows, selectedFields]);
+  }, [rows, fieldMapping]);
 
   const validationResult = useMemo(() => {
     return validateRows(selectedRows);
   }, [selectedRows]);
 
   const missingExpectedFields = useMemo(() => {
-    return getMissingExpectedInvoiceFields(headers);
-  }, [headers]);
+    return expectedInvoiceFields.filter((field) => !fieldMapping[field]);
+  }, [fieldMapping]);
 
   const issuesByRow = useMemo(() => {
     return validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
@@ -182,7 +201,7 @@ export function CsvUploader() {
           <h1 className="mt-2 text-3xl font-bold">DataPreflight</h1>
           <p className="mt-2 max-w-2xl text-slate-400">
             Validate invoice CSV data before importing it into an accounting
-            system. Select the fields you need, inspect issues, and export clean
+            system. Map messy CSV headers, inspect issues, and export clean
             invoice data.
           </p>
         </section>
@@ -270,19 +289,44 @@ export function CsvUploader() {
 
         {headers.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Invoice mode</h2>
+            <h2 className="text-xl font-semibold">Field mapping</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Expected invoice fields: invoice_number, company, email, amount,
-              vat.
+              Map the uploaded CSV headers to the invoice fields DataPreflight
+              validates.
             </p>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {expectedInvoiceFields.map((targetField) => (
+                <label key={targetField} className="block">
+                  <span className="text-sm font-medium text-slate-300">
+                    {targetField}
+                  </span>
+
+                  <select
+                    value={fieldMapping[targetField]}
+                    onChange={(event) =>
+                      updateFieldMapping(targetField, event.target.value)
+                    }
+                    className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+                  >
+                    <option value="">Not mapped</option>
+                    {headers.map((header) => (
+                      <option key={header} value={header}>
+                        {header}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
 
             {missingExpectedFields.length > 0 ? (
               <div className="mt-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
-                Missing expected fields: {missingExpectedFields.join(", ")}
+                Missing mappings: {missingExpectedFields.join(", ")}
               </div>
             ) : (
               <div className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
-                All expected invoice fields were detected.
+                All expected invoice fields are mapped.
               </div>
             )}
           </section>
@@ -290,25 +334,19 @@ export function CsvUploader() {
 
         {headers.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">Detected fields</h2>
+            <h2 className="text-xl font-semibold">Detected CSV headers</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Select which fields should continue through the invoice preflight
-              check.
+              These are the raw fields found in the uploaded file.
             </p>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="mt-4 flex flex-wrap gap-3">
               {headers.map((header) => (
-                <label
+                <span
                   key={header}
-                  className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm"
+                  className="rounded-full border border-slate-800 bg-slate-950 px-3 py-1 text-sm text-slate-300"
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedFields.includes(header)}
-                    onChange={() => toggleField(header)}
-                  />
-                  <span>{header}</span>
-                </label>
+                  {header}
+                </span>
               ))}
             </div>
           </section>
@@ -561,6 +599,71 @@ export function CsvUploader() {
       </div>
     </main>
   );
+}
+
+function createEmptyMapping(): FieldMapping {
+  return {
+    invoice_number: "",
+    company: "",
+    email: "",
+    amount: "",
+    vat: "",
+  };
+}
+
+function createSuggestedMapping(headers: string[]): FieldMapping {
+  return {
+    invoice_number:
+      headers.find((header) => {
+        const normalized = normalizeHeader(header);
+        return (
+          normalized.includes("invoice") ||
+          normalized.includes("factuur") ||
+          normalized.includes("number") ||
+          normalized.includes("nummer")
+        );
+      }) ?? "",
+    company:
+      headers.find((header) => {
+        const normalized = normalizeHeader(header);
+        return (
+          normalized.includes("company") ||
+          normalized.includes("client") ||
+          normalized.includes("customer") ||
+          normalized.includes("bedrijf") ||
+          normalized.includes("klant")
+        );
+      }) ?? "",
+    email:
+      headers.find((header) => {
+        const normalized = normalizeHeader(header);
+        return normalized.includes("email") || normalized.includes("mail");
+      }) ?? "",
+    amount:
+      headers.find((header) => {
+        const normalized = normalizeHeader(header);
+        return (
+          normalized.includes("amount") ||
+          normalized.includes("total") ||
+          normalized.includes("price") ||
+          normalized.includes("bedrag") ||
+          normalized.includes("totaal")
+        );
+      }) ?? "",
+    vat:
+      headers.find((header) => {
+        const normalized = normalizeHeader(header);
+        return (
+          normalized.includes("vat") ||
+          normalized.includes("btw") ||
+          normalized.includes("tax")
+        );
+      }) ?? "",
+  };
+}
+
+function normalizeHeader(header: string) {
+  return header.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
 }
 
 function SummaryCard({ label, value }: { label: string; value: number }) {
