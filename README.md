@@ -218,3 +218,9 @@ messy input
 → transparent validation
 → trusted output
 ```
+
+- duplicate invoice numbers
+- negative or zero amounts
+- negative VAT values
+- suspicious VAT percentages
+- invalid invoice status values

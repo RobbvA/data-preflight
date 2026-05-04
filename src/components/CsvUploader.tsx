@@ -17,6 +17,7 @@ type FieldMapping = {
   email: string;
   amount: string;
   vat: string;
+  status: string;
 };
 
 const expectedInvoiceFields: Array<keyof FieldMapping> = [
@@ -25,6 +26,7 @@ const expectedInvoiceFields: Array<keyof FieldMapping> = [
   "email",
   "amount",
   "vat",
+  "status",
 ];
 
 export function CsvUploader() {
@@ -37,6 +39,7 @@ export function CsvUploader() {
     email: "",
     amount: "",
     vat: "",
+    status: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -608,6 +611,7 @@ function createEmptyMapping(): FieldMapping {
     email: "",
     amount: "",
     vat: "",
+    status: "",
   };
 }
 
@@ -657,6 +661,15 @@ function createSuggestedMapping(headers: string[]): FieldMapping {
           normalized.includes("vat") ||
           normalized.includes("btw") ||
           normalized.includes("tax")
+        );
+      }) ?? "",
+    status:
+      headers.find((header) => {
+        const normalized = normalizeHeader(header);
+        return (
+          normalized.includes("status") ||
+          normalized.includes("state") ||
+          normalized.includes("fase")
         );
       }) ?? "",
   };
