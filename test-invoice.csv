@@ -1,6 +1,5 @@
 Invoice No,Client Name,Email Address,Total Price,VAT Amount,Status
 INV-2026-001,Acme BV,finance@acme.nl,1200,252,ready
-INV-2026-002,Beta BV,wrong-email,850,178.50,ready
-,Delta BV,billing@delta.nl,500,105,ready
-INV-2026-004,Gamma BV,admin@gamma.nl,abc,84,ready
-INV-2026-005,Omega BV,finance@omega.nl,1000,1200,ready
+INV-2026-001,Beta BV,billing@beta.nl,850,178.50,paid
+INV-2026-003,Gamma BV,admin@gamma.nl,-50,-10,refund
+INV-2026-004,Delta BV,wrong-email,500,600,unknown

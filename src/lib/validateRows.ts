@@ -11,6 +11,11 @@ export type ValidationIssue = {
     | "number"
     | "empty-row"
     | "vat-higher-than-amount"
+    | "amount-not-positive"
+    | "vat-negative"
+    | "suspicious-vat-rate"
+    | "duplicate-invoice-number"
+    | "invalid-status"
     | "missing-expected-field";
   problem: string;
   why: string;
@@ -32,13 +37,16 @@ const expectedInvoiceFields = [
   "vat",
 ];
 
+const allowedStatuses = ["ready", "paid", "draft", "pending", "sent"];
+
 export function validateRows(rows: CsvRow[]): ValidationResult {
   const issues: ValidationIssue[] = [];
   const cleanRows: CsvRow[] = [];
   const errorRows: CsvRow[] = [];
+  const duplicateInvoiceNumbers = findDuplicateInvoiceNumbers(rows);
 
   rows.forEach((row, index) => {
-    const rowIssues = validateRow(row, index + 1);
+    const rowIssues = validateRow(row, index + 1, duplicateInvoiceNumbers);
 
     if (rowIssues.some((issue) => issue.severity === "critical")) {
       errorRows.push(row);
@@ -60,7 +68,11 @@ export function getMissingExpectedInvoiceFields(headers: string[]) {
   return expectedInvoiceFields.filter((field) => !headers.includes(field));
 }
 
-function validateRow(row: CsvRow, rowIndex: number): ValidationIssue[] {
+function validateRow(
+  row: CsvRow,
+  rowIndex: number,
+  duplicateInvoiceNumbers: Set<string>,
+): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const values = Object.values(row);
   const isEmptyRow = values.every((value) => value.trim() === "");
@@ -121,16 +133,72 @@ function validateRow(row: CsvRow, rowIndex: number): ValidationIssue[] {
     }
   });
 
+  validateInvoiceNumber(row, rowIndex, duplicateInvoiceNumbers, issues);
+  validateAmountAndVat(row, rowIndex, issues);
+  validateStatus(row, rowIndex, issues);
+
+  return issues;
+}
+
+function validateInvoiceNumber(
+  row: CsvRow,
+  rowIndex: number,
+  duplicateInvoiceNumbers: Set<string>,
+  issues: ValidationIssue[],
+) {
+  const invoiceNumber = row.invoice_number?.trim();
+
+  if (!invoiceNumber) return;
+
+  if (duplicateInvoiceNumbers.has(invoiceNumber)) {
+    issues.push({
+      rowIndex,
+      field: "invoice_number",
+      type: "duplicate-invoice-number",
+      problem: "Duplicate invoice number",
+      why: `Invoice number "${invoiceNumber}" appears more than once. Accounting systems usually require invoice numbers to be unique.`,
+      fix: "Use a unique invoice number or remove the duplicate row.",
+      severity: "critical",
+    });
+  }
+}
+
+function validateAmountAndVat(
+  row: CsvRow,
+  rowIndex: number,
+  issues: ValidationIssue[],
+) {
   const amount = Number(row.amount);
   const vat = Number(row.vat);
 
-  if (
-    row.amount &&
-    row.vat &&
-    !Number.isNaN(amount) &&
-    !Number.isNaN(vat) &&
-    vat > amount
-  ) {
+  const hasValidAmount = row.amount && !Number.isNaN(amount);
+  const hasValidVat = row.vat && !Number.isNaN(vat);
+
+  if (hasValidAmount && amount <= 0) {
+    issues.push({
+      rowIndex,
+      field: "amount",
+      type: "amount-not-positive",
+      problem: "Amount is not positive",
+      why: `Invoice amount ${amount} is zero or below. Regular invoices usually require a positive amount.`,
+      fix: "Use a positive invoice amount, or check whether this row is a credit/refund case.",
+      severity: "warning",
+    });
+  }
+
+  if (hasValidVat && vat < 0) {
+    issues.push({
+      rowIndex,
+      field: "vat",
+      type: "vat-negative",
+      problem: "VAT is negative",
+      why: `VAT value ${vat} is below zero, which is unusual for normal invoice imports.`,
+      fix: "Check whether this is a credit invoice or correct the VAT value.",
+      severity: "warning",
+    });
+  }
+
+  if (hasValidAmount && hasValidVat && vat > amount) {
     issues.push({
       rowIndex,
       field: "vat",
@@ -142,7 +210,66 @@ function validateRow(row: CsvRow, rowIndex: number): ValidationIssue[] {
     });
   }
 
-  return issues;
+  if (hasValidAmount && hasValidVat && amount > 0) {
+    const vatRate = vat / amount;
+
+    if (vatRate > 0.3) {
+      issues.push({
+        rowIndex,
+        field: "vat",
+        type: "suspicious-vat-rate",
+        problem: "Suspicious VAT rate",
+        why: `VAT is approximately ${(vatRate * 100).toFixed(
+          1,
+        )}% of the invoice amount, which is higher than expected for most invoice data.`,
+        fix: "Check whether the VAT amount is correct or whether amount already includes VAT.",
+        severity: "warning",
+      });
+    }
+  }
+}
+
+function validateStatus(
+  row: CsvRow,
+  rowIndex: number,
+  issues: ValidationIssue[],
+) {
+  const status = row.status?.trim().toLowerCase();
+
+  if (!status) return;
+
+  if (!allowedStatuses.includes(status)) {
+    issues.push({
+      rowIndex,
+      field: "status",
+      type: "invalid-status",
+      problem: "Unknown invoice status",
+      why: `"${row.status}" is not one of the expected statuses: ${allowedStatuses.join(
+        ", ",
+      )}.`,
+      fix: "Use a known status or remove this field from the export if it is not needed.",
+      severity: "warning",
+    });
+  }
+}
+
+function findDuplicateInvoiceNumbers(rows: CsvRow[]) {
+  const seenInvoiceNumbers = new Set<string>();
+  const duplicateInvoiceNumbers = new Set<string>();
+
+  rows.forEach((row) => {
+    const invoiceNumber = row.invoice_number?.trim();
+
+    if (!invoiceNumber) return;
+
+    if (seenInvoiceNumbers.has(invoiceNumber)) {
+      duplicateInvoiceNumbers.add(invoiceNumber);
+    }
+
+    seenInvoiceNumbers.add(invoiceNumber);
+  });
+
+  return duplicateInvoiceNumbers;
 }
 
 function isValidEmail(value: string) {
