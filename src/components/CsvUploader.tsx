@@ -135,6 +135,17 @@ export function CsvUploader() {
     return expectedInvoiceFields.filter((field) => !fieldMapping[field]);
   }, [fieldMapping]);
 
+  const duplicateMappedHeaders = useMemo(() => {
+    const usedHeaders = Object.values(fieldMapping).filter(Boolean);
+
+    return usedHeaders.filter(
+      (header, index) => usedHeaders.indexOf(header) !== index,
+    );
+  }, [fieldMapping]);
+
+  const hasDuplicateMappings = duplicateMappedHeaders.length > 0;
+  const hasIncompleteMapping = missingExpectedFields.length > 0;
+
   const issuesByRow = useMemo(() => {
     return validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
       (accumulator, issue) => {
@@ -194,6 +205,23 @@ export function CsvUploader() {
       issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
   );
 
+  const canExport =
+    !hasIncompleteMapping &&
+    !hasDuplicateMappings &&
+    validationResult.cleanRows.length > 0;
+
+  const importReadinessMessage = hasIncompleteMapping
+    ? "Import blocked: required fields are not mapped."
+    : hasDuplicateMappings
+      ? "Import blocked: one or more CSV columns are mapped multiple times."
+      : blockedCount > 0
+        ? "Import will fail unless blocked invoices are fixed."
+        : warningCount > 0
+          ? "Import possible, but warnings should be reviewed first."
+          : cleanCount > 0
+            ? "All mapped invoices are ready for import."
+            : "Upload and map invoice data to start the preflight check.";
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
       <div className="mx-auto max-w-6xl space-y-8">
@@ -213,10 +241,22 @@ export function CsvUploader() {
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-xl font-semibold">Import readiness</h2>
             <p className="mt-1 text-sm text-slate-400">
-              High-level insight before exporting invoice data.
+              {importReadinessMessage}
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+              {hasIncompleteMapping && (
+                <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-yellow-200">
+                  ⚠️ Mapping incomplete
+                </span>
+              )}
+
+              {hasDuplicateMappings && (
+                <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-red-300">
+                  ⚠️ Duplicate mapping
+                </span>
+              )}
+
               {blockedCount > 0 && (
                 <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-red-300">
                   ⚠️ {blockedCount} blocked
@@ -241,11 +281,15 @@ export function CsvUploader() {
                 </span>
               )}
 
-              {blockedCount === 0 && warningCount === 0 && cleanCount > 0 && (
-                <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-200">
-                  All selected invoices are ready for import
-                </span>
-              )}
+              {!hasIncompleteMapping &&
+                !hasDuplicateMappings &&
+                blockedCount === 0 &&
+                warningCount === 0 &&
+                cleanCount > 0 && (
+                  <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-200">
+                    All selected invoices are ready for import
+                  </span>
+                )}
             </div>
           </section>
         )}
@@ -299,39 +343,78 @@ export function CsvUploader() {
             </p>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {expectedInvoiceFields.map((targetField) => (
-                <label key={targetField} className="block">
-                  <span className="text-sm font-medium text-slate-300">
-                    {targetField}
-                  </span>
+              {expectedInvoiceFields.map((targetField) => {
+                const selectedHeader = fieldMapping[targetField];
+                const isMissing = !selectedHeader;
+                const isDuplicate =
+                  selectedHeader !== "" &&
+                  Object.values(fieldMapping).filter(
+                    (mappedHeader) => mappedHeader === selectedHeader,
+                  ).length > 1;
 
-                  <select
-                    value={fieldMapping[targetField]}
-                    onChange={(event) =>
-                      updateFieldMapping(targetField, event.target.value)
-                    }
-                    className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-                  >
-                    <option value="">Not mapped</option>
-                    {headers.map((header) => (
-                      <option key={header} value={header}>
-                        {header}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
+                return (
+                  <label key={targetField} className="block">
+                    <span className="text-sm font-medium text-slate-300">
+                      {targetField}
+                    </span>
+
+                    <select
+                      value={selectedHeader}
+                      onChange={(event) =>
+                        updateFieldMapping(targetField, event.target.value)
+                      }
+                      className={`mt-2 w-full rounded-lg border px-3 py-2 text-sm text-slate-100 ${
+                        isMissing
+                          ? "border-yellow-500/40 bg-yellow-500/10"
+                          : isDuplicate
+                            ? "border-red-500/40 bg-red-500/10"
+                            : "border-slate-800 bg-slate-950"
+                      }`}
+                    >
+                      <option value="">Not mapped</option>
+                      {headers.map((header) => (
+                        <option key={header} value={header}>
+                          {header}
+                        </option>
+                      ))}
+                    </select>
+
+                    {isMissing && (
+                      <p className="mt-1 text-xs text-yellow-200">
+                        Required mapping missing
+                      </p>
+                    )}
+
+                    {isDuplicate && (
+                      <p className="mt-1 text-xs text-red-300">
+                        This CSV column is mapped more than once
+                      </p>
+                    )}
+                  </label>
+                );
+              })}
             </div>
 
-            {missingExpectedFields.length > 0 ? (
-              <div className="mt-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
-                Missing mappings: {missingExpectedFields.join(", ")}
-              </div>
-            ) : (
-              <div className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
-                All expected invoice fields are mapped.
-              </div>
-            )}
+            <div className="mt-4 space-y-3">
+              {missingExpectedFields.length > 0 && (
+                <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+                  Missing mappings: {missingExpectedFields.join(", ")}
+                </div>
+              )}
+
+              {hasDuplicateMappings && (
+                <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+                  Duplicate mapping detected:{" "}
+                  {Array.from(new Set(duplicateMappedHeaders)).join(", ")}
+                </div>
+              )}
+
+              {!hasIncompleteMapping && !hasDuplicateMappings && (
+                <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-200">
+                  All expected invoice fields are mapped correctly.
+                </div>
+              )}
+            </div>
           </section>
         )}
 
@@ -558,13 +641,21 @@ export function CsvUploader() {
               clean invoice JSON.
             </p>
 
+            {!canExport && (
+              <div className="mt-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+                Clean export is disabled until required mappings are complete,
+                duplicate mappings are resolved, and at least one clean invoice
+                is available.
+              </div>
+            )}
+
             <div className="mt-4 flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() =>
                   downloadCsv("clean-invoices.csv", validationResult.cleanRows)
                 }
-                disabled={validationResult.cleanRows.length === 0}
+                disabled={!canExport}
                 className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Download clean-invoices.csv
@@ -591,7 +682,7 @@ export function CsvUploader() {
                     JSON.stringify(validationResult.cleanRows, null, 2),
                   )
                 }
-                disabled={validationResult.cleanRows.length === 0}
+                disabled={!canExport}
                 className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Copy clean invoice JSON
