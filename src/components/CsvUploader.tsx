@@ -6,8 +6,8 @@ import { validateRows, type ValidationIssue } from "@/lib/validateRows";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 import { DataSetPreview } from "@/components/data-preflight/DataSetPreview";
-import { SummaryCard } from "@/components/data-preflight/SummaryCard";
 import { ImportReadinessPanel } from "@/components/data-preflight/ImportReadinessPanel";
+import { PreflightSummary } from "@/components/data-preflight/PreflightSummary";
 
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
 
@@ -146,9 +146,7 @@ export function CsvUploader() {
       expectedInvoiceFields.forEach((targetField) => {
         const sourceField = fieldMapping[targetField];
 
-        mappedRow[targetField] = sourceField
-          ? (row[sourceField] ?? "")
-          : "";
+        mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
       });
 
       return mappedRow;
@@ -160,75 +158,62 @@ export function CsvUploader() {
   }, [selectedRows]);
 
   const missingExpectedFields = useMemo(() => {
-    return expectedInvoiceFields.filter(
-      (field) => !fieldMapping[field],
-    );
+    return expectedInvoiceFields.filter((field) => !fieldMapping[field]);
   }, [fieldMapping]);
 
   const duplicateMappedHeaders = useMemo(() => {
     const usedHeaders = Object.values(fieldMapping).filter(Boolean);
 
     return usedHeaders.filter(
-      (header, index) =>
-        usedHeaders.indexOf(header) !== index,
+      (header, index) => usedHeaders.indexOf(header) !== index,
     );
   }, [fieldMapping]);
 
-  const hasDuplicateMappings =
-    duplicateMappedHeaders.length > 0;
-
-  const hasIncompleteMapping =
-    missingExpectedFields.length > 0;
+  const hasDuplicateMappings = duplicateMappedHeaders.length > 0;
+  const hasIncompleteMapping = missingExpectedFields.length > 0;
 
   const issuesByRow = useMemo(() => {
-    return validationResult.issues.reduce<
-      Record<number, ValidationIssue[]>
-    >((accumulator, issue) => {
-      accumulator[issue.rowIndex] = [
-        ...(accumulator[issue.rowIndex] ?? []),
-        issue,
-      ];
+    return validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
+      (accumulator, issue) => {
+        accumulator[issue.rowIndex] = [
+          ...(accumulator[issue.rowIndex] ?? []),
+          issue,
+        ];
 
-      return accumulator;
-    }, {});
+        return accumulator;
+      },
+      {},
+    );
   }, [validationResult.issues]);
 
-  const cleanInvoiceItems =
-    useMemo<InvoicePreviewItem[]>(() => {
-      return selectedRows
-        .map((row, index) => ({
-          rowIndex: index + 1,
-          row,
-          issues: issuesByRow[index + 1] ?? [],
-        }))
-        .filter((item) => item.issues.length === 0);
-    }, [selectedRows, issuesByRow]);
+  const cleanInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return selectedRows
+      .map((row, index) => ({
+        rowIndex: index + 1,
+        row,
+        issues: issuesByRow[index + 1] ?? [],
+      }))
+      .filter((item) => item.issues.length === 0);
+  }, [selectedRows, issuesByRow]);
 
-  const blockedInvoiceItems =
-    useMemo<InvoicePreviewItem[]>(() => {
-      return selectedRows
-        .map((row, index) => ({
-          rowIndex: index + 1,
-          row,
-          issues: issuesByRow[index + 1] ?? [],
-        }))
-        .filter((item) =>
-          item.issues.some(
-            (issue) => issue.severity === "critical",
-          ),
-        );
-    }, [selectedRows, issuesByRow]);
+  const blockedInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return selectedRows
+      .map((row, index) => ({
+        rowIndex: index + 1,
+        row,
+        issues: issuesByRow[index + 1] ?? [],
+      }))
+      .filter((item) =>
+        item.issues.some((issue) => issue.severity === "critical"),
+      );
+  }, [selectedRows, issuesByRow]);
 
-  const visibleCleanInvoiceItems =
-    showOnlyBlocked ? [] : cleanInvoiceItems;
-
-  const visibleBlockedInvoiceItems =
-    blockedInvoiceItems;
+  const visibleCleanInvoiceItems = showOnlyBlocked ? [] : cleanInvoiceItems;
+  const visibleBlockedInvoiceItems = blockedInvoiceItems;
 
   const selectedBlockedInvoice =
     blockedInvoiceItems.find(
-      (item) =>
-        item.rowIndex === selectedBlockedRowIndex,
+      (item) => item.rowIndex === selectedBlockedRowIndex,
     ) ?? null;
 
   const warningCount = validationResult.issues.filter(
@@ -239,38 +224,30 @@ export function CsvUploader() {
     (issue) => issue.severity === "critical",
   ).length;
 
-  const blockedCount =
-    validationResult.errorRows.length;
+  const blockedCount = validationResult.errorRows.length;
+  const cleanCount = validationResult.cleanRows.length;
 
-  const cleanCount =
-    validationResult.cleanRows.length;
-
-  const hasSuspiciousVat =
-    validationResult.issues.some(
-      (issue) =>
-        issue.field
-          .toLowerCase()
-          .includes("vat") &&
-        issue.severity === "warning",
-    );
+  const hasSuspiciousVat = validationResult.issues.some(
+    (issue) =>
+      issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
+  );
 
   const canExport =
     !hasIncompleteMapping &&
     !hasDuplicateMappings &&
     validationResult.cleanRows.length > 0;
 
-  const importReadinessMessage =
-    hasIncompleteMapping
-      ? "Import blocked: required fields are not mapped."
-      : hasDuplicateMappings
-        ? "Import blocked: one or more CSV columns are mapped multiple times."
-        : blockedCount > 0
-          ? "Import will fail unless blocked invoices are fixed."
-          : warningCount > 0
-            ? "Import possible, but warnings should be reviewed first."
-            : cleanCount > 0
-              ? "All mapped invoices are ready for import."
-              : "Upload and map invoice data to start the preflight check.";
+  const importReadinessMessage = hasIncompleteMapping
+    ? "Import blocked: required fields are not mapped."
+    : hasDuplicateMappings
+      ? "Import blocked: one or more CSV columns are mapped multiple times."
+      : blockedCount > 0
+        ? "Import will fail unless blocked invoices are fixed."
+        : warningCount > 0
+          ? "Import possible, but warnings should be reviewed first."
+          : cleanCount > 0
+            ? "All mapped invoices are ready for import."
+            : "Upload and map invoice data to start the preflight check.";
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
@@ -280,29 +257,20 @@ export function CsvUploader() {
             Invoice data preflight
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold">
-            DataPreflight
-          </h1>
+          <h1 className="mt-2 text-3xl font-bold">DataPreflight</h1>
 
           <p className="mt-2 max-w-2xl text-slate-400">
-            Validate invoice CSV data before importing
-            it into an accounting system. Map messy CSV
-            headers, inspect issues, and export clean
+            Validate invoice CSV data before importing it into an accounting
+            system. Map messy CSV headers, inspect issues, and export clean
             invoice data.
           </p>
         </section>
 
         {selectedRows.length > 0 && (
           <ImportReadinessPanel
-            importReadinessMessage={
-              importReadinessMessage
-            }
-            hasIncompleteMapping={
-              hasIncompleteMapping
-            }
-            hasDuplicateMappings={
-              hasDuplicateMappings
-            }
+            importReadinessMessage={importReadinessMessage}
+            hasIncompleteMapping={hasIncompleteMapping}
+            hasDuplicateMappings={hasDuplicateMappings}
             blockedCount={blockedCount}
             warningCount={warningCount}
             cleanCount={cleanCount}
@@ -324,9 +292,7 @@ export function CsvUploader() {
           />
 
           {isLoading && (
-            <p className="mt-3 text-sm text-slate-400">
-              Processing file...
-            </p>
+            <p className="mt-3 text-sm text-slate-400">Processing file...</p>
           )}
 
           {fileName && !isLoading && (
@@ -354,143 +320,87 @@ export function CsvUploader() {
 
         {headers.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">
-              Field mapping
-            </h2>
+            <h2 className="text-xl font-semibold">Field mapping</h2>
 
             <p className="mt-1 text-sm text-slate-400">
-              Map the uploaded CSV headers to the
-              invoice fields DataPreflight validates.
+              Map the uploaded CSV headers to the invoice fields DataPreflight
+              validates.
             </p>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {expectedInvoiceFields.map(
-                (targetField) => {
-                  const selectedHeader =
-                    fieldMapping[targetField];
+              {expectedInvoiceFields.map((targetField) => {
+                const selectedHeader = fieldMapping[targetField];
+                const isMissing = !selectedHeader;
+                const isDuplicate =
+                  selectedHeader !== "" &&
+                  Object.values(fieldMapping).filter(
+                    (mappedHeader) => mappedHeader === selectedHeader,
+                  ).length > 1;
 
-                  const isMissing =
-                    !selectedHeader;
+                return (
+                  <label key={targetField} className="block">
+                    <span className="text-sm font-medium text-slate-300">
+                      {targetField}
+                    </span>
 
-                  const isDuplicate =
-                    selectedHeader !== "" &&
-                    Object.values(
-                      fieldMapping,
-                    ).filter(
-                      (mappedHeader) =>
-                        mappedHeader ===
-                        selectedHeader,
-                    ).length > 1;
-
-                  return (
-                    <label
-                      key={targetField}
-                      className="block"
+                    <select
+                      value={selectedHeader}
+                      onChange={(event) =>
+                        updateFieldMapping(targetField, event.target.value)
+                      }
+                      className={`mt-2 w-full rounded-lg border px-3 py-2 text-sm text-slate-100 ${
+                        isMissing
+                          ? "border-yellow-500/40 bg-yellow-500/10"
+                          : isDuplicate
+                            ? "border-red-500/40 bg-red-500/10"
+                            : "border-slate-800 bg-slate-950"
+                      }`}
                     >
-                      <span className="text-sm font-medium text-slate-300">
-                        {targetField}
-                      </span>
+                      <option value="">Not mapped</option>
 
-                      <select
-                        value={selectedHeader}
-                        onChange={(event) =>
-                          updateFieldMapping(
-                            targetField,
-                            event.target.value,
-                          )
-                        }
-                        className={`mt-2 w-full rounded-lg border px-3 py-2 text-sm text-slate-100 ${
-                          isMissing
-                            ? "border-yellow-500/40 bg-yellow-500/10"
-                            : isDuplicate
-                              ? "border-red-500/40 bg-red-500/10"
-                              : "border-slate-800 bg-slate-950"
-                        }`}
-                      >
-                        <option value="">
-                          Not mapped
+                      {headers.map((header) => (
+                        <option key={header} value={header}>
+                          {header}
                         </option>
+                      ))}
+                    </select>
 
-                        {headers.map((header) => (
-                          <option
-                            key={header}
-                            value={header}
-                          >
-                            {header}
-                          </option>
-                        ))}
-                      </select>
+                    {isMissing && (
+                      <p className="mt-1 text-xs text-yellow-200">
+                        Required mapping missing
+                      </p>
+                    )}
 
-                      {isMissing && (
-                        <p className="mt-1 text-xs text-yellow-200">
-                          Required mapping missing
-                        </p>
-                      )}
-
-                      {isDuplicate && (
-                        <p className="mt-1 text-xs text-red-300">
-                          This CSV column is mapped
-                          more than once
-                        </p>
-                      )}
-                    </label>
-                  );
-                },
-              )}
+                    {isDuplicate && (
+                      <p className="mt-1 text-xs text-red-300">
+                        This CSV column is mapped more than once
+                      </p>
+                    )}
+                  </label>
+                );
+              })}
             </div>
           </section>
         )}
 
         {selectedRows.length > 0 && (
-          <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">
-              Preflight summary
-            </h2>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <SummaryCard
-                label="Total invoices"
-                value={selectedRows.length}
-              />
-
-              <SummaryCard
-                label="Ready for import"
-                value={
-                  validationResult.cleanRows.length
-                }
-              />
-
-              <SummaryCard
-                label="Blocked invoices"
-                value={
-                  validationResult.errorRows.length
-                }
-              />
-
-              <SummaryCard
-                label="Critical issues"
-                value={criticalCount}
-              />
-
-              <SummaryCard
-                label="Warnings"
-                value={warningCount}
-              />
-            </div>
-          </section>
+          <PreflightSummary
+            totalInvoices={selectedRows.length}
+            cleanCount={cleanCount}
+            blockedCount={blockedCount}
+            criticalCount={criticalCount}
+            warningCount={warningCount}
+          />
         )}
 
         {selectedRows.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold">
-                  Invoice review
-                </h2>
+                <h2 className="text-xl font-semibold">Invoice review</h2>
 
                 <p className="mt-1 text-sm text-slate-400">
-                  Review clean and blocked invoices
-                  before exporting.
+                  Review clean and blocked invoices before exporting.
                 </p>
               </div>
 
@@ -503,9 +413,7 @@ export function CsvUploader() {
                     : "border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-500"
                 }`}
               >
-                {showOnlyBlocked
-                  ? "Showing blocked only"
-                  : "Show only blocked"}
+                {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
               </button>
             </div>
           </section>
@@ -527,11 +435,7 @@ export function CsvUploader() {
                   : "No clean invoices yet."
               }
               isOpen={isCleanOpen}
-              onToggle={() =>
-                setIsCleanOpen(
-                  (current) => !current,
-                )
-              }
+              onToggle={() => setIsCleanOpen((current) => !current)}
             />
 
             <DataSetPreview
@@ -539,18 +443,10 @@ export function CsvUploader() {
               description="Click a blocked invoice to inspect its issues."
               items={visibleBlockedInvoiceItems}
               emptyMessage="No blocked invoices."
-              selectedRowIndex={
-                selectedBlockedRowIndex
-              }
-              onSelectItem={
-                setSelectedBlockedRowIndex
-              }
+              selectedRowIndex={selectedBlockedRowIndex}
+              onSelectItem={setSelectedBlockedRowIndex}
               isOpen={isBlockedOpen}
-              onToggle={() =>
-                setIsBlockedOpen(
-                  (current) => !current,
-                )
-              }
+              onToggle={() => setIsBlockedOpen((current) => !current)}
             />
           </section>
         )}
@@ -564,32 +460,16 @@ export function CsvUploader() {
                 </h2>
 
                 <p className="mt-1 text-sm text-red-200">
-                  Row{" "}
-                  {
-                    selectedBlockedInvoice.rowIndex
-                  }{" "}
-                  has{" "}
-                  {
-                    selectedBlockedInvoice
-                      .issues.length
-                  }{" "}
-                  issue
-                  {selectedBlockedInvoice
-                    .issues.length === 1
-                    ? ""
-                    : "s"}{" "}
-                  that should be fixed before
-                  import.
+                  Row {selectedBlockedInvoice.rowIndex} has{" "}
+                  {selectedBlockedInvoice.issues.length} issue
+                  {selectedBlockedInvoice.issues.length === 1 ? "" : "s"} that
+                  should be fixed before import.
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={() =>
-                  setSelectedBlockedRowIndex(
-                    null,
-                  )
-                }
+                onClick={() => setSelectedBlockedRowIndex(null)}
                 className="text-sm text-red-200 underline underline-offset-4 hover:text-red-100"
               >
                 Close detail
@@ -603,51 +483,39 @@ export function CsvUploader() {
                 </h3>
 
                 <pre className="mt-3 overflow-auto text-xs text-slate-300">
-                  {JSON.stringify(
-                    selectedBlockedInvoice.row,
-                    null,
-                    2,
-                  )}
+                  {JSON.stringify(selectedBlockedInvoice.row, null, 2)}
                 </pre>
               </div>
 
               <div className="space-y-3">
-                {selectedBlockedInvoice.issues.map(
-                  (issue) => (
-                    <div
-                      key={`${issue.rowIndex}-${issue.field}-${issue.type}`}
-                      className="rounded-lg border border-red-500/20 bg-slate-950 p-4"
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-slate-300">
-                          {issue.severity}
-                        </span>
+                {selectedBlockedInvoice.issues.map((issue) => (
+                  <div
+                    key={`${issue.rowIndex}-${issue.field}-${issue.type}`}
+                    className="rounded-lg border border-red-500/20 bg-slate-950 p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase text-slate-300">
+                        {issue.severity}
+                      </span>
 
-                        <span className="text-sm text-slate-400">
-                          Field: {issue.field}
-                        </span>
-                      </div>
-
-                      <h3 className="mt-3 font-semibold">
-                        {issue.problem}
-                      </h3>
-
-                      <p className="mt-2 text-sm text-slate-300">
-                        <span className="font-medium text-slate-100">
-                          Why:
-                        </span>{" "}
-                        {issue.why}
-                      </p>
-
-                      <p className="mt-2 text-sm text-slate-300">
-                        <span className="font-medium text-slate-100">
-                          Fix:
-                        </span>{" "}
-                        {issue.fix}
-                      </p>
+                      <span className="text-sm text-slate-400">
+                        Field: {issue.field}
+                      </span>
                     </div>
-                  ),
-                )}
+
+                    <h3 className="mt-3 font-semibold">{issue.problem}</h3>
+
+                    <p className="mt-2 text-sm text-slate-300">
+                      <span className="font-medium text-slate-100">Why:</span>{" "}
+                      {issue.why}
+                    </p>
+
+                    <p className="mt-2 text-sm text-slate-300">
+                      <span className="font-medium text-slate-100">Fix:</span>{" "}
+                      {issue.fix}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
@@ -655,23 +523,18 @@ export function CsvUploader() {
 
         {selectedRows.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">
-              Export
-            </h2>
+            <h2 className="text-xl font-semibold">Export</h2>
 
             <p className="mt-1 text-sm text-slate-400">
-              Download clean invoice rows, export
-              the issue report, or copy clean
-              invoice JSON.
+              Download clean invoice rows, export the issue report, or copy
+              clean invoice JSON.
             </p>
 
             {!canExport && (
               <div className="mt-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
-                Clean export is disabled until
-                required mappings are complete,
-                duplicate mappings are resolved,
-                and at least one clean invoice is
-                available.
+                Clean export is disabled until required mappings are complete,
+                duplicate mappings are resolved, and at least one clean invoice
+                is available.
               </div>
             )}
 
@@ -679,10 +542,7 @@ export function CsvUploader() {
               <button
                 type="button"
                 onClick={() =>
-                  downloadCsv(
-                    "clean-invoices.csv",
-                    validationResult.cleanRows,
-                  )
+                  downloadCsv("clean-invoices.csv", validationResult.cleanRows)
                 }
                 disabled={!canExport}
                 className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"
@@ -698,10 +558,7 @@ export function CsvUploader() {
                     validationResult.issues,
                   )
                 }
-                disabled={
-                  validationResult.issues.length ===
-                  0
-                }
+                disabled={validationResult.issues.length === 0}
                 className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Download invoice-errors.csv
@@ -711,11 +568,7 @@ export function CsvUploader() {
                 type="button"
                 onClick={() =>
                   navigator.clipboard.writeText(
-                    JSON.stringify(
-                      validationResult.cleanRows,
-                      null,
-                      2,
-                    ),
+                    JSON.stringify(validationResult.cleanRows, null, 2),
                   )
                 }
                 disabled={!canExport}
@@ -742,14 +595,11 @@ function createEmptyMapping(): FieldMapping {
   };
 }
 
-function createSuggestedMapping(
-  headers: string[],
-): FieldMapping {
+function createSuggestedMapping(headers: string[]): FieldMapping {
   return {
     invoice_number:
       headers.find((header) => {
-        const normalized =
-          normalizeHeader(header);
+        const normalized = normalizeHeader(header);
 
         return (
           normalized.includes("invoice") ||
@@ -761,8 +611,7 @@ function createSuggestedMapping(
 
     company:
       headers.find((header) => {
-        const normalized =
-          normalizeHeader(header);
+        const normalized = normalizeHeader(header);
 
         return (
           normalized.includes("company") ||
@@ -775,19 +624,14 @@ function createSuggestedMapping(
 
     email:
       headers.find((header) => {
-        const normalized =
-          normalizeHeader(header);
+        const normalized = normalizeHeader(header);
 
-        return (
-          normalized.includes("email") ||
-          normalized.includes("mail")
-        );
+        return normalized.includes("email") || normalized.includes("mail");
       }) ?? "",
 
     amount:
       headers.find((header) => {
-        const normalized =
-          normalizeHeader(header);
+        const normalized = normalizeHeader(header);
 
         return (
           normalized.includes("amount") ||
@@ -800,8 +644,7 @@ function createSuggestedMapping(
 
     vat:
       headers.find((header) => {
-        const normalized =
-          normalizeHeader(header);
+        const normalized = normalizeHeader(header);
 
         return (
           normalized.includes("vat") ||
@@ -812,8 +655,7 @@ function createSuggestedMapping(
 
     status:
       headers.find((header) => {
-        const normalized =
-          normalizeHeader(header);
+        const normalized = normalizeHeader(header);
 
         return (
           normalized.includes("status") ||
@@ -825,7 +667,5 @@ function createSuggestedMapping(
 }
 
 function normalizeHeader(header: string) {
-  return header
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]/g, "");
+  return header.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
 }
