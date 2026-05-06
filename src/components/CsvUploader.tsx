@@ -15,7 +15,7 @@ import {
 import {
   createEmptyMapping,
   createSuggestedMapping,
-} from "@/lib/data-preflight/fieldMapping";
+} from "@/lib/fieldMapping";
 
 import { BlockedInvoiceDetail } from "@/components/data-preflight/BlockedInvoiceDetail";
 import { ExportSection } from "@/components/data-preflight/ExportSection";
