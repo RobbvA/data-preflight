@@ -8,6 +8,7 @@ import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 import { DataSetPreview } from "@/components/data-preflight/DataSetPreview";
 import { ImportReadinessPanel } from "@/components/data-preflight/ImportReadinessPanel";
 import { PreflightSummary } from "@/components/data-preflight/PreflightSummary";
+import { UploadSection } from "@/components/data-preflight/UploadSection";
 
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
 
@@ -44,13 +45,10 @@ export function CsvUploader() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [selectedBlockedRowIndex, setSelectedBlockedRowIndex] = useState<
     number | null
   >(null);
-
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
-
   const [isCleanOpen, setIsCleanOpen] = useState(false);
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
 
@@ -62,10 +60,8 @@ export function CsvUploader() {
     setError(null);
     setIsLoading(true);
     setFileName(file.name);
-
     setSelectedBlockedRowIndex(null);
     setShowOnlyBlocked(false);
-
     setIsCleanOpen(false);
     setIsBlockedOpen(true);
 
@@ -84,19 +80,14 @@ export function CsvUploader() {
 
       setRows(parsedRows);
       setHeaders(detectedHeaders);
-
       setFieldMapping(createSuggestedMapping(detectedHeaders));
     } catch {
       setError("Failed to parse CSV file. Please check the file format.");
-
       setRows([]);
       setHeaders([]);
-
       setFieldMapping(createEmptyMapping());
-
       setSelectedBlockedRowIndex(null);
       setShowOnlyBlocked(false);
-
       setIsCleanOpen(false);
       setIsBlockedOpen(true);
     } finally {
@@ -108,15 +99,11 @@ export function CsvUploader() {
     setRows([]);
     setFileName("");
     setHeaders([]);
-
     setFieldMapping(createEmptyMapping());
-
     setError(null);
     setIsLoading(false);
-
     setSelectedBlockedRowIndex(null);
     setShowOnlyBlocked(false);
-
     setIsCleanOpen(false);
     setIsBlockedOpen(true);
   }
@@ -135,7 +122,6 @@ export function CsvUploader() {
 
   function toggleBlockedFilter() {
     setShowOnlyBlocked((currentValue) => !currentValue);
-
     setSelectedBlockedRowIndex(null);
   }
 
@@ -145,7 +131,6 @@ export function CsvUploader() {
 
       expectedInvoiceFields.forEach((targetField) => {
         const sourceField = fieldMapping[targetField];
-
         mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
       });
 
@@ -278,45 +263,14 @@ export function CsvUploader() {
           />
         )}
 
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <label className="block text-sm font-medium text-slate-300">
-            Upload invoice CSV
-          </label>
-
-          <input
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-            disabled={isLoading}
-            className="mt-4 block w-full text-sm text-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
-          />
-
-          {isLoading && (
-            <p className="mt-3 text-sm text-slate-400">Processing file...</p>
-          )}
-
-          {fileName && !isLoading && (
-            <p className="mt-3 text-sm text-slate-400">
-              Selected file: {fileName}
-            </p>
-          )}
-
-          {error && (
-            <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-              {error}
-            </div>
-          )}
-
-          {(rows.length > 0 || error || fileName) && (
-            <button
-              type="button"
-              onClick={resetFlow}
-              className="mt-4 text-sm text-slate-400 underline underline-offset-4 hover:text-slate-200"
-            >
-              Reset
-            </button>
-          )}
-        </section>
+        <UploadSection
+          fileName={fileName}
+          isLoading={isLoading}
+          error={error}
+          hasActiveFile={rows.length > 0 || Boolean(error) || Boolean(fileName)}
+          onFileChange={handleFileChange}
+          onReset={resetFlow}
+        />
 
         {headers.length > 0 && (
           <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
