@@ -6,9 +6,14 @@ export function SummaryCard({
   value: number;
 }) {
   return (
-    <div className="rounded-lg bg-slate-950 p-4">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
+    <div className="rounded-xl border border-white/10 bg-slate-950/50 p-4 shadow-lg shadow-slate-950/20">
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </p>
+
+      <p className="mt-3 text-3xl font-semibold tracking-tight text-white">
+        {value}
+      </p>
     </div>
   );
 }

@@ -16,10 +16,22 @@ export function PreflightSummary({
   warningCount,
 }: PreflightSummaryProps) {
   return (
-    <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="text-xl font-semibold">Preflight summary</h2>
+    <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-blue-950/20 backdrop-blur">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-300/70">
+          Dataset overview
+        </p>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <h2 className="mt-2 text-xl font-semibold text-white">
+          Preflight summary
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-400">
+          A quick operational view of the uploaded invoice dataset.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <SummaryCard label="Total invoices" value={totalInvoices} />
         <SummaryCard label="Ready for import" value={cleanCount} />
         <SummaryCard label="Blocked invoices" value={blockedCount} />

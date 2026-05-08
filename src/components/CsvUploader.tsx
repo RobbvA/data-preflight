@@ -3,14 +3,8 @@
 import { useMemo, useState } from "react";
 
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
-import {
-  validateRows,
-  type ValidationIssue,
-} from "@/lib/validateRows";
-import {
-  downloadCsv,
-  downloadErrorCsv,
-} from "@/lib/exportData";
+import { validateRows, type ValidationIssue } from "@/lib/validateRows";
+import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 import {
   createEmptyMapping,
@@ -36,9 +30,7 @@ type FieldMapping = {
   status: string;
 };
 
-const expectedInvoiceFields: Array<
-  keyof FieldMapping
-> = [
+const expectedInvoiceFields: Array<keyof FieldMapping> = [
   "invoice_number",
   "company",
   "email",
@@ -49,103 +41,56 @@ const expectedInvoiceFields: Array<
 
 export function CsvUploader() {
   const [rows, setRows] = useState<CsvRow[]>([]);
-  const [fileName, setFileName] =
-    useState("");
-  const [headers, setHeaders] = useState<
-    string[]
-  >([]);
-
+  const [fileName, setFileName] = useState("");
+  const [headers, setHeaders] = useState<string[]>([]);
   const [fieldMapping, setFieldMapping] =
-    useState<FieldMapping>(
-      createEmptyMapping(),
-    );
+    useState<FieldMapping>(createEmptyMapping());
 
-  const [isLoading, setIsLoading] =
-    useState(false);
-
-  const [error, setError] = useState<
-    string | null
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedBlockedRowIndex, setSelectedBlockedRowIndex] = useState<
+    number | null
   >(null);
+  const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
+  const [isCleanOpen, setIsCleanOpen] = useState(false);
+  const [isBlockedOpen, setIsBlockedOpen] = useState(true);
 
-  const [
-    selectedBlockedRowIndex,
-    setSelectedBlockedRowIndex,
-  ] = useState<number | null>(null);
-
-  const [showOnlyBlocked, setShowOnlyBlocked] =
-    useState(false);
-
-  const [isCleanOpen, setIsCleanOpen] =
-    useState(false);
-
-  const [isBlockedOpen, setIsBlockedOpen] =
-    useState(true);
-
-  async function handleFileChange(
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    const file =
-      event.target.files?.[0];
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
 
     if (!file) return;
 
     setError(null);
     setIsLoading(true);
     setFileName(file.name);
-
     setSelectedBlockedRowIndex(null);
     setShowOnlyBlocked(false);
-
     setIsCleanOpen(false);
     setIsBlockedOpen(true);
 
     try {
-      const parsedRows =
-        await parseCsvFile(file);
+      const parsedRows = await parseCsvFile(file);
 
       if (parsedRows.length === 0) {
-        throw new Error(
-          "CSV file is empty.",
-        );
+        throw new Error("CSV file is empty.");
       }
 
-      const detectedHeaders =
-        Object.keys(parsedRows[0] ?? {});
+      const detectedHeaders = Object.keys(parsedRows[0] ?? {});
 
-      if (
-        detectedHeaders.length === 0
-      ) {
-        throw new Error(
-          "CSV file has no headers.",
-        );
+      if (detectedHeaders.length === 0) {
+        throw new Error("CSV file has no headers.");
       }
 
       setRows(parsedRows);
       setHeaders(detectedHeaders);
-
-      setFieldMapping(
-        createSuggestedMapping(
-          detectedHeaders,
-        ),
-      );
+      setFieldMapping(createSuggestedMapping(detectedHeaders));
     } catch {
-      setError(
-        "Failed to parse CSV file. Please check the file format.",
-      );
-
+      setError("Failed to parse CSV file. Please check the file format.");
       setRows([]);
       setHeaders([]);
-
-      setFieldMapping(
-        createEmptyMapping(),
-      );
-
-      setSelectedBlockedRowIndex(
-        null,
-      );
-
+      setFieldMapping(createEmptyMapping());
+      setSelectedBlockedRowIndex(null);
       setShowOnlyBlocked(false);
-
       setIsCleanOpen(false);
       setIsBlockedOpen(true);
     } finally {
@@ -157,20 +102,11 @@ export function CsvUploader() {
     setRows([]);
     setFileName("");
     setHeaders([]);
-
-    setFieldMapping(
-      createEmptyMapping(),
-    );
-
+    setFieldMapping(createEmptyMapping());
     setError(null);
     setIsLoading(false);
-
-    setSelectedBlockedRowIndex(
-      null,
-    );
-
+    setSelectedBlockedRowIndex(null);
     setShowOnlyBlocked(false);
-
     setIsCleanOpen(false);
     setIsBlockedOpen(true);
   }
@@ -179,379 +115,241 @@ export function CsvUploader() {
     targetField: keyof FieldMapping,
     sourceField: string,
   ) {
-    setFieldMapping(
-      (currentMapping) => ({
-        ...currentMapping,
-        [targetField]: sourceField,
-      }),
-    );
+    setFieldMapping((currentMapping) => ({
+      ...currentMapping,
+      [targetField]: sourceField,
+    }));
 
-    setSelectedBlockedRowIndex(
-      null,
-    );
+    setSelectedBlockedRowIndex(null);
   }
 
   function toggleBlockedFilter() {
-    setShowOnlyBlocked(
-      (currentValue) =>
-        !currentValue,
-    );
-
-    setSelectedBlockedRowIndex(
-      null,
-    );
+    setShowOnlyBlocked((currentValue) => !currentValue);
+    setSelectedBlockedRowIndex(null);
   }
 
   const selectedRows = useMemo(() => {
     return rows.map((row) => {
-      const mappedRow: CsvRow =
-        {};
+      const mappedRow: CsvRow = {};
 
-      expectedInvoiceFields.forEach(
-        (targetField) => {
-          const sourceField =
-            fieldMapping[targetField];
-
-          mappedRow[targetField] =
-            sourceField
-              ? (row[sourceField] ??
-                "")
-              : "";
-        },
-      );
+      expectedInvoiceFields.forEach((targetField) => {
+        const sourceField = fieldMapping[targetField];
+        mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
+      });
 
       return mappedRow;
     });
   }, [rows, fieldMapping]);
 
-  const validationResult =
-    useMemo(() => {
-      return validateRows(
-        selectedRows,
-      );
-    }, [selectedRows]);
+  const validationResult = useMemo(() => {
+    return validateRows(selectedRows);
+  }, [selectedRows]);
 
-  const missingExpectedFields =
-    useMemo(() => {
-      return expectedInvoiceFields.filter(
-        (field) =>
-          !fieldMapping[field],
-      );
-    }, [fieldMapping]);
+  const missingExpectedFields = useMemo(() => {
+    return expectedInvoiceFields.filter((field) => !fieldMapping[field]);
+  }, [fieldMapping]);
 
-  const duplicateMappedHeaders =
-    useMemo(() => {
-      const usedHeaders =
-        Object.values(
-          fieldMapping,
-        ).filter(Boolean);
+  const duplicateMappedHeaders = useMemo(() => {
+    const usedHeaders = Object.values(fieldMapping).filter(Boolean);
 
-      return usedHeaders.filter(
-        (header, index) =>
-          usedHeaders.indexOf(
-            header,
-          ) !== index,
-      );
-    }, [fieldMapping]);
+    return usedHeaders.filter(
+      (header, index) => usedHeaders.indexOf(header) !== index,
+    );
+  }, [fieldMapping]);
 
-  const hasDuplicateMappings =
-    duplicateMappedHeaders.length >
-    0;
-
-  const hasIncompleteMapping =
-    missingExpectedFields.length >
-    0;
+  const hasDuplicateMappings = duplicateMappedHeaders.length > 0;
+  const hasIncompleteMapping = missingExpectedFields.length > 0;
 
   const issuesByRow = useMemo(() => {
-    return validationResult.issues.reduce<
-      Record<
-        number,
-        ValidationIssue[]
-      >
-    >((accumulator, issue) => {
-      accumulator[issue.rowIndex] =
-        [
-          ...(accumulator[
-            issue.rowIndex
-          ] ?? []),
+    return validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
+      (accumulator, issue) => {
+        accumulator[issue.rowIndex] = [
+          ...(accumulator[issue.rowIndex] ?? []),
           issue,
         ];
 
-      return accumulator;
-    }, {});
+        return accumulator;
+      },
+      {},
+    );
   }, [validationResult.issues]);
 
-  const cleanInvoiceItems =
-    useMemo<
-      InvoicePreviewItem[]
-    >(() => {
-      return selectedRows
-        .map((row, index) => ({
-          rowIndex: index + 1,
-          row,
-          issues:
-            issuesByRow[
-              index + 1
-            ] ?? [],
-        }))
-        .filter(
-          (item) =>
-            item.issues.length ===
-            0,
-        );
-    }, [
-      selectedRows,
-      issuesByRow,
-    ]);
+  const cleanInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return selectedRows
+      .map((row, index) => ({
+        rowIndex: index + 1,
+        row,
+        issues: issuesByRow[index + 1] ?? [],
+      }))
+      .filter((item) => item.issues.length === 0);
+  }, [selectedRows, issuesByRow]);
 
-  const blockedInvoiceItems =
-    useMemo<
-      InvoicePreviewItem[]
-    >(() => {
-      return selectedRows
-        .map((row, index) => ({
-          rowIndex: index + 1,
-          row,
-          issues:
-            issuesByRow[
-              index + 1
-            ] ?? [],
-        }))
-        .filter((item) =>
-          item.issues.some(
-            (issue) =>
-              issue.severity ===
-              "critical",
-          ),
-        );
-    }, [
-      selectedRows,
-      issuesByRow,
-    ]);
+  const blockedInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return selectedRows
+      .map((row, index) => ({
+        rowIndex: index + 1,
+        row,
+        issues: issuesByRow[index + 1] ?? [],
+      }))
+      .filter((item) =>
+        item.issues.some((issue) => issue.severity === "critical"),
+      );
+  }, [selectedRows, issuesByRow]);
 
   const selectedBlockedInvoice =
     blockedInvoiceItems.find(
-      (item) =>
-        item.rowIndex ===
-        selectedBlockedRowIndex,
+      (item) => item.rowIndex === selectedBlockedRowIndex,
     ) ?? null;
 
-  const warningCount =
-    validationResult.issues.filter(
-      (issue) =>
-        issue.severity ===
-        "warning",
-    ).length;
+  const warningCount = validationResult.issues.filter(
+    (issue) => issue.severity === "warning",
+  ).length;
 
-  const criticalCount =
-    validationResult.issues.filter(
-      (issue) =>
-        issue.severity ===
-        "critical",
-    ).length;
+  const criticalCount = validationResult.issues.filter(
+    (issue) => issue.severity === "critical",
+  ).length;
 
-  const blockedCount =
-    validationResult.errorRows
-      .length;
+  const blockedCount = validationResult.errorRows.length;
+  const cleanCount = validationResult.cleanRows.length;
 
-  const cleanCount =
-    validationResult.cleanRows
-      .length;
-
-  const hasSuspiciousVat =
-    validationResult.issues.some(
-      (issue) =>
-        issue.field
-          .toLowerCase()
-          .includes("vat") &&
-        issue.severity ===
-          "warning",
-    );
+  const hasSuspiciousVat = validationResult.issues.some(
+    (issue) =>
+      issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
+  );
 
   const canExport =
     !hasIncompleteMapping &&
     !hasDuplicateMappings &&
-    validationResult.cleanRows
-      .length > 0;
+    validationResult.cleanRows.length > 0;
 
-  const importReadinessMessage =
-    hasIncompleteMapping
-      ? "Import blocked: required fields are not mapped."
-      : hasDuplicateMappings
-        ? "Import blocked: one or more CSV columns are mapped multiple times."
-        : blockedCount > 0
-          ? "Import will fail unless blocked invoices are fixed."
-          : warningCount > 0
-            ? "Import possible, but warnings should be reviewed first."
-            : cleanCount > 0
-              ? "All mapped invoices are ready for import."
-              : "Upload and map invoice data to start the preflight check.";
+  const importReadinessMessage = hasIncompleteMapping
+    ? "Import blocked: required fields are not mapped."
+    : hasDuplicateMappings
+      ? "Import blocked: one or more CSV columns are mapped multiple times."
+      : blockedCount > 0
+        ? "Import will fail unless blocked invoices are fixed."
+        : warningCount > 0
+          ? "Import possible, but warnings should be reviewed first."
+          : cleanCount > 0
+            ? "All mapped invoices are ready for import."
+            : "Upload and map invoice data to start the preflight check.";
+
+  const hasUploadedRows = selectedRows.length > 0;
+  const hasHeaders = headers.length > 0;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
-      <div className="mx-auto max-w-6xl space-y-8">
-        <section>
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-slate-500">
-            Invoice data preflight
-          </p>
+    <main className="min-h-screen overflow-hidden bg-slate-950 px-5 py-8 text-slate-100 sm:px-6 lg:px-8">
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute left-1/2 top-[-160px] h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-blue-600/20 blur-3xl" />
+        <div className="absolute right-[-120px] top-40 h-[460px] w-[620px] rounded-full bg-violet-600/10 blur-3xl" />
+        <div className="absolute bottom-[-160px] left-[-120px] h-[420px] w-[620px] rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_34%),linear-gradient(180deg,_rgba(15,23,42,0.1),_rgba(2,6,23,1))]" />
+      </div>
 
-          <h1 className="mt-2 text-3xl font-bold">
-            DataPreflight
-          </h1>
+      <div className="mx-auto max-w-7xl space-y-8">
+        <section className="grid gap-6 pt-6 lg:grid-cols-[1fr_360px] lg:items-start">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-300/80">
+              Invoice data preflight
+            </p>
 
-          <p className="mt-2 max-w-2xl text-slate-400">
-            Validate invoice CSV data before importing
-            it into an accounting system. Map messy CSV
-            headers, inspect issues, and export clean
-            invoice data.
-          </p>
+            <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              DataPreflight
+            </h1>
+
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
+              A trust layer for messy invoice CSV exports. Map headers, validate
+              business rules, inspect issues, and export only clean invoice data.
+            </p>
+          </div>
+
+          <UploadSection
+            fileName={fileName}
+            isLoading={isLoading}
+            error={error}
+            hasActiveFile={
+              rows.length > 0 || Boolean(error) || Boolean(fileName)
+            }
+            onFileChange={handleFileChange}
+            onReset={resetFlow}
+          />
         </section>
 
-        {selectedRows.length > 0 && (
-          <ImportReadinessPanel
-            importReadinessMessage={
-              importReadinessMessage
-            }
-            hasIncompleteMapping={
-              hasIncompleteMapping
-            }
-            hasDuplicateMappings={
-              hasDuplicateMappings
-            }
-            blockedCount={
-              blockedCount
-            }
-            warningCount={
-              warningCount
-            }
-            cleanCount={cleanCount}
-            hasSuspiciousVat={
-              hasSuspiciousVat
-            }
-          />
+        {hasUploadedRows && (
+          <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+            <ImportReadinessPanel
+              importReadinessMessage={importReadinessMessage}
+              hasIncompleteMapping={hasIncompleteMapping}
+              hasDuplicateMappings={hasDuplicateMappings}
+              blockedCount={blockedCount}
+              warningCount={warningCount}
+              cleanCount={cleanCount}
+              hasSuspiciousVat={hasSuspiciousVat}
+            />
+
+            <PreflightSummary
+              totalInvoices={selectedRows.length}
+              cleanCount={cleanCount}
+              blockedCount={blockedCount}
+              criticalCount={criticalCount}
+              warningCount={warningCount}
+            />
+          </section>
         )}
 
-        <UploadSection
-          fileName={fileName}
-          isLoading={isLoading}
-          error={error}
-          hasActiveFile={
-            rows.length > 0 ||
-            Boolean(error) ||
-            Boolean(fileName)
-          }
-          onFileChange={
-            handleFileChange
-          }
-          onReset={resetFlow}
-        />
-
-        {headers.length > 0 && (
+        {hasHeaders ? (
           <FieldMappingSection
             headers={headers}
-            expectedInvoiceFields={
-              expectedInvoiceFields
-            }
-            fieldMapping={
-              fieldMapping
-            }
-            onUpdateFieldMapping={
-              updateFieldMapping
-            }
+            expectedInvoiceFields={expectedInvoiceFields}
+            fieldMapping={fieldMapping}
+            onUpdateFieldMapping={updateFieldMapping}
           />
+        ) : (
+          <section className="rounded-2xl border border-dashed border-white/10 bg-white/[0.025] p-6 shadow-2xl shadow-blue-950/10 backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Mapping setup
+            </p>
+
+            <h2 className="mt-2 text-xl font-semibold text-slate-200">
+              Waiting for CSV headers
+            </h2>
+
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+              Upload an invoice CSV to detect headers and create the field
+              mapping layer.
+            </p>
+          </section>
         )}
 
-        {selectedRows.length > 0 && (
-          <PreflightSummary
-            totalInvoices={
-              selectedRows.length
-            }
-            cleanCount={
-              cleanCount
-            }
-            blockedCount={
-              blockedCount
-            }
-            criticalCount={
-              criticalCount
-            }
-            warningCount={
-              warningCount
-            }
-          />
-        )}
-
-        {selectedRows.length > 0 && (
+        {hasUploadedRows && (
           <InvoiceReviewSection
-            showOnlyBlocked={
-              showOnlyBlocked
-            }
-            cleanInvoiceItems={
-              cleanInvoiceItems
-            }
-            blockedInvoiceItems={
-              blockedInvoiceItems
-            }
-            selectedBlockedRowIndex={
-              selectedBlockedRowIndex
-            }
-            isCleanOpen={
-              isCleanOpen
-            }
-            isBlockedOpen={
-              isBlockedOpen
-            }
-            onToggleBlockedFilter={
-              toggleBlockedFilter
-            }
-            onSelectBlockedInvoice={
-              setSelectedBlockedRowIndex
-            }
-            onToggleCleanOpen={() =>
-              setIsCleanOpen(
-                (current) =>
-                  !current,
-              )
-            }
-            onToggleBlockedOpen={() =>
-              setIsBlockedOpen(
-                (current) =>
-                  !current,
-              )
-            }
+            showOnlyBlocked={showOnlyBlocked}
+            cleanInvoiceItems={cleanInvoiceItems}
+            blockedInvoiceItems={blockedInvoiceItems}
+            selectedBlockedRowIndex={selectedBlockedRowIndex}
+            isCleanOpen={isCleanOpen}
+            isBlockedOpen={isBlockedOpen}
+            onToggleBlockedFilter={toggleBlockedFilter}
+            onSelectBlockedInvoice={setSelectedBlockedRowIndex}
+            onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
+            onToggleBlockedOpen={() => setIsBlockedOpen((current) => !current)}
           />
         )}
 
         {selectedBlockedInvoice && (
           <BlockedInvoiceDetail
-            selectedBlockedInvoice={
-              selectedBlockedInvoice
-            }
-            onClose={() =>
-              setSelectedBlockedRowIndex(
-                null,
-              )
-            }
+            selectedBlockedInvoice={selectedBlockedInvoice}
+            onClose={() => setSelectedBlockedRowIndex(null)}
           />
         )}
 
-        {selectedRows.length > 0 && (
+        {hasUploadedRows && (
           <ExportSection
-            canExport={
-              canExport
-            }
-            cleanRows={
-              validationResult.cleanRows
-            }
-            issues={
-              validationResult.issues
-            }
-            onDownloadCleanCsv={
-              downloadCsv
-            }
-            onDownloadErrorCsv={
-              downloadErrorCsv
-            }
+            canExport={canExport}
+            cleanRows={validationResult.cleanRows}
+            issues={validationResult.issues}
+            onDownloadCleanCsv={downloadCsv}
+            onDownloadErrorCsv={downloadErrorCsv}
           />
         )}
       </div>

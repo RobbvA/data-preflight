@@ -16,43 +16,54 @@ export function UploadSection({
   onReset,
 }: UploadSectionProps) {
   return (
-    <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-      <label className="block text-sm font-medium text-slate-300">
-        Upload invoice CSV
-      </label>
+    <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-300/70">
+            Source file
+          </p>
 
-      <input
-        type="file"
-        accept=".csv"
-        onChange={onFileChange}
-        disabled={isLoading}
-        className="mt-4 block w-full text-sm text-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
-      />
+          <p className="mt-1 text-sm font-medium text-white">
+            Upload invoice CSV
+          </p>
+        </div>
 
-      {isLoading && (
-        <p className="mt-3 text-sm text-slate-400">Processing file...</p>
-      )}
+        {hasActiveFile && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+          >
+            Reset
+          </button>
+        )}
+      </div>
 
-      {fileName && !isLoading && (
-        <p className="mt-3 text-sm text-slate-400">
-          Selected file: {fileName}
-        </p>
-      )}
+      <div className="mt-4 rounded-xl border border-white/10 bg-slate-950/50 p-3">
+        <input
+          type="file"
+          accept=".csv"
+          onChange={onFileChange}
+          disabled={isLoading}
+          className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-blue-500/15 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-100 hover:file:bg-blue-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+        />
+
+        {isLoading && (
+          <p className="mt-2 text-xs text-slate-400">Processing file...</p>
+        )}
+
+        {fileName && !isLoading && (
+          <p className="mt-2 truncate text-xs text-slate-400">
+            Selected:{" "}
+            <span className="font-medium text-slate-200">{fileName}</span>
+          </p>
+        )}
+      </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+        <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
           {error}
         </div>
-      )}
-
-      {hasActiveFile && (
-        <button
-          type="button"
-          onClick={onReset}
-          className="mt-4 text-sm text-slate-400 underline underline-offset-4 hover:text-slate-200"
-        >
-          Reset
-        </button>
       )}
     </section>
   );

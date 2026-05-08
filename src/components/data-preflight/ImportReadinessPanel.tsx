@@ -18,53 +18,73 @@ export function ImportReadinessPanel({
   hasSuspiciousVat,
 }: ImportReadinessPanelProps) {
   return (
-    <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="text-xl font-semibold">
-        Import readiness
-      </h2>
+    <section className="rounded-2xl border border-blue-400/20 bg-blue-500/[0.08] p-6 shadow-2xl shadow-blue-950/30 backdrop-blur">
+      <div className="flex flex-wrap items-start justify-between gap-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-200/70">
+            Control center
+          </p>
 
-      <p className="mt-1 text-sm text-slate-400">
-        {importReadinessMessage}
-      </p>
+          <h2 className="mt-2 text-xl font-semibold text-white">
+            Import readiness
+          </h2>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100/80">
+            {importReadinessMessage}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
         {hasIncompleteMapping && (
-          <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-yellow-200">
-            ⚠️ Mapping incomplete
-          </span>
+          <StatusPill tone="warning">⚠️ Mapping incomplete</StatusPill>
         )}
 
         {hasDuplicateMappings && (
-          <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-red-300">
-            ⚠️ Duplicate mapping
-          </span>
+          <StatusPill tone="danger">⚠️ Duplicate mapping</StatusPill>
         )}
 
         {blockedCount > 0 && (
-          <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-red-300">
-            ⚠️ {blockedCount} blocked
-          </span>
+          <StatusPill tone="danger">⚠️ {blockedCount} blocked</StatusPill>
         )}
 
         {warningCount > 0 && (
-          <span className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-yellow-200">
-            ⚠️ {warningCount} warning
-            {warningCount === 1 ? "" : "s"}
-          </span>
+          <StatusPill tone="warning">
+            ⚠️ {warningCount} warning{warningCount === 1 ? "" : "s"}
+          </StatusPill>
         )}
 
         {cleanCount > 0 && (
-          <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-200">
-            ✅ {cleanCount} ready
-          </span>
+          <StatusPill tone="success">✅ {cleanCount} ready</StatusPill>
         )}
 
         {hasSuspiciousVat && (
-          <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-purple-200">
-            ⚠️ VAT anomalies detected
-          </span>
+          <StatusPill tone="info">⚠️ VAT anomalies detected</StatusPill>
         )}
       </div>
     </section>
+  );
+}
+
+function StatusPill({
+  tone,
+  children,
+}: {
+  tone: "warning" | "danger" | "success" | "info";
+  children: React.ReactNode;
+}) {
+  const toneClasses = {
+    warning: "border-yellow-400/30 bg-yellow-400/10 text-yellow-100",
+    danger: "border-red-400/30 bg-red-400/10 text-red-100",
+    success: "border-emerald-400/30 bg-emerald-400/10 text-emerald-100",
+    info: "border-violet-400/30 bg-violet-400/10 text-violet-100",
+  };
+
+  return (
+    <span
+      className={`rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm ${toneClasses[tone]}`}
+    >
+      {children}
+    </span>
   );
 }

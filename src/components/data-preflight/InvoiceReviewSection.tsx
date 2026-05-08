@@ -29,60 +29,68 @@ export function InvoiceReviewSection({
   const visibleCleanInvoiceItems = showOnlyBlocked ? [] : cleanInvoiceItems;
 
   return (
-    <>
-      <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+    <section className="space-y-5">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-blue-950/20 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold">Invoice review</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-300/70">
+              Review workspace
+            </p>
+
+            <h2 className="mt-2 text-xl font-semibold text-white">
+              Invoice review
+            </h2>
 
             <p className="mt-1 text-sm text-slate-400">
-              Review clean and blocked invoices before exporting.
+              Focus on blocked invoices first. Clean invoices stay collapsed by
+              default.
             </p>
           </div>
 
           <button
             type="button"
             onClick={onToggleBlockedFilter}
-            className={`rounded-lg border px-4 py-2 text-sm font-medium transition ${
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
               showOnlyBlocked
-                ? "border-red-500/30 bg-red-500/20 text-red-200"
-                : "border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-500"
+                ? "border-red-400/30 bg-red-400/10 text-red-100"
+                : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
             }`}
           >
             {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
           </button>
         </div>
-      </section>
+      </div>
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <DataSetPreview
-          title="Clean invoices"
-          description={
-            showOnlyBlocked
-              ? "Hidden while blocked-only mode is active."
-              : "These rows passed the current validation rules and are ready for export."
-          }
-          items={visibleCleanInvoiceItems}
-          emptyMessage={
-            showOnlyBlocked
-              ? "Clean invoices are hidden in blocked-only mode."
-              : "No clean invoices yet."
-          }
-          isOpen={isCleanOpen}
-          onToggle={onToggleCleanOpen}
-        />
+      <DataSetPreview
+        title="Blocked invoices"
+        description="Rows with critical issues. Click an invoice to inspect the full explanation."
+        items={blockedInvoiceItems}
+        emptyMessage="No blocked invoices."
+        selectedRowIndex={selectedBlockedRowIndex}
+        onSelectItem={onSelectBlockedInvoice}
+        isOpen={isBlockedOpen}
+        onToggle={onToggleBlockedOpen}
+        tone="danger"
+      />
 
-        <DataSetPreview
-          title="Blocked invoices"
-          description="Click a blocked invoice to inspect its issues."
-          items={blockedInvoiceItems}
-          emptyMessage="No blocked invoices."
-          selectedRowIndex={selectedBlockedRowIndex}
-          onSelectItem={onSelectBlockedInvoice}
-          isOpen={isBlockedOpen}
-          onToggle={onToggleBlockedOpen}
-        />
-      </section>
-    </>
+      <DataSetPreview
+        title="Clean invoices"
+        description={
+          showOnlyBlocked
+            ? "Hidden while blocked-only mode is active."
+            : "Rows that passed validation. Kept collapsed to reduce noise."
+        }
+        items={visibleCleanInvoiceItems}
+        emptyMessage={
+          showOnlyBlocked
+            ? "Clean invoices are hidden in blocked-only mode."
+            : "No clean invoices yet."
+        }
+        isOpen={isCleanOpen}
+        onToggle={onToggleCleanOpen}
+        tone="neutral"
+        compact
+      />
+    </section>
   );
 }
