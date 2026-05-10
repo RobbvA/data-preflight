@@ -8,15 +8,16 @@ import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 import {
   createEmptyMapping,
+  createMappingSuggestions,
   createSuggestedMapping,
 } from "@/lib/fieldMapping";
 
+import type { MappingSuggestion } from "@/lib/fieldMapping";
+
 import { BlockedInvoiceDetail } from "@/components/data-preflight/BlockedInvoiceDetail";
-import { ExportSection } from "@/components/data-preflight/ExportSection";
 import { FieldMappingSection } from "@/components/data-preflight/FieldMappingSection";
 import { ImportReadinessPanel } from "@/components/data-preflight/ImportReadinessPanel";
 import { InvoiceReviewSection } from "@/components/data-preflight/InvoiceReviewSection";
-import { PreflightSummary } from "@/components/data-preflight/PreflightSummary";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
 
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
@@ -83,7 +84,7 @@ export function CsvUploader() {
 
       setRows(parsedRows);
       setHeaders(detectedHeaders);
-      setFieldMapping(createSuggestedMapping(detectedHeaders));
+      setFieldMapping(createSuggestedMapping(detectedHeaders, parsedRows));
     } catch {
       setError("Failed to parse CSV file. Please check the file format.");
       setRows([]);
@@ -127,6 +128,10 @@ export function CsvUploader() {
     setShowOnlyBlocked((currentValue) => !currentValue);
     setSelectedBlockedRowIndex(null);
   }
+
+  const mappingSuggestions = useMemo<MappingSuggestion[]>(() => {
+    return createMappingSuggestions(headers, rows);
+  }, [headers, rows]);
 
   const selectedRows = useMemo(() => {
     return rows.map((row) => {
@@ -276,25 +281,22 @@ export function CsvUploader() {
         </section>
 
         {hasUploadedRows && (
-          <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-            <ImportReadinessPanel
-              importReadinessMessage={importReadinessMessage}
-              hasIncompleteMapping={hasIncompleteMapping}
-              hasDuplicateMappings={hasDuplicateMappings}
-              blockedCount={blockedCount}
-              warningCount={warningCount}
-              cleanCount={cleanCount}
-              hasSuspiciousVat={hasSuspiciousVat}
-            />
-
-            <PreflightSummary
-              totalInvoices={selectedRows.length}
-              cleanCount={cleanCount}
-              blockedCount={blockedCount}
-              criticalCount={criticalCount}
-              warningCount={warningCount}
-            />
-          </section>
+          <ImportReadinessPanel
+            importReadinessMessage={importReadinessMessage}
+            totalInvoices={selectedRows.length}
+            hasIncompleteMapping={hasIncompleteMapping}
+            hasDuplicateMappings={hasDuplicateMappings}
+            blockedCount={blockedCount}
+            warningCount={warningCount}
+            cleanCount={cleanCount}
+            criticalCount={criticalCount}
+            hasSuspiciousVat={hasSuspiciousVat}
+            canExport={canExport}
+            cleanRows={validationResult.cleanRows}
+            issues={validationResult.issues}
+            onDownloadCleanCsv={downloadCsv}
+            onDownloadErrorCsv={downloadErrorCsv}
+          />
         )}
 
         {hasHeaders ? (
@@ -302,6 +304,7 @@ export function CsvUploader() {
             headers={headers}
             expectedInvoiceFields={expectedInvoiceFields}
             fieldMapping={fieldMapping}
+            mappingSuggestions={mappingSuggestions}
             onUpdateFieldMapping={updateFieldMapping}
           />
         ) : (
@@ -340,16 +343,6 @@ export function CsvUploader() {
           <BlockedInvoiceDetail
             selectedBlockedInvoice={selectedBlockedInvoice}
             onClose={() => setSelectedBlockedRowIndex(null)}
-          />
-        )}
-
-        {hasUploadedRows && (
-          <ExportSection
-            canExport={canExport}
-            cleanRows={validationResult.cleanRows}
-            issues={validationResult.issues}
-            onDownloadCleanCsv={downloadCsv}
-            onDownloadErrorCsv={downloadErrorCsv}
           />
         )}
       </div>
