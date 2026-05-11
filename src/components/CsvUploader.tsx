@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
 import { validateRows, type ValidationIssue } from "@/lib/validateRows";
+import { normalizeInvoiceRows } from "@/lib/normalizeInvoice";
+
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 import {
@@ -139,16 +141,23 @@ export function CsvUploader() {
 
       expectedInvoiceFields.forEach((targetField) => {
         const sourceField = fieldMapping[targetField];
-        mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
+
+        mappedRow[targetField] = sourceField
+          ? (row[sourceField] ?? "")
+          : "";
       });
 
       return mappedRow;
     });
   }, [rows, fieldMapping]);
 
-  const validationResult = useMemo(() => {
-    return validateRows(selectedRows);
+  const normalizedRows = useMemo(() => {
+    return normalizeInvoiceRows(selectedRows);
   }, [selectedRows]);
+
+  const validationResult = useMemo(() => {
+    return validateRows(normalizedRows);
+  }, [normalizedRows]);
 
   const missingExpectedFields = useMemo(() => {
     return expectedInvoiceFields.filter((field) => !fieldMapping[field]);
@@ -180,17 +189,17 @@ export function CsvUploader() {
   }, [validationResult.issues]);
 
   const cleanInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
-    return selectedRows
+    return normalizedRows
       .map((row, index) => ({
         rowIndex: index + 1,
         row,
         issues: issuesByRow[index + 1] ?? [],
       }))
       .filter((item) => item.issues.length === 0);
-  }, [selectedRows, issuesByRow]);
+  }, [normalizedRows, issuesByRow]);
 
   const blockedInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
-    return selectedRows
+    return normalizedRows
       .map((row, index) => ({
         rowIndex: index + 1,
         row,
@@ -199,7 +208,7 @@ export function CsvUploader() {
       .filter((item) =>
         item.issues.some((issue) => issue.severity === "critical"),
       );
-  }, [selectedRows, issuesByRow]);
+  }, [normalizedRows, issuesByRow]);
 
   const selectedBlockedInvoice =
     blockedInvoiceItems.find(
@@ -219,7 +228,8 @@ export function CsvUploader() {
 
   const hasSuspiciousVat = validationResult.issues.some(
     (issue) =>
-      issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
+      issue.field.toLowerCase().includes("vat") &&
+      issue.severity === "warning",
   );
 
   const canExport =
@@ -239,7 +249,7 @@ export function CsvUploader() {
             ? "All mapped invoices are ready for import."
             : "Upload and map invoice data to start the preflight check.";
 
-  const hasUploadedRows = selectedRows.length > 0;
+  const hasUploadedRows = normalizedRows.length > 0;
   const hasHeaders = headers.length > 0;
 
   return (
@@ -283,7 +293,7 @@ export function CsvUploader() {
         {hasUploadedRows && (
           <ImportReadinessPanel
             importReadinessMessage={importReadinessMessage}
-            totalInvoices={selectedRows.length}
+            totalInvoices={normalizedRows.length}
             hasIncompleteMapping={hasIncompleteMapping}
             hasDuplicateMappings={hasDuplicateMappings}
             blockedCount={blockedCount}
