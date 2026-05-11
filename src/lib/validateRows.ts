@@ -2,6 +2,16 @@ import type { CsvRow } from "@/lib/parseCsv";
 
 export type Severity = "critical" | "warning";
 
+export type BusinessRisk =
+  | "import_failure"
+  | "financial_reporting"
+  | "tax_risk"
+  | "workflow_inconsistency"
+  | "duplicate_risk"
+  | "data_quality"
+  | "payment_terms"
+  | "regional_compliance";
+
 export type ValidationIssue = {
   rowIndex: number;
   field: string;
@@ -28,6 +38,7 @@ export type ValidationIssue = {
   why: string;
   fix: string;
   severity: Severity;
+  risk: BusinessRisk;
 };
 
 export type ValidationResult = {
@@ -62,6 +73,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Empty rows can create failed imports or meaningless records in downstream systems.",
         fix: "Remove the empty row from the CSV before importing.",
         severity: "critical",
+        risk: "import_failure",
       });
 
       return;
@@ -77,6 +89,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
           why: "Required invoice fields are needed to safely identify and import the invoice.",
           fix: `Add a value for ${field}.`,
           severity: "critical",
+          risk: "import_failure",
         });
       }
     });
@@ -90,6 +103,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Invalid email addresses can break billing communication, invoice routing, or customer matching.",
         fix: "Use a valid email address such as finance@example.com.",
         severity: "critical",
+        risk: "workflow_inconsistency",
       });
     }
 
@@ -105,6 +119,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Accounting systems need numeric invoice amounts to calculate totals and balances.",
         fix: "Remove currency symbols or text and use a numeric value.",
         severity: "critical",
+        risk: "financial_reporting",
       });
     }
 
@@ -117,6 +132,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "VAT must be numeric so tax totals can be calculated correctly.",
         fix: "Remove currency symbols or text and use a numeric VAT value.",
         severity: "critical",
+        risk: "tax_risk",
       });
     }
 
@@ -129,6 +145,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "A non-positive invoice amount may indicate a credit note, refund, or incorrect export.",
         fix: "Verify whether this should be a normal invoice, credit note, or corrected amount.",
         severity: "warning",
+        risk: "financial_reporting",
       });
     }
 
@@ -141,6 +158,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Negative VAT can indicate a refund, credit note, or incorrectly mapped VAT column.",
         fix: "Check whether the VAT value is correct or whether the invoice type should be handled separately.",
         severity: "warning",
+        risk: "tax_risk",
       });
     }
 
@@ -153,6 +171,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "VAT higher than the invoice amount is usually invalid and may cause accounting import errors.",
         fix: "Check whether amount and VAT columns were swapped or exported incorrectly.",
         severity: "warning",
+        risk: "tax_risk",
       });
     }
 
@@ -168,6 +187,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
           why: "A VAT rate above 30% is uncommon for standard invoice imports and may indicate incorrect data.",
           fix: "Verify the VAT amount and check whether the amount column excludes or includes VAT.",
           severity: "warning",
+          risk: "tax_risk",
         });
       }
     }
@@ -184,6 +204,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Duplicate invoice numbers can create duplicate records or overwrite existing invoices.",
         fix: "Remove the duplicate row or correct the invoice number.",
         severity: "critical",
+        risk: "duplicate_risk",
       });
     }
 
@@ -199,6 +220,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Unexpected statuses can fail imports or create inconsistent workflow states.",
         fix: `Use one of: ${allowedStatuses.join(", ")}.`,
         severity: "warning",
+        risk: "workflow_inconsistency",
       });
     }
 
@@ -211,6 +233,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Country helps determine tax handling, currency expectations, and import routing.",
         fix: "Add a valid country code such as NL, DE, or FR.",
         severity: "warning",
+        risk: "regional_compliance",
       });
     }
 
@@ -223,6 +246,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Invalid country codes can cause incorrect tax handling or failed imports.",
         fix: "Use a two-letter country code such as NL, DE, or FR.",
         severity: "warning",
+        risk: "regional_compliance",
       });
     }
 
@@ -235,6 +259,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Missing currency can make invoice totals ambiguous in downstream systems.",
         fix: "Add a valid currency code such as EUR, USD, or GBP.",
         severity: "warning",
+        risk: "financial_reporting",
       });
     }
 
@@ -247,6 +272,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Invalid currency codes can cause failed imports or incorrect financial reporting.",
         fix: "Use a three-letter currency code such as EUR, USD, or GBP.",
         severity: "warning",
+        risk: "financial_reporting",
       });
     }
 
@@ -259,6 +285,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Invalid invoice dates can break reporting periods, payment terms, or accounting imports.",
         fix: "Use a valid date in YYYY-MM-DD format.",
         severity: "warning",
+        risk: "financial_reporting",
       });
     }
 
@@ -271,6 +298,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "Invalid due dates can break payment tracking and aging reports.",
         fix: "Use a valid date in YYYY-MM-DD format.",
         severity: "warning",
+        risk: "payment_terms",
       });
     }
 
@@ -289,6 +317,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         why: "A due date before the invoice date usually indicates incorrect payment terms or swapped date fields.",
         fix: "Check whether the invoice date and due date columns are mapped correctly.",
         severity: "warning",
+        risk: "payment_terms",
       });
     }
   });
@@ -349,8 +378,15 @@ function countInvoiceNumbers(rows: CsvRow[]) {
 
     if (!invoiceNumber) return accumulator;
 
-    accumulator[invoiceNumber] = (accumulator[invoiceNumber] ?? 0) + 1;
+    accumulator[invoiceNumber] = (invoiceNumberCounts(accumulator, invoiceNumber));
 
     return accumulator;
   }, {});
+}
+
+function invoiceNumberCounts(
+  accumulator: Record<string, number>,
+  invoiceNumber: string,
+) {
+  return (accumulator[invoiceNumber] ?? 0) + 1;
 }
