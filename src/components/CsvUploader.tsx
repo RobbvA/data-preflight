@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
 import { validateRows, type ValidationIssue } from "@/lib/validateRows";
 import { normalizeInvoiceRows } from "@/lib/normalizeInvoice";
-
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 import {
@@ -14,7 +13,7 @@ import {
   createSuggestedMapping,
 } from "@/lib/fieldMapping";
 
-import type { MappingSuggestion } from "@/lib/fieldMapping";
+import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
 
 import { BlockedInvoiceDetail } from "@/components/data-preflight/BlockedInvoiceDetail";
 import { FieldMappingSection } from "@/components/data-preflight/FieldMappingSection";
@@ -24,15 +23,6 @@ import { UploadSection } from "@/components/data-preflight/UploadSection";
 
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
 
-type FieldMapping = {
-  invoice_number: string;
-  company: string;
-  email: string;
-  amount: string;
-  vat: string;
-  status: string;
-};
-
 const expectedInvoiceFields: Array<keyof FieldMapping> = [
   "invoice_number",
   "company",
@@ -40,6 +30,10 @@ const expectedInvoiceFields: Array<keyof FieldMapping> = [
   "amount",
   "vat",
   "status",
+  "country",
+  "invoice_date",
+  "due_date",
+  "currency",
 ];
 
 export function CsvUploader() {
@@ -142,9 +136,7 @@ export function CsvUploader() {
       expectedInvoiceFields.forEach((targetField) => {
         const sourceField = fieldMapping[targetField];
 
-        mappedRow[targetField] = sourceField
-          ? (row[sourceField] ?? "")
-          : "";
+        mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
       });
 
       return mappedRow;
@@ -228,8 +220,7 @@ export function CsvUploader() {
 
   const hasSuspiciousVat = validationResult.issues.some(
     (issue) =>
-      issue.field.toLowerCase().includes("vat") &&
-      issue.severity === "warning",
+      issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
   );
 
   const canExport =
@@ -282,9 +273,7 @@ export function CsvUploader() {
             fileName={fileName}
             isLoading={isLoading}
             error={error}
-            hasActiveFile={
-              rows.length > 0 || Boolean(error) || Boolean(fileName)
-            }
+            hasActiveFile={rows.length > 0 || Boolean(error) || Boolean(fileName)}
             onFileChange={handleFileChange}
             onReset={resetFlow}
           />

@@ -7,6 +7,10 @@ export type FieldMapping = {
   amount: string;
   vat: string;
   status: string;
+  country: string;
+  invoice_date: string;
+  due_date: string;
+  currency: string;
 };
 
 export type InvoiceField = keyof FieldMapping;
@@ -97,6 +101,41 @@ const invoiceFieldSynonyms: Record<InvoiceField, string[]> = {
     "paid status",
     "betaalstatus",
   ],
+  country: [
+    "country",
+    "country code",
+    "land",
+    "landcode",
+    "billing country",
+    "customer country",
+  ],
+  invoice_date: [
+    "invoice date",
+    "invoice created",
+    "created",
+    "created at",
+    "date",
+    "factuurdatum",
+    "factuur datum",
+    "datum",
+  ],
+  due_date: [
+    "due",
+    "due date",
+    "payment due",
+    "expires",
+    "expiry date",
+    "vervaldatum",
+    "verval datum",
+    "betaaldatum",
+  ],
+  currency: [
+    "currency",
+    "currency code",
+    "valuta",
+    "currencycode",
+    "invoice currency",
+  ],
 };
 
 const allowedStatuses = ["ready", "paid", "draft", "pending", "sent"];
@@ -109,6 +148,10 @@ export function createEmptyMapping(): FieldMapping {
     amount: "",
     vat: "",
     status: "",
+    country: "",
+    invoice_date: "",
+    due_date: "",
+    currency: "",
   };
 }
 
@@ -311,6 +354,16 @@ function valueMatchesFieldPattern(value: string, field: InvoiceField) {
     case "company":
       return looksLikeCompanyName(normalizedValue);
 
+    case "country":
+      return looksLikeCountryCode(normalizedValue);
+
+    case "invoice_date":
+    case "due_date":
+      return looksLikeIsoDate(normalizedValue);
+
+    case "currency":
+      return looksLikeCurrencyCode(normalizedValue);
+
     default:
       return false;
   }
@@ -355,8 +408,23 @@ function looksLikeCompanyName(value: string) {
   if (isValidEmail(value)) return false;
   if (parseBusinessNumber(value) !== null) return false;
   if (allowedStatuses.includes(value)) return false;
+  if (looksLikeCountryCode(value)) return false;
+  if (looksLikeCurrencyCode(value)) return false;
+  if (looksLikeIsoDate(value)) return false;
 
   return /[a-z]/i.test(value) && value.length >= 2;
+}
+
+function looksLikeCountryCode(value: string) {
+  return /^[a-z]{2}$/i.test(value);
+}
+
+function looksLikeCurrencyCode(value: string) {
+  return /^[a-z]{3}$/i.test(value);
+}
+
+function looksLikeIsoDate(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
 function getConfidence(score: number): MappingConfidence {

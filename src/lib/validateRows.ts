@@ -16,6 +16,13 @@ export type ValidationIssue = {
     | "suspicious-vat-rate"
     | "duplicate-invoice-number"
     | "invalid-status"
+    | "invalid-invoice-date"
+    | "invalid-due-date"
+    | "due-before-invoice-date"
+    | "missing-currency"
+    | "invalid-currency"
+    | "missing-country"
+    | "invalid-country"
     | "missing-expected-field";
   problem: string;
   why: string;
@@ -194,6 +201,96 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
         severity: "warning",
       });
     }
+
+    if (!row.country?.trim()) {
+      issues.push({
+        rowIndex,
+        field: "country",
+        type: "missing-country",
+        problem: "Country is missing.",
+        why: "Country helps determine tax handling, currency expectations, and import routing.",
+        fix: "Add a valid country code such as NL, DE, or FR.",
+        severity: "warning",
+      });
+    }
+
+    if (row.country && !isValidCountryCode(row.country)) {
+      issues.push({
+        rowIndex,
+        field: "country",
+        type: "invalid-country",
+        problem: "Country code is invalid.",
+        why: "Invalid country codes can cause incorrect tax handling or failed imports.",
+        fix: "Use a two-letter country code such as NL, DE, or FR.",
+        severity: "warning",
+      });
+    }
+
+    if (!row.currency?.trim()) {
+      issues.push({
+        rowIndex,
+        field: "currency",
+        type: "missing-currency",
+        problem: "Currency is missing.",
+        why: "Missing currency can make invoice totals ambiguous in downstream systems.",
+        fix: "Add a valid currency code such as EUR, USD, or GBP.",
+        severity: "warning",
+      });
+    }
+
+    if (row.currency && !isValidCurrencyCode(row.currency)) {
+      issues.push({
+        rowIndex,
+        field: "currency",
+        type: "invalid-currency",
+        problem: "Currency code is invalid.",
+        why: "Invalid currency codes can cause failed imports or incorrect financial reporting.",
+        fix: "Use a three-letter currency code such as EUR, USD, or GBP.",
+        severity: "warning",
+      });
+    }
+
+    if (row.invoice_date && !isValidIsoDate(row.invoice_date)) {
+      issues.push({
+        rowIndex,
+        field: "invoice_date",
+        type: "invalid-invoice-date",
+        problem: "Invoice date is invalid.",
+        why: "Invalid invoice dates can break reporting periods, payment terms, or accounting imports.",
+        fix: "Use a valid date in YYYY-MM-DD format.",
+        severity: "warning",
+      });
+    }
+
+    if (row.due_date && !isValidIsoDate(row.due_date)) {
+      issues.push({
+        rowIndex,
+        field: "due_date",
+        type: "invalid-due-date",
+        problem: "Due date is invalid.",
+        why: "Invalid due dates can break payment tracking and aging reports.",
+        fix: "Use a valid date in YYYY-MM-DD format.",
+        severity: "warning",
+      });
+    }
+
+    if (
+      row.invoice_date &&
+      row.due_date &&
+      isValidIsoDate(row.invoice_date) &&
+      isValidIsoDate(row.due_date) &&
+      row.due_date < row.invoice_date
+    ) {
+      issues.push({
+        rowIndex,
+        field: "due_date",
+        type: "due-before-invoice-date",
+        problem: "Due date is before the invoice date.",
+        why: "A due date before the invoice date usually indicates incorrect payment terms or swapped date fields.",
+        fix: "Check whether the invoice date and due date columns are mapped correctly.",
+        severity: "warning",
+      });
+    }
   });
 
   const rowsWithCriticalIssues = new Set(
@@ -229,6 +326,21 @@ function parseNumber(value: string) {
   const parsedValue = Number(cleanedValue);
 
   return Number.isFinite(parsedValue) ? parsedValue : null;
+}
+
+function isValidCountryCode(value: string) {
+  return /^[A-Z]{2}$/.test(value.trim());
+}
+
+function isValidCurrencyCode(value: string) {
+  return /^[A-Z]{3}$/.test(value.trim());
+}
+
+function isValidIsoDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const date = new Date(value);
+  return !Number.isNaN(date.getTime());
 }
 
 function countInvoiceNumbers(rows: CsvRow[]) {

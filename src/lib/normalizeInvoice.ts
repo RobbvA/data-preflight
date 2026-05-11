@@ -7,6 +7,10 @@ const invoiceFields = [
   "amount",
   "vat",
   "status",
+  "country",
+  "invoice_date",
+  "due_date",
+  "currency",
 ] as const;
 
 type InvoiceField = (typeof invoiceFields)[number];
@@ -46,6 +50,16 @@ function normalizeInvoiceValue(field: InvoiceField, value: string) {
 
     case "status":
       return trimmedValue.toLowerCase();
+
+    case "country":
+      return trimmedValue.toUpperCase();
+
+    case "currency":
+      return trimmedValue.toUpperCase();
+
+    case "invoice_date":
+    case "due_date":
+      return trimmedValue;
 
     default:
       return trimmedValue;
