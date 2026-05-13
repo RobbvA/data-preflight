@@ -1,4 +1,5 @@
 import type { CsvRow } from "@/lib/parseCsv";
+import { invoiceProfile } from "@/lib/profiles/invoiceProfile";
 
 export type FieldMapping = {
   invoice_number: string;
@@ -19,6 +20,8 @@ export type MappingConfidence = "high" | "medium" | "low" | "none";
 
 export type MappingSuggestion = {
   targetField: InvoiceField;
+  targetLabel: string;
+  required: boolean;
   suggestedHeader: string;
   confidence: MappingConfidence;
   score: number;
@@ -30,129 +33,29 @@ export type MappingSuggestion = {
   }>;
 };
 
-const invoiceFieldSynonyms: Record<InvoiceField, string[]> = {
-  invoice_number: [
-    "invoice",
-    "invoice number",
-    "invoice no",
-    "invoice id",
-    "factuur",
-    "factuurnummer",
-    "factuur nummer",
-    "nummer",
-    "number",
-    "document number",
-    "reference",
-    "ref",
-  ],
-  company: [
-    "company",
-    "client",
-    "customer",
-    "customer name",
-    "client name",
-    "bedrijf",
-    "klant",
-    "klantnaam",
-    "debtor",
-    "debiteur",
-    "organization",
-    "organisation",
-  ],
-  email: [
-    "email",
-    "e-mail",
-    "mail",
-    "email address",
-    "e-mailadres",
-    "contact email",
-    "billing email",
-    "invoice email",
-  ],
-  amount: [
-    "amount",
-    "total",
-    "total amount",
-    "invoice total",
-    "price",
-    "bedrag",
-    "totaal",
-    "totaalbedrag",
-    "subtotal",
-    "net amount",
-    "gross amount",
-  ],
-  vat: [
-    "vat",
-    "btw",
-    "tax",
-    "vat amount",
-    "btw bedrag",
-    "tax amount",
-    "sales tax",
-    "vat total",
-  ],
-  status: [
-    "status",
-    "state",
-    "fase",
-    "payment status",
-    "invoice status",
-    "paid status",
-    "betaalstatus",
-  ],
-  country: [
-    "country",
-    "country code",
-    "land",
-    "landcode",
-    "billing country",
-    "customer country",
-  ],
-  invoice_date: [
-    "invoice date",
-    "invoice created",
-    "created",
-    "created at",
-    "date",
-    "factuurdatum",
-    "factuur datum",
-    "datum",
-  ],
-  due_date: [
-    "due",
-    "due date",
-    "payment due",
-    "expires",
-    "expiry date",
-    "vervaldatum",
-    "verval datum",
-    "betaaldatum",
-  ],
-  currency: [
-    "currency",
-    "currency code",
-    "valuta",
-    "currencycode",
-    "invoice currency",
-  ],
-};
-
 const allowedStatuses = ["ready", "paid", "draft", "pending", "sent"];
 
+const activeProfile = invoiceProfile;
+
+const profileFields = activeProfile.fields.map(
+  (field) => field.key,
+) as InvoiceField[];
+
+function getProfileField(field: InvoiceField) {
+  return activeProfile.fields.find((profileField) => profileField.key === field);
+}
+
+function getFieldSynonyms(field: InvoiceField) {
+  return getProfileField(field)?.synonyms ?? [];
+}
+
 export function createEmptyMapping(): FieldMapping {
-  return {
-    invoice_number: "",
-    company: "",
-    email: "",
-    amount: "",
-    vat: "",
-    status: "",
-    country: "",
-    invoice_date: "",
-    due_date: "",
-    currency: "",
-  };
+  return profileFields.reduce<FieldMapping>((mapping, field) => {
+    return {
+      ...mapping,
+      [field]: "",
+    };
+  }, {} as FieldMapping);
 }
 
 export function createSuggestedMapping(
@@ -174,9 +77,11 @@ export function createMappingSuggestions(
   headers: string[],
   rows: CsvRow[] = [],
 ): MappingSuggestion[] {
-  const fields = Object.keys(invoiceFieldSynonyms) as InvoiceField[];
+  const fields = profileFields;
 
   return fields.map((targetField) => {
+    const profileField = getProfileField(targetField);
+
     const rankedMatches = headers
       .map((header) => scoreHeaderAndValuesForField(header, targetField, rows))
       .sort((a, b) => b.score - a.score);
@@ -186,6 +91,8 @@ export function createMappingSuggestions(
     if (!bestMatch || bestMatch.score === 0) {
       return {
         targetField,
+        targetLabel: profileField?.label ?? targetField,
+        required: profileField?.required ?? false,
         suggestedHeader: "",
         confidence: "none",
         score: 0,
@@ -196,6 +103,8 @@ export function createMappingSuggestions(
 
     return {
       targetField,
+      targetLabel: profileField?.label ?? targetField,
+      required: profileField?.required ?? false,
       suggestedHeader: bestMatch.header,
       confidence: getConfidence(bestMatch.score),
       score: bestMatch.score,
@@ -229,7 +138,7 @@ function scoreHeaderAndValuesForField(
 
 function scoreHeaderForField(header: string, field: InvoiceField) {
   const normalizedHeader = normalizeText(header);
-  const synonyms = invoiceFieldSynonyms[field];
+  const synonyms = getFieldSynonyms(field);
 
   let bestScore = 0;
   let reason = "No semantic header match found.";

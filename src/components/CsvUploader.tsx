@@ -23,19 +23,6 @@ import { UploadSection } from "@/components/data-preflight/UploadSection";
 
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
 
-const expectedInvoiceFields: Array<keyof FieldMapping> = [
-  "invoice_number",
-  "company",
-  "email",
-  "amount",
-  "vat",
-  "status",
-  "country",
-  "invoice_date",
-  "due_date",
-  "currency",
-];
-
 export function CsvUploader() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [fileName, setFileName] = useState("");
@@ -125,6 +112,12 @@ export function CsvUploader() {
     setSelectedBlockedRowIndex(null);
   }
 
+  function toggleSelectedBlockedInvoice(rowIndex: number) {
+    setSelectedBlockedRowIndex((currentRowIndex) =>
+      currentRowIndex === rowIndex ? null : rowIndex,
+    );
+  }
+
   const mappingSuggestions = useMemo<MappingSuggestion[]>(() => {
     return createMappingSuggestions(headers, rows);
   }, [headers, rows]);
@@ -133,7 +126,8 @@ export function CsvUploader() {
     return rows.map((row) => {
       const mappedRow: CsvRow = {};
 
-      expectedInvoiceFields.forEach((targetField) => {
+      mappingSuggestions.forEach((suggestion) => {
+        const targetField = suggestion.targetField;
         const sourceField = fieldMapping[targetField];
 
         mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
@@ -141,7 +135,7 @@ export function CsvUploader() {
 
       return mappedRow;
     });
-  }, [rows, fieldMapping]);
+  }, [rows, fieldMapping, mappingSuggestions]);
 
   const normalizedRows = useMemo(() => {
     return normalizeInvoiceRows(selectedRows);
@@ -152,8 +146,11 @@ export function CsvUploader() {
   }, [normalizedRows]);
 
   const missingExpectedFields = useMemo(() => {
-    return expectedInvoiceFields.filter((field) => !fieldMapping[field]);
-  }, [fieldMapping]);
+    return mappingSuggestions
+      .filter((suggestion) => suggestion.required)
+      .filter((suggestion) => !fieldMapping[suggestion.targetField])
+      .map((suggestion) => suggestion.targetField);
+  }, [fieldMapping, mappingSuggestions]);
 
   const duplicateMappedHeaders = useMemo(() => {
     const usedHeaders = Object.values(fieldMapping).filter(Boolean);
@@ -256,7 +253,7 @@ export function CsvUploader() {
         <section className="grid gap-6 pt-6 lg:grid-cols-[1fr_360px] lg:items-start">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-300/80">
-              Invoice data preflight
+              Data profile preflight
             </p>
 
             <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
@@ -264,8 +261,9 @@ export function CsvUploader() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
-              A trust layer for messy invoice CSV exports. Map headers, validate
-              business rules, inspect issues, and export only clean invoice data.
+              A trust layer for messy business data exports. Map headers,
+              validate business rules, inspect issues, and export only trusted
+              data.
             </p>
           </div>
 
@@ -301,7 +299,6 @@ export function CsvUploader() {
         {hasHeaders ? (
           <FieldMappingSection
             headers={headers}
-            expectedInvoiceFields={expectedInvoiceFields}
             fieldMapping={fieldMapping}
             mappingSuggestions={mappingSuggestions}
             onUpdateFieldMapping={updateFieldMapping}
@@ -317,8 +314,7 @@ export function CsvUploader() {
             </h2>
 
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-              Upload an invoice CSV to detect headers and create the field
-              mapping layer.
+              Upload a CSV to detect headers and create the field mapping layer.
             </p>
           </section>
         )}
@@ -332,7 +328,7 @@ export function CsvUploader() {
             isCleanOpen={isCleanOpen}
             isBlockedOpen={isBlockedOpen}
             onToggleBlockedFilter={toggleBlockedFilter}
-            onSelectBlockedInvoice={setSelectedBlockedRowIndex}
+            onSelectBlockedInvoice={toggleSelectedBlockedInvoice}
             onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
             onToggleBlockedOpen={() => setIsBlockedOpen((current) => !current)}
           />

@@ -2,20 +2,10 @@
 
 import { useState } from "react";
 
-import type { MappingSuggestion } from "@/lib/fieldMapping";
-
-type FieldMapping = {
-  invoice_number: string;
-  company: string;
-  email: string;
-  amount: string;
-  vat: string;
-  status: string;
-};
+import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
 
 type FieldMappingSectionProps = {
   headers: string[];
-  expectedInvoiceFields: Array<keyof FieldMapping>;
   fieldMapping: FieldMapping;
   mappingSuggestions: MappingSuggestion[];
   onUpdateFieldMapping: (
@@ -26,7 +16,6 @@ type FieldMappingSectionProps = {
 
 export function FieldMappingSection({
   headers,
-  expectedInvoiceFields,
   fieldMapping,
   mappingSuggestions,
   onUpdateFieldMapping,
@@ -46,19 +35,19 @@ export function FieldMappingSection({
       <h2 className="text-xl font-semibold">Field mapping</h2>
 
       <p className="mt-1 text-sm text-slate-400">
-        Map the uploaded CSV headers to the invoice fields DataPreflight
-        validates.
+        Map the uploaded CSV headers to the active data profile fields
+        DataPreflight validates.
       </p>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        {expectedInvoiceFields.map((targetField) => {
+        {mappingSuggestions.map((suggestion) => {
+          const targetField = suggestion.targetField;
           const selectedHeader = fieldMapping[targetField];
 
-          const suggestion = mappingSuggestions.find(
-            (item) => item.targetField === targetField,
-          );
+          const fieldLabel = suggestion.targetLabel;
+          const isRequired = suggestion.required;
 
-          const isMissing = !selectedHeader;
+          const isMissing = isRequired && !selectedHeader;
 
           const isDuplicate =
             selectedHeader !== "" &&
@@ -73,21 +62,31 @@ export function FieldMappingSection({
               <label className="block">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-slate-300">
-                    {targetField}
+                    {fieldLabel}
                   </span>
 
-                  {suggestion && suggestion.confidence !== "none" && (
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                      isRequired
+                        ? "border-red-400/30 bg-red-500/10 text-red-200"
+                        : "border-slate-700 bg-slate-800 text-slate-400"
+                    }`}
+                  >
+                    {isRequired ? "Required" : "Optional"}
+                  </span>
+
+                  {suggestion.confidence !== "none" && (
                     <button
                       type="button"
                       onClick={() => toggleReason(targetField)}
                       className="flex h-5 w-5 items-center justify-center rounded-full border border-blue-400/30 bg-blue-500/10 text-xs font-semibold text-blue-200 transition hover:border-blue-300/60 hover:bg-blue-500/20"
-                      aria-label={`Show mapping reason for ${targetField}`}
+                      aria-label={`Show mapping reason for ${fieldLabel}`}
                     >
                       ?
                     </button>
                   )}
 
-                  {suggestion && suggestion.confidence !== "none" && (
+                  {suggestion.confidence !== "none" && (
                     <span
                       className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${getConfidenceClasses(
                         suggestion.confidence,
@@ -121,7 +120,7 @@ export function FieldMappingSection({
                 </select>
               </label>
 
-              {isReasonOpen && suggestion && (
+              {isReasonOpen && (
                 <div className="absolute left-0 top-full z-20 mt-2 w-full rounded-xl border border-white/10 bg-slate-950 p-4 shadow-2xl shadow-black/40">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -130,7 +129,7 @@ export function FieldMappingSection({
                       </p>
 
                       <p className="mt-2 text-sm font-medium text-slate-200">
-                        {targetField} →{" "}
+                        {fieldLabel} →{" "}
                         <span className="text-blue-200">
                           {suggestion.suggestedHeader || "Not mapped"}
                         </span>
@@ -152,6 +151,16 @@ export function FieldMappingSection({
                   </p>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
+                        isRequired
+                          ? "border-red-400/30 bg-red-500/10 text-red-200"
+                          : "border-slate-700 bg-slate-800 text-slate-400"
+                      }`}
+                    >
+                      {isRequired ? "Required" : "Optional"}
+                    </span>
+
                     <span
                       className={`rounded-full border px-2 py-0.5 text-xs font-medium ${getConfidenceClasses(
                         suggestion.confidence,
