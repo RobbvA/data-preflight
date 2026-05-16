@@ -38,6 +38,7 @@ export function CsvUploader() {
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
   const [isCleanOpen, setIsCleanOpen] = useState(false);
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
+  const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -51,6 +52,7 @@ export function CsvUploader() {
     setShowOnlyBlocked(false);
     setIsCleanOpen(false);
     setIsBlockedOpen(true);
+    setIsFieldMappingOpen(false);
 
     try {
       const parsedRows = await parseCsvFile(file);
@@ -77,6 +79,7 @@ export function CsvUploader() {
       setShowOnlyBlocked(false);
       setIsCleanOpen(false);
       setIsBlockedOpen(true);
+      setIsFieldMappingOpen(false);
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +96,7 @@ export function CsvUploader() {
     setShowOnlyBlocked(false);
     setIsCleanOpen(false);
     setIsBlockedOpen(true);
+    setIsFieldMappingOpen(false);
   }
 
   function updateFieldMapping(
@@ -298,29 +302,6 @@ export function CsvUploader() {
           />
         )}
 
-        {hasHeaders ? (
-          <FieldMappingSection
-            headers={headers}
-            fieldMapping={fieldMapping}
-            mappingSuggestions={mappingSuggestions}
-            onUpdateFieldMapping={updateFieldMapping}
-          />
-        ) : (
-          <section className="rounded-2xl border border-dashed border-white/10 bg-white/[0.025] p-4 shadow-2xl shadow-blue-950/10 backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-              Mapping setup
-            </p>
-
-            <h2 className="mt-1.5 text-lg font-semibold text-slate-200">
-              Waiting for CSV headers
-            </h2>
-
-            <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-500">
-              Upload a CSV to detect headers and create the field mapping layer.
-            </p>
-          </section>
-        )}
-
         {hasUploadedRows && (
           <InvoiceReviewSection
             showOnlyBlocked={showOnlyBlocked}
@@ -341,6 +322,31 @@ export function CsvUploader() {
             selectedBlockedInvoice={selectedBlockedInvoice}
             onClose={() => setSelectedBlockedRowIndex(null)}
           />
+        )}
+
+        {hasHeaders ? (
+          <FieldMappingSection
+            headers={headers}
+            fieldMapping={fieldMapping}
+            mappingSuggestions={mappingSuggestions}
+            isOpen={isFieldMappingOpen}
+            onToggleOpen={() => setIsFieldMappingOpen((current) => !current)}
+            onUpdateFieldMapping={updateFieldMapping}
+          />
+        ) : (
+          <section className="rounded-2xl border border-dashed border-white/10 bg-white/[0.025] p-4 shadow-2xl shadow-blue-950/10 backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Mapping setup
+            </p>
+
+            <h2 className="mt-1.5 text-lg font-semibold text-slate-200">
+              Waiting for CSV headers
+            </h2>
+
+            <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-500">
+              Upload a CSV to detect headers and create the field mapping layer.
+            </p>
+          </section>
         )}
       </div>
     </main>

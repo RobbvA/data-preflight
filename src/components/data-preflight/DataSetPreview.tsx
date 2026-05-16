@@ -13,6 +13,7 @@ type DataSetPreviewProps = {
   onToggle: () => void;
   tone?: "neutral" | "danger";
   compact?: boolean;
+  embedded?: boolean;
 };
 
 const invoiceFields = [
@@ -35,15 +36,18 @@ export function DataSetPreview({
   onToggle,
   tone = "neutral",
   compact = false,
+  embedded = false,
 }: DataSetPreviewProps) {
   const isDanger = tone === "danger";
 
   return (
     <section
-      className={`rounded-2xl border p-4 shadow-xl backdrop-blur ${
+      className={`rounded-xl border backdrop-blur ${
+        embedded ? "p-3 shadow-none" : "p-4 shadow-xl"
+      } ${
         isDanger
-          ? "border-red-400/[0.14] bg-red-500/[0.035] shadow-slate-950/20"
-          : "border-white/[0.08] bg-white/[0.025] shadow-slate-950/15"
+          ? "border-red-400/[0.12] bg-red-500/[0.028] shadow-slate-950/20"
+          : "border-white/[0.07] bg-slate-950/25 shadow-slate-950/15"
       }`}
     >
       <button
@@ -53,7 +57,7 @@ export function DataSetPreview({
       >
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-base font-semibold text-white">{title}</h2>
+            <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
 
             <span
               className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
@@ -66,10 +70,12 @@ export function DataSetPreview({
             </span>
           </div>
 
-          <p className="mt-1 text-xs text-slate-400">{description}</p>
+          <p className="mt-0.5 text-xs leading-5 text-slate-500">
+            {description}
+          </p>
         </div>
 
-        <span className="rounded-full border border-white/[0.08] bg-slate-950/30 px-2.5 py-1 text-[11px] font-medium text-slate-300 transition hover:border-white/15 hover:text-white">
+        <span className="rounded-full border border-white/[0.06] bg-slate-950/20 px-2.5 py-1 text-[10px] font-medium text-slate-500 transition hover:border-white/12 hover:text-slate-300">
           {isOpen ? "Collapse" : "Expand"}
         </span>
       </button>
