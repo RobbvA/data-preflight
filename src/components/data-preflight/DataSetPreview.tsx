@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 import type { InvoicePreviewItem } from "./types";
 
 type DataSetPreviewProps = {
@@ -38,10 +40,10 @@ export function DataSetPreview({
 
   return (
     <section
-      className={`rounded-2xl border p-5 shadow-2xl backdrop-blur ${
+      className={`rounded-2xl border p-4 shadow-xl backdrop-blur ${
         isDanger
-          ? "border-red-400/20 bg-red-500/[0.045] shadow-red-950/20"
-          : "border-white/10 bg-white/[0.035] shadow-blue-950/10"
+          ? "border-red-400/[0.14] bg-red-500/[0.035] shadow-slate-950/20"
+          : "border-white/[0.08] bg-white/[0.025] shadow-slate-950/15"
       }`}
     >
       <button
@@ -50,51 +52,54 @@ export function DataSetPreview({
         className="flex w-full items-start justify-between gap-4 text-left"
       >
         <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-lg font-semibold text-white">{title}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-base font-semibold text-white">{title}</h2>
 
             <span
-              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+              className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                 isDanger
-                  ? "border-red-400/30 bg-red-400/10 text-red-100"
-                  : "border-white/10 bg-white/[0.04] text-slate-300"
+                  ? "border-red-400/15 bg-red-400/[0.05] text-red-200/80"
+                  : "border-white/[0.06] bg-white/[0.02] text-slate-400"
               }`}
             >
               {items.length} row{items.length === 1 ? "" : "s"}
             </span>
           </div>
 
-          <p className="mt-1 text-sm text-slate-400">{description}</p>
+          <p className="mt-1 text-xs text-slate-400">{description}</p>
         </div>
 
-        <span className="rounded-full border border-white/10 bg-slate-950/40 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:text-white">
+        <span className="rounded-full border border-white/[0.08] bg-slate-950/30 px-2.5 py-1 text-[11px] font-medium text-slate-300 transition hover:border-white/15 hover:text-white">
           {isOpen ? "Collapse" : "Expand"}
         </span>
       </button>
 
       {isOpen &&
         (items.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-white/10 bg-slate-950/40 p-4 text-sm text-slate-400">
+          <p className="mt-3 rounded-xl border border-white/[0.07] bg-slate-950/30 p-3 text-sm text-slate-400">
             {emptyMessage}
           </p>
         ) : (
           <div
-            className={`mt-4 overflow-auto rounded-xl border border-white/10 bg-slate-950/50 ${
-              compact ? "max-h-[260px]" : "max-h-[520px]"
+            className={`mt-3 overflow-auto rounded-xl border border-white/[0.07] bg-slate-950/35 ${
+              compact ? "max-h-[240px]" : "max-h-[500px]"
             }`}
           >
-            <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[900px] border-collapse text-left text-xs">
               <thead className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur">
-                <tr className="border-b border-white/10 text-xs uppercase tracking-[0.14em] text-slate-500">
-                  <th className="px-4 py-3 font-medium">Row</th>
+                <tr className="border-b border-white/[0.07] uppercase tracking-[0.12em] text-slate-500">
+                  <th className="px-3 py-2 text-[10px] font-medium">Row</th>
 
                   {invoiceFields.map((field) => (
-                    <th key={field} className="px-4 py-3 font-medium">
+                    <th
+                      key={field}
+                      className="px-3 py-2 text-[10px] font-medium"
+                    >
                       {field}
                     </th>
                   ))}
 
-                  <th className="px-4 py-3 font-medium">Issues</th>
+                  <th className="px-3 py-2 text-[10px] font-medium">Issues</th>
                 </tr>
               </thead>
 
@@ -121,25 +126,24 @@ export function DataSetPreview({
                     : "";
 
                   const rowClass = isSelected
-                    ? "bg-red-500/12"
+                    ? "bg-red-500/[0.09]"
                     : isDanger
-                      ? "hover:bg-red-500/[0.045]"
-                      : "hover:bg-white/[0.035]";
+                      ? "hover:bg-red-500/[0.03]"
+                      : "hover:bg-white/[0.025]";
 
                   return (
-                    <>
+                    <Fragment key={`${title}-${item.rowIndex}`}>
                       <tr
-                        key={`${title}-${item.rowIndex}`}
                         onClick={
                           onSelectItem
                             ? () => onSelectItem(item.rowIndex)
                             : undefined
                         }
-                        className={`border-b border-white/10 transition last:border-b-0 ${
+                        className={`border-b border-white/[0.06] transition last:border-b-0 ${
                           onSelectItem ? "cursor-pointer" : ""
                         } ${rowClass}`}
                       >
-                        <td className="px-4 py-3 text-xs font-medium text-slate-500">
+                        <td className="px-3 py-2 text-[11px] font-medium text-slate-500">
                           {item.rowIndex}
                         </td>
 
@@ -156,12 +160,12 @@ export function DataSetPreview({
                             : value;
 
                           return (
-                            <td key={field} className="px-4 py-3">
+                            <td key={field} className="px-3 py-2">
                               <span
                                 title={fieldTooltip}
-                                className={`block max-w-[180px] truncate rounded-md px-2 py-1 ${
+                                className={`block max-w-[160px] truncate rounded px-1.5 py-0.5 ${
                                   hasIssue && isDanger
-                                    ? "border border-red-400/25 bg-red-500/10 text-red-50"
+                                    ? "border border-red-400/15 bg-red-500/[0.055] text-red-50"
                                     : "text-slate-300"
                                 }`}
                               >
@@ -171,21 +175,21 @@ export function DataSetPreview({
                           );
                         })}
 
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2">
                           {item.issues.length > 0 ? (
                             <span
                               title={tooltipText}
-                              className="inline-flex cursor-help rounded-full border border-red-400/30 bg-red-400/10 px-2.5 py-1 text-xs font-medium text-red-100"
+                              className="inline-flex cursor-help rounded-full border border-red-400/20 bg-red-400/[0.06] px-2 py-0.5 text-[10px] font-medium text-red-100/90"
                             >
                               {criticalIssues.length > 0
                                 ? `${criticalIssues.length} critical`
                                 : `${warningIssues.length} warning`}
                               {item.issues.length > 1
-                                ? ` · ${item.issues.length} total`
+                                ? ` · ${item.issues.length}`
                                 : ""}
                             </span>
                           ) : (
-                            <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-100">
+                            <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-medium text-emerald-100/85">
                               clean
                             </span>
                           )}
@@ -193,67 +197,72 @@ export function DataSetPreview({
                       </tr>
 
                       {isSelected && item.issues.length > 0 && (
-                        <tr className="border-b border-red-400/10 bg-red-500/[0.04]">
+                        <tr className="border-b border-red-400/[0.07] bg-red-500/[0.02]">
                           <td
                             colSpan={invoiceFields.length + 2}
-                            className="px-4 py-3"
+                            className="px-3 py-2"
                           >
                             <div className="space-y-2">
                               <div className="flex items-center justify-between gap-4">
                                 <div>
-                                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-red-200/80">
+                                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-red-200/70">
                                     Quick issue overview
                                   </p>
 
-                                  <p className="mt-0.5 text-xs text-slate-500">
-                                    Full details are shown in the detail panel
-                                    below.
+                                  <p className="mt-0.5 text-[11px] text-slate-500">
+                                    Compact fixes. Full details are shown in the
+                                    detail panel below.
                                   </p>
                                 </div>
 
-                                <span className="rounded-full border border-red-400/30 bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-100">
+                                <span className="shrink-0 rounded-full border border-red-400/20 bg-red-500/[0.07] px-2 py-0.5 text-[10px] font-medium text-red-100/90">
                                   {item.issues.length} issue
                                   {item.issues.length === 1 ? "" : "s"}
                                 </span>
                               </div>
 
-                              <div className="grid gap-2 md:grid-cols-2">
+                              <div className="divide-y divide-white/[0.06] rounded-lg border border-white/[0.06] bg-slate-950/20">
                                 {item.issues.map((issue, index) => (
                                   <div
-                                    key={`${issue.field}-${index}`}
-                                    className="rounded-lg border border-white/10 bg-slate-950/40 p-3"
+                                    key={`${issue.field}-${issue.type}-${index}`}
+                                    className="grid gap-2 px-2.5 py-2 md:grid-cols-[1fr_auto]"
                                   >
-                                    <div className="flex items-start justify-between gap-3">
-                                      <div>
-                                        <p className="text-sm font-medium text-white">
+                                    <div className="min-w-0">
+                                      <div className="flex flex-wrap items-center gap-1.5">
+                                        <p className="truncate text-xs font-medium text-white">
                                           {issue.problem}
                                         </p>
 
-                                        <p className="mt-1 text-xs text-slate-500">
-                                          Field:{" "}
-                                          <span className="text-slate-300">
-                                            {issue.field}
-                                          </span>
-                                        </p>
+                                        <span className="rounded-full border border-white/[0.06] bg-white/[0.02] px-1.5 py-0.5 text-[9px] text-slate-500">
+                                          {issue.field}
+                                        </span>
+
+                                        <span className="rounded-full border border-blue-400/12 bg-blue-500/[0.055] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-blue-200/80">
+                                          {formatRiskLabel(issue.risk)}
+                                        </span>
+
+                                        <span className="rounded-full border border-white/[0.06] bg-slate-900/40 px-1.5 py-0.5 text-[9px] text-slate-600">
+                                          {formatIssueType(issue.type)}
+                                        </span>
                                       </div>
 
-                                      <span
-                                        className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-                                          issue.severity === "critical"
-                                            ? "border-red-400/30 bg-red-500/10 text-red-100"
-                                            : "border-yellow-400/30 bg-yellow-500/10 text-yellow-100"
-                                        }`}
-                                      >
-                                        {issue.severity}
-                                      </span>
+                                      <p className="mt-1 text-[11px] leading-5 text-slate-300">
+                                        <span className="font-medium text-slate-200">
+                                          Fix:
+                                        </span>{" "}
+                                        {issue.fix}
+                                      </p>
                                     </div>
 
-                                    <p className="mt-2 text-xs leading-5 text-slate-300">
-                                      <span className="font-medium text-slate-200">
-                                        Fix:
-                                      </span>{" "}
-                                      {issue.fix}
-                                    </p>
+                                    <span
+                                      className={`h-fit shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${
+                                        issue.severity === "critical"
+                                          ? "border-red-400/20 bg-red-500/[0.07] text-red-100/90"
+                                          : "border-yellow-400/20 bg-yellow-500/[0.07] text-yellow-100/90"
+                                      }`}
+                                    >
+                                      {issue.severity}
+                                    </span>
                                   </div>
                                 ))}
                               </div>
@@ -261,7 +270,7 @@ export function DataSetPreview({
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>
@@ -270,4 +279,12 @@ export function DataSetPreview({
         ))}
     </section>
   );
+}
+
+function formatRiskLabel(risk: string) {
+  return risk.replaceAll("_", " ");
+}
+
+function formatIssueType(type: string) {
+  return type.replaceAll("-", " ");
 }

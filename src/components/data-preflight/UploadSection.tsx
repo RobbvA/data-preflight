@@ -16,10 +16,10 @@ export function UploadSection({
   onReset,
 }: UploadSectionProps) {
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur">
+    <section className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 shadow-xl shadow-slate-950/20 backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-300/70">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-300/65">
             Source file
           </p>
 
@@ -32,20 +32,20 @@ export function UploadSection({
           <button
             type="button"
             onClick={onReset}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+            className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
           >
             Reset
           </button>
         )}
       </div>
 
-      <div className="mt-4 rounded-xl border border-white/10 bg-slate-950/50 p-3">
+      <div className="mt-4 rounded-xl border border-white/[0.07] bg-slate-950/35 p-3">
         <input
           type="file"
           accept=".csv"
           onChange={onFileChange}
           disabled={isLoading}
-          className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-blue-500/15 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-100 hover:file:bg-blue-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-md file:border-0 file:bg-blue-500/12 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-blue-100 hover:file:bg-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
         />
 
         {isLoading && (
@@ -61,7 +61,7 @@ export function UploadSection({
       </div>
 
       {error && (
-        <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+        <div className="mt-3 rounded-lg border border-red-500/25 bg-red-500/[0.08] p-3 text-xs text-red-300">
           {error}
         </div>
       )}

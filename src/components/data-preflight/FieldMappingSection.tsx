@@ -31,15 +31,15 @@ export function FieldMappingSection({
   }
 
   return (
-    <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-      <h2 className="text-xl font-semibold">Field mapping</h2>
+    <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <h2 className="text-lg font-semibold">Field mapping</h2>
 
       <p className="mt-1 text-sm text-slate-400">
         Map the uploaded CSV headers to the active data profile fields
         DataPreflight validates.
       </p>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <div className="mt-4 grid gap-x-4 gap-y-3 md:grid-cols-2">
         {mappingSuggestions.map((suggestion) => {
           const targetField = suggestion.targetField;
           const selectedHeader = fieldMapping[targetField];
@@ -68,8 +68,8 @@ export function FieldMappingSection({
                   <span
                     className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                       isRequired
-                        ? "border-red-400/30 bg-red-500/10 text-red-200"
-                        : "border-slate-700 bg-slate-800 text-slate-400"
+                        ? "border-red-400/18 bg-red-500/[0.06] text-red-200/85"
+                        : "border-slate-700/70 bg-slate-800/60 text-slate-500"
                     }`}
                   >
                     {isRequired ? "Required" : "Optional"}
@@ -79,7 +79,7 @@ export function FieldMappingSection({
                     <button
                       type="button"
                       onClick={() => toggleReason(targetField)}
-                      className="flex h-5 w-5 items-center justify-center rounded-full border border-blue-400/30 bg-blue-500/10 text-xs font-semibold text-blue-200 transition hover:border-blue-300/60 hover:bg-blue-500/20"
+                      className="flex h-5 w-5 items-center justify-center rounded-full border border-blue-400/20 bg-blue-500/[0.06] text-xs font-semibold text-blue-200/85 transition hover:border-blue-300/40 hover:bg-blue-500/12 hover:text-blue-100"
                       aria-label={`Show mapping reason for ${fieldLabel}`}
                     >
                       ?
@@ -102,7 +102,7 @@ export function FieldMappingSection({
                   onChange={(event) =>
                     onUpdateFieldMapping(targetField, event.target.value)
                   }
-                  className={`mt-2 w-full rounded-lg border px-3 py-2 text-sm text-slate-100 ${
+                  className={`mt-1.5 w-full rounded-lg border px-3 py-1.5 text-sm text-slate-100 ${
                     isMissing
                       ? "border-yellow-500/40 bg-yellow-500/10"
                       : isDuplicate
@@ -154,8 +154,8 @@ export function FieldMappingSection({
                     <span
                       className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
                         isRequired
-                          ? "border-red-400/30 bg-red-500/10 text-red-200"
-                          : "border-slate-700 bg-slate-800 text-slate-400"
+                          ? "border-red-400/18 bg-red-500/[0.06] text-red-200/85"
+                          : "border-slate-700/70 bg-slate-800/60 text-slate-500"
                       }`}
                     >
                       {isRequired ? "Required" : "Optional"}
@@ -169,7 +169,7 @@ export function FieldMappingSection({
                       {getConfidenceLabel(suggestion.confidence)}
                     </span>
 
-                    <span className="rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-xs text-slate-400">
+                    <span className="rounded-full border border-slate-700/70 bg-slate-900/70 px-2 py-0.5 text-xs text-slate-500">
                       Score {suggestion.score}/100
                     </span>
                   </div>
@@ -214,16 +214,16 @@ function getConfidenceLabel(confidence: MappingSuggestion["confidence"]) {
 
 function getConfidenceClasses(confidence: MappingSuggestion["confidence"]) {
   if (confidence === "high") {
-    return "border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
+    return "border-emerald-400/18 bg-emerald-500/[0.06] text-emerald-200/85";
   }
 
   if (confidence === "medium") {
-    return "border-blue-400/30 bg-blue-500/10 text-blue-200";
+    return "border-blue-400/18 bg-blue-500/[0.06] text-blue-200/85";
   }
 
   if (confidence === "low") {
-    return "border-yellow-400/30 bg-yellow-500/10 text-yellow-200";
+    return "border-yellow-400/18 bg-yellow-500/[0.06] text-yellow-200/85";
   }
 
-  return "border-slate-700 bg-slate-800 text-slate-400";
+  return "border-slate-700/70 bg-slate-800/60 text-slate-500";
 }

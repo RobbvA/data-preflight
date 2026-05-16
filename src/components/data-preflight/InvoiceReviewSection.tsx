@@ -29,15 +29,15 @@ export function InvoiceReviewSection({
   const visibleCleanInvoiceItems = showOnlyBlocked ? [] : cleanInvoiceItems;
 
   return (
-    <section className="space-y-5">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-blue-950/20 backdrop-blur">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <section className="space-y-4">
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-300/70">
               Review workspace
             </p>
 
-            <h2 className="mt-2 text-xl font-semibold text-white">
+            <h2 className="mt-1.5 text-lg font-semibold text-white">
               Invoice review
             </h2>
 
@@ -50,7 +50,7 @@ export function InvoiceReviewSection({
           <button
             type="button"
             onClick={onToggleBlockedFilter}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+            className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
               showOnlyBlocked
                 ? "border-red-400/30 bg-red-400/10 text-red-100"
                 : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
