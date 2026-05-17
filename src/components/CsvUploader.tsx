@@ -21,7 +21,10 @@ import { ImportReadinessPanel } from "@/components/data-preflight/ImportReadines
 import { InvoiceReviewSection } from "@/components/data-preflight/InvoiceReviewSection";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
 
-import type { InvoicePreviewItem } from "@/components/data-preflight/types";
+import {
+  createInvoicePreviewItem,
+  type InvoicePreviewItem,
+} from "@/components/data-preflight/types";
 
 export function CsvUploader() {
   const [rows, setRows] = useState<CsvRow[]>([]);
@@ -186,11 +189,15 @@ export function CsvUploader() {
   }, [validationResult.issues]);
 
   const invoiceItems = useMemo<InvoicePreviewItem[]>(() => {
-    return normalizedRows.map((row, index) => ({
-      rowIndex: index + 1,
-      row,
-      issues: issuesByRow[index + 1] ?? [],
-    }));
+    return normalizedRows
+      .map((row, index) =>
+        createInvoicePreviewItem({
+          rowIndex: index + 1,
+          row,
+          issues: issuesByRow[index + 1] ?? [],
+        }),
+      )
+      .sort((a, b) => b.priorityScore - a.priorityScore);
   }, [normalizedRows, issuesByRow]);
 
   const blockedInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {

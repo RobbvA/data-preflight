@@ -36,13 +36,23 @@ export function BlockedInvoiceDetail({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-full border border-white/12 bg-white/[0.055] px-3 py-1 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.09] hover:text-white"
-        >
-          Close detail
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-medium text-slate-300">
+            {selectedBlockedInvoice.actionLabel}
+          </span>
+
+          <span className="rounded-full border border-red-300/20 bg-red-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-red-100/90">
+            {selectedBlockedInvoice.priorityScore} score
+          </span>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/12 bg-white/[0.055] px-3 py-1 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.09] hover:text-white"
+          >
+            Close detail
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-[0.9fr_1.3fr]">

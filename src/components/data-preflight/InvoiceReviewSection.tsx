@@ -48,8 +48,8 @@ export function InvoiceReviewSection({
           </h2>
 
           <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">
-            Separate blocked invoices, warning-only invoices, and import-ready
-            invoices before export.
+            Priority-ranked review queue for blocked invoices, warning-only
+            invoices, and import-ready rows.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export function InvoiceReviewSection({
       <div className="mt-4 space-y-3">
         <DataSetPreview
           title="Blocked invoices"
-          description="Rows with critical issues. These should be fixed before import."
+          description="Rows with critical issues. Sorted by operational priority."
           items={blockedInvoiceItems}
           emptyMessage="No blocked invoices."
           selectedRowIndex={selectedBlockedRowIndex}
@@ -85,7 +85,7 @@ export function InvoiceReviewSection({
           description={
             showOnlyBlocked
               ? "Hidden while blocked-only mode is active."
-              : "Rows with warnings only. Import may be possible, but review is recommended."
+              : "Warning-only rows. Sorted by review priority."
           }
           items={visibleWarningInvoiceItems}
           emptyMessage={

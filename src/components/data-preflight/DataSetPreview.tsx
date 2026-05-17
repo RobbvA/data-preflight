@@ -1,6 +1,9 @@
 import { Fragment } from "react";
 
-import type { InvoicePreviewItem } from "./types";
+import type {
+  InvoicePreviewItem,
+  InvoicePriority,
+} from "@/components/data-preflight/types";
 
 type DataSetPreviewProps = {
   title: string;
@@ -96,9 +99,13 @@ export function DataSetPreview({
               compact ? "max-h-[240px]" : "max-h-[500px]"
             }`}
           >
-            <table className="w-full min-w-[900px] border-collapse text-left text-xs">
+            <table className="w-full min-w-[980px] border-collapse text-left text-xs">
               <thead className="sticky top-0 z-10 bg-[#10182b]/95 backdrop-blur">
                 <tr className="border-b border-white/10 uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-2 text-[10px] font-medium">
+                    Priority
+                  </th>
+
                   <th className="px-3 py-2 text-[10px] font-medium">Row</th>
 
                   {invoiceFields.map((field) => (
@@ -111,6 +118,7 @@ export function DataSetPreview({
                   ))}
 
                   <th className="px-3 py-2 text-[10px] font-medium">Issues</th>
+                  <th className="px-3 py-2 text-[10px] font-medium">Action</th>
                 </tr>
               </thead>
 
@@ -134,7 +142,7 @@ export function DataSetPreview({
 
                   const tooltipText = mainIssue
                     ? `Fix: ${mainIssue.fix} • Click row for details`
-                    : "";
+                    : item.actionLabel;
 
                   const rowClass = isSelected
                     ? "bg-red-400/[0.09]"
@@ -156,6 +164,10 @@ export function DataSetPreview({
                           onSelectItem ? "cursor-pointer" : ""
                         } ${rowClass}`}
                       >
+                        <td className="px-3 py-2">
+                          <PriorityBadge priority={item.priority} />
+                        </td>
+
                         <td className="px-3 py-2 text-[11px] font-medium text-slate-400">
                           {item.rowIndex}
                         </td>
@@ -213,12 +225,18 @@ export function DataSetPreview({
                             </span>
                           )}
                         </td>
+
+                        <td className="px-3 py-2">
+                          <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-medium text-slate-300">
+                            {item.actionLabel}
+                          </span>
+                        </td>
                       </tr>
 
                       {isSelected && item.issues.length > 0 && (
                         <tr className="border-b border-red-300/[0.08] bg-red-400/[0.025]">
                           <td
-                            colSpan={invoiceFields.length + 2}
+                            colSpan={invoiceFields.length + 4}
                             className="px-3 py-2"
                           >
                             <div className="space-y-2">
@@ -229,15 +247,18 @@ export function DataSetPreview({
                                   </p>
 
                                   <p className="mt-0.5 text-[11px] text-slate-400">
-                                    Compact fixes. Full details are shown in the
-                                    detail panel below.
+                                    {item.actionLabel}. Full details are shown
+                                    in the detail panel below.
                                   </p>
                                 </div>
 
-                                <span className="shrink-0 rounded-full border border-red-300/20 bg-red-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-red-100/90">
-                                  {item.issues.length} issue
-                                  {item.issues.length === 1 ? "" : "s"}
-                                </span>
+                                <div className="flex shrink-0 items-center gap-2">
+                                  <PriorityBadge priority={item.priority} />
+
+                                  <span className="rounded-full border border-red-300/20 bg-red-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-red-100/90">
+                                    {item.priorityScore} score
+                                  </span>
+                                </div>
                               </div>
 
                               <div className="divide-y divide-white/[0.08] rounded-lg border border-white/[0.08] bg-white/[0.035]">
@@ -297,6 +318,32 @@ export function DataSetPreview({
           </div>
         ))}
     </section>
+  );
+}
+
+function PriorityBadge({ priority }: { priority: InvoicePriority }) {
+  const priorityClasses: Record<InvoicePriority, string> = {
+    critical: "border-red-300/25 bg-red-400/[0.09] text-red-50",
+    high: "border-orange-300/25 bg-orange-400/[0.09] text-orange-50",
+    medium: "border-yellow-300/25 bg-yellow-400/[0.08] text-yellow-50",
+    low: "border-blue-300/20 bg-blue-400/[0.07] text-blue-100",
+    clear: "border-emerald-300/18 bg-emerald-400/[0.07] text-emerald-100",
+  };
+
+  const labels: Record<InvoicePriority, string> = {
+    critical: "Critical",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+    clear: "Clear",
+  };
+
+  return (
+    <span
+      className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${priorityClasses[priority]}`}
+    >
+      {labels[priority]}
+    </span>
   );
 }
 
