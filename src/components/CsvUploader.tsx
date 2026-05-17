@@ -253,22 +253,22 @@ export function CsvUploader() {
   const hasHeaders = headers.length > 0;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-slate-950 px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
+    <main className="min-h-screen overflow-hidden bg-[#0b1020] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-160px] h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-blue-600/20 blur-3xl" />
-        <div className="absolute right-[-120px] top-40 h-[460px] w-[620px] rounded-full bg-violet-600/10 blur-3xl" />
-        <div className="absolute bottom-[-160px] left-[-120px] h-[420px] w-[620px] rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_34%),linear-gradient(180deg,_rgba(15,23,42,0.1),_rgba(2,6,23,1))]" />
+        <div className="absolute left-1/2 top-[-180px] h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-blue-500/25 blur-3xl" />
+        <div className="absolute right-[-140px] top-28 h-[520px] w-[680px] rounded-full bg-violet-500/18 blur-3xl" />
+        <div className="absolute bottom-[-180px] left-[-120px] h-[440px] w-[660px] rounded-full bg-cyan-400/14 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(147,197,253,0.14),_transparent_36%),linear-gradient(180deg,_rgba(30,41,59,0.28),_rgba(11,16,32,1))]" />
       </div>
 
       <div className="mx-auto max-w-7xl space-y-6">
         <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_360px] lg:items-start">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-300/80">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200/80">
               Data profile preflight
             </p>
 
-            <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-3 max-w-3xl bg-gradient-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
               DataPreflight
             </h1>
 
@@ -345,16 +345,16 @@ export function CsvUploader() {
             onUpdateFieldMapping={updateFieldMapping}
           />
         ) : (
-          <section className="rounded-2xl border border-dashed border-white/10 bg-white/[0.025] p-4 shadow-2xl shadow-blue-950/10 backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+          <section className="rounded-2xl border border-dashed border-white/12 bg-white/[0.045] p-4 shadow-xl shadow-slate-950/15 backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
               Mapping setup
             </p>
 
-            <h2 className="mt-1.5 text-lg font-semibold text-slate-200">
+            <h2 className="mt-1.5 text-lg font-semibold text-slate-100">
               Waiting for CSV headers
             </h2>
 
-            <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-500">
+            <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-400">
               Upload a CSV to detect headers and create the field mapping layer.
             </p>
           </section>

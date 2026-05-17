@@ -36,10 +36,10 @@ export function InvoiceReviewSection({
   const visibleCleanInvoiceItems = showOnlyBlocked ? [] : cleanInvoiceItems;
 
   return (
-    <section className="rounded-2xl border border-violet-400/[0.14] bg-violet-500/[0.035] p-4 shadow-xl shadow-slate-950/20 backdrop-blur">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
+    <section className="rounded-2xl border border-violet-300/18 bg-violet-400/[0.055] p-4 shadow-xl shadow-violet-950/20 backdrop-blur">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-200/60">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-100/65">
             Review workspace
           </p>
 
@@ -47,7 +47,7 @@ export function InvoiceReviewSection({
             Invoice review
           </h2>
 
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">
             Separate blocked invoices, warning-only invoices, and import-ready
             invoices before export.
           </p>
@@ -58,8 +58,8 @@ export function InvoiceReviewSection({
           onClick={onToggleBlockedFilter}
           className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
             showOnlyBlocked
-              ? "border-red-400/25 bg-red-400/[0.07] text-red-100/90"
-              : "border-white/[0.08] bg-white/[0.03] text-slate-400 hover:border-white/15 hover:bg-white/[0.06] hover:text-slate-200"
+              ? "border-red-300/25 bg-red-400/[0.08] text-red-100/90"
+              : "border-white/12 bg-white/[0.055] text-slate-300 hover:border-white/20 hover:bg-white/[0.09] hover:text-white"
           }`}
         >
           {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
