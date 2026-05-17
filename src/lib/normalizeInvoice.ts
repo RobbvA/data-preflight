@@ -35,12 +35,29 @@ const countryAliases: Record<string, string> = {
   nederland: "NL",
   netherlands: "NL",
   holland: "NL",
+  nl: "NL",
   duitsland: "DE",
   germany: "DE",
+  deutschland: "DE",
+  de: "DE",
   belgie: "BE",
   belgium: "BE",
+  belgië: "BE",
+  be: "BE",
   france: "FR",
   frankrijk: "FR",
+  fr: "FR",
+  spain: "ES",
+  spanje: "ES",
+  es: "ES",
+  italy: "IT",
+  italie: "IT",
+  italië: "IT",
+  it: "IT",
+  unitedkingdom: "GB",
+  "united kingdom": "GB",
+  uk: "GB",
+  gb: "GB",
 };
 
 const currencyAliases: Record<string, string> = {
@@ -82,10 +99,10 @@ function normalizeInvoiceValue(field: InvoiceField, value: string) {
       return trimmedValue;
 
     case "company":
-      return trimmedValue;
+      return normalizeCompany(trimmedValue);
 
     case "email":
-      return trimmedValue.toLowerCase();
+      return normalizeEmail(trimmedValue);
 
     case "amount":
     case "vat":
@@ -110,41 +127,68 @@ function normalizeInvoiceValue(field: InvoiceField, value: string) {
 }
 
 function normalizeWhitespace(value: string) {
-  return value.replaceAll(/\s+/g, " ").trim();
+  return value
+    .replaceAll(/\u00a0/g, " ")
+    .replaceAll(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeCompany(value: string) {
+  return normalizeWhitespace(value);
+}
+
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
 }
 
 function normalizeStatus(value: string) {
-  const normalizedValue = value.toLowerCase().trim();
+  const normalizedValue = normalizeWhitespace(value).toLowerCase();
 
   return statusAliases[normalizedValue] ?? normalizedValue;
 }
 
 function normalizeCountry(value: string) {
-  const normalizedValue = value.toLowerCase().trim();
+  const normalizedValue = normalizeWhitespace(value).toLowerCase();
 
   return countryAliases[normalizedValue] ?? value.toUpperCase();
 }
 
 function normalizeCurrency(value: string) {
-  const normalizedValue = value.toLowerCase().trim();
+  const normalizedValue = normalizeWhitespace(value).toLowerCase();
 
   return currencyAliases[normalizedValue] ?? value.toUpperCase();
 }
 
 function normalizeDate(value: string) {
-  const normalizedValue = value.trim();
+  const normalizedValue = normalizeWhitespace(value);
 
   const isoMatch = normalizedValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (isoMatch) return normalizedValue;
 
   const europeanMatch = normalizedValue.match(
-    /^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/,
+    /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/,
   );
 
   if (europeanMatch) {
     const [, day, month, year] = europeanMatch;
 
     return `${year}-${day.padStart(2, "0")}-${month.padStart(2, "0")}`;
+  }
+
+  const compactEuropeanMatch = normalizedValue.match(/^(\d{2})(\d{2})(\d{4})$/);
+
+  if (compactEuropeanMatch) {
+    const [, day, month, year] = compactEuropeanMatch;
+
+    return `${year}-${month}-${day}`;
+  }
+
+  const compactIsoMatch = normalizedValue.match(/^(\d{4})(\d{2})(\d{2})$/);
+
+  if (compactIsoMatch) {
+    const [, year, month, day] = compactIsoMatch;
+
+    return `${year}-${month}-${day}`;
   }
 
   return normalizedValue;
@@ -161,28 +205,40 @@ function normalizeBusinessNumber(value: string) {
     .replaceAll("£", "")
     .replaceAll("GBP", "")
     .replaceAll("gbp", "")
+    .replaceAll(/\u00a0/g, "")
     .replaceAll(/\s/g, "")
     .trim();
 
   if (!withoutCurrency) return "";
 
-  const hasComma = withoutCurrency.includes(",");
-  const hasDot = withoutCurrency.includes(".");
+  const withoutAccountingParentheses = withoutCurrency.match(/^\((.+)\)$/)
+    ? `-${withoutCurrency.replaceAll(/[()]/g, "")}`
+    : withoutCurrency;
+
+  const sanitizedValue = withoutAccountingParentheses.replaceAll(
+    /[^0-9,.-]/g,
+    "",
+  );
+
+  if (!sanitizedValue || sanitizedValue === "-") return sanitizedValue;
+
+  const hasComma = sanitizedValue.includes(",");
+  const hasDot = sanitizedValue.includes(".");
 
   if (hasComma && hasDot) {
-    const lastCommaIndex = withoutCurrency.lastIndexOf(",");
-    const lastDotIndex = withoutCurrency.lastIndexOf(".");
+    const lastCommaIndex = sanitizedValue.lastIndexOf(",");
+    const lastDotIndex = sanitizedValue.lastIndexOf(".");
 
     if (lastCommaIndex > lastDotIndex) {
-      return withoutCurrency.replaceAll(".", "").replaceAll(",", ".");
+      return sanitizedValue.replaceAll(".", "").replaceAll(",", ".");
     }
 
-    return withoutCurrency.replaceAll(",", "");
+    return sanitizedValue.replaceAll(",", "");
   }
 
   if (hasComma) {
-    return withoutCurrency.replaceAll(",", ".");
+    return sanitizedValue.replaceAll(",", ".");
   }
 
-  return withoutCurrency;
+  return sanitizedValue;
 }
