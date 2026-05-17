@@ -1,0 +1,31 @@
+document_no,debtor,contact_email,gross_total,tax_amount,workflow_status,landcode,created_at,payment_due,currency_code,note
+INV-2026-001,Acme BV,finance@acme.nl,"€1.200,00","€252,00",paid,NL,2026-05-01,2026-05-31,EUR,Perfect NL invoice
+INV-2026-002,Beta Holding,billing@beta.nl,"850.50","178.61",ready,Netherlands,01/05/2026,31/05/2026,euro,EU date + country/currency normalization
+INV-2026-003,Gamma Supplies,admin@gamma.nl,"1 500,00","315,00",Paid,Nederland,20260503,20260602,€,Compact ISO date + euro symbol
+INV-2026-004,Delta BV,wrong-email,"500","105",sent,NL,2026-05-04,2026-06-03,EUR,Invalid email
+INV-2026-005,Epsilon BV,invoice@epsilon.nl,"(50,00)","(10,00)",refund,NL,2026-05-05,2026-06-04,EUR,Accounting negative number + unknown status
+INV-2026-006,Zeta BV,finance@zeta.nl,"400","600",pending,NL,2026-05-06,2026-06-05,EUR,VAT higher than amount
+INV-2026-007,Eta BV,finance@eta.nl,"1000","450",draft,NL,2026-05-07,2026-06-06,EUR,Suspicious VAT ratio
+INV-2026-008,Theta BV,,750,157.50,ready,NL,2026-05-08,2026-06-07,EUR,Missing email
+INV-2026-009,,contact@iota.nl,900,189,ready,NL,2026-05-09,2026-06-08,EUR,Missing company
+INV-2026-010,Kappa BV,finance@kappa.nl,,210,ready,NL,2026-05-10,2026-06-09,EUR,Missing amount
+INV-2026-011,Lambda BV,finance@lambda.nl,1000,,ready,NL,2026-05-11,2026-06-10,EUR,Missing VAT
+INV-2026-012,Mu BV,finance@mu.nl,abc,21,ready,NL,2026-05-12,2026-06-11,EUR,Amount text
+INV-2026-013,Nu BV,finance@nu.nl,1000,twentyone,ready,NL,2026-05-13,2026-06-12,EUR,VAT text
+INV-2026-014,Xi BV,finance@xi.nl,1000,210,unknown,NL,2026-05-14,2026-06-13,EUR,Unknown status
+INV-2026-015,Omicron BV,finance@omicron.nl,1000,0,ready,NL,2026-05-15,2026-06-14,EUR,Zero VAT
+INV-2026-016,Pi BV,finance@pi.nl,1000,90,ready,DE,2026-05-16,2026-06-15,EUR,German VAT lower
+INV-2026-017,Rho BV,finance@rho.nl,1000,200,ready,France,2026-05-17,2026-06-16,EUR,Country name normalization
+INV-2026-018,Sigma BV,finance@sigma.nl,1000,190,ready,Germany,2026-05-18,2026-06-17,EUR,German country name
+INV-2026-019,Tau BV,finance@tau.nl,1000,210,ready,NL,2026-05-19,2026-06-18,USD,Currency USD
+INV-2026-020,Upsilon BV,finance@upsilon.nl,1000,210,ready,NL,2026-05-20,2026-06-19,,Missing currency
+INV-2026-021,Phi BV,finance@phi.nl,1000,210,ready,NL,2026-05-21,2026-05-01,EUR,Due before invoice date
+INV-2026-022,Chi BV,finance@chi.nl,1000,210,ready,NL,not-a-date,2026-06-21,EUR,Invalid invoice date
+INV-2026-023,Psi BV,finance@psi.nl,1000,210,ready,NL,2026-05-23,not-a-date,EUR,Invalid due date
+INV-2026-024,Omega BV,finance@omega.nl,999.99,210,ready,NL,2026-05-24,2026-06-23,EUR,Slight VAT ratio issue maybe ok
+INV-2026-025,Acme BV,finance@acme.nl,1200,252,paid,NL,2026-05-01,2026-05-31,EUR,Possible business duplicate not yet detected
+INV-2026-001,Acme BV,finance@acme.nl,1200,252,paid,NL,2026-05-01,2026-05-31,EUR,Duplicate invoice number
+,No Invoice BV,noinvoice@example.com,500,105,ready,NL,2026-05-26,2026-06-25,EUR,Missing invoice number
+INV-2026-028,Trailing Spaces BV , spaces@example.com , 1000 , 210 , ready , nl , 28-05-2026 , 27-06-2026 , eur ,Whitespace cleanup
+INV-2026-029,Comma Client BV,comma@example.com,"1,200.50","252.11",ready,NL,2026-05-29,2026-06-28,EUR,US number format
+INV-2026-030,Semicolon BV,semi@example.com,"1.200,50","252,11",ready,NL,2026-05-30,2026-06-29,EUR,EU number format

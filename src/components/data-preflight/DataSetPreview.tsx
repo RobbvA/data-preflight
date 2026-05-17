@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useMemo, useState } from "react";
 
 import type {
   InvoicePreviewItem,
@@ -18,6 +18,8 @@ type DataSetPreviewProps = {
   compact?: boolean;
   embedded?: boolean;
 };
+
+type SortMode = "priority" | "row" | "issues";
 
 const invoiceFields = [
   "invoice_number",
@@ -41,8 +43,24 @@ export function DataSetPreview({
   compact = false,
   embedded = false,
 }: DataSetPreviewProps) {
+  const [sortMode, setSortMode] = useState<SortMode>("priority");
+
   const isDanger = tone === "danger";
   const isWarning = tone === "warning";
+
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      if (sortMode === "priority") {
+        return b.priorityScore - a.priorityScore;
+      }
+
+      if (sortMode === "issues") {
+        return b.issues.length - a.issues.length;
+      }
+
+      return a.rowIndex - b.rowIndex;
+    });
+  }, [items, sortMode]);
 
   return (
     <section
@@ -56,12 +74,12 @@ export function DataSetPreview({
             : "border-white/10 bg-white/[0.045] shadow-slate-950/15"
       }`}
     >
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-start justify-between gap-4 text-left"
-      >
-        <div>
+      <div className="flex w-full flex-wrap items-start justify-between gap-4">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="min-w-0 flex-1 text-left"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
 
@@ -81,12 +99,30 @@ export function DataSetPreview({
           <p className="mt-0.5 text-xs leading-5 text-slate-400">
             {description}
           </p>
-        </div>
+        </button>
 
-        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-slate-400 transition hover:border-white/18 hover:bg-white/[0.07] hover:text-slate-200">
-          {isOpen ? "Collapse" : "Expand"}
-        </span>
-      </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {isOpen && items.length > 1 && (
+            <select
+              value={sortMode}
+              onChange={(event) => setSortMode(event.target.value as SortMode)}
+              className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-slate-300 outline-none transition hover:border-white/18 hover:bg-white/[0.07]"
+            >
+              <option value="priority">Sort: priority</option>
+              <option value="row">Sort: CSV row</option>
+              <option value="issues">Sort: issue count</option>
+            </select>
+          )}
+
+          <button
+            type="button"
+            onClick={onToggle}
+            className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-slate-400 transition hover:border-white/18 hover:bg-white/[0.07] hover:text-slate-200"
+          >
+            {isOpen ? "Collapse" : "Expand"}
+          </button>
+        </div>
+      </div>
 
       {isOpen &&
         (items.length === 0 ? (
@@ -123,7 +159,7 @@ export function DataSetPreview({
               </thead>
 
               <tbody>
-                {items.map((item) => {
+                {sortedItems.map((item) => {
                   const isSelected = selectedRowIndex === item.rowIndex;
 
                   const issueFields = new Set(
