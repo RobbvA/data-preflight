@@ -11,7 +11,7 @@ type DataSetPreviewProps = {
   onSelectItem?: (rowIndex: number) => void;
   isOpen: boolean;
   onToggle: () => void;
-  tone?: "neutral" | "danger";
+  tone?: "neutral" | "danger" | "warning";
   compact?: boolean;
   embedded?: boolean;
 };
@@ -39,6 +39,7 @@ export function DataSetPreview({
   embedded = false,
 }: DataSetPreviewProps) {
   const isDanger = tone === "danger";
+  const isWarning = tone === "warning";
 
   return (
     <section
@@ -47,7 +48,9 @@ export function DataSetPreview({
       } ${
         isDanger
           ? "border-red-400/[0.12] bg-red-500/[0.028] shadow-slate-950/20"
-          : "border-white/[0.07] bg-slate-950/25 shadow-slate-950/15"
+          : isWarning
+            ? "border-yellow-400/[0.12] bg-yellow-500/[0.025] shadow-slate-950/15"
+            : "border-white/[0.07] bg-slate-950/25 shadow-slate-950/15"
       }`}
     >
       <button
@@ -63,7 +66,9 @@ export function DataSetPreview({
               className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                 isDanger
                   ? "border-red-400/15 bg-red-400/[0.05] text-red-200/80"
-                  : "border-white/[0.06] bg-white/[0.02] text-slate-400"
+                  : isWarning
+                    ? "border-yellow-400/15 bg-yellow-400/[0.05] text-yellow-100/80"
+                    : "border-white/[0.06] bg-white/[0.02] text-slate-400"
               }`}
             >
               {items.length} row{items.length === 1 ? "" : "s"}
@@ -135,7 +140,9 @@ export function DataSetPreview({
                     ? "bg-red-500/[0.09]"
                     : isDanger
                       ? "hover:bg-red-500/[0.03]"
-                      : "hover:bg-white/[0.025]";
+                      : isWarning
+                        ? "hover:bg-yellow-500/[0.025]"
+                        : "hover:bg-white/[0.025]";
 
                   return (
                     <Fragment key={`${title}-${item.rowIndex}`}>
@@ -172,7 +179,9 @@ export function DataSetPreview({
                                 className={`block max-w-[160px] truncate rounded px-1.5 py-0.5 ${
                                   hasIssue && isDanger
                                     ? "border border-red-400/15 bg-red-500/[0.055] text-red-50"
-                                    : "text-slate-300"
+                                    : hasIssue && isWarning
+                                      ? "border border-yellow-400/15 bg-yellow-500/[0.05] text-yellow-50"
+                                      : "text-slate-300"
                                 }`}
                               >
                                 {value}
@@ -185,7 +194,11 @@ export function DataSetPreview({
                           {item.issues.length > 0 ? (
                             <span
                               title={tooltipText}
-                              className="inline-flex cursor-help rounded-full border border-red-400/20 bg-red-400/[0.06] px-2 py-0.5 text-[10px] font-medium text-red-100/90"
+                              className={`inline-flex cursor-help rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                                criticalIssues.length > 0
+                                  ? "border-red-400/20 bg-red-400/[0.06] text-red-100/90"
+                                  : "border-yellow-400/20 bg-yellow-400/[0.06] text-yellow-100/90"
+                              }`}
                             >
                               {criticalIssues.length > 0
                                 ? `${criticalIssues.length} critical`
@@ -196,7 +209,7 @@ export function DataSetPreview({
                             </span>
                           ) : (
                             <span className="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-medium text-emerald-100/85">
-                              clean
+                              ready
                             </span>
                           )}
                         </td>

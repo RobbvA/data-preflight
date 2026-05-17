@@ -37,6 +37,7 @@ export function CsvUploader() {
   >(null);
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
   const [isCleanOpen, setIsCleanOpen] = useState(false);
+  const [isWarningOpen, setIsWarningOpen] = useState(true);
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
 
@@ -51,6 +52,7 @@ export function CsvUploader() {
     setSelectedBlockedRowIndex(null);
     setShowOnlyBlocked(false);
     setIsCleanOpen(false);
+    setIsWarningOpen(true);
     setIsBlockedOpen(true);
     setIsFieldMappingOpen(false);
 
@@ -78,6 +80,7 @@ export function CsvUploader() {
       setSelectedBlockedRowIndex(null);
       setShowOnlyBlocked(false);
       setIsCleanOpen(false);
+      setIsWarningOpen(true);
       setIsBlockedOpen(true);
       setIsFieldMappingOpen(false);
     } finally {
@@ -95,6 +98,7 @@ export function CsvUploader() {
     setSelectedBlockedRowIndex(null);
     setShowOnlyBlocked(false);
     setIsCleanOpen(false);
+    setIsWarningOpen(true);
     setIsBlockedOpen(true);
     setIsFieldMappingOpen(false);
   }
@@ -181,27 +185,31 @@ export function CsvUploader() {
     );
   }, [validationResult.issues]);
 
-  const cleanInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
-    return normalizedRows
-      .map((row, index) => ({
-        rowIndex: index + 1,
-        row,
-        issues: issuesByRow[index + 1] ?? [],
-      }))
-      .filter((item) => item.issues.length === 0);
+  const invoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return normalizedRows.map((row, index) => ({
+      rowIndex: index + 1,
+      row,
+      issues: issuesByRow[index + 1] ?? [],
+    }));
   }, [normalizedRows, issuesByRow]);
 
   const blockedInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
-    return normalizedRows
-      .map((row, index) => ({
-        rowIndex: index + 1,
-        row,
-        issues: issuesByRow[index + 1] ?? [],
-      }))
-      .filter((item) =>
-        item.issues.some((issue) => issue.severity === "critical"),
-      );
-  }, [normalizedRows, issuesByRow]);
+    return invoiceItems.filter((item) =>
+      item.issues.some((issue) => issue.severity === "critical"),
+    );
+  }, [invoiceItems]);
+
+  const warningInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return invoiceItems.filter(
+      (item) =>
+        item.issues.length > 0 &&
+        item.issues.every((issue) => issue.severity === "warning"),
+    );
+  }, [invoiceItems]);
+
+  const cleanInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+    return invoiceItems.filter((item) => item.issues.length === 0);
+  }, [invoiceItems]);
 
   const selectedBlockedInvoice =
     blockedInvoiceItems.find(
@@ -306,13 +314,16 @@ export function CsvUploader() {
           <InvoiceReviewSection
             showOnlyBlocked={showOnlyBlocked}
             cleanInvoiceItems={cleanInvoiceItems}
+            warningInvoiceItems={warningInvoiceItems}
             blockedInvoiceItems={blockedInvoiceItems}
             selectedBlockedRowIndex={selectedBlockedRowIndex}
             isCleanOpen={isCleanOpen}
+            isWarningOpen={isWarningOpen}
             isBlockedOpen={isBlockedOpen}
             onToggleBlockedFilter={toggleBlockedFilter}
             onSelectBlockedInvoice={toggleSelectedBlockedInvoice}
             onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
+            onToggleWarningOpen={() => setIsWarningOpen((current) => !current)}
             onToggleBlockedOpen={() => setIsBlockedOpen((current) => !current)}
           />
         )}

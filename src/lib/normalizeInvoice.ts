@@ -15,6 +15,49 @@ const invoiceFields = [
 
 type InvoiceField = (typeof invoiceFields)[number];
 
+const statusAliases: Record<string, string> = {
+  ready: "ready",
+  open: "ready",
+  new: "draft",
+  concept: "draft",
+  draft: "draft",
+  pending: "pending",
+  sent: "sent",
+  paid: "paid",
+  payed: "paid",
+  voldaan: "paid",
+  betaald: "paid",
+  verzonden: "sent",
+  openstaand: "pending",
+};
+
+const countryAliases: Record<string, string> = {
+  nederland: "NL",
+  netherlands: "NL",
+  holland: "NL",
+  duitsland: "DE",
+  germany: "DE",
+  belgie: "BE",
+  belgium: "BE",
+  france: "FR",
+  frankrijk: "FR",
+};
+
+const currencyAliases: Record<string, string> = {
+  "€": "EUR",
+  euro: "EUR",
+  euros: "EUR",
+  eur: "EUR",
+  $: "USD",
+  dollar: "USD",
+  dollars: "USD",
+  usd: "USD",
+  "£": "GBP",
+  pound: "GBP",
+  pounds: "GBP",
+  gbp: "GBP",
+};
+
 export function normalizeInvoiceRows(rows: CsvRow[]): CsvRow[] {
   return rows.map((row) => normalizeInvoiceRow(row));
 }
@@ -30,7 +73,7 @@ export function normalizeInvoiceRow(row: CsvRow): CsvRow {
 }
 
 function normalizeInvoiceValue(field: InvoiceField, value: string) {
-  const trimmedValue = value.trim();
+  const trimmedValue = normalizeWhitespace(value);
 
   if (!trimmedValue) return "";
 
@@ -39,7 +82,7 @@ function normalizeInvoiceValue(field: InvoiceField, value: string) {
       return trimmedValue;
 
     case "company":
-      return normalizeWhitespace(trimmedValue);
+      return trimmedValue;
 
     case "email":
       return trimmedValue.toLowerCase();
@@ -49,17 +92,17 @@ function normalizeInvoiceValue(field: InvoiceField, value: string) {
       return normalizeBusinessNumber(trimmedValue);
 
     case "status":
-      return trimmedValue.toLowerCase();
+      return normalizeStatus(trimmedValue);
 
     case "country":
-      return trimmedValue.toUpperCase();
+      return normalizeCountry(trimmedValue);
 
     case "currency":
-      return trimmedValue.toUpperCase();
+      return normalizeCurrency(trimmedValue);
 
     case "invoice_date":
     case "due_date":
-      return trimmedValue;
+      return normalizeDate(trimmedValue);
 
     default:
       return trimmedValue;
@@ -70,12 +113,55 @@ function normalizeWhitespace(value: string) {
   return value.replaceAll(/\s+/g, " ").trim();
 }
 
+function normalizeStatus(value: string) {
+  const normalizedValue = value.toLowerCase().trim();
+
+  return statusAliases[normalizedValue] ?? normalizedValue;
+}
+
+function normalizeCountry(value: string) {
+  const normalizedValue = value.toLowerCase().trim();
+
+  return countryAliases[normalizedValue] ?? value.toUpperCase();
+}
+
+function normalizeCurrency(value: string) {
+  const normalizedValue = value.toLowerCase().trim();
+
+  return currencyAliases[normalizedValue] ?? value.toUpperCase();
+}
+
+function normalizeDate(value: string) {
+  const normalizedValue = value.trim();
+
+  const isoMatch = normalizedValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) return normalizedValue;
+
+  const europeanMatch = normalizedValue.match(
+    /^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/,
+  );
+
+  if (europeanMatch) {
+    const [, day, month, year] = europeanMatch;
+
+    return `${year}-${day.padStart(2, "0")}-${month.padStart(2, "0")}`;
+  }
+
+  return normalizedValue;
+}
+
 function normalizeBusinessNumber(value: string) {
   const withoutCurrency = value
     .replaceAll("€", "")
     .replaceAll("EUR", "")
     .replaceAll("eur", "")
-    .replaceAll(" ", "")
+    .replaceAll("$", "")
+    .replaceAll("USD", "")
+    .replaceAll("usd", "")
+    .replaceAll("£", "")
+    .replaceAll("GBP", "")
+    .replaceAll("gbp", "")
+    .replaceAll(/\s/g, "")
     .trim();
 
   if (!withoutCurrency) return "";

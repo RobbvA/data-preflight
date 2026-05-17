@@ -354,7 +354,9 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
 
   return {
     issues,
-    cleanRows: rows.filter((_, index) => !rowsWithCriticalIssues.has(index + 1)),
+    cleanRows: rows.filter(
+      (_, index) => !rowsWithCriticalIssues.has(index + 1),
+    ),
     errorRows: rows.filter((_, index) => rowsWithCriticalIssues.has(index + 1)),
   };
 }
@@ -368,12 +370,7 @@ function isValidEmail(email: string) {
 }
 
 function parseNumber(value: string) {
-  const cleanedValue = value
-    .trim()
-    .replaceAll("€", "")
-    .replaceAll(" ", "")
-    .replaceAll(".", "")
-    .replaceAll(",", ".");
+  const cleanedValue = value.trim();
 
   if (!cleanedValue) return null;
 
