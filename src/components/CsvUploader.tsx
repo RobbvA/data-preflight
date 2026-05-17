@@ -35,13 +35,17 @@ export function CsvUploader() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [selectedBlockedRowIndex, setSelectedBlockedRowIndex] = useState<
     number | null
   >(null);
+
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
+
   const [isCleanOpen, setIsCleanOpen] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(true);
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
+
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -51,12 +55,17 @@ export function CsvUploader() {
 
     setError(null);
     setIsLoading(true);
+
     setFileName(file.name);
+
     setSelectedBlockedRowIndex(null);
+
     setShowOnlyBlocked(false);
+
     setIsCleanOpen(false);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
+
     setIsFieldMappingOpen(false);
 
     try {
@@ -73,18 +82,26 @@ export function CsvUploader() {
       }
 
       setRows(parsedRows);
+
       setHeaders(detectedHeaders);
+
       setFieldMapping(createSuggestedMapping(detectedHeaders, parsedRows));
     } catch {
       setError("Failed to parse CSV file. Please check the file format.");
+
       setRows([]);
       setHeaders([]);
+
       setFieldMapping(createEmptyMapping());
+
       setSelectedBlockedRowIndex(null);
+
       setShowOnlyBlocked(false);
+
       setIsCleanOpen(false);
       setIsWarningOpen(true);
       setIsBlockedOpen(true);
+
       setIsFieldMappingOpen(false);
     } finally {
       setIsLoading(false);
@@ -93,16 +110,25 @@ export function CsvUploader() {
 
   function resetFlow() {
     setRows([]);
+
     setFileName("");
+
     setHeaders([]);
+
     setFieldMapping(createEmptyMapping());
+
     setError(null);
+
     setIsLoading(false);
+
     setSelectedBlockedRowIndex(null);
+
     setShowOnlyBlocked(false);
+
     setIsCleanOpen(false);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
+
     setIsFieldMappingOpen(false);
   }
 
@@ -120,6 +146,7 @@ export function CsvUploader() {
 
   function toggleBlockedFilter() {
     setShowOnlyBlocked((currentValue) => !currentValue);
+
     setSelectedBlockedRowIndex(null);
   }
 
@@ -139,6 +166,7 @@ export function CsvUploader() {
 
       mappingSuggestions.forEach((suggestion) => {
         const targetField = suggestion.targetField;
+
         const sourceField = fieldMapping[targetField];
 
         mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
@@ -172,6 +200,7 @@ export function CsvUploader() {
   }, [fieldMapping]);
 
   const hasDuplicateMappings = duplicateMappedHeaders.length > 0;
+
   const hasIncompleteMapping = missingExpectedFields.length > 0;
 
   const issuesByRow = useMemo(() => {
@@ -200,13 +229,13 @@ export function CsvUploader() {
       .sort((a, b) => b.priorityScore - a.priorityScore);
   }, [normalizedRows, issuesByRow]);
 
-  const blockedInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+  const blockedInvoiceItems = useMemo(() => {
     return invoiceItems.filter((item) =>
       item.issues.some((issue) => issue.severity === "critical"),
     );
   }, [invoiceItems]);
 
-  const warningInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+  const warningInvoiceItems = useMemo(() => {
     return invoiceItems.filter(
       (item) =>
         item.issues.length > 0 &&
@@ -214,7 +243,7 @@ export function CsvUploader() {
     );
   }, [invoiceItems]);
 
-  const cleanInvoiceItems = useMemo<InvoicePreviewItem[]>(() => {
+  const cleanInvoiceItems = useMemo(() => {
     return invoiceItems.filter((item) => item.issues.length === 0);
   }, [invoiceItems]);
 
@@ -232,6 +261,7 @@ export function CsvUploader() {
   ).length;
 
   const blockedCount = validationResult.errorRows.length;
+
   const cleanCount = validationResult.cleanRows.length;
 
   const hasSuspiciousVat = validationResult.issues.some(
@@ -257,15 +287,20 @@ export function CsvUploader() {
             : "Upload and map invoice data to start the preflight check.";
 
   const hasUploadedRows = normalizedRows.length > 0;
+
   const hasHeaders = headers.length > 0;
+
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#0b1020] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 top-[-180px] h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-blue-500/25 blur-3xl" />
+
         <div className="absolute right-[-140px] top-28 h-[520px] w-[680px] rounded-full bg-violet-500/18 blur-3xl" />
+
         <div className="absolute bottom-[-180px] left-[-120px] h-[440px] w-[660px] rounded-full bg-cyan-400/14 blur-3xl" />
+
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(147,197,253,0.14),_transparent_36%),linear-gradient(180deg,_rgba(30,41,59,0.28),_rgba(11,16,32,1))]" />
       </div>
 
@@ -364,17 +399,14 @@ export function CsvUploader() {
         <button
           type="button"
           onClick={() => setIsFieldMappingOpen(true)}
-          className="fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl border border-r-0 border-cyan-300/20 bg-[#10182b]/90 px-3 py-3 text-xs font-semibold text-cyan-100 shadow-xl shadow-black/25 backdrop-blur-xl transition hover:border-cyan-200/35 hover:bg-[#13203a] hover:text-white"
+          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-cyan-300/10 bg-[#10182b]/70 text-cyan-100/70 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-cyan-200/25 hover:bg-[#14203a]/90 hover:text-white"
           aria-label="Open field mapping panel"
+          title="Open field mapping"
         >
-          <span className="text-sm">⚙</span>
-
-          <span className="hidden writing-mode-vertical sm:block">Mapping</span>
-
-          <span className="sm:hidden">Mapping</span>
+          <span className="text-base leading-none">⚙</span>
 
           {(hasIncompleteMapping || hasDuplicateMappings) && (
-            <span className="absolute -left-1 top-2 h-2 w-2 rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/40" />
+            <span className="absolute left-1 top-2 h-2 w-2 rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/40" />
           )}
         </button>
       )}

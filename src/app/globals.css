@@ -24,8 +24,3 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-
-.writing-mode-vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
