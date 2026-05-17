@@ -74,8 +74,8 @@ export function FieldMappingSection({
           </h2>
 
           <p className="mt-1 text-xs text-slate-400">
-            Optional configuration layer. Open this only when detected mappings
-            need adjustment.
+            Optional configuration layer. Mapping uses header semantics and
+            sample values.
           </p>
         </div>
 

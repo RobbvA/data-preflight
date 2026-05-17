@@ -33,7 +33,25 @@ export type MappingSuggestion = {
   }>;
 };
 
-const allowedStatuses = ["ready", "paid", "draft", "pending", "sent"];
+type ScoredMatch = {
+  header: string;
+  score: number;
+  reason: string;
+};
+
+const allowedStatuses = [
+  "ready",
+  "paid",
+  "draft",
+  "pending",
+  "sent",
+  "open",
+  "concept",
+  "voldaan",
+  "betaald",
+  "verzonden",
+  "openstaand",
+];
 
 const activeProfile = invoiceProfile;
 
@@ -41,12 +59,94 @@ const profileFields = activeProfile.fields.map(
   (field) => field.key,
 ) as InvoiceField[];
 
+const fieldSpecificHeaderHints: Record<InvoiceField, string[]> = {
+  invoice_number: [
+    "ref",
+    "reference",
+    "invoice ref",
+    "invoice reference",
+    "document",
+    "document number",
+    "factuurnr",
+    "factuurnummer",
+    "invoice no",
+    "invoice number",
+    "number",
+  ],
+  company: [
+    "client",
+    "customer",
+    "customer name",
+    "company",
+    "company name",
+    "klant",
+    "klantnaam",
+    "debiteur",
+    "debtor",
+  ],
+  email: [
+    "email",
+    "e-mail",
+    "contact",
+    "contact email",
+    "billing email",
+    "invoice email",
+    "mail",
+  ],
+  amount: [
+    "amount",
+    "total",
+    "invoice total",
+    "grand total",
+    "subtotal",
+    "net",
+    "gross",
+    "bedrag",
+    "totaal",
+    "factuurbedrag",
+  ],
+  vat: [
+    "vat",
+    "tax",
+    "tax amount",
+    "vat amount",
+    "btw",
+    "btw bedrag",
+    "belasting",
+  ],
+  status: ["status", "state", "workflow", "stage", "payment status"],
+  country: ["country", "country code", "land", "regio", "region"],
+  invoice_date: [
+    "invoice date",
+    "created",
+    "created at",
+    "date",
+    "issued",
+    "issue date",
+    "factuurdatum",
+  ],
+  due_date: [
+    "due",
+    "due date",
+    "payment due",
+    "expires",
+    "vervaldatum",
+    "betaaldatum",
+  ],
+  currency: ["currency", "currency code", "valuta", "munteenheid"],
+};
+
 function getProfileField(field: InvoiceField) {
-  return activeProfile.fields.find((profileField) => profileField.key === field);
+  return activeProfile.fields.find(
+    (profileField) => profileField.key === field,
+  );
 }
 
 function getFieldSynonyms(field: InvoiceField) {
-  return getProfileField(field)?.synonyms ?? [];
+  return [
+    ...(getProfileField(field)?.synonyms ?? []),
+    ...fieldSpecificHeaderHints[field],
+  ];
 }
 
 export function createEmptyMapping(): FieldMapping {
@@ -77,18 +177,20 @@ export function createMappingSuggestions(
   headers: string[],
   rows: CsvRow[] = [],
 ): MappingSuggestion[] {
-  const fields = profileFields;
+  const usedHeaders = new Set<string>();
 
-  return fields.map((targetField) => {
+  return profileFields.map((targetField) => {
     const profileField = getProfileField(targetField);
 
     const rankedMatches = headers
       .map((header) => scoreHeaderAndValuesForField(header, targetField, rows))
       .sort((a, b) => b.score - a.score);
 
-    const bestMatch = rankedMatches[0];
+    const bestAvailableMatch = rankedMatches.find(
+      (match) => match.score > 0 && !usedHeaders.has(match.header),
+    );
 
-    if (!bestMatch || bestMatch.score === 0) {
+    if (!bestAvailableMatch) {
       return {
         targetField,
         targetLabel: profileField?.label ?? targetField,
@@ -101,16 +203,21 @@ export function createMappingSuggestions(
       };
     }
 
+    usedHeaders.add(bestAvailableMatch.header);
+
     return {
       targetField,
       targetLabel: profileField?.label ?? targetField,
       required: profileField?.required ?? false,
-      suggestedHeader: bestMatch.header,
-      confidence: getConfidence(bestMatch.score),
-      score: bestMatch.score,
-      reason: bestMatch.reason,
+      suggestedHeader: bestAvailableMatch.header,
+      confidence: getConfidence(bestAvailableMatch.score),
+      score: bestAvailableMatch.score,
+      reason: bestAvailableMatch.reason,
       alternatives: rankedMatches
-        .filter((match) => match.header !== bestMatch.header && match.score > 0)
+        .filter(
+          (match) =>
+            match.header !== bestAvailableMatch.header && match.score > 0,
+        )
         .slice(0, 3),
     };
   });
@@ -120,23 +227,39 @@ function scoreHeaderAndValuesForField(
   header: string,
   field: InvoiceField,
   rows: CsvRow[],
-) {
+): ScoredMatch {
   const headerMatch = scoreHeaderForField(header, field);
   const sampleValues = getSampleValues(rows, header);
   const valueMatch = scoreValuesForField(sampleValues, field);
+  const conflictPenalty = getConflictPenalty(header, field);
 
-  if (valueMatch.score > headerMatch.score) {
-    return {
-      header,
-      score: valueMatch.score,
-      reason: valueMatch.reason,
-    };
-  }
+  const combinedScore = Math.max(
+    headerMatch.score,
+    Math.min(90, headerMatch.score + Math.round(valueMatch.score * 0.25)),
+    valueMatch.score,
+  );
 
-  return headerMatch;
+  const finalScore = Math.max(0, combinedScore - conflictPenalty);
+
+  const reasons = [
+    headerMatch.score > 0 ? headerMatch.reason : null,
+    valueMatch.score > 0 ? valueMatch.reason : null,
+    conflictPenalty > 0
+      ? "Score reduced because the header strongly suggests another field."
+      : null,
+  ].filter(Boolean);
+
+  return {
+    header,
+    score: finalScore,
+    reason:
+      reasons.length > 0
+        ? reasons.join(" ")
+        : "No semantic header or sample value match found.",
+  };
 }
 
-function scoreHeaderForField(header: string, field: InvoiceField) {
+function scoreHeaderForField(header: string, field: InvoiceField): ScoredMatch {
   const normalizedHeader = normalizeText(header);
   const synonyms = getFieldSynonyms(field);
 
@@ -200,7 +323,7 @@ function scoreValuesForField(values: string[], field: InvoiceField) {
   if (field === "company") {
     if (matchRatio >= 0.8) {
       return {
-        score: 55,
+        score: 45,
         reason:
           "Sample values look like text values, but company names are hard to verify safely.",
       };
@@ -212,30 +335,77 @@ function scoreValuesForField(values: string[], field: InvoiceField) {
     };
   }
 
-  if (matchRatio >= 0.8) {
+  if (field === "amount" || field === "vat") {
+    return scoreNumericFinancialValues(values, field);
+  }
+
+  if (matchRatio >= 0.85) {
     return {
-      score: 80,
-      reason: `Sample values strongly look like ${field}.`,
+      score: 82,
+      reason: `Sample values strongly look like ${formatFieldName(field)}.`,
     };
   }
 
-  if (matchRatio >= 0.5) {
+  if (matchRatio >= 0.6) {
     return {
-      score: 60,
-      reason: `Sample values partially look like ${field}.`,
+      score: 62,
+      reason: `Sample values partially look like ${formatFieldName(field)}.`,
     };
   }
 
-  if (matchRatio >= 0.3) {
+  if (matchRatio >= 0.35) {
     return {
-      score: 40,
-      reason: `Some sample values may match ${field}.`,
+      score: 38,
+      reason: `Some sample values may match ${formatFieldName(field)}.`,
     };
   }
 
   return {
     score: 0,
     reason: "Sample values do not match this field pattern.",
+  };
+}
+
+function scoreNumericFinancialValues(values: string[], field: InvoiceField) {
+  const parsedValues = values
+    .map((value) => parseBusinessNumber(value))
+    .filter((value): value is number => value !== null);
+
+  if (parsedValues.length === 0) {
+    return {
+      score: 0,
+      reason: "Sample values are not numeric.",
+    };
+  }
+
+  const matchRatio = parsedValues.length / values.length;
+  const averageValue =
+    parsedValues.reduce((total, value) => total + Math.abs(value), 0) /
+    parsedValues.length;
+
+  if (matchRatio < 0.6) {
+    return {
+      score: 35,
+      reason: "Some sample values are numeric.",
+    };
+  }
+
+  if (field === "amount") {
+    return {
+      score: averageValue >= 100 ? 78 : 55,
+      reason:
+        averageValue >= 100
+          ? "Sample values look like invoice totals or amounts."
+          : "Sample values are numeric but relatively small for invoice amounts.",
+    };
+  }
+
+  return {
+    score: averageValue <= 500 ? 72 : 50,
+    reason:
+      averageValue <= 500
+        ? "Sample values look like VAT or tax amounts."
+        : "Sample values are numeric but large for VAT values.",
   };
 }
 
@@ -252,8 +422,6 @@ function valueMatchesFieldPattern(value: string, field: InvoiceField) {
       return isValidEmail(normalizedValue);
 
     case "amount":
-      return parseBusinessNumber(normalizedValue) !== null;
-
     case "vat":
       return parseBusinessNumber(normalizedValue) !== null;
 
@@ -268,7 +436,7 @@ function valueMatchesFieldPattern(value: string, field: InvoiceField) {
 
     case "invoice_date":
     case "due_date":
-      return looksLikeIsoDate(normalizedValue);
+      return looksLikeDate(normalizedValue);
 
     case "currency":
       return looksLikeCurrencyCode(normalizedValue);
@@ -278,11 +446,126 @@ function valueMatchesFieldPattern(value: string, field: InvoiceField) {
   }
 }
 
+function getConflictPenalty(header: string, field: InvoiceField) {
+  const normalizedHeader = normalizeText(header);
+
+  const conflictGroups: Record<InvoiceField, InvoiceField[]> = {
+    invoice_number: [
+      "company",
+      "email",
+      "amount",
+      "vat",
+      "status",
+      "country",
+      "invoice_date",
+      "due_date",
+      "currency",
+    ],
+    company: [
+      "invoice_number",
+      "email",
+      "amount",
+      "vat",
+      "status",
+      "country",
+      "invoice_date",
+      "due_date",
+      "currency",
+    ],
+    email: [
+      "invoice_number",
+      "company",
+      "amount",
+      "vat",
+      "status",
+      "country",
+      "invoice_date",
+      "due_date",
+      "currency",
+    ],
+    amount: [
+      "vat",
+      "status",
+      "country",
+      "invoice_date",
+      "due_date",
+      "currency",
+    ],
+    vat: [
+      "amount",
+      "status",
+      "country",
+      "invoice_date",
+      "due_date",
+      "currency",
+    ],
+    status: [
+      "invoice_number",
+      "company",
+      "email",
+      "amount",
+      "vat",
+      "country",
+      "invoice_date",
+      "due_date",
+      "currency",
+    ],
+    country: [
+      "invoice_number",
+      "company",
+      "email",
+      "amount",
+      "vat",
+      "status",
+      "invoice_date",
+      "due_date",
+      "currency",
+    ],
+    invoice_date: [
+      "due_date",
+      "amount",
+      "vat",
+      "status",
+      "country",
+      "currency",
+    ],
+    due_date: [
+      "invoice_date",
+      "amount",
+      "vat",
+      "status",
+      "country",
+      "currency",
+    ],
+    currency: [
+      "invoice_number",
+      "company",
+      "email",
+      "amount",
+      "vat",
+      "status",
+      "country",
+      "invoice_date",
+      "due_date",
+    ],
+  };
+
+  const conflictingFields = conflictGroups[field];
+
+  const hasConflict = conflictingFields.some((conflictingField) =>
+    getFieldSynonyms(conflictingField).some(
+      (synonym) => normalizeText(synonym) === normalizedHeader,
+    ),
+  );
+
+  return hasConflict ? 40 : 0;
+}
+
 function getSampleValues(rows: CsvRow[], header: string) {
   return rows
     .map((row) => row[header]?.trim())
     .filter((value): value is string => Boolean(value))
-    .slice(0, 20);
+    .slice(0, 25);
 }
 
 function looksLikeInvoiceNumber(value: string) {
@@ -302,13 +585,36 @@ function parseBusinessNumber(value: string) {
   const cleanedValue = value
     .trim()
     .replaceAll("€", "")
-    .replaceAll(" ", "")
-    .replaceAll(".", "")
-    .replaceAll(",", ".");
+    .replaceAll("EUR", "")
+    .replaceAll("eur", "")
+    .replaceAll("$", "")
+    .replaceAll("USD", "")
+    .replaceAll("usd", "")
+    .replaceAll("£", "")
+    .replaceAll("GBP", "")
+    .replaceAll("gbp", "")
+    .replaceAll(/\s/g, "");
 
   if (!cleanedValue) return null;
 
-  const parsedValue = Number(cleanedValue);
+  const hasComma = cleanedValue.includes(",");
+  const hasDot = cleanedValue.includes(".");
+
+  let normalizedNumber = cleanedValue;
+
+  if (hasComma && hasDot) {
+    const lastCommaIndex = cleanedValue.lastIndexOf(",");
+    const lastDotIndex = cleanedValue.lastIndexOf(".");
+
+    normalizedNumber =
+      lastCommaIndex > lastDotIndex
+        ? cleanedValue.replaceAll(".", "").replaceAll(",", ".")
+        : cleanedValue.replaceAll(",", "");
+  } else if (hasComma) {
+    normalizedNumber = cleanedValue.replaceAll(",", ".");
+  }
+
+  const parsedValue = Number(normalizedNumber);
 
   return Number.isFinite(parsedValue) ? parsedValue : null;
 }
@@ -319,7 +625,7 @@ function looksLikeCompanyName(value: string) {
   if (allowedStatuses.includes(value)) return false;
   if (looksLikeCountryCode(value)) return false;
   if (looksLikeCurrencyCode(value)) return false;
-  if (looksLikeIsoDate(value)) return false;
+  if (looksLikeDate(value)) return false;
 
   return /[a-z]/i.test(value) && value.length >= 2;
 }
@@ -332,8 +638,11 @@ function looksLikeCurrencyCode(value: string) {
   return /^[a-z]{3}$/i.test(value);
 }
 
-function looksLikeIsoDate(value: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+function looksLikeDate(value: string) {
+  return (
+    /^\d{4}-\d{2}-\d{2}$/.test(value) ||
+    /^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/.test(value)
+  );
 }
 
 function getConfidence(score: number): MappingConfidence {
@@ -357,4 +666,8 @@ function hasTokenOverlap(valueA: string, valueB: string) {
   const tokensB = valueB.split(" ").filter(Boolean);
 
   return tokensA.some((token) => tokensB.includes(token));
+}
+
+function formatFieldName(field: string) {
+  return field.replaceAll("_", " ");
 }
