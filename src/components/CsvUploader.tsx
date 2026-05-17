@@ -258,6 +258,7 @@ export function CsvUploader() {
 
   const hasUploadedRows = normalizedRows.length > 0;
   const hasHeaders = headers.length > 0;
+  const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#0b1020] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
@@ -284,29 +285,6 @@ export function CsvUploader() {
               validate business rules, inspect issues, and export only trusted
               data.
             </p>
-
-            {hasHeaders && (
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsFieldMappingOpen(true)}
-                  className="rounded-full border border-cyan-300/25 bg-cyan-400/[0.08] px-4 py-2 text-xs font-semibold text-cyan-100 transition hover:border-cyan-200/40 hover:bg-cyan-400/[0.14] hover:text-white"
-                >
-                  Open mapping
-                </button>
-
-                <span className="text-xs text-slate-400">
-                  {Object.values(fieldMapping).filter(Boolean).length}/
-                  {mappingSuggestions.length} fields mapped
-                </span>
-
-                {(hasIncompleteMapping || hasDuplicateMappings) && (
-                  <span className="rounded-full border border-yellow-300/20 bg-yellow-400/[0.08] px-2.5 py-1 text-[11px] font-medium text-yellow-100/90">
-                    Mapping needs review
-                  </span>
-                )}
-              </div>
-            )}
           </div>
 
           <UploadSection
@@ -382,6 +360,25 @@ export function CsvUploader() {
         )}
       </div>
 
+      {hasHeaders && !isFieldMappingOpen && (
+        <button
+          type="button"
+          onClick={() => setIsFieldMappingOpen(true)}
+          className="fixed right-0 top-1/2 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-2xl border border-r-0 border-cyan-300/20 bg-[#10182b]/90 px-3 py-3 text-xs font-semibold text-cyan-100 shadow-xl shadow-black/25 backdrop-blur-xl transition hover:border-cyan-200/35 hover:bg-[#13203a] hover:text-white"
+          aria-label="Open field mapping panel"
+        >
+          <span className="text-sm">⚙</span>
+
+          <span className="hidden writing-mode-vertical sm:block">Mapping</span>
+
+          <span className="sm:hidden">Mapping</span>
+
+          {(hasIncompleteMapping || hasDuplicateMappings) && (
+            <span className="absolute -left-1 top-2 h-2 w-2 rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/40" />
+          )}
+        </button>
+      )}
+
       {hasHeaders && isFieldMappingOpen && (
         <div className="fixed inset-0 z-50">
           <button
@@ -406,6 +403,18 @@ export function CsvUploader() {
                   Review how CSV headers are mapped into invoice fields. Keep
                   this closed during normal invoice review.
                 </p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                    {mappedCount}/{mappingSuggestions.length} mapped
+                  </span>
+
+                  {(hasIncompleteMapping || hasDuplicateMappings) && (
+                    <span className="rounded-full border border-yellow-300/20 bg-yellow-400/[0.08] px-2.5 py-1 text-[11px] font-medium text-yellow-100/90">
+                      Needs review
+                    </span>
+                  )}
+                </div>
               </div>
 
               <button
