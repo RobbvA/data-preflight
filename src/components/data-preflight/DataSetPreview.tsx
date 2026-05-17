@@ -19,7 +19,7 @@ type DataSetPreviewProps = {
   embedded?: boolean;
 };
 
-type SortMode = "priority" | "row" | "issues";
+type SortMode = "priority" | "row" | "issues" | "status";
 
 const invoiceFields = [
   "invoice_number",
@@ -29,6 +29,16 @@ const invoiceFields = [
   "vat",
   "status",
 ];
+
+const statusPriority: Record<string, number> = {
+  unknown: 0,
+  "": 0,
+  pending: 1,
+  sent: 2,
+  ready: 3,
+  draft: 4,
+  paid: 5,
+};
 
 export function DataSetPreview({
   title,
@@ -56,6 +66,17 @@ export function DataSetPreview({
 
       if (sortMode === "issues") {
         return b.issues.length - a.issues.length;
+      }
+
+      if (sortMode === "status") {
+        const statusA = getStatusPriority(a.row.status);
+        const statusB = getStatusPriority(b.row.status);
+
+        if (statusA !== statusB) {
+          return statusA - statusB;
+        }
+
+        return b.priorityScore - a.priorityScore;
       }
 
       return a.rowIndex - b.rowIndex;
@@ -106,11 +127,20 @@ export function DataSetPreview({
             <select
               value={sortMode}
               onChange={(event) => setSortMode(event.target.value as SortMode)}
-              className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-slate-300 outline-none transition hover:border-white/18 hover:bg-white/[0.07]"
+              className="rounded-full border border-cyan-300/20 bg-[#111c33] px-3 py-1 text-[10px] font-medium text-slate-100 outline-none transition hover:border-cyan-300/35 hover:bg-[#17243f] focus:border-cyan-300/50"
             >
-              <option value="priority">Sort: priority</option>
-              <option value="row">Sort: CSV row</option>
-              <option value="issues">Sort: issue count</option>
+              <option value="priority" className="bg-[#111c33] text-slate-100">
+                Sort: priority
+              </option>
+              <option value="status" className="bg-[#111c33] text-slate-100">
+                Sort: payment status
+              </option>
+              <option value="row" className="bg-[#111c33] text-slate-100">
+                Sort: CSV row
+              </option>
+              <option value="issues" className="bg-[#111c33] text-slate-100">
+                Sort: issue count
+              </option>
             </select>
           )}
 
@@ -355,6 +385,12 @@ export function DataSetPreview({
         ))}
     </section>
   );
+}
+
+function getStatusPriority(status: string | undefined) {
+  const normalizedStatus = status?.trim().toLowerCase() ?? "";
+
+  return statusPriority[normalizedStatus] ?? statusPriority.unknown;
 }
 
 function PriorityBadge({ priority }: { priority: InvoicePriority }) {
