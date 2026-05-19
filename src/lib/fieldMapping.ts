@@ -39,6 +39,22 @@ type ScoredMatch = {
   reason: string;
 };
 
+type ColumnAnalysis = {
+  header: string;
+  sampleSize: number;
+  nonEmptyRatio: number;
+  uniqueRatio: number;
+  emailRatio: number;
+  invoiceNumberRatio: number;
+  numericRatio: number;
+  dateRatio: number;
+  statusRatio: number;
+  countryRatio: number;
+  currencyRatio: number;
+  companyNameRatio: number;
+  averageAbsoluteNumber: number | null;
+};
+
 const allowedStatuses = [
   "ready",
   "paid",
@@ -121,7 +137,7 @@ export function createMappingSuggestions(
         confidence: "none",
         score: 0,
         reason:
-          "No safe mapping found. Header or sample values were not reliable enough for automatic mapping.",
+          "No safe automatic mapping found. Header, sample values, or column behavior were not reliable enough.",
         alternatives: rankedMatches
           .filter((match) => match.score > 0)
           .slice(0, 3),
@@ -149,11 +165,12 @@ export function createMappingSuggestions(
 }
 
 function getMinimumAutoMapScore(field: InvoiceField) {
-  if (field === "company") return 60;
-  if (field === "amount" || field === "vat") return 65;
-  if (field === "invoice_date" || field === "due_date") return 65;
+  if (field === "company") return 64;
+  if (field === "amount" || field === "vat") return 68;
+  if (field === "invoice_date" || field === "due_date") return 68;
+  if (field === "currency" || field === "country") return 62;
 
-  return 55;
+  return 58;
 }
 
 function scoreHeaderAndValuesForField(
@@ -161,13 +178,21 @@ function scoreHeaderAndValuesForField(
   field: InvoiceField,
   rows: CsvRow[],
 ): ScoredMatch {
-  const headerMatch = scoreHeaderForField(header, field);
   const sampleValues = getSampleValues(rows, header);
-  const valueMatch = scoreValuesForField(sampleValues, field);
-  const conflictPenalty = getConflictPenalty(header, field);
-  const ambiguityPenalty = getAmbiguityPenalty(header, field, sampleValues);
+  const columnAnalysis = analyzeColumn(header, sampleValues);
 
-  const combinedScore = combineScores(headerMatch.score, valueMatch.score);
+  const headerMatch = scoreHeaderForField(header, field);
+  const valueMatch = scoreValuesForField(columnAnalysis, field);
+  const behaviorMatch = scoreColumnBehavior(columnAnalysis, field);
+  const conflictPenalty = getConflictPenalty(header, field);
+  const ambiguityPenalty = getAmbiguityPenalty(header, field, columnAnalysis);
+
+  const combinedScore = combineScores({
+    headerScore: headerMatch.score,
+    valueScore: valueMatch.score,
+    behaviorScore: behaviorMatch.score,
+  });
+
   const finalScore = Math.max(
     0,
     combinedScore - conflictPenalty - ambiguityPenalty,
@@ -176,11 +201,12 @@ function scoreHeaderAndValuesForField(
   const reasons = [
     headerMatch.score > 0 ? headerMatch.reason : null,
     valueMatch.score > 0 ? valueMatch.reason : null,
+    behaviorMatch.score > 0 ? behaviorMatch.reason : null,
     conflictPenalty > 0
-      ? "Score reduced because the header strongly suggests another field."
+      ? "Confidence reduced because the header strongly suggests another field."
       : null,
     ambiguityPenalty > 0
-      ? "Score reduced because this header/value pattern is ambiguous."
+      ? "Confidence reduced because this column is ambiguous and needs safer review."
       : null,
   ].filter(Boolean);
 
@@ -190,19 +216,52 @@ function scoreHeaderAndValuesForField(
     reason:
       reasons.length > 0
         ? reasons.join(" ")
-        : "No semantic header or sample value match found.",
+        : "No semantic header, sample value, or behavior match found.",
   };
 }
 
-function combineScores(headerScore: number, valueScore: number) {
-  if (headerScore >= 90)
-    return Math.min(100, headerScore + Math.round(valueScore * 0.05));
-  if (headerScore >= 70)
-    return Math.min(95, headerScore + Math.round(valueScore * 0.15));
-  if (headerScore >= 50)
-    return Math.min(85, headerScore + Math.round(valueScore * 0.2));
+function combineScores({
+  headerScore,
+  valueScore,
+  behaviorScore,
+}: {
+  headerScore: number;
+  valueScore: number;
+  behaviorScore: number;
+}) {
+  const supportingSignalBoost =
+    headerScore > 0 && (valueScore > 0 || behaviorScore > 0) ? 8 : 0;
 
-  return valueScore;
+  if (headerScore >= 90) {
+    return Math.min(
+      100,
+      headerScore +
+        Math.round(valueScore * 0.04) +
+        Math.round(behaviorScore * 0.04),
+    );
+  }
+
+  if (headerScore >= 70) {
+    return Math.min(
+      96,
+      headerScore +
+        Math.round(valueScore * 0.12) +
+        Math.round(behaviorScore * 0.12) +
+        supportingSignalBoost,
+    );
+  }
+
+  if (headerScore >= 50) {
+    return Math.min(
+      88,
+      headerScore +
+        Math.round(valueScore * 0.18) +
+        Math.round(behaviorScore * 0.18) +
+        supportingSignalBoost,
+    );
+  }
+
+  return Math.max(valueScore, behaviorScore);
 }
 
 function scoreHeaderForField(header: string, field: InvoiceField): ScoredMatch {
@@ -224,15 +283,15 @@ function scoreHeaderForField(header: string, field: InvoiceField): ScoredMatch {
     }
 
     if (hasExactTokenMatch(normalizedHeader, normalizedSynonym)) {
-      if (bestScore < 82) {
-        bestScore = 82;
-        reason = `Header token matches "${synonym}".`;
+      if (bestScore < 84) {
+        bestScore = 84;
+        reason = `Header shares an exact token with "${synonym}".`;
       }
     }
 
     if (normalizedHeader.includes(normalizedSynonym)) {
-      if (bestScore < 78) {
-        bestScore = 78;
+      if (bestScore < 80) {
+        bestScore = 80;
         reason = `Header contains "${synonym}".`;
       }
     }
@@ -255,151 +314,303 @@ function scoreHeaderForField(header: string, field: InvoiceField): ScoredMatch {
   };
 }
 
-function scoreValuesForField(values: string[], field: InvoiceField) {
-  if (values.length === 0) {
+function scoreValuesForField(analysis: ColumnAnalysis, field: InvoiceField) {
+  if (analysis.sampleSize === 0) {
     return {
       score: 0,
       reason: "No sample values available.",
     };
   }
 
-  if (field === "amount" || field === "vat") {
-    return scoreNumericFinancialValues(values, field);
-  }
+  switch (field) {
+    case "invoice_number":
+      if (analysis.invoiceNumberRatio >= 0.75) {
+        return {
+          score: 82,
+          reason: "Sample values strongly look like invoice references.",
+        };
+      }
 
-  const matchingValues = values.filter((value) =>
-    valueMatchesFieldPattern(value, field),
-  );
+      if (analysis.invoiceNumberRatio >= 0.45) {
+        return {
+          score: 58,
+          reason: "Some sample values look like invoice references.",
+        };
+      }
 
-  const matchRatio = matchingValues.length / values.length;
-
-  if (field === "company") {
-    if (matchRatio >= 0.85) {
       return {
-        score: 50,
-        reason:
-          "Sample values look like organization names, but company inference remains cautious.",
+        score: 0,
+        reason: "Sample values do not look like invoice references.",
       };
-    }
 
+    case "email":
+      if (analysis.emailRatio >= 0.85) {
+        return {
+          score: 86,
+          reason: "Most sample values are valid email addresses.",
+        };
+      }
+
+      if (analysis.emailRatio >= 0.55) {
+        return {
+          score: 62,
+          reason: "Some sample values are valid email addresses.",
+        };
+      }
+
+      return {
+        score: 0,
+        reason: "Sample values do not look like email addresses.",
+      };
+
+    case "amount":
+      return scoreAmountValues(analysis);
+
+    case "vat":
+      return scoreVatValues(analysis);
+
+    case "status":
+      if (analysis.statusRatio >= 0.8) {
+        return {
+          score: 82,
+          reason: "Sample values look like known invoice statuses.",
+        };
+      }
+
+      if (analysis.statusRatio >= 0.5) {
+        return {
+          score: 58,
+          reason: "Some sample values look like invoice statuses.",
+        };
+      }
+
+      return {
+        score: 0,
+        reason: "Sample values do not look like invoice statuses.",
+      };
+
+    case "company":
+      if (analysis.companyNameRatio >= 0.85) {
+        return {
+          score: 54,
+          reason:
+            "Sample values look like organization names, but company inference remains cautious.",
+        };
+      }
+
+      return {
+        score: 0,
+        reason: "Sample values are not reliable enough to infer company.",
+      };
+
+    case "country":
+      if (analysis.countryRatio >= 0.8) {
+        return {
+          score: 82,
+          reason: "Sample values look like country codes or country names.",
+        };
+      }
+
+      return {
+        score: 0,
+        reason: "Sample values do not look like countries.",
+      };
+
+    case "invoice_date":
+    case "due_date":
+      if (analysis.dateRatio >= 0.85) {
+        return {
+          score: 78,
+          reason: `Sample values strongly look like ${formatFieldName(field)}.`,
+        };
+      }
+
+      if (analysis.dateRatio >= 0.55) {
+        return {
+          score: 58,
+          reason: `Some sample values look like ${formatFieldName(field)}.`,
+        };
+      }
+
+      return {
+        score: 0,
+        reason: "Sample values do not look like dates.",
+      };
+
+    case "currency":
+      if (analysis.currencyRatio >= 0.8) {
+        return {
+          score: 84,
+          reason: "Sample values look like currency codes or symbols.",
+        };
+      }
+
+      return {
+        score: 0,
+        reason: "Sample values do not look like currencies.",
+      };
+
+    default:
+      return {
+        score: 0,
+        reason: "No value pattern available for this field.",
+      };
+  }
+}
+
+function scoreAmountValues(analysis: ColumnAnalysis) {
+  if (analysis.numericRatio < 0.65 || analysis.averageAbsoluteNumber === null) {
     return {
       score: 0,
-      reason: "Sample values are not reliable enough to infer company.",
+      reason: "Sample values are not reliably numeric enough for amount.",
     };
   }
 
-  if (matchRatio >= 0.9) {
+  if (analysis.averageAbsoluteNumber >= 100) {
     return {
-      score: 82,
-      reason: `Sample values strongly look like ${formatFieldName(field)}.`,
+      score: 78,
+      reason: "Sample values look like invoice totals or financial amounts.",
     };
   }
 
-  if (matchRatio >= 0.65) {
+  return {
+    score: 52,
+    reason:
+      "Sample values are numeric, but relatively small for invoice amount inference.",
+  };
+}
+
+function scoreVatValues(analysis: ColumnAnalysis) {
+  if (analysis.numericRatio < 0.65 || analysis.averageAbsoluteNumber === null) {
     return {
-      score: 62,
-      reason: `Sample values partially look like ${formatFieldName(field)}.`,
+      score: 0,
+      reason: "Sample values are not reliably numeric enough for VAT.",
     };
   }
 
-  if (matchRatio >= 0.4) {
+  if (analysis.averageAbsoluteNumber <= 500) {
     return {
-      score: 38,
-      reason: `Some sample values may match ${formatFieldName(field)}.`,
+      score: 74,
+      reason: "Sample values look like VAT or tax amounts.",
+    };
+  }
+
+  return {
+    score: 48,
+    reason:
+      "Sample values are numeric, but relatively large for VAT inference.",
+  };
+}
+
+function scoreColumnBehavior(analysis: ColumnAnalysis, field: InvoiceField) {
+  if (analysis.sampleSize === 0) {
+    return {
+      score: 0,
+      reason: "No column behavior available.",
+    };
+  }
+
+  if (
+    field === "invoice_number" &&
+    analysis.uniqueRatio >= 0.9 &&
+    analysis.nonEmptyRatio >= 0.9
+  ) {
+    return {
+      score: 35,
+      reason: "Column values are mostly unique and populated.",
+    };
+  }
+
+  if (
+    field === "company" &&
+    analysis.companyNameRatio >= 0.8 &&
+    analysis.uniqueRatio >= 0.4
+  ) {
+    return {
+      score: 28,
+      reason: "Column behaves like a customer or organization column.",
+    };
+  }
+
+  if (
+    field === "status" &&
+    analysis.statusRatio >= 0.75 &&
+    analysis.uniqueRatio <= 0.4
+  ) {
+    return {
+      score: 30,
+      reason: "Column contains repeated workflow-like values.",
+    };
+  }
+
+  if (
+    (field === "country" || field === "currency") &&
+    analysis.uniqueRatio <= 0.4
+  ) {
+    return {
+      score: 22,
+      reason: "Column has repeated standardized values.",
     };
   }
 
   return {
     score: 0,
-    reason: "Sample values do not match this field pattern.",
+    reason: "No useful column behavior signal found.",
   };
 }
 
-function scoreNumericFinancialValues(values: string[], field: InvoiceField) {
-  const parsedValues = values
+function analyzeColumn(header: string, values: string[]): ColumnAnalysis {
+  const normalizedValues = values.map((value) => value.trim()).filter(Boolean);
+
+  const sampleSize = normalizedValues.length;
+  const uniqueValueCount = new Set(
+    normalizedValues.map((value) => value.toLowerCase()),
+  ).size;
+
+  const parsedNumbers = normalizedValues
     .map((value) => parseBusinessNumber(value))
     .filter((value): value is number => value !== null);
 
-  if (parsedValues.length === 0) {
-    return {
-      score: 0,
-      reason: "Sample values are not numeric.",
-    };
-  }
-
-  const matchRatio = parsedValues.length / values.length;
-  const averageAbsoluteValue =
-    parsedValues.reduce((total, value) => total + Math.abs(value), 0) /
-    parsedValues.length;
-
-  if (matchRatio < 0.65) {
-    return {
-      score: 35,
-      reason:
-        "Some sample values are numeric, but not enough for safe mapping.",
-    };
-  }
-
-  if (field === "amount") {
-    return {
-      score: averageAbsoluteValue >= 100 ? 76 : 52,
-      reason:
-        averageAbsoluteValue >= 100
-          ? "Sample values look like invoice totals or amounts."
-          : "Sample values are numeric but small for invoice amount inference.",
-    };
-  }
+  const averageAbsoluteNumber =
+    parsedNumbers.length > 0
+      ? parsedNumbers.reduce((total, value) => total + Math.abs(value), 0) /
+        parsedNumbers.length
+      : null;
 
   return {
-    score: averageAbsoluteValue <= 500 ? 72 : 48,
-    reason:
-      averageAbsoluteValue <= 500
-        ? "Sample values look like VAT or tax amounts."
-        : "Sample values are numeric but large for VAT inference.",
+    header,
+    sampleSize,
+    nonEmptyRatio: values.length === 0 ? 0 : sampleSize / values.length,
+    uniqueRatio: sampleSize === 0 ? 0 : uniqueValueCount / sampleSize,
+    emailRatio: getMatchRatio(normalizedValues, isValidEmail),
+    invoiceNumberRatio: getMatchRatio(normalizedValues, looksLikeInvoiceNumber),
+    numericRatio:
+      sampleSize === 0 ? 0 : parsedNumbers.length / normalizedValues.length,
+    dateRatio: getMatchRatio(normalizedValues, looksLikeDate),
+    statusRatio: getMatchRatio(normalizedValues, (value) =>
+      allowedStatuses.includes(value.trim().toLowerCase()),
+    ),
+    countryRatio: getMatchRatio(
+      normalizedValues,
+      (value) =>
+        looksLikeCountryCode(value) ||
+        looksLikeKnownCountryName(value.trim().toLowerCase()),
+    ),
+    currencyRatio: getMatchRatio(
+      normalizedValues,
+      (value) =>
+        looksLikeCurrencyCode(value) ||
+        looksLikeKnownCurrency(value.trim().toLowerCase()),
+    ),
+    companyNameRatio: getMatchRatio(normalizedValues, looksLikeCompanyName),
+    averageAbsoluteNumber,
   };
 }
 
-function valueMatchesFieldPattern(value: string, field: InvoiceField) {
-  const normalizedValue = value.trim().toLowerCase();
+function getMatchRatio(values: string[], matcher: (value: string) => boolean) {
+  if (values.length === 0) return 0;
 
-  if (!normalizedValue) return false;
-
-  switch (field) {
-    case "invoice_number":
-      return looksLikeInvoiceNumber(normalizedValue);
-
-    case "email":
-      return isValidEmail(normalizedValue);
-
-    case "amount":
-    case "vat":
-      return parseBusinessNumber(normalizedValue) !== null;
-
-    case "status":
-      return allowedStatuses.includes(normalizedValue);
-
-    case "company":
-      return looksLikeCompanyName(normalizedValue);
-
-    case "country":
-      return (
-        looksLikeCountryCode(normalizedValue) ||
-        looksLikeKnownCountryName(normalizedValue)
-      );
-
-    case "invoice_date":
-    case "due_date":
-      return looksLikeDate(normalizedValue);
-
-    case "currency":
-      return (
-        looksLikeCurrencyCode(normalizedValue) ||
-        looksLikeKnownCurrency(normalizedValue)
-      );
-
-    default:
-      return false;
-  }
+  return values.filter((value) => matcher(value)).length / values.length;
 }
 
 function getConflictPenalty(header: string, field: InvoiceField) {
@@ -415,31 +626,43 @@ function getConflictPenalty(header: string, field: InvoiceField) {
     ),
   );
 
-  return hasStrongConflict ? 45 : 0;
+  return hasStrongConflict ? 48 : 0;
 }
 
 function getAmbiguityPenalty(
   header: string,
   field: InvoiceField,
-  values: string[],
+  analysis: ColumnAnalysis,
 ) {
   const normalizedHeader = normalizeText(header);
 
-  if (field === "invoice_date" && normalizedHeader === "date") return 20;
-  if (field === "due_date" && normalizedHeader === "date") return 25;
+  if (field === "invoice_date" && normalizedHeader === "date") return 24;
+  if (field === "due_date" && normalizedHeader === "date") return 28;
 
-  if (field === "company" && normalizedHeader.includes("contact")) return 30;
+  if (field === "company" && normalizedHeader.includes("contact")) return 35;
+
   if (field === "email" && normalizedHeader === "contact") {
-    const emailRatio =
-      values.length === 0
-        ? 0
-        : values.filter((value) => isValidEmail(value)).length / values.length;
-
-    return emailRatio >= 0.6 ? 0 : 35;
+    return analysis.emailRatio >= 0.65 ? 0 : 40;
   }
 
-  if (field === "amount" && normalizedHeader.includes("tax")) return 45;
-  if (field === "vat" && normalizedHeader.includes("total")) return 35;
+  if (field === "amount" && normalizedHeader.includes("tax")) return 48;
+  if (field === "vat" && normalizedHeader.includes("total")) return 38;
+
+  if (
+    field === "vat" &&
+    analysis.averageAbsoluteNumber !== null &&
+    analysis.averageAbsoluteNumber > 1000
+  ) {
+    return 18;
+  }
+
+  if (
+    field === "amount" &&
+    analysis.averageAbsoluteNumber !== null &&
+    analysis.averageAbsoluteNumber < 50
+  ) {
+    return 18;
+  }
 
   return 0;
 }
@@ -448,13 +671,14 @@ function getSampleValues(rows: CsvRow[], header: string) {
   return rows
     .map((row) => row[header]?.trim())
     .filter((value): value is string => Boolean(value))
-    .slice(0, 25);
+    .slice(0, 30);
 }
 
 function looksLikeInvoiceNumber(value: string) {
   return (
     /inv[-_ ]?\d+/i.test(value) ||
     /fact[-_ ]?\d+/i.test(value) ||
+    /fac[-_ ]?\d+/i.test(value) ||
     /\d{4}[-_]\d+/.test(value) ||
     /^[a-z]{2,}[-_]\d+$/i.test(value)
   );
@@ -480,21 +704,32 @@ function parseBusinessNumber(value: string) {
 
   if (!cleanedValue) return null;
 
-  const hasComma = cleanedValue.includes(",");
-  const hasDot = cleanedValue.includes(".");
+  const withoutAccountingParentheses = cleanedValue.match(/^\((.+)\)$/)
+    ? `-${cleanedValue.replaceAll(/[()]/g, "")}`
+    : cleanedValue;
 
-  let normalizedNumber = cleanedValue;
+  const sanitizedValue = withoutAccountingParentheses.replaceAll(
+    /[^0-9,.-]/g,
+    "",
+  );
+
+  if (!sanitizedValue || sanitizedValue === "-") return null;
+
+  const hasComma = sanitizedValue.includes(",");
+  const hasDot = sanitizedValue.includes(".");
+
+  let normalizedNumber = sanitizedValue;
 
   if (hasComma && hasDot) {
-    const lastCommaIndex = cleanedValue.lastIndexOf(",");
-    const lastDotIndex = cleanedValue.lastIndexOf(".");
+    const lastCommaIndex = sanitizedValue.lastIndexOf(",");
+    const lastDotIndex = sanitizedValue.lastIndexOf(".");
 
     normalizedNumber =
       lastCommaIndex > lastDotIndex
-        ? cleanedValue.replaceAll(".", "").replaceAll(",", ".")
-        : cleanedValue.replaceAll(",", "");
+        ? sanitizedValue.replaceAll(".", "").replaceAll(",", ".")
+        : sanitizedValue.replaceAll(",", "");
   } else if (hasComma) {
-    normalizedNumber = cleanedValue.replaceAll(",", ".");
+    normalizedNumber = sanitizedValue.replaceAll(",", ".");
   }
 
   const parsedValue = Number(normalizedNumber);
@@ -503,18 +738,20 @@ function parseBusinessNumber(value: string) {
 }
 
 function looksLikeCompanyName(value: string) {
-  if (isValidEmail(value)) return false;
-  if (parseBusinessNumber(value) !== null) return false;
-  if (allowedStatuses.includes(value)) return false;
-  if (looksLikeCountryCode(value)) return false;
-  if (looksLikeCurrencyCode(value)) return false;
-  if (looksLikeDate(value)) return false;
+  const normalizedValue = value.trim().toLowerCase();
 
-  return /[a-z]/i.test(value) && value.length >= 2;
+  if (isValidEmail(normalizedValue)) return false;
+  if (parseBusinessNumber(normalizedValue) !== null) return false;
+  if (allowedStatuses.includes(normalizedValue)) return false;
+  if (looksLikeCountryCode(normalizedValue)) return false;
+  if (looksLikeCurrencyCode(normalizedValue)) return false;
+  if (looksLikeDate(normalizedValue)) return false;
+
+  return /[a-z]/i.test(normalizedValue) && normalizedValue.length >= 2;
 }
 
 function looksLikeCountryCode(value: string) {
-  return /^[a-z]{2}$/i.test(value);
+  return /^[a-z]{2}$/i.test(value.trim());
 }
 
 function looksLikeKnownCountryName(value: string) {
@@ -524,16 +761,22 @@ function looksLikeKnownCountryName(value: string) {
     "holland",
     "duitsland",
     "germany",
+    "deutschland",
     "belgie",
     "belgië",
     "belgium",
     "france",
     "frankrijk",
-  ].includes(value);
+    "spain",
+    "spanje",
+    "italy",
+    "italie",
+    "italië",
+  ].includes(value.trim().toLowerCase());
 }
 
 function looksLikeCurrencyCode(value: string) {
-  return /^[a-z]{3}$/i.test(value);
+  return /^[a-z]{3}$/i.test(value.trim());
 }
 
 function looksLikeKnownCurrency(value: string) {
@@ -543,25 +786,29 @@ function looksLikeKnownCurrency(value: string) {
     "euros",
     "usd",
     "dollar",
+    "dollars",
     "gbp",
     "pound",
+    "pounds",
     "€",
     "$",
     "£",
-  ].includes(value);
+  ].includes(value.trim().toLowerCase());
 }
 
 function looksLikeDate(value: string) {
+  const normalizedValue = value.trim();
+
   return (
-    /^\d{4}-\d{2}-\d{2}$/.test(value) ||
-    /^\d{1,2}[-/.]\d{1,2}[-/.]\d{4}$/.test(value) ||
-    /^\d{8}$/.test(value)
+    /^\d{4}-\d{2}-\d{2}$/.test(normalizedValue) ||
+    /^\d{1,2}[-/.]\d{1,2}[-/.]\d{4}$/.test(normalizedValue) ||
+    /^\d{8}$/.test(normalizedValue)
   );
 }
 
 function getConfidence(score: number): MappingConfidence {
   if (score >= 90) return "high";
-  if (score >= 70) return "medium";
+  if (score >= 72) return "medium";
   if (score > 0) return "low";
   return "none";
 }

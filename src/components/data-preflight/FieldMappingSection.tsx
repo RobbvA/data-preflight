@@ -35,13 +35,19 @@ export function FieldMappingSection({
       suggestion.required && !fieldMapping[suggestion.targetField],
   ).length;
 
+  const lowConfidenceCount = mappingSuggestions.filter(
+    (suggestion) =>
+      suggestion.suggestedHeader && suggestion.confidence === "low",
+  ).length;
+
   const duplicateMappedHeaders = Object.values(fieldMapping)
     .filter(Boolean)
     .filter((header, index, headers) => headers.indexOf(header) !== index);
 
   const duplicateCount = new Set(duplicateMappedHeaders).size;
 
-  const hasMappingIssues = missingRequiredCount > 0 || duplicateCount > 0;
+  const hasMappingIssues =
+    missingRequiredCount > 0 || duplicateCount > 0 || lowConfidenceCount > 0;
 
   function toggleReason(targetField: keyof FieldMapping) {
     setOpenReasonField((currentField) =>
@@ -74,8 +80,8 @@ export function FieldMappingSection({
           </h2>
 
           <p className="mt-1 text-xs text-slate-400">
-            Optional configuration layer. Mapping uses header semantics and
-            sample values.
+            Deterministic auto-mapping based on header meaning, sample values,
+            and column behavior.
           </p>
         </div>
 
@@ -87,6 +93,12 @@ export function FieldMappingSection({
           {missingRequiredCount > 0 && (
             <span className="rounded-full border border-yellow-300/20 bg-yellow-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-yellow-100/90">
               {missingRequiredCount} missing
+            </span>
+          )}
+
+          {lowConfidenceCount > 0 && (
+            <span className="rounded-full border border-yellow-300/20 bg-yellow-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-yellow-100/90">
+              {lowConfidenceCount} low confidence
             </span>
           )}
 
@@ -119,6 +131,9 @@ export function FieldMappingSection({
                 Object.values(fieldMapping).filter(
                   (mappedHeader) => mappedHeader === selectedHeader,
                 ).length > 1;
+
+              const needsConfidenceReview =
+                selectedHeader !== "" && suggestion.confidence === "low";
 
               const isReasonOpen = openReasonField === targetField;
 
@@ -172,7 +187,9 @@ export function FieldMappingSection({
                           ? "border-yellow-300/35 bg-yellow-400/[0.08]"
                           : isDuplicate
                             ? "border-red-300/35 bg-red-400/[0.08]"
-                            : "border-white/10 bg-[#10182b]/80"
+                            : needsConfidenceReview
+                              ? "border-yellow-300/25 bg-yellow-400/[0.055]"
+                              : "border-white/10 bg-[#10182b]/80"
                       }`}
                     >
                       <option value="">Not mapped</option>
@@ -243,7 +260,10 @@ export function FieldMappingSection({
                         <p className="mt-3 text-xs leading-5 text-slate-400">
                           Alternatives:{" "}
                           {suggestion.alternatives
-                            .map((alternative) => alternative.header)
+                            .map(
+                              (alternative) =>
+                                `${alternative.header} (${alternative.score})`,
+                            )
                             .join(", ")}
                         </p>
                       )}
@@ -253,6 +273,12 @@ export function FieldMappingSection({
                   {isMissing && (
                     <p className="mt-1 text-xs text-yellow-100">
                       Required mapping missing
+                    </p>
+                  )}
+
+                  {needsConfidenceReview && (
+                    <p className="mt-1 text-xs text-yellow-100">
+                      Low confidence. Review this mapping before export.
                     </p>
                   )}
 
