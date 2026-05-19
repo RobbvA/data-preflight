@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
 import { validateRows, type ValidationIssue } from "@/lib/validateRows";
@@ -36,9 +36,7 @@ export function CsvUploader() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedBlockedRowIndex, setSelectedBlockedRowIndex] = useState<
-    number | null
-  >(null);
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
 
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
 
@@ -47,6 +45,17 @@ export function CsvUploader() {
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
 
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
+
+  const detailRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!selectedRowIndex || !detailRef.current) return;
+
+    detailRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [selectedRowIndex]);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -58,7 +67,7 @@ export function CsvUploader() {
 
     setFileName(file.name);
 
-    setSelectedBlockedRowIndex(null);
+    setSelectedRowIndex(null);
 
     setShowOnlyBlocked(false);
 
@@ -94,7 +103,7 @@ export function CsvUploader() {
 
       setFieldMapping(createEmptyMapping());
 
-      setSelectedBlockedRowIndex(null);
+      setSelectedRowIndex(null);
 
       setShowOnlyBlocked(false);
 
@@ -121,7 +130,7 @@ export function CsvUploader() {
 
     setIsLoading(false);
 
-    setSelectedBlockedRowIndex(null);
+    setSelectedRowIndex(null);
 
     setShowOnlyBlocked(false);
 
@@ -141,17 +150,17 @@ export function CsvUploader() {
       [targetField]: sourceField,
     }));
 
-    setSelectedBlockedRowIndex(null);
+    setSelectedRowIndex(null);
   }
 
   function toggleBlockedFilter() {
     setShowOnlyBlocked((currentValue) => !currentValue);
 
-    setSelectedBlockedRowIndex(null);
+    setSelectedRowIndex(null);
   }
 
-  function toggleSelectedBlockedInvoice(rowIndex: number) {
-    setSelectedBlockedRowIndex((currentRowIndex) =>
+  function toggleSelectedInvoice(rowIndex: number) {
+    setSelectedRowIndex((currentRowIndex) =>
       currentRowIndex === rowIndex ? null : rowIndex,
     );
   }
@@ -247,10 +256,8 @@ export function CsvUploader() {
     return invoiceItems.filter((item) => item.issues.length === 0);
   }, [invoiceItems]);
 
-  const selectedBlockedInvoice =
-    blockedInvoiceItems.find(
-      (item) => item.rowIndex === selectedBlockedRowIndex,
-    ) ?? null;
+  const selectedInvoice =
+    invoiceItems.find((item) => item.rowIndex === selectedRowIndex) ?? null;
 
   const warningCount = validationResult.issues.filter(
     (issue) => issue.severity === "warning",
@@ -359,23 +366,25 @@ export function CsvUploader() {
             cleanInvoiceItems={cleanInvoiceItems}
             warningInvoiceItems={warningInvoiceItems}
             blockedInvoiceItems={blockedInvoiceItems}
-            selectedBlockedRowIndex={selectedBlockedRowIndex}
+            selectedRowIndex={selectedRowIndex}
             isCleanOpen={isCleanOpen}
             isWarningOpen={isWarningOpen}
             isBlockedOpen={isBlockedOpen}
             onToggleBlockedFilter={toggleBlockedFilter}
-            onSelectBlockedInvoice={toggleSelectedBlockedInvoice}
+            onSelectInvoice={toggleSelectedInvoice}
             onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
             onToggleWarningOpen={() => setIsWarningOpen((current) => !current)}
             onToggleBlockedOpen={() => setIsBlockedOpen((current) => !current)}
           />
         )}
 
-        {selectedBlockedInvoice && (
-          <BlockedInvoiceDetail
-            selectedBlockedInvoice={selectedBlockedInvoice}
-            onClose={() => setSelectedBlockedRowIndex(null)}
-          />
+        {selectedInvoice && (
+          <div ref={detailRef}>
+            <BlockedInvoiceDetail
+              selectedInvoice={selectedInvoice}
+              onClose={() => setSelectedRowIndex(null)}
+            />
+          </div>
         )}
 
         {!hasHeaders && (

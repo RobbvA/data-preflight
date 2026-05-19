@@ -28,6 +28,10 @@ const invoiceFields = [
   "amount",
   "vat",
   "status",
+  "country",
+  "invoice_date",
+  "due_date",
+  "currency",
 ];
 
 const statusPriority: Record<string, number> = {
@@ -162,10 +166,10 @@ export function DataSetPreview({
         ) : (
           <div
             className={`mt-3 overflow-auto rounded-xl border border-white/10 bg-[#10182b]/70 ${
-              compact ? "max-h-[240px]" : "max-h-[500px]"
+              compact ? "max-h-[280px]" : "max-h-[520px]"
             }`}
           >
-            <table className="w-full min-w-[980px] border-collapse text-left text-xs">
+            <table className="w-full min-w-[1320px] border-collapse text-left text-xs">
               <thead className="sticky top-0 z-10 bg-[#10182b]/95 backdrop-blur">
                 <tr className="border-b border-white/10 uppercase tracking-[0.12em] text-slate-400">
                   <th className="px-3 py-2 text-[10px] font-medium">
@@ -179,7 +183,7 @@ export function DataSetPreview({
                       key={field}
                       className="px-3 py-2 text-[10px] font-medium"
                     >
-                      {field}
+                      {formatColumnLabel(field)}
                     </th>
                   ))}
 
@@ -207,11 +211,11 @@ export function DataSetPreview({
                   const mainIssue = criticalIssues[0] ?? warningIssues[0];
 
                   const tooltipText = mainIssue
-                    ? `Fix: ${mainIssue.fix} • Click row for details`
-                    : item.actionLabel;
+                    ? `Fix: ${mainIssue.fix} • Click row for full detail`
+                    : "Click row to inspect normalized output";
 
                   const rowClass = isSelected
-                    ? "bg-red-400/[0.09]"
+                    ? "bg-cyan-400/[0.08]"
                     : isDanger
                       ? "hover:bg-red-400/[0.035]"
                       : isWarning
@@ -229,6 +233,7 @@ export function DataSetPreview({
                         className={`border-b border-white/[0.08] transition last:border-b-0 ${
                           onSelectItem ? "cursor-pointer" : ""
                         } ${rowClass}`}
+                        title={tooltipText}
                       >
                         <td className="px-3 py-2">
                           <PriorityBadge priority={item.priority} />
@@ -247,14 +252,14 @@ export function DataSetPreview({
                           );
 
                           const fieldTooltip = fieldIssue
-                            ? `Fix: ${fieldIssue.fix} • Click row for details`
+                            ? `Fix: ${fieldIssue.fix} • Click row for full detail`
                             : value;
 
                           return (
                             <td key={field} className="px-3 py-2">
                               <span
                                 title={fieldTooltip}
-                                className={`block max-w-[160px] truncate rounded px-1.5 py-0.5 ${
+                                className={`block max-w-[150px] truncate rounded px-1.5 py-0.5 ${
                                   hasIssue && isDanger
                                     ? "border border-red-300/18 bg-red-400/[0.07] text-red-50"
                                     : hasIssue && isWarning
@@ -300,7 +305,7 @@ export function DataSetPreview({
                       </tr>
 
                       {isSelected && item.issues.length > 0 && (
-                        <tr className="border-b border-red-300/[0.08] bg-red-400/[0.025]">
+                        <tr className="border-b border-cyan-300/[0.08] bg-cyan-400/[0.025]">
                           <td
                             colSpan={invoiceFields.length + 4}
                             className="px-3 py-2"
@@ -308,20 +313,21 @@ export function DataSetPreview({
                             <div className="space-y-2">
                               <div className="flex items-center justify-between gap-4">
                                 <div>
-                                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-red-100/75">
+                                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-100/75">
                                     Quick issue overview
                                   </p>
 
                                   <p className="mt-0.5 text-[11px] text-slate-400">
-                                    {item.actionLabel}. Full details are shown
-                                    in the detail panel below.
+                                    {item.actionLabel}. Full normalized data and
+                                    explanation are shown in the detail panel
+                                    below.
                                   </p>
                                 </div>
 
                                 <div className="flex shrink-0 items-center gap-2">
                                   <PriorityBadge priority={item.priority} />
 
-                                  <span className="rounded-full border border-red-300/20 bg-red-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-red-100/90">
+                                  <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-cyan-100/90">
                                     {item.priorityScore} score
                                   </span>
                                 </div>
@@ -417,6 +423,10 @@ function PriorityBadge({ priority }: { priority: InvoicePriority }) {
       {labels[priority]}
     </span>
   );
+}
+
+function formatColumnLabel(field: string) {
+  return field.replaceAll("_", " ");
 }
 
 function formatRiskLabel(risk: string) {

@@ -6,12 +6,12 @@ type InvoiceReviewSectionProps = {
   cleanInvoiceItems: InvoicePreviewItem[];
   warningInvoiceItems: InvoicePreviewItem[];
   blockedInvoiceItems: InvoicePreviewItem[];
-  selectedBlockedRowIndex: number | null;
+  selectedRowIndex: number | null;
   isCleanOpen: boolean;
   isWarningOpen: boolean;
   isBlockedOpen: boolean;
   onToggleBlockedFilter: () => void;
-  onSelectBlockedInvoice: (rowIndex: number) => void;
+  onSelectInvoice: (rowIndex: number) => void;
   onToggleCleanOpen: () => void;
   onToggleWarningOpen: () => void;
   onToggleBlockedOpen: () => void;
@@ -22,12 +22,12 @@ export function InvoiceReviewSection({
   cleanInvoiceItems,
   warningInvoiceItems,
   blockedInvoiceItems,
-  selectedBlockedRowIndex,
+  selectedRowIndex,
   isCleanOpen,
   isWarningOpen,
   isBlockedOpen,
   onToggleBlockedFilter,
-  onSelectBlockedInvoice,
+  onSelectInvoice,
   onToggleCleanOpen,
   onToggleWarningOpen,
   onToggleBlockedOpen,
@@ -72,8 +72,8 @@ export function InvoiceReviewSection({
           description="Rows with critical issues. Sorted by operational priority."
           items={blockedInvoiceItems}
           emptyMessage="No blocked invoices."
-          selectedRowIndex={selectedBlockedRowIndex}
-          onSelectItem={onSelectBlockedInvoice}
+          selectedRowIndex={selectedRowIndex}
+          onSelectItem={onSelectInvoice}
           isOpen={isBlockedOpen}
           onToggle={onToggleBlockedOpen}
           tone="danger"
@@ -85,7 +85,7 @@ export function InvoiceReviewSection({
           description={
             showOnlyBlocked
               ? "Hidden while blocked-only mode is active."
-              : "Warning-only rows. Sorted by review priority."
+              : "Warning-only rows. Click a row to inspect normalized data and explanations."
           }
           items={visibleWarningInvoiceItems}
           emptyMessage={
@@ -93,6 +93,8 @@ export function InvoiceReviewSection({
               ? "Warning-only invoices are hidden in blocked-only mode."
               : "No warning-only invoices."
           }
+          selectedRowIndex={selectedRowIndex}
+          onSelectItem={onSelectInvoice}
           isOpen={isWarningOpen}
           onToggle={onToggleWarningOpen}
           tone="warning"
@@ -105,7 +107,7 @@ export function InvoiceReviewSection({
           description={
             showOnlyBlocked
               ? "Hidden while blocked-only mode is active."
-              : "Rows without detected issues."
+              : "Rows without detected issues. Click a row to inspect normalized output."
           }
           items={visibleCleanInvoiceItems}
           emptyMessage={
@@ -113,6 +115,8 @@ export function InvoiceReviewSection({
               ? "Import-ready invoices are hidden in blocked-only mode."
               : "No import-ready invoices yet."
           }
+          selectedRowIndex={selectedRowIndex}
+          onSelectItem={onSelectInvoice}
           isOpen={isCleanOpen}
           onToggle={onToggleCleanOpen}
           tone="neutral"
