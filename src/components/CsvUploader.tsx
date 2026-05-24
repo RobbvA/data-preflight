@@ -288,16 +288,16 @@ export function CsvUploader() {
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#0b1020] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
+    <main className="min-h-screen overflow-hidden bg-[#080d1a] px-5 py-5 text-slate-100 sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-180px] h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-blue-500/25 blur-3xl" />
-        <div className="absolute right-[-140px] top-28 h-[520px] w-[680px] rounded-full bg-violet-500/18 blur-3xl" />
-        <div className="absolute bottom-[-180px] left-[-120px] h-[440px] w-[660px] rounded-full bg-cyan-400/14 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(147,197,253,0.14),_transparent_36%),linear-gradient(180deg,_rgba(30,41,59,0.28),_rgba(11,16,32,1))]" />
+        <div className="absolute left-1/2 top-[-220px] h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-cyan-500/16 blur-3xl" />
+        <div className="absolute right-[-180px] top-32 h-[520px] w-[680px] rounded-full bg-violet-500/12 blur-3xl" />
+        <div className="absolute bottom-[-180px] left-[-120px] h-[440px] w-[660px] rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.10),_transparent_35%),linear-gradient(180deg,_rgba(15,23,42,0.22),_rgba(8,13,26,1))]" />
       </div>
 
-      <div className="mx-auto max-w-[1500px] space-y-6">
-        <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_360px] lg:items-start">
+      <div className="mx-auto max-w-[1380px] space-y-6">
+        <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_380px] lg:items-start">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200/80">
               Data profile preflight
@@ -374,20 +374,22 @@ export function CsvUploader() {
         )}
 
         {!hasHeaders && (
-          <section className="rounded-2xl border border-dashed border-white/12 bg-white/[0.045] p-4 shadow-xl shadow-slate-950/15 backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+          <section className="rounded-[1.75rem] border border-dashed border-white/12 bg-white/[0.03] p-5 shadow-xl shadow-slate-950/15 backdrop-blur">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               Mapping setup
             </p>
 
-            <h2 className="mt-1.5 text-lg font-semibold text-slate-100">
+            <h2 className="mt-2 text-xl font-semibold text-slate-100">
               Waiting for CSV headers
             </h2>
 
-            <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-400">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">
               Upload a CSV to detect headers and create the field mapping layer.
             </p>
           </section>
         )}
+
+        <ProductFooter />
       </div>
 
       {hasHeaders && !isFieldMappingOpen && (
@@ -465,5 +467,31 @@ export function CsvUploader() {
         </div>
       )}
     </main>
+  );
+}
+
+function ProductFooter() {
+  return (
+    <footer className="border-t border-white/10 py-6">
+      <div className="flex flex-col gap-3 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="font-medium text-slate-400">
+            © 2026 DataPreflight. All rights reserved.
+          </p>
+
+          <p className="mt-1">
+            Built for trusted operational imports and explainable data review.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span>Privacy-first processing</span>
+          <span className="hidden text-slate-700 sm:inline">•</span>
+          <span>Client-side validation</span>
+          <span className="hidden text-slate-700 sm:inline">•</span>
+          <span>MVP v1</span>
+        </div>
+      </div>
+    </footer>
   );
 }

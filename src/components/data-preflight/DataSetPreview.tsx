@@ -22,19 +22,6 @@ type DataSetPreviewProps = {
 
 type SortMode = "priority" | "row" | "issues" | "status";
 
-const invoiceFields = [
-  "invoice_number",
-  "company",
-  "email",
-  "amount",
-  "vat",
-  "status",
-  "country",
-  "invoice_date",
-  "due_date",
-  "currency",
-];
-
 const statusPriority: Record<string, number> = {
   unknown: 0,
   "": 0,
@@ -66,21 +53,14 @@ export function DataSetPreview({
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
-      if (sortMode === "priority") {
-        return b.priorityScore - a.priorityScore;
-      }
-
-      if (sortMode === "issues") {
-        return b.issues.length - a.issues.length;
-      }
+      if (sortMode === "priority") return b.priorityScore - a.priorityScore;
+      if (sortMode === "issues") return b.issues.length - a.issues.length;
 
       if (sortMode === "status") {
         const statusA = getStatusPriority(a.row.status);
         const statusB = getStatusPriority(b.row.status);
 
-        if (statusA !== statusB) {
-          return statusA - statusB;
-        }
+        if (statusA !== statusB) return statusA - statusB;
 
         return b.priorityScore - a.priorityScore;
       }
@@ -91,14 +71,14 @@ export function DataSetPreview({
 
   return (
     <section
-      className={`rounded-xl border backdrop-blur ${
-        embedded ? "p-3 shadow-none" : "p-4 shadow-xl"
+      className={`rounded-2xl border backdrop-blur ${
+        embedded ? "p-4 shadow-none" : "p-5 shadow-xl"
       } ${
         isDanger
-          ? "border-red-300/[0.14] bg-red-400/[0.04] shadow-slate-950/15"
+          ? "border-red-300/[0.13] bg-red-400/[0.025]"
           : isWarning
-            ? "border-yellow-300/[0.14] bg-yellow-400/[0.04] shadow-slate-950/15"
-            : "border-white/10 bg-white/[0.045] shadow-slate-950/15"
+            ? "border-yellow-300/[0.13] bg-yellow-400/[0.025]"
+            : "border-white/10 bg-white/[0.03]"
       }`}
     >
       <div className="flex w-full flex-wrap items-start justify-between gap-4">
@@ -108,14 +88,14 @@ export function DataSetPreview({
           className="min-w-0 flex-1 text-left"
         >
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
+            <h3 className="text-base font-semibold text-slate-100">{title}</h3>
 
             <span
-              className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+              className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${
                 isDanger
-                  ? "border-red-300/18 bg-red-400/[0.07] text-red-100/85"
+                  ? "border-red-300/18 bg-red-400/[0.06] text-red-100/85"
                   : isWarning
-                    ? "border-yellow-300/18 bg-yellow-400/[0.07] text-yellow-100/85"
+                    ? "border-yellow-300/18 bg-yellow-400/[0.06] text-yellow-100/85"
                     : "border-white/10 bg-white/[0.04] text-slate-300"
               }`}
             >
@@ -123,9 +103,7 @@ export function DataSetPreview({
             </span>
           </div>
 
-          <p className="mt-0.5 text-xs leading-5 text-slate-400">
-            {description}
-          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-400">{description}</p>
         </button>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -133,27 +111,19 @@ export function DataSetPreview({
             <select
               value={sortMode}
               onChange={(event) => setSortMode(event.target.value as SortMode)}
-              className="rounded-full border border-cyan-300/20 bg-[#111c33] px-3 py-1 text-[10px] font-medium text-slate-100 outline-none transition hover:border-cyan-300/35 hover:bg-[#17243f] focus:border-cyan-300/50"
+              className="rounded-full border border-white/10 bg-[#0f172a] px-3 py-1.5 text-[10px] font-medium text-slate-100 outline-none transition hover:border-cyan-300/30 focus:border-cyan-300/50"
             >
-              <option value="priority" className="bg-[#111c33] text-slate-100">
-                Sort: priority
-              </option>
-              <option value="status" className="bg-[#111c33] text-slate-100">
-                Sort: payment status
-              </option>
-              <option value="row" className="bg-[#111c33] text-slate-100">
-                Sort: CSV row
-              </option>
-              <option value="issues" className="bg-[#111c33] text-slate-100">
-                Sort: issue count
-              </option>
+              <option value="priority">Sort: priority</option>
+              <option value="status">Sort: payment status</option>
+              <option value="row">Sort: CSV row</option>
+              <option value="issues">Sort: issue count</option>
             </select>
           )}
 
           <button
             type="button"
             onClick={onToggle}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-slate-400 transition hover:border-white/18 hover:bg-white/[0.07] hover:text-slate-200"
+            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-medium text-slate-400 transition hover:border-white/18 hover:bg-white/[0.07] hover:text-slate-200"
           >
             {isOpen ? "Collapse" : "Expand"}
           </button>
@@ -162,248 +132,202 @@ export function DataSetPreview({
 
       {isOpen &&
         (items.length === 0 ? (
-          <p className="mt-3 rounded-xl border border-white/10 bg-white/[0.035] p-3 text-sm text-slate-400">
+          <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-400">
             {emptyMessage}
           </p>
         ) : (
           <div
-            className={`mt-3 overflow-auto rounded-xl border border-white/10 bg-[#10182b]/70 ${
-              compact ? "max-h-[460px]" : "max-h-[720px]"
+            className={`mt-4 space-y-2 overflow-y-auto pr-1 ${
+              compact ? "max-h-[420px]" : "max-h-[680px]"
             }`}
           >
-            <table className="w-full min-w-[1500px] border-collapse text-left text-xs">
-              <thead className="sticky top-0 z-10 bg-[#10182b]/95 backdrop-blur">
-                <tr className="border-b border-white/10 uppercase tracking-[0.12em] text-slate-400">
-                  <th className="px-3 py-2 text-[10px] font-medium">
-                    Priority
-                  </th>
+            {sortedItems.map((item) => {
+              const isSelected = selectedRowIndex === item.rowIndex;
+              const criticalIssues = item.issues.filter(
+                (issue) => issue.severity === "critical",
+              );
+              const warningIssues = item.issues.filter(
+                (issue) => issue.severity === "warning",
+              );
 
-                  <th className="px-3 py-2 text-[10px] font-medium">Row</th>
+              return (
+                <Fragment key={`${title}-${item.rowIndex}`}>
+                  <article
+                    onClick={
+                      onSelectItem
+                        ? () => onSelectItem(item.rowIndex)
+                        : undefined
+                    }
+                    className={`rounded-xl border p-3 transition ${
+                      onSelectItem ? "cursor-pointer" : ""
+                    } ${
+                      isSelected
+                        ? "border-cyan-300/30 bg-cyan-400/[0.06]"
+                        : "border-white/[0.08] bg-[#0f172a]/58 hover:border-white/[0.14] hover:bg-white/[0.045]"
+                    }`}
+                  >
+                    <div className="grid gap-3 lg:grid-cols-[180px_1.1fr_0.9fr_0.95fr_auto] lg:items-center">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <PriorityBadge priority={item.priority} />
 
-                  {invoiceFields.map((field) => (
-                    <th
-                      key={field}
-                      className="px-3 py-2 text-[10px] font-medium"
-                    >
-                      {formatColumnLabel(field)}
-                    </th>
-                  ))}
+                        <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] text-slate-400">
+                          Row {item.rowIndex}
+                        </span>
+                      </div>
 
-                  <th className="px-3 py-2 text-[10px] font-medium">Issues</th>
-                  <th className="px-3 py-2 text-[10px] font-medium">Action</th>
-                </tr>
-              </thead>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">
+                          {item.row.invoice_number || "Missing invoice number"}
+                        </p>
 
-              <tbody>
-                {sortedItems.map((item) => {
-                  const isSelected = selectedRowIndex === item.rowIndex;
+                        <p className="mt-0.5 truncate text-xs text-slate-400">
+                          {item.row.company || "Missing company"} ·{" "}
+                          {item.row.email || "Missing email"}
+                        </p>
+                      </div>
 
-                  const issueFields = new Set(
-                    item.issues.map((issue) => issue.field),
-                  );
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                          Financials
+                        </p>
 
-                  const criticalIssues = item.issues.filter(
-                    (issue) => issue.severity === "critical",
-                  );
+                        <p className="mt-0.5 truncate text-xs font-medium text-slate-200">
+                          {formatMoneyValue(item.row.amount)} · VAT{" "}
+                          {formatMoneyValue(item.row.vat)}
+                        </p>
+                      </div>
 
-                  const warningIssues = item.issues.filter(
-                    (issue) => issue.severity === "warning",
-                  );
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                          Context
+                        </p>
 
-                  const rowClass = isSelected
-                    ? "bg-cyan-400/[0.08]"
-                    : isDanger
-                      ? "hover:bg-red-400/[0.035]"
-                      : isWarning
-                        ? "hover:bg-yellow-400/[0.03]"
-                        : "hover:bg-white/[0.035]";
+                        <p className="mt-0.5 truncate text-xs font-medium text-slate-200">
+                          {item.row.status || "unknown"} ·{" "}
+                          {item.row.country || "—"} / {item.row.currency || "—"}
+                        </p>
 
-                  return (
-                    <Fragment key={`${title}-${item.rowIndex}`}>
-                      <tr
-                        onClick={
-                          onSelectItem
-                            ? () => onSelectItem(item.rowIndex)
-                            : undefined
-                        }
-                        className={`border-b border-white/[0.08] transition last:border-b-0 ${
-                          onSelectItem ? "cursor-pointer" : ""
-                        } ${rowClass}`}
-                        title="Click row for quick overview"
-                      >
-                        <td className="px-3 py-2">
-                          <PriorityBadge priority={item.priority} />
-                        </td>
+                        <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                          {item.row.invoice_date || "no invoice date"} →{" "}
+                          {item.row.due_date || "no due date"}
+                        </p>
+                      </div>
 
-                        <td className="px-3 py-2 text-[11px] font-medium text-slate-400">
-                          {item.rowIndex}
-                        </td>
+                      <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                        <IssueBadge
+                          criticalCount={criticalIssues.length}
+                          warningCount={warningIssues.length}
+                          totalCount={item.issues.length}
+                        />
 
-                        {invoiceFields.map((field) => {
-                          const hasIssue = issueFields.has(field);
-                          const value = item.row[field] || "—";
+                        <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-medium text-slate-300">
+                          {item.actionLabel}
+                        </span>
+                      </div>
+                    </div>
 
-                          const fieldIssue = item.issues.find(
-                            (issue) => issue.field === field,
-                          );
+                    {item.issues.length > 0 && (
+                      <p className="mt-3 line-clamp-1 text-xs text-slate-400">
+                        <span className="font-medium text-slate-200">
+                          Main issue:
+                        </span>{" "}
+                        {item.issues[0]?.problem}
+                      </p>
+                    )}
+                  </article>
 
-                          const fieldTooltip = fieldIssue
-                            ? `Fix: ${fieldIssue.fix}`
-                            : value;
+                  {isSelected && (
+                    <div className="rounded-xl border border-cyan-300/[0.12] bg-cyan-400/[0.025] p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/70">
+                            Quick review
+                          </p>
 
-                          return (
-                            <td key={field} className="px-3 py-2">
-                              <span
-                                title={fieldTooltip}
-                                className={`block max-w-[170px] truncate rounded px-1.5 py-0.5 ${
-                                  hasIssue && isDanger
-                                    ? "border border-red-300/18 bg-red-400/[0.07] text-red-50"
-                                    : hasIssue && isWarning
-                                      ? "border border-yellow-300/18 bg-yellow-400/[0.07] text-yellow-50"
-                                      : "text-slate-200"
-                                }`}
-                              >
-                                {value}
-                              </span>
-                            </td>
-                          );
-                        })}
-
-                        <td className="px-3 py-2">
-                          {item.issues.length > 0 ? (
-                            <span
-                              className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-                                criticalIssues.length > 0
-                                  ? "border-red-300/20 bg-red-400/[0.07] text-red-100/90"
-                                  : "border-yellow-300/20 bg-yellow-400/[0.07] text-yellow-100/90"
-                              }`}
-                            >
-                              {criticalIssues.length > 0
-                                ? `${criticalIssues.length} critical`
-                                : `${warningIssues.length} warning`}
-                              {item.issues.length > 1
-                                ? ` · ${item.issues.length}`
-                                : ""}
-                            </span>
-                          ) : (
-                            <span className="rounded-full border border-emerald-300/18 bg-emerald-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-emerald-100/85">
-                              ready
-                            </span>
-                          )}
-                        </td>
-
-                        <td className="px-3 py-2">
-                          <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-medium text-slate-300">
+                          <p className="mt-1 text-sm font-medium text-white">
                             {item.actionLabel}
+                          </p>
+
+                          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
+                            This overview shows what blocks or weakens trust for
+                            this invoice. Open full details only when you need
+                            normalized data and complete explanations.
+                          </p>
+                        </div>
+
+                        <div className="flex shrink-0 flex-wrap items-center gap-2">
+                          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-cyan-100/90">
+                            {item.priorityScore} score
                           </span>
-                        </td>
-                      </tr>
 
-                      {isSelected && (
-                        <tr className="border-b border-cyan-300/[0.08] bg-cyan-400/[0.025]">
-                          <td
-                            colSpan={invoiceFields.length + 4}
-                            className="px-3 py-3"
-                          >
-                            <div className="space-y-3">
-                              <div className="flex flex-wrap items-center justify-between gap-4">
-                                <div>
-                                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-100/75">
-                                    Quick row overview
-                                  </p>
+                          {onViewDetails && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onViewDetails(item.rowIndex);
+                              }}
+                              className="rounded-full border border-cyan-300/25 bg-cyan-400/[0.1] px-3 py-1.5 text-[10px] font-semibold text-cyan-100 transition hover:border-cyan-200/45 hover:bg-cyan-400/[0.16] hover:text-white"
+                            >
+                              View full details
+                            </button>
+                          )}
+                        </div>
+                      </div>
 
-                                  <p className="mt-0.5 text-[11px] text-slate-400">
-                                    {item.actionLabel}. Use full details for
-                                    normalized data and complete issue
-                                    explanations.
-                                  </p>
-                                </div>
+                      {item.issues.length > 0 ? (
+                        <div className="mt-4 grid gap-2">
+                          {item.issues.map((issue, index) => (
+                            <div
+                              key={`${issue.field}-${issue.type}-${index}`}
+                              className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-3"
+                            >
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[9px] font-medium ${
+                                    issue.severity === "critical"
+                                      ? "border-red-300/20 bg-red-400/[0.08] text-red-100/90"
+                                      : "border-yellow-300/20 bg-yellow-400/[0.08] text-yellow-100/90"
+                                  }`}
+                                >
+                                  {issue.severity}
+                                </span>
 
-                                <div className="flex shrink-0 items-center gap-2">
-                                  <PriorityBadge priority={item.priority} />
+                                <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[9px] text-slate-400">
+                                  {issue.field}
+                                </span>
 
-                                  <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-cyan-100/90">
-                                    {item.priorityScore} score
-                                  </span>
-
-                                  {onViewDetails && (
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        onViewDetails(item.rowIndex)
-                                      }
-                                      className="rounded-full border border-cyan-300/25 bg-cyan-400/[0.1] px-3 py-1 text-[10px] font-semibold text-cyan-100 transition hover:border-cyan-200/45 hover:bg-cyan-400/[0.16] hover:text-white"
-                                    >
-                                      View full details
-                                    </button>
-                                  )}
-                                </div>
+                                <span className="rounded-full border border-cyan-300/14 bg-cyan-400/[0.07] px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-cyan-100/85">
+                                  {formatRiskLabel(issue.risk)}
+                                </span>
                               </div>
 
-                              {item.issues.length > 0 ? (
-                                <div className="divide-y divide-white/[0.08] rounded-lg border border-white/[0.08] bg-white/[0.035]">
-                                  {item.issues.map((issue, index) => (
-                                    <div
-                                      key={`${issue.field}-${issue.type}-${index}`}
-                                      className="grid gap-2 px-2.5 py-2 md:grid-cols-[1fr_auto]"
-                                    >
-                                      <div className="min-w-0">
-                                        <div className="flex flex-wrap items-center gap-1.5">
-                                          <p className="truncate text-xs font-medium text-white">
-                                            {issue.problem}
-                                          </p>
+                              <p className="mt-2 text-sm font-medium text-white">
+                                {issue.problem}
+                              </p>
 
-                                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-slate-400">
-                                            {issue.field}
-                                          </span>
-
-                                          <span className="rounded-full border border-cyan-300/14 bg-cyan-400/[0.07] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-cyan-100/85">
-                                            {formatRiskLabel(issue.risk)}
-                                          </span>
-
-                                          <span className="rounded-full border border-white/10 bg-white/[0.035] px-1.5 py-0.5 text-[9px] text-slate-500">
-                                            {formatIssueType(issue.type)}
-                                          </span>
-                                        </div>
-
-                                        <p className="mt-1 text-[11px] leading-5 text-slate-300">
-                                          <span className="font-medium text-slate-100">
-                                            Fix:
-                                          </span>{" "}
-                                          {issue.fix}
-                                        </p>
-                                      </div>
-
-                                      <span
-                                        className={`h-fit shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${
-                                          issue.severity === "critical"
-                                            ? "border-red-300/20 bg-red-400/[0.08] text-red-100/90"
-                                            : "border-yellow-300/20 bg-yellow-400/[0.08] text-yellow-100/90"
-                                        }`}
-                                      >
-                                        {issue.severity}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="rounded-lg border border-emerald-300/18 bg-emerald-400/[0.055] p-3">
-                                  <p className="text-xs font-medium text-emerald-100">
-                                    No issues detected. This row is import-ready
-                                    based on the current mapping and validation
-                                    rules.
-                                  </p>
-                                </div>
-                              )}
+                              <p className="mt-1 text-xs leading-5 text-slate-300">
+                                <span className="font-medium text-slate-100">
+                                  Fix:
+                                </span>{" "}
+                                {issue.fix}
+                              </p>
                             </div>
-                          </td>
-                        </tr>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mt-4 rounded-lg border border-emerald-300/18 bg-emerald-400/[0.055] p-3">
+                          <p className="text-xs font-medium text-emerald-100">
+                            No issues detected. This row is import-ready based
+                            on the current mapping and validation rules.
+                          </p>
+                        </div>
                       )}
-                    </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
+                    </div>
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
         ))}
     </section>
@@ -412,7 +336,6 @@ export function DataSetPreview({
 
 function getStatusPriority(status: string | undefined) {
   const normalizedStatus = status?.trim().toLowerCase() ?? "";
-
   return statusPriority[normalizedStatus] ?? statusPriority.unknown;
 }
 
@@ -442,14 +365,44 @@ function PriorityBadge({ priority }: { priority: InvoicePriority }) {
   );
 }
 
-function formatColumnLabel(field: string) {
-  return field.replaceAll("_", " ");
+function IssueBadge({
+  criticalCount,
+  warningCount,
+  totalCount,
+}: {
+  criticalCount: number;
+  warningCount: number;
+  totalCount: number;
+}) {
+  if (totalCount === 0) {
+    return (
+      <span className="rounded-full border border-emerald-300/18 bg-emerald-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-emerald-100/85">
+        Ready
+      </span>
+    );
+  }
+
+  if (criticalCount > 0) {
+    return (
+      <span className="rounded-full border border-red-300/20 bg-red-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-red-100/90">
+        {criticalCount} critical
+        {totalCount > criticalCount ? ` · ${totalCount}` : ""}
+      </span>
+    );
+  }
+
+  return (
+    <span className="rounded-full border border-yellow-300/20 bg-yellow-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-yellow-100/90">
+      {warningCount} warning{warningCount === 1 ? "" : "s"}
+    </span>
+  );
+}
+
+function formatMoneyValue(value: string | undefined) {
+  if (!value) return "—";
+  return value;
 }
 
 function formatRiskLabel(risk: string) {
   return risk.replaceAll("_", " ");
-}
-
-function formatIssueType(type: string) {
-  return type.replaceAll("-", " ");
 }

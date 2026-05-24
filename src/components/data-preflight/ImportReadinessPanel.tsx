@@ -49,78 +49,80 @@ export function ImportReadinessPanel({
   const statusTone = isBlocked ? "danger" : hasWarnings ? "warning" : "success";
 
   return (
-    <section className="rounded-2xl border border-cyan-300/18 bg-cyan-400/[0.055] p-4 shadow-xl shadow-cyan-950/20 backdrop-blur">
-      <div className="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
+    <section className="rounded-[1.75rem] border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-slate-950/25 backdrop-blur-xl">
+      <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100/70">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-100/60">
             Control center
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-semibold text-white">
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-semibold tracking-tight text-white">
               Import readiness
             </h2>
 
             <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
           </div>
 
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-cyan-50/75">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
             {importReadinessMessage}
           </p>
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            <Metric label="Total" value={totalInvoices} />
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <Metric label="Total invoices" value={totalInvoices} />
             <Metric label="Ready" value={cleanCount} tone="success" />
             <Metric label="Blocked" value={blockedCount} tone="danger" />
             <Metric label="Critical" value={criticalCount} tone="danger" />
             <Metric label="Warnings" value={warningCount} tone="warning" />
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-            {hasIncompleteMapping && (
-              <StatusPill tone="warning">Mapping incomplete</StatusPill>
-            )}
+          {(hasIncompleteMapping ||
+            hasDuplicateMappings ||
+            hasSuspiciousVat) && (
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              {hasIncompleteMapping && (
+                <StatusPill tone="warning">Mapping incomplete</StatusPill>
+              )}
 
-            {hasDuplicateMappings && (
-              <StatusPill tone="danger">Duplicate mapping</StatusPill>
-            )}
+              {hasDuplicateMappings && (
+                <StatusPill tone="danger">Duplicate mapping</StatusPill>
+              )}
 
-            {hasSuspiciousVat && (
-              <StatusPill tone="info">VAT anomalies detected</StatusPill>
-            )}
-          </div>
+              {hasSuspiciousVat && (
+                <StatusPill tone="info">VAT anomalies detected</StatusPill>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="rounded-2xl border border-white/12 bg-white/[0.055] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+        <aside className="rounded-2xl border border-white/10 bg-[#0f172a]/60 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
             Trusted export
           </p>
 
-          <h3 className="mt-1.5 text-base font-semibold text-white">
-            Export validated data
+          <h3 className="mt-2 text-base font-semibold text-white">
+            Export clean output
           </h3>
 
-          <p className="mt-1 text-sm leading-6 text-slate-300">
-            Export only after mapping is safe and clean invoice rows are
-            available.
+          <p className="mt-1 text-sm leading-6 text-slate-400">
+            Export only rows that passed mapping and validation checks.
           </p>
 
           {!canExport && (
-            <div className="mt-3 rounded-xl border border-yellow-300/25 bg-yellow-400/[0.08] p-2.5 text-xs leading-5 text-yellow-100">
-              Clean export is disabled until mappings are complete, duplicate
-              mappings are resolved, and at least one clean invoice is
-              available.
+            <div className="mt-4 rounded-xl border border-yellow-300/18 bg-yellow-400/[0.06] p-3 text-xs leading-5 text-yellow-100/90">
+              Clean export is disabled until mappings are safe and at least one
+              clean invoice is available.
             </div>
           )}
 
-          <div className="mt-3 flex flex-col gap-2">
+          <div className="mt-4 flex flex-col gap-2">
             <button
               type="button"
               onClick={() =>
                 onDownloadCleanCsv("clean-invoices.csv", cleanRows)
               }
               disabled={!canExport}
-              className="rounded-xl bg-cyan-100 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               Download clean CSV
             </button>
@@ -129,7 +131,7 @@ export function ImportReadinessPanel({
               type="button"
               onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
               disabled={issues.length === 0}
-              className="rounded-xl border border-white/12 bg-white/[0.055] px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/[0.09] disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/[0.075] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Download issue report
             </button>
@@ -142,12 +144,12 @@ export function ImportReadinessPanel({
                 )
               }
               disabled={!canExport}
-              className="rounded-xl border border-white/12 bg-white/[0.055] px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/20 hover:bg-white/[0.09] disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/[0.075] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Copy clean JSON
             </button>
           </div>
-        </div>
+        </aside>
       </div>
     </section>
   );
@@ -170,9 +172,9 @@ function Metric({
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.055] p-2.5">
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className={`mt-0.5 text-xl font-semibold ${toneClasses[tone]}`}>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+      <p className="text-[11px] text-slate-500">{label}</p>
+      <p className={`mt-1 text-2xl font-semibold ${toneClasses[tone]}`}>
         {value}
       </p>
     </div>
