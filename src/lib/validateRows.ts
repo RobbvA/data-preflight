@@ -1,4 +1,8 @@
 import type { CsvRow } from "@/lib/parseCsv";
+import {
+  invoiceAllowedStatuses,
+  invoiceProfile,
+} from "@/lib/profiles/invoiceProfile";
 
 export type Severity = "critical" | "warning";
 
@@ -59,9 +63,11 @@ export type ValidationResult = {
   errorRows: CsvRow[];
 };
 
-const requiredFields = ["invoice_number", "company", "email", "amount", "vat"];
+const requiredFields = invoiceProfile.fields
+  .filter((field) => field.required)
+  .map((field) => field.key);
 
-const allowedStatuses = ["ready", "paid", "draft", "pending", "sent"];
+const allowedStatuses = [...invoiceAllowedStatuses];
 
 export function validateRows(rows: CsvRow[]): ValidationResult {
   const issues: ValidationIssue[] = [];
@@ -226,7 +232,7 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
 
     if (
       row.status &&
-      !allowedStatuses.includes(row.status.trim().toLowerCase())
+      !allowedStatuses.includes(row.status.trim().toLowerCase() as never)
     ) {
       issues.push({
         rowIndex,

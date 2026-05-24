@@ -38,7 +38,6 @@ export function createInvoicePreviewItem({
 function calculatePriorityScore(issues: ValidationIssue[]) {
   return issues.reduce((score, issue) => {
     const severityScore = issue.severity === "critical" ? 100 : 35;
-
     const riskScore = getRiskScore(issue.risk);
 
     return score + severityScore + riskScore;

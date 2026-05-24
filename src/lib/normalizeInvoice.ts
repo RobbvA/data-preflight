@@ -1,19 +1,8 @@
 import type { CsvRow } from "@/lib/parseCsv";
-
-const invoiceFields = [
-  "invoice_number",
-  "company",
-  "email",
-  "amount",
-  "vat",
-  "status",
-  "country",
-  "invoice_date",
-  "due_date",
-  "currency",
-] as const;
-
-type InvoiceField = (typeof invoiceFields)[number];
+import {
+  invoiceFieldKeys,
+  type InvoiceField,
+} from "@/lib/profiles/invoiceProfile";
 
 const statusAliases: Record<string, string> = {
   ready: "ready",
@@ -82,7 +71,7 @@ export function normalizeInvoiceRows(rows: CsvRow[]): CsvRow[] {
 export function normalizeInvoiceRow(row: CsvRow): CsvRow {
   const normalizedRow: CsvRow = {};
 
-  invoiceFields.forEach((field) => {
+  invoiceFieldKeys.forEach((field) => {
     normalizedRow[field] = normalizeInvoiceValue(field, row[field] ?? "");
   });
 
@@ -172,7 +161,7 @@ function normalizeDate(value: string) {
   if (europeanMatch) {
     const [, day, month, year] = europeanMatch;
 
-    return `${year}-${day.padStart(2, "0")}-${month.padStart(2, "0")}`;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   }
 
   const compactEuropeanMatch = normalizedValue.match(/^(\d{2})(\d{2})(\d{4})$/);

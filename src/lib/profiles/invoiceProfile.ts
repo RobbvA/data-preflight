@@ -1,13 +1,35 @@
 import type { DataProfile } from "../dataProfile";
 
-export const invoiceProfile: DataProfile = {
+export const invoiceFieldKeys = [
+  "invoice_number",
+  "company",
+  "email",
+  "amount",
+  "vat",
+  "status",
+  "country",
+  "invoice_date",
+  "due_date",
+  "currency",
+] as const;
+
+export type InvoiceField = (typeof invoiceFieldKeys)[number];
+
+export type InvoiceFieldMapping = Record<InvoiceField, string>;
+
+export const invoiceAllowedStatuses = [
+  "ready",
+  "paid",
+  "draft",
+  "pending",
+  "sent",
+] as const;
+
+export const invoiceProfile: DataProfile<InvoiceField> = {
   id: "invoice",
-
   name: "Invoice Import",
-
   description:
     "Validate and prepare invoice data for safe import into business systems.",
-
   fields: [
     {
       key: "invoice_number",
@@ -42,7 +64,6 @@ export const invoiceProfile: DataProfile = {
         "number",
       ],
     },
-
     {
       key: "company",
       label: "Company",
@@ -69,7 +90,6 @@ export const invoiceProfile: DataProfile = {
         "debtor name",
       ],
     },
-
     {
       key: "email",
       label: "Email",
@@ -91,7 +111,6 @@ export const invoiceProfile: DataProfile = {
         "factuurmail",
       ],
     },
-
     {
       key: "amount",
       label: "Amount",
@@ -118,7 +137,6 @@ export const invoiceProfile: DataProfile = {
         "bruto",
       ],
     },
-
     {
       key: "vat",
       label: "VAT",
@@ -138,7 +156,6 @@ export const invoiceProfile: DataProfile = {
         "belastingbedrag",
       ],
     },
-
     {
       key: "status",
       label: "Status",
@@ -156,7 +173,6 @@ export const invoiceProfile: DataProfile = {
         "betaalstatus",
       ],
     },
-
     {
       key: "country",
       label: "Country",
@@ -172,7 +188,6 @@ export const invoiceProfile: DataProfile = {
         "regio",
       ],
     },
-
     {
       key: "invoice_date",
       label: "Invoice Date",
@@ -193,7 +208,6 @@ export const invoiceProfile: DataProfile = {
         "boekingsdatum",
       ],
     },
-
     {
       key: "due_date",
       label: "Due Date",
@@ -213,7 +227,6 @@ export const invoiceProfile: DataProfile = {
         "uiterste betaaldatum",
       ],
     },
-
     {
       key: "currency",
       label: "Currency",
