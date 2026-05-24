@@ -12,6 +12,7 @@ type DataSetPreviewProps = {
   emptyMessage: string;
   selectedRowIndex?: number | null;
   onSelectItem?: (rowIndex: number) => void;
+  onViewDetails?: (rowIndex: number) => void;
   isOpen: boolean;
   onToggle: () => void;
   tone?: "neutral" | "danger" | "warning";
@@ -51,6 +52,7 @@ export function DataSetPreview({
   emptyMessage,
   selectedRowIndex,
   onSelectItem,
+  onViewDetails,
   isOpen,
   onToggle,
   tone = "neutral",
@@ -166,10 +168,10 @@ export function DataSetPreview({
         ) : (
           <div
             className={`mt-3 overflow-auto rounded-xl border border-white/10 bg-[#10182b]/70 ${
-              compact ? "max-h-[280px]" : "max-h-[520px]"
+              compact ? "max-h-[460px]" : "max-h-[720px]"
             }`}
           >
-            <table className="w-full min-w-[1320px] border-collapse text-left text-xs">
+            <table className="w-full min-w-[1500px] border-collapse text-left text-xs">
               <thead className="sticky top-0 z-10 bg-[#10182b]/95 backdrop-blur">
                 <tr className="border-b border-white/10 uppercase tracking-[0.12em] text-slate-400">
                   <th className="px-3 py-2 text-[10px] font-medium">
@@ -208,12 +210,6 @@ export function DataSetPreview({
                     (issue) => issue.severity === "warning",
                   );
 
-                  const mainIssue = criticalIssues[0] ?? warningIssues[0];
-
-                  const tooltipText = mainIssue
-                    ? `Fix: ${mainIssue.fix} • Click row for full detail`
-                    : "Click row to inspect normalized output";
-
                   const rowClass = isSelected
                     ? "bg-cyan-400/[0.08]"
                     : isDanger
@@ -233,7 +229,7 @@ export function DataSetPreview({
                         className={`border-b border-white/[0.08] transition last:border-b-0 ${
                           onSelectItem ? "cursor-pointer" : ""
                         } ${rowClass}`}
-                        title={tooltipText}
+                        title="Click row for quick overview"
                       >
                         <td className="px-3 py-2">
                           <PriorityBadge priority={item.priority} />
@@ -252,14 +248,14 @@ export function DataSetPreview({
                           );
 
                           const fieldTooltip = fieldIssue
-                            ? `Fix: ${fieldIssue.fix} • Click row for full detail`
+                            ? `Fix: ${fieldIssue.fix}`
                             : value;
 
                           return (
                             <td key={field} className="px-3 py-2">
                               <span
                                 title={fieldTooltip}
-                                className={`block max-w-[150px] truncate rounded px-1.5 py-0.5 ${
+                                className={`block max-w-[170px] truncate rounded px-1.5 py-0.5 ${
                                   hasIssue && isDanger
                                     ? "border border-red-300/18 bg-red-400/[0.07] text-red-50"
                                     : hasIssue && isWarning
@@ -276,8 +272,7 @@ export function DataSetPreview({
                         <td className="px-3 py-2">
                           {item.issues.length > 0 ? (
                             <span
-                              title={tooltipText}
-                              className={`inline-flex cursor-help rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                              className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                                 criticalIssues.length > 0
                                   ? "border-red-300/20 bg-red-400/[0.07] text-red-100/90"
                                   : "border-yellow-300/20 bg-yellow-400/[0.07] text-yellow-100/90"
@@ -304,23 +299,23 @@ export function DataSetPreview({
                         </td>
                       </tr>
 
-                      {isSelected && item.issues.length > 0 && (
+                      {isSelected && (
                         <tr className="border-b border-cyan-300/[0.08] bg-cyan-400/[0.025]">
                           <td
                             colSpan={invoiceFields.length + 4}
-                            className="px-3 py-2"
+                            className="px-3 py-3"
                           >
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between gap-4">
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap items-center justify-between gap-4">
                                 <div>
                                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-100/75">
-                                    Quick issue overview
+                                    Quick row overview
                                   </p>
 
                                   <p className="mt-0.5 text-[11px] text-slate-400">
-                                    {item.actionLabel}. Full normalized data and
-                                    explanation are shown in the detail panel
-                                    below.
+                                    {item.actionLabel}. Use full details for
+                                    normalized data and complete issue
+                                    explanations.
                                   </p>
                                 </div>
 
@@ -330,54 +325,76 @@ export function DataSetPreview({
                                   <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-cyan-100/90">
                                     {item.priorityScore} score
                                   </span>
+
+                                  {onViewDetails && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onViewDetails(item.rowIndex)
+                                      }
+                                      className="rounded-full border border-cyan-300/25 bg-cyan-400/[0.1] px-3 py-1 text-[10px] font-semibold text-cyan-100 transition hover:border-cyan-200/45 hover:bg-cyan-400/[0.16] hover:text-white"
+                                    >
+                                      View full details
+                                    </button>
+                                  )}
                                 </div>
                               </div>
 
-                              <div className="divide-y divide-white/[0.08] rounded-lg border border-white/[0.08] bg-white/[0.035]">
-                                {item.issues.map((issue, index) => (
-                                  <div
-                                    key={`${issue.field}-${issue.type}-${index}`}
-                                    className="grid gap-2 px-2.5 py-2 md:grid-cols-[1fr_auto]"
-                                  >
-                                    <div className="min-w-0">
-                                      <div className="flex flex-wrap items-center gap-1.5">
-                                        <p className="truncate text-xs font-medium text-white">
-                                          {issue.problem}
+                              {item.issues.length > 0 ? (
+                                <div className="divide-y divide-white/[0.08] rounded-lg border border-white/[0.08] bg-white/[0.035]">
+                                  {item.issues.map((issue, index) => (
+                                    <div
+                                      key={`${issue.field}-${issue.type}-${index}`}
+                                      className="grid gap-2 px-2.5 py-2 md:grid-cols-[1fr_auto]"
+                                    >
+                                      <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-1.5">
+                                          <p className="truncate text-xs font-medium text-white">
+                                            {issue.problem}
+                                          </p>
+
+                                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-slate-400">
+                                            {issue.field}
+                                          </span>
+
+                                          <span className="rounded-full border border-cyan-300/14 bg-cyan-400/[0.07] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-cyan-100/85">
+                                            {formatRiskLabel(issue.risk)}
+                                          </span>
+
+                                          <span className="rounded-full border border-white/10 bg-white/[0.035] px-1.5 py-0.5 text-[9px] text-slate-500">
+                                            {formatIssueType(issue.type)}
+                                          </span>
+                                        </div>
+
+                                        <p className="mt-1 text-[11px] leading-5 text-slate-300">
+                                          <span className="font-medium text-slate-100">
+                                            Fix:
+                                          </span>{" "}
+                                          {issue.fix}
                                         </p>
-
-                                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-slate-400">
-                                          {issue.field}
-                                        </span>
-
-                                        <span className="rounded-full border border-cyan-300/14 bg-cyan-400/[0.07] px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-cyan-100/85">
-                                          {formatRiskLabel(issue.risk)}
-                                        </span>
-
-                                        <span className="rounded-full border border-white/10 bg-white/[0.035] px-1.5 py-0.5 text-[9px] text-slate-500">
-                                          {formatIssueType(issue.type)}
-                                        </span>
                                       </div>
 
-                                      <p className="mt-1 text-[11px] leading-5 text-slate-300">
-                                        <span className="font-medium text-slate-100">
-                                          Fix:
-                                        </span>{" "}
-                                        {issue.fix}
-                                      </p>
+                                      <span
+                                        className={`h-fit shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${
+                                          issue.severity === "critical"
+                                            ? "border-red-300/20 bg-red-400/[0.08] text-red-100/90"
+                                            : "border-yellow-300/20 bg-yellow-400/[0.08] text-yellow-100/90"
+                                        }`}
+                                      >
+                                        {issue.severity}
+                                      </span>
                                     </div>
-
-                                    <span
-                                      className={`h-fit shrink-0 rounded-full border px-1.5 py-0.5 text-[9px] font-medium ${
-                                        issue.severity === "critical"
-                                          ? "border-red-300/20 bg-red-400/[0.08] text-red-100/90"
-                                          : "border-yellow-300/20 bg-yellow-400/[0.08] text-yellow-100/90"
-                                      }`}
-                                    >
-                                      {issue.severity}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="rounded-lg border border-emerald-300/18 bg-emerald-400/[0.055] p-3">
+                                  <p className="text-xs font-medium text-emerald-100">
+                                    No issues detected. This row is import-ready
+                                    based on the current mapping and validation
+                                    rules.
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>

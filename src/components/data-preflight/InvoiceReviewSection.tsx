@@ -12,6 +12,7 @@ type InvoiceReviewSectionProps = {
   isBlockedOpen: boolean;
   onToggleBlockedFilter: () => void;
   onSelectInvoice: (rowIndex: number) => void;
+  onViewInvoiceDetails: (rowIndex: number) => void;
   onToggleCleanOpen: () => void;
   onToggleWarningOpen: () => void;
   onToggleBlockedOpen: () => void;
@@ -28,6 +29,7 @@ export function InvoiceReviewSection({
   isBlockedOpen,
   onToggleBlockedFilter,
   onSelectInvoice,
+  onViewInvoiceDetails,
   onToggleCleanOpen,
   onToggleWarningOpen,
   onToggleBlockedOpen,
@@ -48,8 +50,8 @@ export function InvoiceReviewSection({
           </h2>
 
           <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">
-            Priority-ranked review queue for blocked invoices, warning-only
-            invoices, and import-ready rows.
+            Click a row for a quick overview. Use View full details when you
+            need normalized data and complete explanations.
           </p>
         </div>
 
@@ -74,6 +76,7 @@ export function InvoiceReviewSection({
           emptyMessage="No blocked invoices."
           selectedRowIndex={selectedRowIndex}
           onSelectItem={onSelectInvoice}
+          onViewDetails={onViewInvoiceDetails}
           isOpen={isBlockedOpen}
           onToggle={onToggleBlockedOpen}
           tone="danger"
@@ -85,7 +88,7 @@ export function InvoiceReviewSection({
           description={
             showOnlyBlocked
               ? "Hidden while blocked-only mode is active."
-              : "Warning-only rows. Click a row to inspect normalized data and explanations."
+              : "Warning-only rows. Same size as blocked for easier scanning."
           }
           items={visibleWarningInvoiceItems}
           emptyMessage={
@@ -95,10 +98,10 @@ export function InvoiceReviewSection({
           }
           selectedRowIndex={selectedRowIndex}
           onSelectItem={onSelectInvoice}
+          onViewDetails={onViewInvoiceDetails}
           isOpen={isWarningOpen}
           onToggle={onToggleWarningOpen}
           tone="warning"
-          compact
           embedded
         />
 
@@ -117,6 +120,7 @@ export function InvoiceReviewSection({
           }
           selectedRowIndex={selectedRowIndex}
           onSelectItem={onSelectInvoice}
+          onViewDetails={onViewInvoiceDetails}
           isOpen={isCleanOpen}
           onToggle={onToggleCleanOpen}
           tone="neutral"

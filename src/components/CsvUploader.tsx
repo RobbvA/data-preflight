@@ -36,7 +36,12 @@ export function CsvUploader() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+  const [selectedPreviewRowIndex, setSelectedPreviewRowIndex] = useState<
+    number | null
+  >(null);
+  const [selectedDetailRowIndex, setSelectedDetailRowIndex] = useState<
+    number | null
+  >(null);
 
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
 
@@ -49,13 +54,13 @@ export function CsvUploader() {
   const detailRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!selectedRowIndex || !detailRef.current) return;
+    if (!selectedDetailRowIndex || !detailRef.current) return;
 
     detailRef.current.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
-  }, [selectedRowIndex]);
+  }, [selectedDetailRowIndex]);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -64,17 +69,13 @@ export function CsvUploader() {
 
     setError(null);
     setIsLoading(true);
-
     setFileName(file.name);
-
-    setSelectedRowIndex(null);
-
+    setSelectedPreviewRowIndex(null);
+    setSelectedDetailRowIndex(null);
     setShowOnlyBlocked(false);
-
     setIsCleanOpen(false);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
-
     setIsFieldMappingOpen(false);
 
     try {
@@ -91,26 +92,19 @@ export function CsvUploader() {
       }
 
       setRows(parsedRows);
-
       setHeaders(detectedHeaders);
-
       setFieldMapping(createSuggestedMapping(detectedHeaders, parsedRows));
     } catch {
       setError("Failed to parse CSV file. Please check the file format.");
-
       setRows([]);
       setHeaders([]);
-
       setFieldMapping(createEmptyMapping());
-
-      setSelectedRowIndex(null);
-
+      setSelectedPreviewRowIndex(null);
+      setSelectedDetailRowIndex(null);
       setShowOnlyBlocked(false);
-
       setIsCleanOpen(false);
       setIsWarningOpen(true);
       setIsBlockedOpen(true);
-
       setIsFieldMappingOpen(false);
     } finally {
       setIsLoading(false);
@@ -119,25 +113,17 @@ export function CsvUploader() {
 
   function resetFlow() {
     setRows([]);
-
     setFileName("");
-
     setHeaders([]);
-
     setFieldMapping(createEmptyMapping());
-
     setError(null);
-
     setIsLoading(false);
-
-    setSelectedRowIndex(null);
-
+    setSelectedPreviewRowIndex(null);
+    setSelectedDetailRowIndex(null);
     setShowOnlyBlocked(false);
-
     setIsCleanOpen(false);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
-
     setIsFieldMappingOpen(false);
   }
 
@@ -150,19 +136,25 @@ export function CsvUploader() {
       [targetField]: sourceField,
     }));
 
-    setSelectedRowIndex(null);
+    setSelectedPreviewRowIndex(null);
+    setSelectedDetailRowIndex(null);
   }
 
   function toggleBlockedFilter() {
     setShowOnlyBlocked((currentValue) => !currentValue);
-
-    setSelectedRowIndex(null);
+    setSelectedPreviewRowIndex(null);
+    setSelectedDetailRowIndex(null);
   }
 
-  function toggleSelectedInvoice(rowIndex: number) {
-    setSelectedRowIndex((currentRowIndex) =>
+  function toggleSelectedPreviewInvoice(rowIndex: number) {
+    setSelectedPreviewRowIndex((currentRowIndex) =>
       currentRowIndex === rowIndex ? null : rowIndex,
     );
+  }
+
+  function viewInvoiceDetails(rowIndex: number) {
+    setSelectedPreviewRowIndex(rowIndex);
+    setSelectedDetailRowIndex(rowIndex);
   }
 
   const mappingSuggestions = useMemo<MappingSuggestion[]>(() => {
@@ -175,7 +167,6 @@ export function CsvUploader() {
 
       mappingSuggestions.forEach((suggestion) => {
         const targetField = suggestion.targetField;
-
         const sourceField = fieldMapping[targetField];
 
         mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
@@ -209,7 +200,6 @@ export function CsvUploader() {
   }, [fieldMapping]);
 
   const hasDuplicateMappings = duplicateMappedHeaders.length > 0;
-
   const hasIncompleteMapping = missingExpectedFields.length > 0;
 
   const issuesByRow = useMemo(() => {
@@ -257,7 +247,8 @@ export function CsvUploader() {
   }, [invoiceItems]);
 
   const selectedInvoice =
-    invoiceItems.find((item) => item.rowIndex === selectedRowIndex) ?? null;
+    invoiceItems.find((item) => item.rowIndex === selectedDetailRowIndex) ??
+    null;
 
   const warningCount = validationResult.issues.filter(
     (issue) => issue.severity === "warning",
@@ -268,7 +259,6 @@ export function CsvUploader() {
   ).length;
 
   const blockedCount = validationResult.errorRows.length;
-
   const cleanCount = validationResult.cleanRows.length;
 
   const hasSuspiciousVat = validationResult.issues.some(
@@ -294,24 +284,19 @@ export function CsvUploader() {
             : "Upload and map invoice data to start the preflight check.";
 
   const hasUploadedRows = normalizedRows.length > 0;
-
   const hasHeaders = headers.length > 0;
-
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#0b1020] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 top-[-180px] h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-blue-500/25 blur-3xl" />
-
         <div className="absolute right-[-140px] top-28 h-[520px] w-[680px] rounded-full bg-violet-500/18 blur-3xl" />
-
         <div className="absolute bottom-[-180px] left-[-120px] h-[440px] w-[660px] rounded-full bg-cyan-400/14 blur-3xl" />
-
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(147,197,253,0.14),_transparent_36%),linear-gradient(180deg,_rgba(30,41,59,0.28),_rgba(11,16,32,1))]" />
       </div>
 
-      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto max-w-[1500px] space-y-6">
         <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_360px] lg:items-start">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200/80">
@@ -366,12 +351,13 @@ export function CsvUploader() {
             cleanInvoiceItems={cleanInvoiceItems}
             warningInvoiceItems={warningInvoiceItems}
             blockedInvoiceItems={blockedInvoiceItems}
-            selectedRowIndex={selectedRowIndex}
+            selectedRowIndex={selectedPreviewRowIndex}
             isCleanOpen={isCleanOpen}
             isWarningOpen={isWarningOpen}
             isBlockedOpen={isBlockedOpen}
             onToggleBlockedFilter={toggleBlockedFilter}
-            onSelectInvoice={toggleSelectedInvoice}
+            onSelectInvoice={toggleSelectedPreviewInvoice}
+            onViewInvoiceDetails={viewInvoiceDetails}
             onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
             onToggleWarningOpen={() => setIsWarningOpen((current) => !current)}
             onToggleBlockedOpen={() => setIsBlockedOpen((current) => !current)}
@@ -382,7 +368,7 @@ export function CsvUploader() {
           <div ref={detailRef}>
             <BlockedInvoiceDetail
               selectedInvoice={selectedInvoice}
-              onClose={() => setSelectedRowIndex(null)}
+              onClose={() => setSelectedDetailRowIndex(null)}
             />
           </div>
         )}
