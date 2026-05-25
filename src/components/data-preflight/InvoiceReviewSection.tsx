@@ -38,21 +38,20 @@ export function InvoiceReviewSection({
   const visibleCleanInvoiceItems = showOnlyBlocked ? [] : cleanInvoiceItems;
 
   return (
-    <section className="rounded-[1.75rem] border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-slate-950/25 backdrop-blur-xl">
-      <div className="flex flex-wrap items-center justify-between gap-5 border-b border-white/10 pb-5">
+    <section className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-between gap-5 border-b border-slate-700/45 pb-5">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-violet-100/60">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Review workspace
           </p>
 
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-50">
             Invoice review
           </h2>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-            Review invoices by operational risk. Only the essential fields are
-            shown first; expand a row when you need context, fixes, or
-            normalized output.
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+            Review invoices by business risk. Blocked rows need fixes first;
+            warning rows can import, but should be checked before export.
           </p>
         </div>
 
@@ -61,8 +60,8 @@ export function InvoiceReviewSection({
           onClick={onToggleBlockedFilter}
           className={`rounded-full border px-3.5 py-2 text-xs font-medium transition ${
             showOnlyBlocked
-              ? "border-red-300/25 bg-red-400/[0.08] text-red-100/90"
-              : "border-white/12 bg-white/[0.045] text-slate-300 hover:border-white/20 hover:bg-white/[0.075] hover:text-white"
+              ? "border-rose-400/25 bg-rose-400/[0.08] text-rose-100"
+              : "border-slate-700/70 bg-slate-950/30 text-slate-400 hover:border-slate-500/70 hover:bg-slate-800/70 hover:text-slate-100"
           }`}
         >
           {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
@@ -72,7 +71,7 @@ export function InvoiceReviewSection({
       <div className="mt-5 space-y-4">
         <DataSetPreview
           title="Blocked invoices"
-          description="Critical rows that must be fixed before import."
+          description="These rows will fail or corrupt an import unless fixed."
           items={blockedInvoiceItems}
           emptyMessage="No blocked invoices."
           selectedRowIndex={selectedRowIndex}
@@ -89,7 +88,7 @@ export function InvoiceReviewSection({
           description={
             showOnlyBlocked
               ? "Hidden while blocked-only mode is active."
-              : "Warning-only rows that may be importable, but need human review."
+              : "These rows can import, but should be checked first."
           }
           items={visibleWarningInvoiceItems}
           emptyMessage={
@@ -111,7 +110,7 @@ export function InvoiceReviewSection({
           description={
             showOnlyBlocked
               ? "Hidden while blocked-only mode is active."
-              : "Rows without detected issues."
+              : "Clean rows that passed the current mapping and validation checks."
           }
           items={visibleCleanInvoiceItems}
           emptyMessage={

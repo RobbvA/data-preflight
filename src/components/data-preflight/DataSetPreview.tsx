@@ -75,10 +75,10 @@ export function DataSetPreview({
         embedded ? "p-4 shadow-none" : "p-5 shadow-xl"
       } ${
         isDanger
-          ? "border-red-300/[0.13] bg-red-400/[0.025]"
+          ? "border-rose-400/15 bg-rose-950/[0.13]"
           : isWarning
-            ? "border-yellow-300/[0.13] bg-yellow-400/[0.025]"
-            : "border-white/10 bg-white/[0.03]"
+            ? "border-amber-300/15 bg-amber-950/[0.12]"
+            : "border-slate-700/50 bg-slate-950/20"
       }`}
     >
       <div className="flex w-full flex-wrap items-start justify-between gap-4">
@@ -93,17 +93,17 @@ export function DataSetPreview({
             <span
               className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${
                 isDanger
-                  ? "border-red-300/18 bg-red-400/[0.06] text-red-100/85"
+                  ? "border-rose-400/20 bg-rose-400/[0.06] text-rose-100/85"
                   : isWarning
-                    ? "border-yellow-300/18 bg-yellow-400/[0.06] text-yellow-100/85"
-                    : "border-white/10 bg-white/[0.04] text-slate-300"
+                    ? "border-amber-300/20 bg-amber-300/[0.06] text-amber-100/85"
+                    : "border-slate-700/70 bg-slate-900/60 text-slate-400"
               }`}
             >
               {items.length} row{items.length === 1 ? "" : "s"}
             </span>
           </div>
 
-          <p className="mt-1 text-xs leading-5 text-slate-400">{description}</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
         </button>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -111,7 +111,7 @@ export function DataSetPreview({
             <select
               value={sortMode}
               onChange={(event) => setSortMode(event.target.value as SortMode)}
-              className="rounded-full border border-white/10 bg-[#0f172a] px-3 py-1.5 text-[10px] font-medium text-slate-100 outline-none transition hover:border-cyan-300/30 focus:border-cyan-300/50"
+              className="rounded-full border border-slate-700/70 bg-slate-950/60 px-3 py-1.5 text-[10px] font-medium text-slate-300 outline-none transition hover:border-slate-500 focus:border-cyan-300/45"
             >
               <option value="priority">Sort: priority</option>
               <option value="status">Sort: payment status</option>
@@ -123,7 +123,7 @@ export function DataSetPreview({
           <button
             type="button"
             onClick={onToggle}
-            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] font-medium text-slate-400 transition hover:border-white/18 hover:bg-white/[0.07] hover:text-slate-200"
+            className="rounded-full border border-slate-700/70 bg-slate-950/40 px-3 py-1.5 text-[10px] font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800/60 hover:text-slate-200"
           >
             {isOpen ? "Collapse" : "Expand"}
           </button>
@@ -132,7 +132,7 @@ export function DataSetPreview({
 
       {isOpen &&
         (items.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-400">
+          <p className="mt-4 rounded-xl border border-slate-700/45 bg-slate-950/35 p-4 text-sm text-slate-500">
             {emptyMessage}
           </p>
         ) : (
@@ -158,56 +158,56 @@ export function DataSetPreview({
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`rounded-xl border p-3 transition ${
+                    className={`rounded-xl border p-4 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-cyan-300/30 bg-cyan-400/[0.06]"
-                        : "border-white/[0.08] bg-[#0f172a]/58 hover:border-white/[0.14] hover:bg-white/[0.045]"
+                        ? "border-cyan-300/25 bg-cyan-300/[0.045]"
+                        : "border-slate-700/45 bg-slate-950/35 hover:border-slate-500/55 hover:bg-slate-900/70"
                     }`}
                   >
-                    <div className="grid gap-3 lg:grid-cols-[180px_1.1fr_0.9fr_0.95fr_auto] lg:items-center">
+                    <div className="grid gap-4 lg:grid-cols-[170px_1.15fr_0.85fr_0.95fr_auto] lg:items-center">
                       <div className="flex flex-wrap items-center gap-2">
                         <PriorityBadge priority={item.priority} />
 
-                        <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] text-slate-400">
+                        <span className="rounded-full border border-slate-700/60 bg-slate-900/60 px-2 py-0.5 text-[10px] text-slate-500">
                           Row {item.rowIndex}
                         </span>
                       </div>
 
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-white">
+                        <p className="truncate text-sm font-semibold text-slate-50">
                           {item.row.invoice_number || "Missing invoice number"}
                         </p>
 
-                        <p className="mt-0.5 truncate text-xs text-slate-400">
+                        <p className="mt-1 truncate text-xs text-slate-500">
                           {item.row.company || "Missing company"} ·{" "}
                           {item.row.email || "Missing email"}
                         </p>
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-600">
                           Financials
                         </p>
 
-                        <p className="mt-0.5 truncate text-xs font-medium text-slate-200">
+                        <p className="mt-1 truncate text-xs font-medium text-slate-300">
                           {formatMoneyValue(item.row.amount)} · VAT{" "}
                           {formatMoneyValue(item.row.vat)}
                         </p>
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-600">
                           Context
                         </p>
 
-                        <p className="mt-0.5 truncate text-xs font-medium text-slate-200">
+                        <p className="mt-1 truncate text-xs font-medium text-slate-300">
                           {item.row.status || "unknown"} ·{" "}
                           {item.row.country || "—"} / {item.row.currency || "—"}
                         </p>
 
-                        <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                        <p className="mt-1 truncate text-[11px] text-slate-600">
                           {item.row.invoice_date || "no invoice date"} →{" "}
                           {item.row.due_date || "no due date"}
                         </p>
@@ -220,15 +220,15 @@ export function DataSetPreview({
                           totalCount={item.issues.length}
                         />
 
-                        <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[10px] font-medium text-slate-300">
+                        <span className="rounded-full border border-slate-700/60 bg-slate-950/30 px-2 py-0.5 text-[10px] font-medium text-slate-400">
                           {item.actionLabel}
                         </span>
                       </div>
                     </div>
 
                     {item.issues.length > 0 && (
-                      <p className="mt-3 line-clamp-1 text-xs text-slate-400">
-                        <span className="font-medium text-slate-200">
+                      <p className="mt-3 line-clamp-1 border-t border-slate-700/35 pt-3 text-xs text-slate-500">
+                        <span className="font-medium text-slate-300">
                           Main issue:
                         </span>{" "}
                         {item.issues[0]?.problem}
@@ -237,18 +237,18 @@ export function DataSetPreview({
                   </article>
 
                   {isSelected && (
-                    <div className="rounded-xl border border-cyan-300/[0.12] bg-cyan-400/[0.025] p-4">
+                    <div className="rounded-xl border border-cyan-300/[0.14] bg-slate-950/40 p-4">
                       <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/70">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/60">
                             Quick review
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-white">
+                          <p className="mt-1 text-sm font-medium text-slate-50">
                             {item.actionLabel}
                           </p>
 
-                          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
+                          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
                             This overview shows what blocks or weakens trust for
                             this invoice. Open full details only when you need
                             normalized data and complete explanations.
@@ -256,7 +256,7 @@ export function DataSetPreview({
                         </div>
 
                         <div className="flex shrink-0 flex-wrap items-center gap-2">
-                          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.08] px-2 py-0.5 text-[10px] font-medium text-cyan-100/90">
+                          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.06] px-2 py-0.5 text-[10px] font-medium text-cyan-100/85">
                             {item.priorityScore} score
                           </span>
 
@@ -267,7 +267,7 @@ export function DataSetPreview({
                                 event.stopPropagation();
                                 onViewDetails(item.rowIndex);
                               }}
-                              className="rounded-full border border-cyan-300/25 bg-cyan-400/[0.1] px-3 py-1.5 text-[10px] font-semibold text-cyan-100 transition hover:border-cyan-200/45 hover:bg-cyan-400/[0.16] hover:text-white"
+                              className="rounded-full border border-cyan-300/25 bg-cyan-300/[0.09] px-3 py-1.5 text-[10px] font-semibold text-cyan-100 transition hover:border-cyan-200/45 hover:bg-cyan-300/[0.14] hover:text-white"
                             >
                               View full details
                             </button>
@@ -280,34 +280,34 @@ export function DataSetPreview({
                           {item.issues.map((issue, index) => (
                             <div
                               key={`${issue.field}-${issue.type}-${index}`}
-                              className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-3"
+                              className="rounded-lg border border-slate-700/45 bg-slate-900/45 p-3"
                             >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
                                   className={`rounded-full border px-2 py-0.5 text-[9px] font-medium ${
                                     issue.severity === "critical"
-                                      ? "border-red-300/20 bg-red-400/[0.08] text-red-100/90"
-                                      : "border-yellow-300/20 bg-yellow-400/[0.08] text-yellow-100/90"
+                                      ? "border-rose-400/20 bg-rose-400/[0.07] text-rose-100"
+                                      : "border-amber-300/20 bg-amber-300/[0.07] text-amber-100"
                                   }`}
                                 >
                                   {issue.severity}
                                 </span>
 
-                                <span className="rounded-full border border-white/10 bg-white/[0.035] px-2 py-0.5 text-[9px] text-slate-400">
+                                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
                                   {issue.field}
                                 </span>
 
-                                <span className="rounded-full border border-cyan-300/14 bg-cyan-400/[0.07] px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-cyan-100/85">
+                                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-slate-400">
                                   {formatRiskLabel(issue.risk)}
                                 </span>
                               </div>
 
-                              <p className="mt-2 text-sm font-medium text-white">
+                              <p className="mt-2 text-sm font-medium text-slate-50">
                                 {issue.problem}
                               </p>
 
-                              <p className="mt-1 text-xs leading-5 text-slate-300">
-                                <span className="font-medium text-slate-100">
+                              <p className="mt-1 text-xs leading-5 text-slate-400">
+                                <span className="font-medium text-slate-200">
                                   Fix:
                                 </span>{" "}
                                 {issue.fix}
@@ -316,7 +316,7 @@ export function DataSetPreview({
                           ))}
                         </div>
                       ) : (
-                        <div className="mt-4 rounded-lg border border-emerald-300/18 bg-emerald-400/[0.055] p-3">
+                        <div className="mt-4 rounded-lg border border-emerald-300/16 bg-emerald-400/[0.045] p-3">
                           <p className="text-xs font-medium text-emerald-100">
                             No issues detected. This row is import-ready based
                             on the current mapping and validation rules.
@@ -341,11 +341,11 @@ function getStatusPriority(status: string | undefined) {
 
 function PriorityBadge({ priority }: { priority: InvoicePriority }) {
   const priorityClasses: Record<InvoicePriority, string> = {
-    critical: "border-red-300/25 bg-red-400/[0.09] text-red-50",
-    high: "border-orange-300/25 bg-orange-400/[0.09] text-orange-50",
-    medium: "border-yellow-300/25 bg-yellow-400/[0.08] text-yellow-50",
-    low: "border-blue-300/20 bg-blue-400/[0.07] text-blue-100",
-    clear: "border-emerald-300/18 bg-emerald-400/[0.07] text-emerald-100",
+    critical: "border-rose-400/25 bg-rose-400/[0.08] text-rose-100",
+    high: "border-orange-300/22 bg-orange-300/[0.07] text-orange-100",
+    medium: "border-amber-300/22 bg-amber-300/[0.07] text-amber-100",
+    low: "border-slate-500/30 bg-slate-700/25 text-slate-300",
+    clear: "border-emerald-300/18 bg-emerald-400/[0.055] text-emerald-100",
   };
 
   const labels: Record<InvoicePriority, string> = {
@@ -376,7 +376,7 @@ function IssueBadge({
 }) {
   if (totalCount === 0) {
     return (
-      <span className="rounded-full border border-emerald-300/18 bg-emerald-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-emerald-100/85">
+      <span className="rounded-full border border-emerald-300/18 bg-emerald-400/[0.055] px-2 py-0.5 text-[10px] font-medium text-emerald-100">
         Ready
       </span>
     );
@@ -384,7 +384,7 @@ function IssueBadge({
 
   if (criticalCount > 0) {
     return (
-      <span className="rounded-full border border-red-300/20 bg-red-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-red-100/90">
+      <span className="rounded-full border border-rose-400/20 bg-rose-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-rose-100">
         {criticalCount} critical
         {totalCount > criticalCount ? ` · ${totalCount}` : ""}
       </span>
@@ -392,7 +392,7 @@ function IssueBadge({
   }
 
   return (
-    <span className="rounded-full border border-yellow-300/20 bg-yellow-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-yellow-100/90">
+    <span className="rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-2 py-0.5 text-[10px] font-medium text-amber-100">
       {warningCount} warning{warningCount === 1 ? "" : "s"}
     </span>
   );

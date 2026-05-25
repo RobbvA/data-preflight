@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080d1a;
+  --background: #070b14;
   --foreground: #e5e7eb;
 }
 
@@ -18,13 +18,17 @@
 
 html {
   background: var(--background);
+  scroll-behavior: smooth;
 }
 
 body {
   min-height: 100vh;
-  background: var(--background);
+  background:
+    radial-gradient(circle at top, rgba(30, 41, 59, 0.34), transparent 34rem),
+    linear-gradient(180deg, #070b14 0%, #080d1a 45%, #070b14 100%);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -33,25 +37,30 @@ input {
   font: inherit;
 }
 
+button,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
 ::selection {
-  background: rgba(34, 211, 238, 0.25);
+  background: rgba(125, 211, 252, 0.22);
   color: white;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.65);
+  background: rgba(2, 6, 23, 0.75);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.35);
+  background: rgba(100, 116, 139, 0.42);
   border-radius: 999px;
-  border: 2px solid rgba(15, 23, 42, 0.65);
+  border: 2px solid rgba(2, 6, 23, 0.75);
 }
 
 ::-webkit-scrollbar-thumb:hover {

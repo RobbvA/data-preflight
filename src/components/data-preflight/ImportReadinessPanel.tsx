@@ -49,22 +49,22 @@ export function ImportReadinessPanel({
   const statusTone = isBlocked ? "danger" : hasWarnings ? "warning" : "success";
 
   return (
-    <section className="rounded-[1.75rem] border border-white/10 bg-white/[0.035] p-5 shadow-2xl shadow-slate-950/25 backdrop-blur-xl">
+    <section className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-100/60">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Control center
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-white">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-50">
               Import readiness
             </h2>
 
             <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
           </div>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
             {importReadinessMessage}
           </p>
 
@@ -95,21 +95,21 @@ export function ImportReadinessPanel({
           )}
         </div>
 
-        <aside className="rounded-2xl border border-white/10 bg-[#0f172a]/60 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+        <aside className="rounded-2xl border border-slate-700/45 bg-slate-950/35 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
             Trusted export
           </p>
 
-          <h3 className="mt-2 text-base font-semibold text-white">
+          <h3 className="mt-2 text-base font-semibold text-slate-50">
             Export clean output
           </h3>
 
-          <p className="mt-1 text-sm leading-6 text-slate-400">
+          <p className="mt-1 text-sm leading-6 text-slate-500">
             Export only rows that passed mapping and validation checks.
           </p>
 
           {!canExport && (
-            <div className="mt-4 rounded-xl border border-yellow-300/18 bg-yellow-400/[0.06] p-3 text-xs leading-5 text-yellow-100/90">
+            <div className="mt-4 rounded-xl border border-amber-300/16 bg-amber-300/[0.055] p-3 text-xs leading-5 text-amber-100/85">
               Clean export is disabled until mappings are safe and at least one
               clean invoice is available.
             </div>
@@ -122,7 +122,7 @@ export function ImportReadinessPanel({
                 onDownloadCleanCsv("clean-invoices.csv", cleanRows)
               }
               disabled={!canExport}
-              className="rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-35"
             >
               Download clean CSV
             </button>
@@ -131,7 +131,7 @@ export function ImportReadinessPanel({
               type="button"
               onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
               disabled={issues.length === 0}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/[0.075] disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-slate-700/60 bg-slate-900/55 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
             >
               Download issue report
             </button>
@@ -144,7 +144,7 @@ export function ImportReadinessPanel({
                 )
               }
               disabled={!canExport}
-              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/[0.075] disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl border border-slate-700/60 bg-slate-900/55 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
             >
               Copy clean JSON
             </button>
@@ -167,13 +167,13 @@ function Metric({
   const toneClasses = {
     neutral: "text-slate-100",
     success: "text-emerald-100",
-    warning: "text-yellow-100",
-    danger: "text-red-100",
+    warning: "text-amber-100",
+    danger: "text-rose-100",
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
-      <p className="text-[11px] text-slate-500">{label}</p>
+    <div className="rounded-2xl border border-slate-700/45 bg-slate-950/30 p-3">
+      <p className="text-[11px] text-slate-600">{label}</p>
       <p className={`mt-1 text-2xl font-semibold ${toneClasses[tone]}`}>
         {value}
       </p>
@@ -189,10 +189,10 @@ function StatusPill({
   children: ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-yellow-300/20 bg-yellow-400/[0.08] text-yellow-100/90",
-    danger: "border-red-300/20 bg-red-400/[0.08] text-red-100/90",
-    success: "border-emerald-300/20 bg-emerald-400/[0.08] text-emerald-100/90",
-    info: "border-violet-300/18 bg-violet-400/[0.07] text-violet-100/85",
+    warning: "border-amber-300/20 bg-amber-300/[0.07] text-amber-100",
+    danger: "border-rose-400/20 bg-rose-400/[0.07] text-rose-100",
+    success: "border-emerald-300/18 bg-emerald-400/[0.055] text-emerald-100",
+    info: "border-slate-500/30 bg-slate-700/25 text-slate-300",
   };
 
   return (
