@@ -48,6 +48,14 @@ export function ImportReadinessPanel({
 
   const statusTone = isBlocked ? "danger" : hasWarnings ? "warning" : "success";
 
+  const nextAction = getNextActionMessage({
+    hasIncompleteMapping,
+    hasDuplicateMappings,
+    blockedCount,
+    warningCount,
+    cleanCount,
+  });
+
   return (
     <section className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
       <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
@@ -67,6 +75,24 @@ export function ImportReadinessPanel({
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
             {importReadinessMessage}
           </p>
+
+          <div
+            className={`mt-4 rounded-2xl border p-3 ${
+              isBlocked
+                ? "border-rose-400/18 bg-rose-400/[0.055]"
+                : hasWarnings
+                  ? "border-amber-300/18 bg-amber-300/[0.055]"
+                  : "border-emerald-300/16 bg-emerald-400/[0.045]"
+            }`}
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Next action
+            </p>
+
+            <p className="mt-1 text-sm font-medium text-slate-100">
+              {nextAction}
+            </p>
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <Metric label="Total invoices" value={totalInvoices} />
@@ -153,6 +179,46 @@ export function ImportReadinessPanel({
       </div>
     </section>
   );
+}
+
+function getNextActionMessage({
+  hasIncompleteMapping,
+  hasDuplicateMappings,
+  blockedCount,
+  warningCount,
+  cleanCount,
+}: {
+  hasIncompleteMapping: boolean;
+  hasDuplicateMappings: boolean;
+  blockedCount: number;
+  warningCount: number;
+  cleanCount: number;
+}) {
+  if (hasIncompleteMapping) {
+    return "Open field mapping and complete the required invoice fields before reviewing rows.";
+  }
+
+  if (hasDuplicateMappings) {
+    return "Open field mapping and resolve duplicate mappings before export.";
+  }
+
+  if (blockedCount > 0) {
+    return `${blockedCount} blocked invoice${
+      blockedCount === 1 ? "" : "s"
+    } need fixes before export. Start with the Blocked invoices section below.`;
+  }
+
+  if (warningCount > 0) {
+    return `No blocking issues found. Review ${warningCount} warning${
+      warningCount === 1 ? "" : "s"
+    } in the Needs review section before export.`;
+  }
+
+  if (cleanCount > 0) {
+    return "All mapped invoices are import-ready. Export the clean output when ready.";
+  }
+
+  return "Upload invoice data to start the preflight check.";
 }
 
 function Metric({

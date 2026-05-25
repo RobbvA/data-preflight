@@ -149,6 +149,7 @@ export function DataSetPreview({
               const warningIssues = item.issues.filter(
                 (issue) => issue.severity === "warning",
               );
+              const mainIssue = item.issues[0];
 
               return (
                 <Fragment key={`${title}-${item.rowIndex}`}>
@@ -226,14 +227,7 @@ export function DataSetPreview({
                       </div>
                     </div>
 
-                    {item.issues.length > 0 && (
-                      <p className="mt-3 line-clamp-1 border-t border-slate-700/35 pt-3 text-xs text-slate-500">
-                        <span className="font-medium text-slate-300">
-                          Main issue:
-                        </span>{" "}
-                        {item.issues[0]?.problem}
-                      </p>
-                    )}
+                    {mainIssue && <MainIssueAlert issue={mainIssue} />}
                   </article>
 
                   {isSelected && (
@@ -331,6 +325,52 @@ export function DataSetPreview({
           </div>
         ))}
     </section>
+  );
+}
+
+function MainIssueAlert({
+  issue,
+}: {
+  issue: InvoicePreviewItem["issues"][number];
+}) {
+  const isCritical = issue.severity === "critical";
+
+  return (
+    <div
+      className={`mt-4 rounded-xl border p-3 ${
+        isCritical
+          ? "border-rose-400/18 bg-rose-400/[0.055]"
+          : "border-amber-300/18 bg-amber-300/[0.055]"
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] ${
+            isCritical
+              ? "border-rose-400/20 bg-rose-400/[0.08] text-rose-100"
+              : "border-amber-300/20 bg-amber-300/[0.08] text-amber-100"
+          }`}
+        >
+          Main issue
+        </span>
+
+        <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
+          {issue.field}
+        </span>
+
+        <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
+          {formatRiskLabel(issue.risk)}
+        </span>
+      </div>
+
+      <p className="mt-2 text-sm font-semibold text-slate-50">
+        {issue.problem}
+      </p>
+
+      <p className="mt-1 text-xs leading-5 text-slate-400">
+        <span className="font-medium text-slate-200">Fix:</span> {issue.fix}
+      </p>
+    </div>
   );
 }
 
