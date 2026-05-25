@@ -288,26 +288,26 @@ export function CsvUploader() {
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#080d1a] px-5 py-5 text-slate-100 sm:px-6 lg:px-8">
+    <main className="min-h-screen overflow-hidden bg-[#070b14] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-220px] h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-cyan-500/16 blur-3xl" />
-        <div className="absolute right-[-180px] top-32 h-[520px] w-[680px] rounded-full bg-violet-500/12 blur-3xl" />
-        <div className="absolute bottom-[-180px] left-[-120px] h-[440px] w-[660px] rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.10),_transparent_35%),linear-gradient(180deg,_rgba(15,23,42,0.22),_rgba(8,13,26,1))]" />
+        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-slate-500/12 blur-3xl" />
+        <div className="absolute right-[-220px] top-28 h-[500px] w-[620px] rounded-full bg-blue-500/7 blur-3xl" />
+        <div className="absolute bottom-[-220px] left-[-160px] h-[420px] w-[620px] rounded-full bg-cyan-500/6 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0.18),_rgba(7,11,20,1))]" />
       </div>
 
-      <div className="mx-auto max-w-[1380px] space-y-6">
-        <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_380px] lg:items-start">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200/80">
+      <div className="mx-auto max-w-[1380px] space-y-7">
+        <section className="grid gap-6 pt-4 lg:grid-cols-[1fr_400px] lg:items-start">
+          <div className="py-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
               Data profile preflight
             </p>
 
-            <h1 className="mt-3 max-w-3xl bg-gradient-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
+            <h1 className="mt-4 max-w-3xl bg-gradient-to-r from-slate-50 via-slate-200 to-cyan-100 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
               DataPreflight
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-400">
               A trust layer for messy business data exports. Map headers,
               validate business rules, inspect issues, and export only trusted
               data.
@@ -374,8 +374,8 @@ export function CsvUploader() {
         )}
 
         {!hasHeaders && (
-          <section className="rounded-[1.75rem] border border-dashed border-white/12 bg-white/[0.03] p-5 shadow-xl shadow-slate-950/15 backdrop-blur">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <section className="rounded-[1.75rem] border border-dashed border-slate-700/55 bg-slate-900/35 p-5 shadow-xl shadow-black/15 backdrop-blur">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
               Mapping setup
             </p>
 
@@ -383,7 +383,7 @@ export function CsvUploader() {
               Waiting for CSV headers
             </h2>
 
-            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
               Upload a CSV to detect headers and create the field mapping layer.
             </p>
           </section>
@@ -396,14 +396,14 @@ export function CsvUploader() {
         <button
           type="button"
           onClick={() => setIsFieldMappingOpen(true)}
-          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-cyan-300/10 bg-[#10182b]/70 text-cyan-100/70 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-cyan-200/25 hover:bg-[#14203a]/90 hover:text-white"
+          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-slate-700/60 bg-slate-950/70 text-slate-400 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-cyan-300/25 hover:bg-slate-900 hover:text-cyan-100"
           aria-label="Open field mapping panel"
           title="Open field mapping"
         >
           <span className="text-base leading-none">⚙</span>
 
           {(hasIncompleteMapping || hasDuplicateMappings) && (
-            <span className="absolute left-1 top-2 h-2 w-2 rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/40" />
+            <span className="absolute left-1 top-2 h-2 w-2 rounded-full bg-amber-300 shadow-lg shadow-amber-300/35" />
           )}
         </button>
       )}
@@ -414,32 +414,32 @@ export function CsvUploader() {
             type="button"
             aria-label="Close mapping panel"
             onClick={() => setIsFieldMappingOpen(false)}
-            className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
           />
 
-          <aside className="absolute right-0 top-0 h-full w-full max-w-2xl overflow-y-auto border-l border-white/12 bg-[#0d1528]/95 p-4 shadow-2xl shadow-black/40 backdrop-blur-xl">
-            <div className="mb-4 flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+          <aside className="absolute right-0 top-0 h-full w-full max-w-2xl overflow-y-auto border-l border-slate-700/55 bg-[#090f1d]/95 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl">
+            <div className="mb-5 flex items-start justify-between gap-4 border-b border-slate-700/45 pb-5">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-100/70">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Configuration layer
                 </p>
 
-                <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-50">
                   Field mapping
                 </h2>
 
-                <p className="mt-1 max-w-xl text-sm leading-6 text-slate-400">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
                   Review how CSV headers are mapped into invoice fields. Keep
                   this closed during normal invoice review.
                 </p>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
                     {mappedCount}/{mappingSuggestions.length} mapped
                   </span>
 
                   {(hasIncompleteMapping || hasDuplicateMappings) && (
-                    <span className="rounded-full border border-yellow-300/20 bg-yellow-400/[0.08] px-2.5 py-1 text-[11px] font-medium text-yellow-100/90">
+                    <span className="rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-2.5 py-1 text-[11px] font-medium text-amber-100">
                       Needs review
                     </span>
                   )}
@@ -449,7 +449,7 @@ export function CsvUploader() {
               <button
                 type="button"
                 onClick={() => setIsFieldMappingOpen(false)}
-                className="rounded-full border border-white/12 bg-white/[0.055] px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.09] hover:text-white"
+                className="rounded-full border border-slate-700/70 bg-slate-950/40 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100"
               >
                 Close
               </button>
@@ -472,10 +472,10 @@ export function CsvUploader() {
 
 function ProductFooter() {
   return (
-    <footer className="border-t border-white/10 py-6">
-      <div className="flex flex-col gap-3 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
+    <footer className="border-t border-slate-800/80 py-6">
+      <div className="flex flex-col gap-3 text-xs text-slate-600 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="font-medium text-slate-400">
+          <p className="font-medium text-slate-500">
             © 2026 DataPreflight. All rights reserved.
           </p>
 
