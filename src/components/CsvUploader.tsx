@@ -297,7 +297,7 @@ export function CsvUploader() {
       </div>
 
       <div className="mx-auto max-w-[1380px] space-y-7">
-        <section className="space-y-5 pt-4">
+        <section className="grid gap-6 pt-4 lg:grid-cols-[1fr_400px] lg:items-start">
           <div className="py-2">
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
               Data profile preflight
@@ -314,18 +314,16 @@ export function CsvUploader() {
             </p>
           </div>
 
-          {!hasUploadedRows && (
-            <UploadSection
-              fileName={fileName}
-              isLoading={isLoading}
-              error={error}
-              hasActiveFile={
-                rows.length > 0 || Boolean(error) || Boolean(fileName)
-              }
-              onFileChange={handleFileChange}
-              onReset={resetFlow}
-            />
-          )}
+          <UploadSection
+            fileName={fileName}
+            isLoading={isLoading}
+            error={error}
+            hasActiveFile={
+              rows.length > 0 || Boolean(error) || Boolean(fileName)
+            }
+            onFileChange={handleFileChange}
+            onReset={resetFlow}
+          />
         </section>
 
         {hasUploadedRows && (
@@ -344,19 +342,6 @@ export function CsvUploader() {
             issues={validationResult.issues}
             onDownloadCleanCsv={downloadCsv}
             onDownloadErrorCsv={downloadErrorCsv}
-          />
-        )}
-
-        {hasUploadedRows && (
-          <UploadSection
-            fileName={fileName}
-            isLoading={isLoading}
-            error={error}
-            hasActiveFile={
-              rows.length > 0 || Boolean(error) || Boolean(fileName)
-            }
-            onFileChange={handleFileChange}
-            onReset={resetFlow}
           />
         )}
 
