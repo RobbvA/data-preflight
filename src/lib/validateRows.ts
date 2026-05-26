@@ -1,4 +1,16 @@
 import type { CsvRow } from "@/lib/parseCsv";
+import {
+  isValidCountryCode,
+  isValidCurrencyCode,
+} from "@/lib/normalization/normalizeCode";
+import {
+  isValidIsoDate,
+  parseIsoDate,
+} from "@/lib/normalization/normalizeDate";
+import {
+  normalizeInvoiceRow,
+  type NormalizedInvoiceRow,
+} from "@/lib/normalization/normalizeInvoiceRow";
 import { parseNormalizedNumber } from "@/lib/normalization/normalizeNumber";
 import {
   invoiceAllowedStatuses,
@@ -67,6 +79,7 @@ export type ValidationResult = {
 type InvoiceValidationContext = {
   rows: CsvRow[];
   row: CsvRow;
+  normalizedRow: NormalizedInvoiceRow;
   rowIndex: number;
   invoiceNumberCounts: Record<string, number>;
 };
@@ -98,13 +111,15 @@ const invoiceValidationRules: InvoiceValidationRule[] = [
 ];
 
 export function validateRows(rows: CsvRow[]): ValidationResult {
-  const invoiceNumberCounts = countInvoiceNumbers(rows);
+  const normalizedRows = rows.map(normalizeInvoiceRow);
+  const invoiceNumberCounts = countInvoiceNumbers(normalizedRows);
   const issues: ValidationIssue[] = [];
 
   rows.forEach((row, index) => {
     const context: InvoiceValidationContext = {
       rows,
       row,
+      normalizedRow: normalizedRows[index],
       rowIndex: index + 1,
       invoiceNumberCounts,
     };
@@ -151,12 +166,13 @@ function validateEmptyRow({
 
 function validateRequiredFields({
   row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
   if (isEmptyRow(row)) return [];
 
   return requiredFields
-    .filter((field) => !getCellValue(row, field))
+    .filter((field) => !normalizedRow[field])
     .map((field) =>
       createIssue({
         rowIndex,
@@ -173,12 +189,10 @@ function validateRequiredFields({
 }
 
 function validateEmail({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const email = getCellValue(row, "email");
-
-  if (!email || isValidEmail(email)) return [];
+  if (!normalizedRow.email || isValidEmail(normalizedRow.email)) return [];
 
   return [
     createIssue({
@@ -196,14 +210,13 @@ function validateEmail({
 }
 
 function validateAmount({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const amountValue = getCellValue(row, "amount");
-  const amount = parseNormalizedNumber(amountValue);
+  const amount = parseNormalizedNumber(normalizedRow.amount);
   const issues: ValidationIssue[] = [];
 
-  if (amountValue && amount === null) {
+  if (normalizedRow.amount && amount === null) {
     issues.push(
       createIssue({
         rowIndex,
@@ -239,14 +252,13 @@ function validateAmount({
 }
 
 function validateVat({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const vatValue = getCellValue(row, "vat");
-  const vat = parseNormalizedNumber(vatValue);
+  const vat = parseNormalizedNumber(normalizedRow.vat);
   const issues: ValidationIssue[] = [];
 
-  if (vatValue && vat === null) {
+  if (normalizedRow.vat && vat === null) {
     issues.push(
       createIssue({
         rowIndex,
@@ -282,11 +294,11 @@ function validateVat({
 }
 
 function validateVatConsistency({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const amount = parseNormalizedNumber(getCellValue(row, "amount"));
-  const vat = parseNormalizedNumber(getCellValue(row, "vat"));
+  const amount = parseNormalizedNumber(normalizedRow.amount);
+  const vat = parseNormalizedNumber(normalizedRow.vat);
   const issues: ValidationIssue[] = [];
 
   if (amount === null || vat === null || amount <= 0) return issues;
@@ -329,11 +341,11 @@ function validateVatConsistency({
 }
 
 function validateDuplicateInvoiceNumber({
-  row,
+  normalizedRow,
   rowIndex,
   invoiceNumberCounts,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const invoiceNumber = normalizeKey(getCellValue(row, "invoice_number"));
+  const invoiceNumber = normalizedRow.normalized_invoice_key;
 
   if (!invoiceNumber || invoiceNumberCounts[invoiceNumber] <= 1) return [];
 
@@ -353,14 +365,12 @@ function validateDuplicateInvoiceNumber({
 }
 
 function validateStatus({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const status = getCellValue(row, "status");
+  const status = normalizedRow.status;
 
-  if (!status || allowedStatuses.includes(status.toLowerCase() as never)) {
-    return [];
-  }
+  if (!status || allowedStatuses.includes(status as never)) return [];
 
   return [
     createIssue({
@@ -378,10 +388,10 @@ function validateStatus({
 }
 
 function validateCountry({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const country = getCellValue(row, "country");
+  const country = normalizedRow.country;
 
   if (!country) {
     return [
@@ -417,10 +427,10 @@ function validateCountry({
 }
 
 function validateCurrency({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const currency = getCellValue(row, "currency");
+  const currency = normalizedRow.currency;
 
   if (!currency) {
     return [
@@ -456,10 +466,10 @@ function validateCurrency({
 }
 
 function validateInvoiceDate({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const invoiceDate = getCellValue(row, "invoice_date");
+  const invoiceDate = normalizedRow.invoice_date;
 
   if (!invoiceDate || isValidIsoDate(invoiceDate)) return [];
 
@@ -479,10 +489,10 @@ function validateInvoiceDate({
 }
 
 function validateDueDate({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const dueDate = getCellValue(row, "due_date");
+  const dueDate = normalizedRow.due_date;
 
   if (!dueDate || isValidIsoDate(dueDate)) return [];
 
@@ -502,11 +512,11 @@ function validateDueDate({
 }
 
 function validatePaymentTerms({
-  row,
+  normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const invoiceDate = getCellValue(row, "invoice_date");
-  const dueDate = getCellValue(row, "due_date");
+  const invoiceDate = normalizedRow.invoice_date;
+  const dueDate = normalizedRow.due_date;
 
   if (
     !invoiceDate ||
@@ -540,10 +550,6 @@ function createIssue(issue: ValidationIssue): ValidationIssue {
   return issue;
 }
 
-function getCellValue(row: CsvRow, field: string) {
-  return row[field]?.trim() ?? "";
-}
-
 function isEmptyRow(row: CsvRow) {
   return Object.values(row).every((value) => !value?.trim());
 }
@@ -552,36 +558,9 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-function isValidCountryCode(value: string) {
-  return /^[A-Z]{2}$/.test(value.trim().toUpperCase());
-}
-
-function isValidCurrencyCode(value: string) {
-  return /^[A-Z]{3}$/.test(value.trim().toUpperCase());
-}
-
-function isValidIsoDate(value: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return false;
-
-  const [year, month, day] = value.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-
-  return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
-  );
-}
-
-function parseIsoDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-
-  return new Date(Date.UTC(year, month - 1, day));
-}
-
-function countInvoiceNumbers(rows: CsvRow[]) {
+function countInvoiceNumbers(rows: NormalizedInvoiceRow[]) {
   return rows.reduce<Record<string, number>>((accumulator, row) => {
-    const invoiceNumber = normalizeKey(row.invoice_number);
+    const invoiceNumber = row.normalized_invoice_key;
 
     if (!invoiceNumber) return accumulator;
 
@@ -589,10 +568,6 @@ function countInvoiceNumbers(rows: CsvRow[]) {
 
     return accumulator;
   }, {});
-}
-
-function normalizeKey(value?: string) {
-  return value?.trim().toLowerCase() ?? "";
 }
 
 function formatFieldName(field: string) {
