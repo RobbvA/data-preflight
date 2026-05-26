@@ -63,333 +63,53 @@ export type ValidationResult = {
   errorRows: CsvRow[];
 };
 
+type InvoiceValidationContext = {
+  rows: CsvRow[];
+  row: CsvRow;
+  rowIndex: number;
+  invoiceNumberCounts: Record<string, number>;
+};
+
+type InvoiceValidationRule = (
+  context: InvoiceValidationContext,
+) => ValidationIssue[];
+
 const requiredFields = invoiceProfile.fields
   .filter((field) => field.required)
   .map((field) => field.key);
 
 const allowedStatuses = [...invoiceAllowedStatuses];
 
+const invoiceValidationRules: InvoiceValidationRule[] = [
+  validateEmptyRow,
+  validateRequiredFields,
+  validateEmail,
+  validateAmount,
+  validateVat,
+  validateVatConsistency,
+  validateDuplicateInvoiceNumber,
+  validateStatus,
+  validateCountry,
+  validateCurrency,
+  validateInvoiceDate,
+  validateDueDate,
+  validatePaymentTerms,
+];
+
 export function validateRows(rows: CsvRow[]): ValidationResult {
-  const issues: ValidationIssue[] = [];
   const invoiceNumberCounts = countInvoiceNumbers(rows);
+  const issues: ValidationIssue[] = [];
 
   rows.forEach((row, index) => {
-    const rowIndex = index + 1;
+    const context: InvoiceValidationContext = {
+      rows,
+      row,
+      rowIndex: index + 1,
+      invoiceNumberCounts,
+    };
 
-    if (isEmptyRow(row)) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "row",
-          type: "empty-row",
-          category: "row_quality",
-          problem: "This row is empty.",
-          why: "Empty rows can create failed imports, blank records, or meaningless entries in downstream systems.",
-          fix: "Remove the empty row from the CSV before importing.",
-          severity: "critical",
-          risk: "import_failure",
-        }),
-      );
-
-      return;
-    }
-
-    requiredFields.forEach((field) => {
-      if (!getCellValue(row, field)) {
-        issues.push(
-          createIssue({
-            rowIndex,
-            field,
-            type: "required",
-            category: "required_data",
-            problem: `${formatFieldName(field)} is missing.`,
-            why: "This field is required to safely identify, validate, and import the invoice record.",
-            fix: `Add a value for ${formatFieldName(field)} before exporting the clean data.`,
-            severity: "critical",
-            risk: "import_failure",
-          }),
-        );
-      }
-    });
-
-    const email = getCellValue(row, "email");
-    const amountValue = getCellValue(row, "amount");
-    const vatValue = getCellValue(row, "vat");
-    const status = getCellValue(row, "status");
-    const country = getCellValue(row, "country");
-    const currency = getCellValue(row, "currency");
-    const invoiceDate = getCellValue(row, "invoice_date");
-    const dueDate = getCellValue(row, "due_date");
-    const invoiceNumber = normalizeKey(getCellValue(row, "invoice_number"));
-
-    if (email && !isValidEmail(email)) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "email",
-          type: "email",
-          category: "contact_data",
-          problem: "Email address is invalid.",
-          why: "Invalid email addresses can break billing communication, invoice routing, customer matching, or automated reminders.",
-          fix: "Use a valid email address such as finance@example.com.",
-          severity: "critical",
-          risk: "workflow_inconsistency",
-        }),
-      );
-    }
-
-    const amount = parseNumber(amountValue);
-    const vat = parseNumber(vatValue);
-
-    if (amountValue && amount === null) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "amount",
-          type: "number",
-          category: "financial",
-          problem: "Amount is not a valid number.",
-          why: "Accounting and reporting systems need numeric invoice amounts to calculate totals, balances, and revenue correctly.",
-          fix: "Remove currency symbols, text, or invalid formatting and use a numeric value.",
-          severity: "critical",
-          risk: "financial_reporting",
-        }),
-      );
-    }
-
-    if (vatValue && vat === null) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "vat",
-          type: "number",
-          category: "tax",
-          problem: "VAT is not a valid number.",
-          why: "VAT must be numeric so tax totals, declarations, and invoice totals can be calculated correctly.",
-          fix: "Remove currency symbols, text, or invalid formatting and use a numeric VAT value.",
-          severity: "critical",
-          risk: "tax_risk",
-        }),
-      );
-    }
-
-    if (amount !== null && amount <= 0) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "amount",
-          type: "amount-not-positive",
-          category: "financial",
-          problem: "Amount is zero or negative.",
-          why: "A non-positive invoice amount may indicate a credit note, refund, test record, or incorrect export.",
-          fix: "Verify whether this row is a normal invoice, credit note, refund, or corrected amount.",
-          severity: "warning",
-          risk: "financial_reporting",
-        }),
-      );
-    }
-
-    if (vat !== null && vat < 0) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "vat",
-          type: "vat-negative",
-          category: "tax",
-          problem: "VAT is negative.",
-          why: "Negative VAT can indicate a refund, credit note, incorrectly mapped VAT column, or reversed transaction.",
-          fix: "Check whether the VAT value is correct or whether this row should be handled as a separate credit/refund flow.",
-          severity: "warning",
-          risk: "tax_risk",
-        }),
-      );
-    }
-
-    if (amount !== null && vat !== null && amount > 0 && vat > amount) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "vat",
-          type: "vat-higher-than-amount",
-          category: "tax",
-          problem: "VAT is higher than the invoice amount.",
-          why: "VAT higher than the invoice amount is usually invalid and may cause accounting import errors or incorrect tax reporting.",
-          fix: "Check whether the amount and VAT columns were swapped, exported incorrectly, or mapped to the wrong fields.",
-          severity: "warning",
-          risk: "tax_risk",
-        }),
-      );
-    }
-
-    if (amount !== null && vat !== null && amount > 0) {
-      const vatRate = vat / amount;
-
-      if (vatRate > 0.3) {
-        issues.push(
-          createIssue({
-            rowIndex,
-            field: "vat",
-            type: "suspicious-vat-rate",
-            category: "tax",
-            problem: "VAT rate looks unusually high.",
-            why: "A VAT rate above 30% is uncommon for standard invoice imports and may indicate incorrect data, wrong mapping, or a total/VAT mismatch.",
-            fix: "Verify the VAT amount and check whether the amount column includes or excludes VAT.",
-            severity: "warning",
-            risk: "tax_risk",
-          }),
-        );
-      }
-    }
-
-    if (invoiceNumber && invoiceNumberCounts[invoiceNumber] > 1) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "invoice_number",
-          type: "duplicate-invoice-number",
-          category: "duplicates",
-          problem: "Invoice number appears more than once.",
-          why: "Duplicate invoice numbers can create duplicate records, overwrite existing invoices, or cause reconciliation problems.",
-          fix: "Remove the duplicate row or assign a unique invoice number before exporting.",
-          severity: "critical",
-          risk: "duplicate_risk",
-        }),
-      );
-    }
-
-    if (status && !allowedStatuses.includes(status.toLowerCase() as never)) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "status",
-          type: "invalid-status",
-          category: "workflow",
-          problem: "Invoice status is not recognized.",
-          why: "Unexpected statuses can fail imports or create inconsistent workflow states in the target system.",
-          fix: `Use one of: ${allowedStatuses.join(", ")}.`,
-          severity: "warning",
-          risk: "workflow_inconsistency",
-        }),
-      );
-    }
-
-    if (!country) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "country",
-          type: "missing-country",
-          category: "regional",
-          problem: "Country is missing.",
-          why: "Country helps determine tax handling, currency expectations, regional rules, and import routing.",
-          fix: "Add a valid two-letter country code such as NL, DE, or FR.",
-          severity: "warning",
-          risk: "regional_compliance",
-        }),
-      );
-    }
-
-    if (country && !isValidCountryCode(country)) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "country",
-          type: "invalid-country",
-          category: "regional",
-          problem: "Country code is invalid.",
-          why: "Invalid country codes can cause incorrect tax handling, failed imports, or wrong regional classification.",
-          fix: "Use a two-letter uppercase country code such as NL, DE, or FR.",
-          severity: "warning",
-          risk: "regional_compliance",
-        }),
-      );
-    }
-
-    if (!currency) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "currency",
-          type: "missing-currency",
-          category: "financial",
-          problem: "Currency is missing.",
-          why: "Missing currency makes invoice totals ambiguous, especially when data is imported into financial or reporting systems.",
-          fix: "Add a valid three-letter currency code such as EUR, USD, or GBP.",
-          severity: "warning",
-          risk: "financial_reporting",
-        }),
-      );
-    }
-
-    if (currency && !isValidCurrencyCode(currency)) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "currency",
-          type: "invalid-currency",
-          category: "financial",
-          problem: "Currency code is invalid.",
-          why: "Invalid currency codes can cause failed imports, incorrect conversion, or unreliable financial reporting.",
-          fix: "Use a three-letter uppercase currency code such as EUR, USD, or GBP.",
-          severity: "warning",
-          risk: "financial_reporting",
-        }),
-      );
-    }
-
-    if (invoiceDate && !isValidIsoDate(invoiceDate)) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "invoice_date",
-          type: "invalid-invoice-date",
-          category: "dates",
-          problem: "Invoice date is invalid.",
-          why: "Invalid invoice dates can break reporting periods, payment terms, accounting imports, or aging analysis.",
-          fix: "Use a valid date in YYYY-MM-DD format.",
-          severity: "warning",
-          risk: "financial_reporting",
-        }),
-      );
-    }
-
-    if (dueDate && !isValidIsoDate(dueDate)) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "due_date",
-          type: "invalid-due-date",
-          category: "dates",
-          problem: "Due date is invalid.",
-          why: "Invalid due dates can break payment tracking, reminders, cash-flow planning, and aging reports.",
-          fix: "Use a valid date in YYYY-MM-DD format.",
-          severity: "warning",
-          risk: "payment_terms",
-        }),
-      );
-    }
-
-    if (
-      invoiceDate &&
-      dueDate &&
-      isValidIsoDate(invoiceDate) &&
-      isValidIsoDate(dueDate) &&
-      parseIsoDate(dueDate).getTime() < parseIsoDate(invoiceDate).getTime()
-    ) {
-      issues.push(
-        createIssue({
-          rowIndex,
-          field: "due_date",
-          type: "due-before-invoice-date",
-          category: "dates",
-          problem: "Due date is before the invoice date.",
-          why: "A due date before the invoice date usually indicates incorrect payment terms, swapped date fields, or invalid source data.",
-          fix: "Check whether invoice date and due date are mapped correctly and correct the payment terms if needed.",
-          severity: "warning",
-          risk: "payment_terms",
-        }),
-      );
-    }
+    const rowIssues = invoiceValidationRules.flatMap((rule) => rule(context));
+    issues.push(...rowIssues);
   });
 
   const rowsWithCriticalIssues = new Set(
@@ -405,6 +125,414 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
     ),
     errorRows: rows.filter((_, index) => rowsWithCriticalIssues.has(index + 1)),
   };
+}
+
+function validateEmptyRow({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  if (!isEmptyRow(row)) return [];
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "row",
+      type: "empty-row",
+      category: "row_quality",
+      problem: "This row is empty.",
+      why: "Empty rows can create failed imports, blank records, or meaningless entries in downstream systems.",
+      fix: "Remove the empty row from the CSV before importing.",
+      severity: "critical",
+      risk: "import_failure",
+    }),
+  ];
+}
+
+function validateRequiredFields({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  if (isEmptyRow(row)) return [];
+
+  return requiredFields
+    .filter((field) => !getCellValue(row, field))
+    .map((field) =>
+      createIssue({
+        rowIndex,
+        field,
+        type: "required",
+        category: "required_data",
+        problem: `${formatFieldName(field)} is missing.`,
+        why: "This field is required to safely identify, validate, and import the invoice record.",
+        fix: `Add a value for ${formatFieldName(field)} before exporting the clean data.`,
+        severity: "critical",
+        risk: "import_failure",
+      }),
+    );
+}
+
+function validateEmail({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const email = getCellValue(row, "email");
+
+  if (!email || isValidEmail(email)) return [];
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "email",
+      type: "email",
+      category: "contact_data",
+      problem: "Email address is invalid.",
+      why: "Invalid email addresses can break billing communication, invoice routing, customer matching, or automated reminders.",
+      fix: "Use a valid email address such as finance@example.com.",
+      severity: "critical",
+      risk: "workflow_inconsistency",
+    }),
+  ];
+}
+
+function validateAmount({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const amountValue = getCellValue(row, "amount");
+  const amount = parseNumber(amountValue);
+  const issues: ValidationIssue[] = [];
+
+  if (amountValue && amount === null) {
+    issues.push(
+      createIssue({
+        rowIndex,
+        field: "amount",
+        type: "number",
+        category: "financial",
+        problem: "Amount is not a valid number.",
+        why: "Accounting and reporting systems need numeric invoice amounts to calculate totals, balances, and revenue correctly.",
+        fix: "Remove currency symbols, text, or invalid formatting and use a numeric value.",
+        severity: "critical",
+        risk: "financial_reporting",
+      }),
+    );
+  }
+
+  if (amount !== null && amount <= 0) {
+    issues.push(
+      createIssue({
+        rowIndex,
+        field: "amount",
+        type: "amount-not-positive",
+        category: "financial",
+        problem: "Amount is zero or negative.",
+        why: "A non-positive invoice amount may indicate a credit note, refund, test record, or incorrect export.",
+        fix: "Verify whether this row is a normal invoice, credit note, refund, or corrected amount.",
+        severity: "warning",
+        risk: "financial_reporting",
+      }),
+    );
+  }
+
+  return issues;
+}
+
+function validateVat({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const vatValue = getCellValue(row, "vat");
+  const vat = parseNumber(vatValue);
+  const issues: ValidationIssue[] = [];
+
+  if (vatValue && vat === null) {
+    issues.push(
+      createIssue({
+        rowIndex,
+        field: "vat",
+        type: "number",
+        category: "tax",
+        problem: "VAT is not a valid number.",
+        why: "VAT must be numeric so tax totals, declarations, and invoice totals can be calculated correctly.",
+        fix: "Remove currency symbols, text, or invalid formatting and use a numeric VAT value.",
+        severity: "critical",
+        risk: "tax_risk",
+      }),
+    );
+  }
+
+  if (vat !== null && vat < 0) {
+    issues.push(
+      createIssue({
+        rowIndex,
+        field: "vat",
+        type: "vat-negative",
+        category: "tax",
+        problem: "VAT is negative.",
+        why: "Negative VAT can indicate a refund, credit note, incorrectly mapped VAT column, or reversed transaction.",
+        fix: "Check whether the VAT value is correct or whether this row should be handled as a separate credit/refund flow.",
+        severity: "warning",
+        risk: "tax_risk",
+      }),
+    );
+  }
+
+  return issues;
+}
+
+function validateVatConsistency({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const amount = parseNumber(getCellValue(row, "amount"));
+  const vat = parseNumber(getCellValue(row, "vat"));
+  const issues: ValidationIssue[] = [];
+
+  if (amount === null || vat === null || amount <= 0) return issues;
+
+  if (vat > amount) {
+    issues.push(
+      createIssue({
+        rowIndex,
+        field: "vat",
+        type: "vat-higher-than-amount",
+        category: "tax",
+        problem: "VAT is higher than the invoice amount.",
+        why: "VAT higher than the invoice amount is usually invalid and may cause accounting import errors or incorrect tax reporting.",
+        fix: "Check whether the amount and VAT columns were swapped, exported incorrectly, or mapped to the wrong fields.",
+        severity: "warning",
+        risk: "tax_risk",
+      }),
+    );
+  }
+
+  const vatRate = vat / amount;
+
+  if (vatRate > 0.3) {
+    issues.push(
+      createIssue({
+        rowIndex,
+        field: "vat",
+        type: "suspicious-vat-rate",
+        category: "tax",
+        problem: "VAT rate looks unusually high.",
+        why: "A VAT rate above 30% is uncommon for standard invoice imports and may indicate incorrect data, wrong mapping, or a total/VAT mismatch.",
+        fix: "Verify the VAT amount and check whether the amount column includes or excludes VAT.",
+        severity: "warning",
+        risk: "tax_risk",
+      }),
+    );
+  }
+
+  return issues;
+}
+
+function validateDuplicateInvoiceNumber({
+  row,
+  rowIndex,
+  invoiceNumberCounts,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const invoiceNumber = normalizeKey(getCellValue(row, "invoice_number"));
+
+  if (!invoiceNumber || invoiceNumberCounts[invoiceNumber] <= 1) return [];
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "invoice_number",
+      type: "duplicate-invoice-number",
+      category: "duplicates",
+      problem: "Invoice number appears more than once.",
+      why: "Duplicate invoice numbers can create duplicate records, overwrite existing invoices, or cause reconciliation problems.",
+      fix: "Remove the duplicate row or assign a unique invoice number before exporting.",
+      severity: "critical",
+      risk: "duplicate_risk",
+    }),
+  ];
+}
+
+function validateStatus({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const status = getCellValue(row, "status");
+
+  if (!status || allowedStatuses.includes(status.toLowerCase() as never)) {
+    return [];
+  }
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "status",
+      type: "invalid-status",
+      category: "workflow",
+      problem: "Invoice status is not recognized.",
+      why: "Unexpected statuses can fail imports or create inconsistent workflow states in the target system.",
+      fix: `Use one of: ${allowedStatuses.join(", ")}.`,
+      severity: "warning",
+      risk: "workflow_inconsistency",
+    }),
+  ];
+}
+
+function validateCountry({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const country = getCellValue(row, "country");
+
+  if (!country) {
+    return [
+      createIssue({
+        rowIndex,
+        field: "country",
+        type: "missing-country",
+        category: "regional",
+        problem: "Country is missing.",
+        why: "Country helps determine tax handling, currency expectations, regional rules, and import routing.",
+        fix: "Add a valid two-letter country code such as NL, DE, or FR.",
+        severity: "warning",
+        risk: "regional_compliance",
+      }),
+    ];
+  }
+
+  if (isValidCountryCode(country)) return [];
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "country",
+      type: "invalid-country",
+      category: "regional",
+      problem: "Country code is invalid.",
+      why: "Invalid country codes can cause incorrect tax handling, failed imports, or wrong regional classification.",
+      fix: "Use a two-letter uppercase country code such as NL, DE, or FR.",
+      severity: "warning",
+      risk: "regional_compliance",
+    }),
+  ];
+}
+
+function validateCurrency({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const currency = getCellValue(row, "currency");
+
+  if (!currency) {
+    return [
+      createIssue({
+        rowIndex,
+        field: "currency",
+        type: "missing-currency",
+        category: "financial",
+        problem: "Currency is missing.",
+        why: "Missing currency makes invoice totals ambiguous, especially when data is imported into financial or reporting systems.",
+        fix: "Add a valid three-letter currency code such as EUR, USD, or GBP.",
+        severity: "warning",
+        risk: "financial_reporting",
+      }),
+    ];
+  }
+
+  if (isValidCurrencyCode(currency)) return [];
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "currency",
+      type: "invalid-currency",
+      category: "financial",
+      problem: "Currency code is invalid.",
+      why: "Invalid currency codes can cause failed imports, incorrect conversion, or unreliable financial reporting.",
+      fix: "Use a three-letter uppercase currency code such as EUR, USD, or GBP.",
+      severity: "warning",
+      risk: "financial_reporting",
+    }),
+  ];
+}
+
+function validateInvoiceDate({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const invoiceDate = getCellValue(row, "invoice_date");
+
+  if (!invoiceDate || isValidIsoDate(invoiceDate)) return [];
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "invoice_date",
+      type: "invalid-invoice-date",
+      category: "dates",
+      problem: "Invoice date is invalid.",
+      why: "Invalid invoice dates can break reporting periods, payment terms, accounting imports, or aging analysis.",
+      fix: "Use a valid date in YYYY-MM-DD format.",
+      severity: "warning",
+      risk: "financial_reporting",
+    }),
+  ];
+}
+
+function validateDueDate({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const dueDate = getCellValue(row, "due_date");
+
+  if (!dueDate || isValidIsoDate(dueDate)) return [];
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "due_date",
+      type: "invalid-due-date",
+      category: "dates",
+      problem: "Due date is invalid.",
+      why: "Invalid due dates can break payment tracking, reminders, cash-flow planning, and aging reports.",
+      fix: "Use a valid date in YYYY-MM-DD format.",
+      severity: "warning",
+      risk: "payment_terms",
+    }),
+  ];
+}
+
+function validatePaymentTerms({
+  row,
+  rowIndex,
+}: InvoiceValidationContext): ValidationIssue[] {
+  const invoiceDate = getCellValue(row, "invoice_date");
+  const dueDate = getCellValue(row, "due_date");
+
+  if (
+    !invoiceDate ||
+    !dueDate ||
+    !isValidIsoDate(invoiceDate) ||
+    !isValidIsoDate(dueDate)
+  ) {
+    return [];
+  }
+
+  if (parseIsoDate(dueDate).getTime() >= parseIsoDate(invoiceDate).getTime()) {
+    return [];
+  }
+
+  return [
+    createIssue({
+      rowIndex,
+      field: "due_date",
+      type: "due-before-invoice-date",
+      category: "dates",
+      problem: "Due date is before the invoice date.",
+      why: "A due date before the invoice date usually indicates incorrect payment terms, swapped date fields, or invalid source data.",
+      fix: "Check whether invoice date and due date are mapped correctly and correct the payment terms if needed.",
+      severity: "warning",
+      risk: "payment_terms",
+    }),
+  ];
 }
 
 function createIssue(issue: ValidationIssue): ValidationIssue {
