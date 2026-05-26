@@ -1,4 +1,5 @@
 import type { CsvRow } from "@/lib/parseCsv";
+import { parseNormalizedNumber } from "@/lib/normalization/normalizeNumber";
 import {
   invoiceAllowedStatuses,
   invoiceProfile,
@@ -199,7 +200,7 @@ function validateAmount({
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
   const amountValue = getCellValue(row, "amount");
-  const amount = parseNumber(amountValue);
+  const amount = parseNormalizedNumber(amountValue);
   const issues: ValidationIssue[] = [];
 
   if (amountValue && amount === null) {
@@ -242,7 +243,7 @@ function validateVat({
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
   const vatValue = getCellValue(row, "vat");
-  const vat = parseNumber(vatValue);
+  const vat = parseNormalizedNumber(vatValue);
   const issues: ValidationIssue[] = [];
 
   if (vatValue && vat === null) {
@@ -284,8 +285,8 @@ function validateVatConsistency({
   row,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const amount = parseNumber(getCellValue(row, "amount"));
-  const vat = parseNumber(getCellValue(row, "vat"));
+  const amount = parseNormalizedNumber(getCellValue(row, "amount"));
+  const vat = parseNormalizedNumber(getCellValue(row, "vat"));
   const issues: ValidationIssue[] = [];
 
   if (amount === null || vat === null || amount <= 0) return issues;
@@ -549,27 +550,6 @@ function isEmptyRow(row: CsvRow) {
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-}
-
-function parseNumber(value: string) {
-  const cleanedValue = normalizeNumberString(value);
-
-  if (!cleanedValue) return null;
-
-  const parsedValue = Number(cleanedValue);
-
-  return Number.isFinite(parsedValue) ? parsedValue : null;
-}
-
-function normalizeNumberString(value: string) {
-  const trimmedValue = value.trim();
-
-  if (!trimmedValue) return "";
-
-  return trimmedValue
-    .replace(/[€$£\s]/g, "")
-    .replace(/\.(?=\d{3}(,|$))/g, "")
-    .replace(",", ".");
 }
 
 function isValidCountryCode(value: string) {
