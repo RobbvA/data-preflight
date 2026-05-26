@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 
 import type { CsvRow } from "@/lib/parseCsv";
+import {
+  getExportBlockerSummaries,
+  getExportSafetyMessage,
+} from "@/lib/exportData";
 import type { ValidationIssue } from "@/lib/validateRows";
 
 type ImportReadinessPanelProps = {
@@ -56,9 +60,19 @@ export function ImportReadinessPanel({
     cleanCount,
   });
 
+  const exportSafetyMessage = getExportSafetyMessage({
+    hasIncompleteMapping,
+    hasDuplicateMappings,
+    cleanRowCount: cleanRows.length,
+    issues,
+  });
+
+  const exportBlockers = getExportBlockerSummaries(issues);
+  const hasExportBlockers = exportBlockers.length > 0;
+
   return (
     <section className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
-      <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
+      <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Control center
@@ -94,6 +108,63 @@ export function ImportReadinessPanel({
             </p>
           </div>
 
+          {hasExportBlockers && (
+            <div className="mt-4 rounded-2xl border border-rose-400/16 bg-rose-400/[0.045] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100/70">
+                    Export blockers
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-300">
+                    These issue groups contain critical validation failures and
+                    are excluded from clean export.
+                  </p>
+                </div>
+
+                <StatusPill tone="danger">
+                  {criticalCount} critical issue
+                  {criticalCount === 1 ? "" : "s"}
+                </StatusPill>
+              </div>
+
+              <div className="mt-3 grid gap-2">
+                {exportBlockers.slice(0, 4).map((blocker) => (
+                  <div
+                    key={`${blocker.type}-${blocker.field}-${blocker.risk}`}
+                    className="rounded-xl border border-slate-700/45 bg-slate-950/30 p-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium text-slate-100">
+                          {blocker.label}
+                        </p>
+
+                        <p className="mt-1 text-xs text-slate-500">
+                          Field: {blocker.field} · Risk:{" "}
+                          {formatLabel(blocker.risk)}
+                        </p>
+                      </div>
+
+                      <span className="rounded-full border border-rose-400/20 bg-rose-400/[0.06] px-2.5 py-1 text-[11px] font-medium text-rose-100">
+                        {blocker.count} row
+                        {blocker.count === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {exportBlockers.length > 4 && (
+                <p className="mt-3 text-xs text-slate-500">
+                  +{exportBlockers.length - 4} more blocker group
+                  {exportBlockers.length - 4 === 1 ? "" : "s"} in the issue
+                  report.
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <Metric label="Total invoices" value={totalInvoices} />
             <Metric label="Ready" value={cleanCount} tone="success" />
@@ -126,18 +197,32 @@ export function ImportReadinessPanel({
             Trusted export
           </p>
 
-          <h3 className="mt-2 text-base font-semibold text-slate-50">
-            Export clean output
-          </h3>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-base font-semibold text-slate-50">
+              Export clean output
+            </h3>
 
-          <p className="mt-1 text-sm leading-6 text-slate-500">
-            Export only rows that passed mapping and validation checks.
+            <StatusPill tone={canExport ? "success" : "warning"}>
+              {canExport ? "Export available" : "Export guarded"}
+            </StatusPill>
+          </div>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {exportSafetyMessage}
           </p>
 
           {!canExport && (
             <div className="mt-4 rounded-xl border border-amber-300/16 bg-amber-300/[0.055] p-3 text-xs leading-5 text-amber-100/85">
-              Clean export is disabled until mappings are safe and at least one
-              clean invoice is available.
+              Clean export stays disabled until mappings are safe and at least
+              one import-ready invoice is available.
+            </div>
+          )}
+
+          {canExport && blockedCount > 0 && (
+            <div className="mt-4 rounded-xl border border-cyan-300/14 bg-cyan-300/[0.045] p-3 text-xs leading-5 text-cyan-100/80">
+              Clean export will contain {cleanRows.length} ready invoice
+              {cleanRows.length === 1 ? "" : "s"}. Blocked invoices stay out of
+              the export.
             </div>
           )}
 
@@ -268,4 +353,8 @@ function StatusPill({
       {children}
     </span>
   );
+}
+
+function formatLabel(value: string) {
+  return value.replaceAll("_", " ");
 }
