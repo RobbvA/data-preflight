@@ -1,4 +1,4 @@
-import type { CsvRow } from "@/lib/parseCsv";
+import type { ParsedRow } from "@/lib/parseCsv";
 import { invoiceProfile } from "@/lib/profiles/invoiceProfile";
 
 export type FieldMapping = {
@@ -96,7 +96,7 @@ export function createEmptyMapping(): FieldMapping {
 
 export function createSuggestedMapping(
   headers: string[],
-  rows: CsvRow[] = [],
+  rows: ParsedRow[] = [],
 ): FieldMapping {
   const suggestions = createMappingSuggestions(headers, rows);
 
@@ -111,7 +111,7 @@ export function createSuggestedMapping(
 
 export function createMappingSuggestions(
   headers: string[],
-  rows: CsvRow[] = [],
+  rows: ParsedRow[] = [],
 ): MappingSuggestion[] {
   const usedHeaders = new Set<string>();
 
@@ -176,7 +176,7 @@ function getMinimumAutoMapScore(field: InvoiceField) {
 function scoreHeaderAndValuesForField(
   header: string,
   field: InvoiceField,
-  rows: CsvRow[],
+  rows: ParsedRow[],
 ): ScoredMatch {
   const sampleValues = getSampleValues(rows, header);
   const columnAnalysis = analyzeColumn(header, sampleValues);
@@ -683,7 +683,7 @@ function getAmbiguityPenalty(
   return 0;
 }
 
-function getSampleValues(rows: CsvRow[], header: string) {
+function getSampleValues(rows: ParsedRow[], header: string) {
   return rows
     .map((row) => row[header]?.trim())
     .filter((value): value is string => Boolean(value))

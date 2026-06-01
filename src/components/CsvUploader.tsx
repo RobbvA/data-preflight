@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { parseCsvFile, type CsvRow } from "@/lib/parseCsv";
+import { parseCsvFile, type ParsedRow } from "@/lib/parseCsv";
 import { validateRows, type ValidationIssue } from "@/lib/validateRows";
 import { normalizeInvoiceRows } from "@/lib/normalizeInvoice";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
@@ -27,7 +27,7 @@ import {
 } from "@/components/data-preflight/types";
 
 export function CsvUploader() {
-  const [rows, setRows] = useState<CsvRow[]>([]);
+  const [rows, setRows] = useState<ParsedRow[]>([]);
   const [fileName, setFileName] = useState("");
   const [headers, setHeaders] = useState<string[]>([]);
   const [fieldMapping, setFieldMapping] =
@@ -79,21 +79,21 @@ export function CsvUploader() {
     setIsFieldMappingOpen(false);
 
     try {
-      const parsedRows = await parseCsvFile(file);
+      const parsedDataSet = await parseCsvFile(file);
 
-      if (parsedRows.length === 0) {
+      if (parsedDataSet.rows.length === 0) {
         throw new Error("CSV file is empty.");
       }
 
-      const detectedHeaders = Object.keys(parsedRows[0] ?? {});
-
-      if (detectedHeaders.length === 0) {
+      if (parsedDataSet.headers.length === 0) {
         throw new Error("CSV file has no headers.");
       }
 
-      setRows(parsedRows);
-      setHeaders(detectedHeaders);
-      setFieldMapping(createSuggestedMapping(detectedHeaders, parsedRows));
+      setRows(parsedDataSet.rows);
+      setHeaders(parsedDataSet.headers);
+      setFieldMapping(
+        createSuggestedMapping(parsedDataSet.headers, parsedDataSet.rows),
+      );
     } catch {
       setError("Failed to parse CSV file. Please check the file format.");
       setRows([]);
@@ -163,7 +163,7 @@ export function CsvUploader() {
 
   const selectedRows = useMemo(() => {
     return rows.map((row) => {
-      const mappedRow: CsvRow = {};
+      const mappedRow: ParsedRow = {};
 
       mappingSuggestions.forEach((suggestion) => {
         const targetField = suggestion.targetField;
