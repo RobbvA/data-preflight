@@ -165,12 +165,12 @@ export function createMappingSuggestions(
 }
 
 function getMinimumAutoMapScore(field: InvoiceField) {
-  if (field === "company") return 64;
-  if (field === "amount" || field === "vat") return 68;
-  if (field === "invoice_date" || field === "due_date") return 68;
-  if (field === "currency" || field === "country") return 62;
+  if (field === "company") return 66;
+  if (field === "amount" || field === "vat") return 70;
+  if (field === "invoice_date" || field === "due_date") return 70;
+  if (field === "currency" || field === "country") return 64;
 
-  return 58;
+  return 60;
 }
 
 function scoreHeaderAndValuesForField(
@@ -273,6 +273,8 @@ function scoreHeaderForField(header: string, field: InvoiceField): ScoredMatch {
 
   for (const synonym of synonyms) {
     const normalizedSynonym = normalizeText(synonym);
+
+    if (!normalizedHeader || !normalizedSynonym) continue;
 
     if (normalizedHeader === normalizedSynonym) {
       return {
@@ -564,7 +566,7 @@ function analyzeColumn(header: string, values: string[]): ColumnAnalysis {
 
   const sampleSize = normalizedValues.length;
   const uniqueValueCount = new Set(
-    normalizedValues.map((value) => value.toLowerCase()),
+    normalizedValues.map((value) => normalizeText(value)),
   ).size;
 
   const parsedNumbers = normalizedValues
@@ -664,6 +666,20 @@ function getAmbiguityPenalty(
     return 18;
   }
 
+  if (
+    field === "invoice_number" &&
+    (analysis.emailRatio > 0.2 || analysis.numericRatio > 0.95)
+  ) {
+    return 24;
+  }
+
+  if (
+    field === "company" &&
+    (analysis.emailRatio > 0.2 || analysis.numericRatio > 0.5)
+  ) {
+    return 32;
+  }
+
   return 0;
 }
 
@@ -675,17 +691,20 @@ function getSampleValues(rows: CsvRow[], header: string) {
 }
 
 function looksLikeInvoiceNumber(value: string) {
+  const normalizedValue = value.trim();
+
   return (
-    /inv[-_ ]?\d+/i.test(value) ||
-    /fact[-_ ]?\d+/i.test(value) ||
-    /fac[-_ ]?\d+/i.test(value) ||
-    /\d{4}[-_]\d+/.test(value) ||
-    /^[a-z]{2,}[-_]\d+$/i.test(value)
+    /inv[-_ ]?\d+/i.test(normalizedValue) ||
+    /invoice[-_ ]?\d+/i.test(normalizedValue) ||
+    /fact[-_ ]?\d+/i.test(normalizedValue) ||
+    /fac[-_ ]?\d+/i.test(normalizedValue) ||
+    /\d{4}[-_]\d+/.test(normalizedValue) ||
+    /^[a-z]{2,}[-_]\d+$/i.test(normalizedValue)
   );
 }
 
 function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
 function parseBusinessNumber(value: string) {
@@ -815,6 +834,8 @@ function getConfidence(score: number): MappingConfidence {
 
 function normalizeText(value: string) {
   return value
+    .normalize("NFD")
+    .replaceAll(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replaceAll(/[_-]/g, " ")
     .replaceAll(/[^a-z0-9 ]/g, "")
@@ -823,8 +844,8 @@ function normalizeText(value: string) {
 }
 
 function hasExactTokenMatch(valueA: string, valueB: string) {
-  const tokensA = valueA.split(" ").filter(Boolean);
-  const tokensB = valueB.split(" ").filter(Boolean);
+  const tokensA = valueA.split(" ").filter((token) => token.length > 2);
+  const tokensB = valueB.split(" ").filter((token) => token.length > 2);
 
   return tokensA.some((token) => tokensB.includes(token));
 }

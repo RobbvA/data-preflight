@@ -1,0 +1,19 @@
+invoice_number,company,email,amount,vat,status,country,invoice_date,due_date,currency
+INV-001,Acme BV,finance@acme.nl,1200,252,ready,NL,2026-05-01,2026-05-30,EUR
+INV-001,Acme BV,finance@acme.nl,1200,252,ready,NL,2026-05-01,2026-05-30,EUR
+,Missing Number BV,billing@missing.nl,900,189,ready,NL,2026-05-02,2026-06-01,EUR
+INV-003,Bad Email BV,not-an-email,500,105,pending,NL,2026-05-03,2026-06-03,EUR
+INV-004,Bad Amount BV,finance@badamount.nl,abc,21,ready,NL,2026-05-04,2026-06-04,EUR
+INV-005,Bad VAT BV,finance@badvat.nl,100,200,ready,NL,2026-05-05,2026-06-05,EUR
+INV-006,Negative Amount BV,finance@negative.nl,-100,21,ready,NL,2026-05-06,2026-06-06,EUR
+INV-007,Negative VAT BV,finance@negativevat.nl,100,-21,ready,NL,2026-05-07,2026-06-07,EUR
+INV-008,Bad Status BV,finance@status.nl,100,21,archived,NL,2026-05-08,2026-06-08,EUR
+INV-009,Bad Country BV,finance@country.nl,100,21,ready,NLD,2026-05-09,2026-06-09,EUR
+INV-010,Bad Currency BV,finance@currency.nl,100,21,ready,NL,2026-05-10,2026-06-10,EURO
+INV-011,Bad Invoice Date BV,finance@date.nl,100,21,ready,NL,2026-99-99,2026-06-11,EUR
+INV-012,Bad Due Date BV,finance@duedate.nl,100,21,ready,NL,2026-05-12,2026-99-99,EUR
+INV-013,Due Before Invoice BV,finance@duebefore.nl,100,21,ready,NL,2026-05-20,2026-05-10,EUR
+INV-014,High VAT Rate BV,finance@highvat.nl,100,45,ready,NL,2026-05-14,2026-06-14,EUR
+INV-015,Comma Amount BV,finance@comma.nl,"1.200,50","252,10",ready,NL,2026-05-15,2026-06-15,EUR
+INV-016,Symbol Amount BV,finance@symbol.nl,"€900,00","€189,00",ready,NL,2026-05-16,2026-06-16,EUR
+,,,,,,,,,
