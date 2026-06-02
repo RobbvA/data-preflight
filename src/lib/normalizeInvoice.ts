@@ -1,8 +1,10 @@
-import type { CsvRow } from "@/lib/parseCsv";
+import type { ParsedRow } from "@/lib/parseCsv";
 import {
   invoiceFieldKeys,
   type InvoiceField,
 } from "@/lib/profiles/invoiceProfile";
+
+export type NormalizedInvoiceRow = ParsedRow;
 
 const statusAliases: Record<string, string> = {
   ready: "ready",
@@ -64,12 +66,14 @@ const currencyAliases: Record<string, string> = {
   gbp: "GBP",
 };
 
-export function normalizeInvoiceRows(rows: CsvRow[]): CsvRow[] {
+export function normalizeInvoiceRows(
+  rows: ParsedRow[],
+): NormalizedInvoiceRow[] {
   return rows.map((row) => normalizeInvoiceRow(row));
 }
 
-export function normalizeInvoiceRow(row: CsvRow): CsvRow {
-  const normalizedRow: CsvRow = {};
+export function normalizeInvoiceRow(row: ParsedRow): NormalizedInvoiceRow {
+  const normalizedRow: NormalizedInvoiceRow = {};
 
   invoiceFieldKeys.forEach((field) => {
     normalizedRow[field] = normalizeInvoiceValue(field, row[field] ?? "");
@@ -108,7 +112,7 @@ function normalizeInvoiceValue(field: InvoiceField, value: string) {
 
     case "invoice_date":
     case "due_date":
-      return normalizeDate(trimmedValue);
+      return normalizeInvoiceDate(trimmedValue);
 
     default:
       return trimmedValue;
@@ -148,7 +152,7 @@ function normalizeCurrency(value: string) {
   return currencyAliases[normalizedValue] ?? value.toUpperCase();
 }
 
-function normalizeDate(value: string) {
+function normalizeInvoiceDate(value: string) {
   const normalizedValue = normalizeWhitespace(value);
 
   const isoMatch = normalizedValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
