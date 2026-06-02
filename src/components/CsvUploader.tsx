@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { parseCsvFile, type ParsedRow } from "@/lib/parseCsv";
+import {
+  parseCsvFile,
+  type ParsedDataSet,
+  type ParsedRow,
+} from "@/lib/parseCsv";
 import { validateRows, type ValidationIssue } from "@/lib/validateRows";
 import { normalizeInvoiceRows } from "@/lib/normalizeInvoice";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
@@ -27,9 +31,10 @@ import {
 } from "@/components/data-preflight/types";
 
 export function CsvUploader() {
-  const [rows, setRows] = useState<ParsedRow[]>([]);
-  const [fileName, setFileName] = useState("");
-  const [headers, setHeaders] = useState<string[]>([]);
+  const [parsedDataSet, setParsedDataSet] = useState<ParsedDataSet | null>(
+    null,
+  );
+
   const [fieldMapping, setFieldMapping] =
     useState<FieldMapping>(createEmptyMapping());
 
@@ -53,6 +58,11 @@ export function CsvUploader() {
 
   const detailRef = useRef<HTMLDivElement | null>(null);
 
+  const rows = parsedDataSet?.rows ?? [];
+  const headers = parsedDataSet?.headers ?? [];
+  const fileName = parsedDataSet?.fileName ?? "";
+  const sourceType = parsedDataSet?.sourceType ?? "csv";
+
   useEffect(() => {
     if (!selectedDetailRowIndex || !detailRef.current) return;
 
@@ -69,7 +79,6 @@ export function CsvUploader() {
 
     setError(null);
     setIsLoading(true);
-    setFileName(file.name);
     setSelectedPreviewRowIndex(null);
     setSelectedDetailRowIndex(null);
     setShowOnlyBlocked(false);
@@ -79,25 +88,26 @@ export function CsvUploader() {
     setIsFieldMappingOpen(false);
 
     try {
-      const parsedDataSet = await parseCsvFile(file);
+      const nextParsedDataSet = await parseCsvFile(file);
 
-      if (parsedDataSet.rows.length === 0) {
+      if (nextParsedDataSet.rows.length === 0) {
         throw new Error("CSV file is empty.");
       }
 
-      if (parsedDataSet.headers.length === 0) {
+      if (nextParsedDataSet.headers.length === 0) {
         throw new Error("CSV file has no headers.");
       }
 
-      setRows(parsedDataSet.rows);
-      setHeaders(parsedDataSet.headers);
+      setParsedDataSet(nextParsedDataSet);
       setFieldMapping(
-        createSuggestedMapping(parsedDataSet.headers, parsedDataSet.rows),
+        createSuggestedMapping(
+          nextParsedDataSet.headers,
+          nextParsedDataSet.rows,
+        ),
       );
     } catch {
       setError("Failed to parse CSV file. Please check the file format.");
-      setRows([]);
-      setHeaders([]);
+      setParsedDataSet(null);
       setFieldMapping(createEmptyMapping());
       setSelectedPreviewRowIndex(null);
       setSelectedDetailRowIndex(null);
@@ -112,9 +122,7 @@ export function CsvUploader() {
   }
 
   function resetFlow() {
-    setRows([]);
-    setFileName("");
-    setHeaders([]);
+    setParsedDataSet(null);
     setFieldMapping(createEmptyMapping());
     setError(null);
     setIsLoading(false);
@@ -274,7 +282,7 @@ export function CsvUploader() {
   const importReadinessMessage = hasIncompleteMapping
     ? "Import blocked: required fields are not mapped."
     : hasDuplicateMappings
-      ? "Import blocked: one or more CSV columns are mapped multiple times."
+      ? "Import blocked: one or more source columns are mapped multiple times."
       : blockedCount > 0
         ? "Import will fail unless blocked invoices are fixed."
         : warningCount > 0
@@ -312,6 +320,24 @@ export function CsvUploader() {
               validate business rules, inspect issues, and export only trusted
               data.
             </p>
+
+            {parsedDataSet && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                  Source: {sourceType.toUpperCase()}
+                </span>
+
+                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                  {parsedDataSet.rowCount} parsed row
+                  {parsedDataSet.rowCount === 1 ? "" : "s"}
+                </span>
+
+                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                  {headers.length} header
+                  {headers.length === 1 ? "" : "s"}
+                </span>
+              </div>
+            )}
           </div>
 
           <UploadSection
@@ -380,11 +406,12 @@ export function CsvUploader() {
             </p>
 
             <h2 className="mt-2 text-xl font-semibold text-slate-100">
-              Waiting for CSV headers
+              Waiting for source headers
             </h2>
 
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-              Upload a CSV to detect headers and create the field mapping layer.
+              Upload a source file to detect headers and create the field
+              mapping layer.
             </p>
           </section>
         )}
@@ -429,7 +456,7 @@ export function CsvUploader() {
                 </h2>
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                  Review how CSV headers are mapped into invoice fields. Keep
+                  Review how source headers are mapped into invoice fields. Keep
                   this closed during normal invoice review.
                 </p>
 
@@ -437,6 +464,12 @@ export function CsvUploader() {
                   <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
                     {mappedCount}/{mappingSuggestions.length} mapped
                   </span>
+
+                  {parsedDataSet && (
+                    <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                      {parsedDataSet.sourceType.toUpperCase()} source
+                    </span>
+                  )}
 
                   {(hasIncompleteMapping || hasDuplicateMappings) && (
                     <span className="rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-2.5 py-1 text-[11px] font-medium text-amber-100">

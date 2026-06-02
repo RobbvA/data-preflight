@@ -1,17 +1,22 @@
-import type { CsvRow } from "@/lib/parseCsv";
+import type { ParsedRow } from "@/lib/parseCsv";
+
 import {
   isValidCountryCode,
   isValidCurrencyCode,
 } from "@/lib/normalization/normalizeCode";
+
 import {
   isValidIsoDate,
   parseIsoDate,
 } from "@/lib/normalization/normalizeDate";
+
 import {
   normalizeInvoiceRow,
   type NormalizedInvoiceRow,
-} from "@/lib/normalization/normalizeInvoiceRow";
+} from "@/lib/normalizeInvoice";
+
 import { parseNormalizedNumber } from "@/lib/normalization/normalizeNumber";
+
 import {
   invoiceAllowedStatuses,
   invoiceProfile,
@@ -62,25 +67,39 @@ export type ValidationIssue = {
     | "missing-country"
     | "invalid-country"
     | "missing-expected-field";
+
   category: IssueCategory;
+
   problem: string;
   why: string;
   fix: string;
+
   severity: Severity;
   risk: BusinessRisk;
 };
 
 export type ValidationResult = {
   issues: ValidationIssue[];
-  cleanRows: CsvRow[];
-  errorRows: CsvRow[];
+  cleanRows: ParsedRow[];
+  errorRows: ParsedRow[];
+};
+
+type ValidationDataSet = {
+  rows: ParsedRow[];
+  normalizedRows: NormalizedInvoiceRow[];
+  invoiceNumberCounts: Record<string, number>;
 };
 
 type InvoiceValidationContext = {
-  rows: CsvRow[];
-  row: CsvRow;
+  dataSet: ValidationDataSet;
+
+  rows: ParsedRow[];
+  row: ParsedRow;
+
   normalizedRow: NormalizedInvoiceRow;
+
   rowIndex: number;
+
   invoiceNumberCounts: Record<string, number>;
 };
 
@@ -110,21 +129,36 @@ const invoiceValidationRules: InvoiceValidationRule[] = [
   validatePaymentTerms,
 ];
 
-export function validateRows(rows: CsvRow[]): ValidationResult {
+export function validateRows(rows: ParsedRow[]): ValidationResult {
   const normalizedRows = rows.map(normalizeInvoiceRow);
+
   const invoiceNumberCounts = countInvoiceNumbers(normalizedRows);
+
+  const dataSet: ValidationDataSet = {
+    rows,
+    normalizedRows,
+    invoiceNumberCounts,
+  };
+
   const issues: ValidationIssue[] = [];
 
   rows.forEach((row, index) => {
     const context: InvoiceValidationContext = {
+      dataSet,
+
       rows,
+
       row,
+
       normalizedRow: normalizedRows[index],
+
       rowIndex: index + 1,
+
       invoiceNumberCounts,
     };
 
     const rowIssues = invoiceValidationRules.flatMap((rule) => rule(context));
+
     issues.push(...rowIssues);
   });
 
@@ -136,9 +170,11 @@ export function validateRows(rows: CsvRow[]): ValidationResult {
 
   return {
     issues,
+
     cleanRows: rows.filter(
       (_, index) => !rowsWithCriticalIssues.has(index + 1),
     ),
+
     errorRows: rows.filter((_, index) => rowsWithCriticalIssues.has(index + 1)),
   };
 }
@@ -155,10 +191,15 @@ function validateEmptyRow({
       field: "row",
       type: "empty-row",
       category: "row_quality",
+
       problem: "This row is empty.",
+
       why: "Empty rows can create failed imports, blank records, or meaningless entries in downstream systems.",
-      fix: "Remove the empty row from the CSV before importing.",
+
+      fix: "Remove the empty row from the import source before exporting.",
+
       severity: "critical",
+
       risk: "import_failure",
     }),
   ];
@@ -176,13 +217,21 @@ function validateRequiredFields({
     .map((field) =>
       createIssue({
         rowIndex,
+
         field,
+
         type: "required",
+
         category: "required_data",
+
         problem: `${formatFieldName(field)} is missing.`,
+
         why: "This field is required to safely identify, validate, and import the invoice record.",
-        fix: `Add a value for ${formatFieldName(field)} before exporting the clean data.`,
+
+        fix: `Add a value for ${formatFieldName(field)} before exporting.`,
+
         severity: "critical",
+
         risk: "import_failure",
       }),
     );
@@ -192,18 +241,28 @@ function validateEmail({
   normalizedRow,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  if (!normalizedRow.email || isValidEmail(normalizedRow.email)) return [];
+  if (!normalizedRow.email || isValidEmail(normalizedRow.email)) {
+    return [];
+  }
 
   return [
     createIssue({
       rowIndex,
+
       field: "email",
+
       type: "email",
+
       category: "contact_data",
+
       problem: "Email address is invalid.",
+
       why: "Invalid email addresses can break billing communication, invoice routing, customer matching, or automated reminders.",
+
       fix: "Use a valid email address such as finance@example.com.",
+
       severity: "critical",
+
       risk: "workflow_inconsistency",
     }),
   ];
@@ -214,19 +273,28 @@ function validateAmount({
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
   const amount = parseNormalizedNumber(normalizedRow.amount);
+
   const issues: ValidationIssue[] = [];
 
   if (normalizedRow.amount && amount === null) {
     issues.push(
       createIssue({
         rowIndex,
+
         field: "amount",
+
         type: "number",
+
         category: "financial",
+
         problem: "Amount is not a valid number.",
-        why: "Accounting and reporting systems need numeric invoice amounts to calculate totals, balances, and revenue correctly.",
-        fix: "Remove currency symbols, text, or invalid formatting and use a numeric value.",
+
+        why: "Accounting and reporting systems require numeric invoice amounts for totals, balances, and revenue calculations.",
+
+        fix: "Remove text, currency symbols, or invalid formatting and use a numeric value.",
+
         severity: "critical",
+
         risk: "financial_reporting",
       }),
     );
@@ -236,13 +304,21 @@ function validateAmount({
     issues.push(
       createIssue({
         rowIndex,
+
         field: "amount",
+
         type: "amount-not-positive",
+
         category: "financial",
+
         problem: "Amount is zero or negative.",
-        why: "A non-positive invoice amount may indicate a credit note, refund, test record, or incorrect export.",
-        fix: "Verify whether this row is a normal invoice, credit note, refund, or corrected amount.",
+
+        why: "A non-positive invoice amount may indicate a credit note, refund, test export, or incorrect mapping.",
+
+        fix: "Verify whether this row should be treated as a normal invoice or separate financial flow.",
+
         severity: "warning",
+
         risk: "financial_reporting",
       }),
     );
@@ -256,19 +332,28 @@ function validateVat({
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
   const vat = parseNormalizedNumber(normalizedRow.vat);
+
   const issues: ValidationIssue[] = [];
 
   if (normalizedRow.vat && vat === null) {
     issues.push(
       createIssue({
         rowIndex,
+
         field: "vat",
+
         type: "number",
+
         category: "tax",
+
         problem: "VAT is not a valid number.",
-        why: "VAT must be numeric so tax totals, declarations, and invoice totals can be calculated correctly.",
-        fix: "Remove currency symbols, text, or invalid formatting and use a numeric VAT value.",
+
+        why: "VAT must be numeric for correct tax calculations, reporting, and import validation.",
+
+        fix: "Remove text or invalid formatting and use a numeric VAT value.",
+
         severity: "critical",
+
         risk: "tax_risk",
       }),
     );
@@ -278,13 +363,21 @@ function validateVat({
     issues.push(
       createIssue({
         rowIndex,
+
         field: "vat",
+
         type: "vat-negative",
+
         category: "tax",
+
         problem: "VAT is negative.",
-        why: "Negative VAT can indicate a refund, credit note, incorrectly mapped VAT column, or reversed transaction.",
-        fix: "Check whether the VAT value is correct or whether this row should be handled as a separate credit/refund flow.",
+
+        why: "Negative VAT may indicate refunds, reversed transactions, or incorrect mapping.",
+
+        fix: "Verify whether the VAT value and transaction type are correct.",
+
         severity: "warning",
+
         risk: "tax_risk",
       }),
     );
@@ -298,22 +391,34 @@ function validateVatConsistency({
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
   const amount = parseNormalizedNumber(normalizedRow.amount);
+
   const vat = parseNormalizedNumber(normalizedRow.vat);
+
   const issues: ValidationIssue[] = [];
 
-  if (amount === null || vat === null || amount <= 0) return issues;
+  if (amount === null || vat === null || amount <= 0) {
+    return issues;
+  }
 
   if (vat > amount) {
     issues.push(
       createIssue({
         rowIndex,
+
         field: "vat",
+
         type: "vat-higher-than-amount",
+
         category: "tax",
+
         problem: "VAT is higher than the invoice amount.",
-        why: "VAT higher than the invoice amount is usually invalid and may cause accounting import errors or incorrect tax reporting.",
-        fix: "Check whether the amount and VAT columns were swapped, exported incorrectly, or mapped to the wrong fields.",
+
+        why: "VAT higher than the invoice amount usually indicates incorrect exports or broken field mapping.",
+
+        fix: "Verify whether amount and VAT columns are mapped correctly.",
+
         severity: "warning",
+
         risk: "tax_risk",
       }),
     );
@@ -325,13 +430,21 @@ function validateVatConsistency({
     issues.push(
       createIssue({
         rowIndex,
+
         field: "vat",
+
         type: "suspicious-vat-rate",
+
         category: "tax",
+
         problem: "VAT rate looks unusually high.",
-        why: "A VAT rate above 30% is uncommon for standard invoice imports and may indicate incorrect data, wrong mapping, or a total/VAT mismatch.",
-        fix: "Verify the VAT amount and check whether the amount column includes or excludes VAT.",
+
+        why: "A VAT rate above 30% is uncommon and may indicate incorrect mapping or calculation.",
+
+        fix: "Check whether the amount includes VAT or whether columns were swapped.",
+
         severity: "warning",
+
         risk: "tax_risk",
       }),
     );
@@ -347,18 +460,28 @@ function validateDuplicateInvoiceNumber({
 }: InvoiceValidationContext): ValidationIssue[] {
   const invoiceNumber = normalizedRow.normalized_invoice_key;
 
-  if (!invoiceNumber || invoiceNumberCounts[invoiceNumber] <= 1) return [];
+  if (!invoiceNumber || invoiceNumberCounts[invoiceNumber] <= 1) {
+    return [];
+  }
 
   return [
     createIssue({
       rowIndex,
+
       field: "invoice_number",
+
       type: "duplicate-invoice-number",
+
       category: "duplicates",
+
       problem: "Invoice number appears more than once.",
-      why: "Duplicate invoice numbers can create duplicate records, overwrite existing invoices, or cause reconciliation problems.",
-      fix: "Remove the duplicate row or assign a unique invoice number before exporting.",
+
+      why: "Duplicate invoice numbers can create duplicate records or overwrite existing invoices.",
+
+      fix: "Remove duplicates or assign unique invoice references before export.",
+
       severity: "critical",
+
       risk: "duplicate_risk",
     }),
   ];
@@ -370,18 +493,28 @@ function validateStatus({
 }: InvoiceValidationContext): ValidationIssue[] {
   const status = normalizedRow.status;
 
-  if (!status || allowedStatuses.includes(status as never)) return [];
+  if (!status || allowedStatuses.includes(status as never)) {
+    return [];
+  }
 
   return [
     createIssue({
       rowIndex,
+
       field: "status",
+
       type: "invalid-status",
+
       category: "workflow",
+
       problem: "Invoice status is not recognized.",
-      why: "Unexpected statuses can fail imports or create inconsistent workflow states in the target system.",
+
+      why: "Unexpected statuses can create inconsistent workflow states in downstream systems.",
+
       fix: `Use one of: ${allowedStatuses.join(", ")}.`,
+
       severity: "warning",
+
       risk: "workflow_inconsistency",
     }),
   ];
@@ -397,30 +530,48 @@ function validateCountry({
     return [
       createIssue({
         rowIndex,
+
         field: "country",
+
         type: "missing-country",
+
         category: "regional",
+
         problem: "Country is missing.",
-        why: "Country helps determine tax handling, currency expectations, regional rules, and import routing.",
-        fix: "Add a valid two-letter country code such as NL, DE, or FR.",
+
+        why: "Country affects tax handling, regional compliance, and routing logic.",
+
+        fix: "Use a valid two-letter country code such as NL, DE, or FR.",
+
         severity: "warning",
+
         risk: "regional_compliance",
       }),
     ];
   }
 
-  if (isValidCountryCode(country)) return [];
+  if (isValidCountryCode(country)) {
+    return [];
+  }
 
   return [
     createIssue({
       rowIndex,
+
       field: "country",
+
       type: "invalid-country",
+
       category: "regional",
+
       problem: "Country code is invalid.",
-      why: "Invalid country codes can cause incorrect tax handling, failed imports, or wrong regional classification.",
-      fix: "Use a two-letter uppercase country code such as NL, DE, or FR.",
+
+      why: "Invalid country codes can create incorrect regional classification or failed imports.",
+
+      fix: "Use a valid two-letter uppercase country code.",
+
       severity: "warning",
+
       risk: "regional_compliance",
     }),
   ];
@@ -436,30 +587,48 @@ function validateCurrency({
     return [
       createIssue({
         rowIndex,
+
         field: "currency",
+
         type: "missing-currency",
+
         category: "financial",
+
         problem: "Currency is missing.",
-        why: "Missing currency makes invoice totals ambiguous, especially when data is imported into financial or reporting systems.",
-        fix: "Add a valid three-letter currency code such as EUR, USD, or GBP.",
+
+        why: "Missing currency makes invoice totals ambiguous in reporting systems.",
+
+        fix: "Use a valid three-letter currency code such as EUR, USD, or GBP.",
+
         severity: "warning",
+
         risk: "financial_reporting",
       }),
     ];
   }
 
-  if (isValidCurrencyCode(currency)) return [];
+  if (isValidCurrencyCode(currency)) {
+    return [];
+  }
 
   return [
     createIssue({
       rowIndex,
+
       field: "currency",
+
       type: "invalid-currency",
+
       category: "financial",
+
       problem: "Currency code is invalid.",
-      why: "Invalid currency codes can cause failed imports, incorrect conversion, or unreliable financial reporting.",
-      fix: "Use a three-letter uppercase currency code such as EUR, USD, or GBP.",
+
+      why: "Invalid currencies can create failed imports or incorrect reporting.",
+
+      fix: "Use a valid three-letter uppercase currency code.",
+
       severity: "warning",
+
       risk: "financial_reporting",
     }),
   ];
@@ -471,18 +640,28 @@ function validateInvoiceDate({
 }: InvoiceValidationContext): ValidationIssue[] {
   const invoiceDate = normalizedRow.invoice_date;
 
-  if (!invoiceDate || isValidIsoDate(invoiceDate)) return [];
+  if (!invoiceDate || isValidIsoDate(invoiceDate)) {
+    return [];
+  }
 
   return [
     createIssue({
       rowIndex,
+
       field: "invoice_date",
+
       type: "invalid-invoice-date",
+
       category: "dates",
+
       problem: "Invoice date is invalid.",
-      why: "Invalid invoice dates can break reporting periods, payment terms, accounting imports, or aging analysis.",
-      fix: "Use a valid date in YYYY-MM-DD format.",
+
+      why: "Invalid invoice dates can break accounting periods and reporting.",
+
+      fix: "Use a valid YYYY-MM-DD date.",
+
       severity: "warning",
+
       risk: "financial_reporting",
     }),
   ];
@@ -494,18 +673,28 @@ function validateDueDate({
 }: InvoiceValidationContext): ValidationIssue[] {
   const dueDate = normalizedRow.due_date;
 
-  if (!dueDate || isValidIsoDate(dueDate)) return [];
+  if (!dueDate || isValidIsoDate(dueDate)) {
+    return [];
+  }
 
   return [
     createIssue({
       rowIndex,
+
       field: "due_date",
+
       type: "invalid-due-date",
+
       category: "dates",
+
       problem: "Due date is invalid.",
-      why: "Invalid due dates can break payment tracking, reminders, cash-flow planning, and aging reports.",
-      fix: "Use a valid date in YYYY-MM-DD format.",
+
+      why: "Invalid due dates break payment tracking and cash-flow planning.",
+
+      fix: "Use a valid YYYY-MM-DD date.",
+
       severity: "warning",
+
       risk: "payment_terms",
     }),
   ];
@@ -516,6 +705,7 @@ function validatePaymentTerms({
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
   const invoiceDate = normalizedRow.invoice_date;
+
   const dueDate = normalizedRow.due_date;
 
   if (
@@ -534,13 +724,21 @@ function validatePaymentTerms({
   return [
     createIssue({
       rowIndex,
+
       field: "due_date",
+
       type: "due-before-invoice-date",
+
       category: "dates",
-      problem: "Due date is before the invoice date.",
-      why: "A due date before the invoice date usually indicates incorrect payment terms, swapped date fields, or invalid source data.",
-      fix: "Check whether invoice date and due date are mapped correctly and correct the payment terms if needed.",
+
+      problem: "Due date is before invoice date.",
+
+      why: "This usually indicates swapped date fields or invalid payment terms.",
+
+      fix: "Verify invoice date and due date mapping.",
+
       severity: "warning",
+
       risk: "payment_terms",
     }),
   ];
@@ -550,7 +748,7 @@ function createIssue(issue: ValidationIssue): ValidationIssue {
   return issue;
 }
 
-function isEmptyRow(row: CsvRow) {
+function isEmptyRow(row: ParsedRow) {
   return Object.values(row).every((value) => !value?.trim());
 }
 
@@ -562,7 +760,9 @@ function countInvoiceNumbers(rows: NormalizedInvoiceRow[]) {
   return rows.reduce<Record<string, number>>((accumulator, row) => {
     const invoiceNumber = row.normalized_invoice_key;
 
-    if (!invoiceNumber) return accumulator;
+    if (!invoiceNumber) {
+      return accumulator;
+    }
 
     accumulator[invoiceNumber] = (accumulator[invoiceNumber] ?? 0) + 1;
 
