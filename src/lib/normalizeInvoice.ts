@@ -89,7 +89,7 @@ function normalizeInvoiceValue(field: InvoiceField, value: string) {
 
   switch (field) {
     case "invoice_number":
-      return trimmedValue;
+      return normalizeInvoiceNumber(trimmedValue);
 
     case "company":
       return normalizeCompany(trimmedValue);
@@ -126,37 +126,52 @@ function normalizeWhitespace(value: string) {
     .trim();
 }
 
+function normalizeTextKey(value: string) {
+  return normalizeWhitespace(value)
+    .normalize("NFD")
+    .replaceAll(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function normalizeInvoiceNumber(value: string) {
+  return normalizeWhitespace(value);
+}
+
 function normalizeCompany(value: string) {
   return normalizeWhitespace(value);
 }
 
 function normalizeEmail(value: string) {
-  return value.trim().toLowerCase();
+  return normalizeWhitespace(value).toLowerCase();
 }
 
 function normalizeStatus(value: string) {
-  const normalizedValue = normalizeWhitespace(value).toLowerCase();
+  const normalizedValue = normalizeTextKey(value);
 
   return statusAliases[normalizedValue] ?? normalizedValue;
 }
 
 function normalizeCountry(value: string) {
-  const normalizedValue = normalizeWhitespace(value).toLowerCase();
+  const normalizedValue = normalizeTextKey(value).replaceAll(/\s/g, "");
 
-  return countryAliases[normalizedValue] ?? value.toUpperCase();
+  return countryAliases[normalizedValue] ?? normalizedValue.toUpperCase();
 }
 
 function normalizeCurrency(value: string) {
-  const normalizedValue = normalizeWhitespace(value).toLowerCase();
+  const normalizedValue = normalizeTextKey(value).replaceAll(/\s/g, "");
 
-  return currencyAliases[normalizedValue] ?? value.toUpperCase();
+  return currencyAliases[normalizedValue] ?? normalizedValue.toUpperCase();
 }
 
 function normalizeInvoiceDate(value: string) {
   const normalizedValue = normalizeWhitespace(value);
 
-  const isoMatch = normalizedValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (isoMatch) return normalizedValue;
+  const isoMatch = normalizedValue.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
 
   const europeanMatch = normalizedValue.match(
     /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/,
@@ -189,17 +204,14 @@ function normalizeInvoiceDate(value: string) {
 
 function normalizeBusinessNumber(value: string) {
   const withoutCurrency = value
-    .replaceAll("€", "")
-    .replaceAll("EUR", "")
-    .replaceAll("eur", "")
-    .replaceAll("$", "")
-    .replaceAll("USD", "")
-    .replaceAll("usd", "")
-    .replaceAll("£", "")
-    .replaceAll("GBP", "")
-    .replaceAll("gbp", "")
     .replaceAll(/\u00a0/g, "")
     .replaceAll(/\s/g, "")
+    .replaceAll(/eur/gi, "")
+    .replaceAll(/usd/gi, "")
+    .replaceAll(/gbp/gi, "")
+    .replaceAll("€", "")
+    .replaceAll("$", "")
+    .replaceAll("£", "")
     .trim();
 
   if (!withoutCurrency) return "";
