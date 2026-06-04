@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import type {
   InvoicePreviewItem,
@@ -68,9 +68,9 @@ export function DataSetPreview({
 
   return (
     <section
-      className={`rounded-2xl border backdrop-blur ${
-        embedded ? "p-4 shadow-none" : "p-5 shadow-xl"
-      } ${getSectionToneClasses(tone)}`}
+      className={`rounded-2xl backdrop-blur ${
+        embedded ? "bg-slate-950/10 p-3" : "bg-slate-950/20 p-5 shadow-xl"
+      }`}
     >
       <div className="flex w-full flex-wrap items-start justify-between gap-4">
         <button
@@ -80,11 +80,12 @@ export function DataSetPreview({
         >
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold text-slate-100">{title}</h3>
-
             <CountBadge tone={tone} count={items.length} />
           </div>
 
-          <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
+            {description}
+          </p>
         </button>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -92,7 +93,7 @@ export function DataSetPreview({
             <select
               value={sortMode}
               onChange={(event) => setSortMode(event.target.value as SortMode)}
-              className="rounded-full border border-slate-700/70 bg-slate-950/60 px-3 py-1.5 text-[10px] font-medium text-slate-300 outline-none transition hover:border-slate-500 focus:border-cyan-300/45"
+              className="rounded-full border border-slate-700/50 bg-slate-950/40 px-3 py-1.5 text-[10px] font-medium text-slate-400 outline-none transition hover:border-slate-500 focus:border-cyan-300/45"
             >
               <option value="priority">Sort: priority</option>
               <option value="status">Sort: status</option>
@@ -104,7 +105,7 @@ export function DataSetPreview({
           <button
             type="button"
             onClick={onToggle}
-            className="rounded-full border border-slate-700/70 bg-slate-950/40 px-3 py-1.5 text-[10px] font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800/60 hover:text-slate-200"
+            className="rounded-full bg-slate-950/30 px-3 py-1.5 text-[10px] font-medium text-slate-500 transition hover:bg-slate-800/60 hover:text-slate-200"
           >
             {isOpen ? "Collapse" : "Expand"}
           </button>
@@ -113,46 +114,47 @@ export function DataSetPreview({
 
       {isOpen &&
         (items.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-slate-700/45 bg-slate-950/35 p-4 text-sm text-slate-500">
+          <p className="mt-4 rounded-xl bg-slate-950/25 p-4 text-sm text-slate-500">
             {emptyMessage}
           </p>
         ) : (
           <div
-            className={`mt-4 space-y-2 overflow-y-auto pr-1 ${
+            className={`mt-4 overflow-y-auto pr-1 ${
               compact ? "max-h-[420px]" : "max-h-[620px]"
             }`}
           >
-            {sortedItems.map((item) => {
-              const isSelected = selectedRowIndex === item.rowIndex;
-              const criticalIssues = item.issues.filter(
-                (issue) => issue.severity === "critical",
-              );
-              const warningIssues = item.issues.filter(
-                (issue) => issue.severity === "warning",
-              );
-              const mainIssue = item.issues[0];
+            <div className="divide-y divide-slate-800/60">
+              {sortedItems.map((item) => {
+                const isSelected = selectedRowIndex === item.rowIndex;
+                const criticalIssues = item.issues.filter(
+                  (issue) => issue.severity === "critical",
+                );
+                const warningIssues = item.issues.filter(
+                  (issue) => issue.severity === "warning",
+                );
+                const mainIssue = item.issues[0];
 
-              return (
-                <Fragment key={`${title}-${item.rowIndex}`}>
+                return (
                   <article
+                    key={`${title}-${item.rowIndex}`}
                     onClick={
                       onSelectItem
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`rounded-xl border px-4 py-3 transition ${
+                    className={`group px-2 py-3 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-cyan-300/25 bg-cyan-300/[0.045]"
-                        : "border-slate-700/45 bg-slate-950/30 hover:border-slate-500/55 hover:bg-slate-900/70"
+                        ? "rounded-xl bg-cyan-300/[0.045]"
+                        : "hover:bg-slate-900/45"
                     }`}
                   >
-                    <div className="grid gap-3 xl:grid-cols-[150px_1.25fr_0.85fr_0.85fr_auto] xl:items-center">
+                    <div className="grid gap-3 xl:grid-cols-[138px_1.25fr_0.8fr_0.8fr_auto] xl:items-center">
                       <div className="flex flex-wrap items-center gap-2">
                         <PriorityBadge priority={item.priority} />
 
-                        <span className="rounded-full border border-slate-700/60 bg-slate-900/60 px-2 py-0.5 text-[10px] text-slate-500">
+                        <span className="text-[10px] font-medium text-slate-600">
                           Row {item.rowIndex}
                         </span>
                       </div>
@@ -169,7 +171,7 @@ export function DataSetPreview({
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-600">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
                           Amount
                         </p>
 
@@ -181,7 +183,7 @@ export function DataSetPreview({
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-600">
+                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
                           Context
                         </p>
 
@@ -205,7 +207,7 @@ export function DataSetPreview({
                               event.stopPropagation();
                               onViewDetails(item.rowIndex);
                             }}
-                            className="rounded-full border border-slate-700/70 bg-slate-900/55 px-2.5 py-1 text-[10px] font-medium text-slate-300 transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.08] hover:text-cyan-100"
+                            className="rounded-full bg-slate-950/35 px-2.5 py-1 text-[10px] font-medium text-slate-400 transition hover:bg-cyan-300/[0.08] hover:text-cyan-100"
                           >
                             Details
                           </button>
@@ -214,154 +216,124 @@ export function DataSetPreview({
                     </div>
 
                     {mainIssue && (
-                      <MainIssueAlert issue={mainIssue} compact={!isSelected} />
+                      <MainIssueInline
+                        issue={mainIssue}
+                        selected={isSelected}
+                      />
                     )}
-                  </article>
 
-                  {isSelected && (
-                    <div className="rounded-xl border border-cyan-300/[0.14] bg-slate-950/40 p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/60">
-                            Quick review
-                          </p>
+                    {isSelected && (
+                      <div className="mt-3 rounded-xl bg-slate-950/25 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/55">
+                              Quick review
+                            </p>
 
-                          <p className="mt-1 text-sm font-medium text-slate-50">
-                            {item.actionLabel}
-                          </p>
+                            <p className="mt-1 text-sm font-medium text-slate-100">
+                              {item.actionLabel}
+                            </p>
+                          </div>
 
-                          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
-                            Review the issue summary below. Open full details
-                            only when you need normalized data and complete
-                            explanations.
-                          </p>
-                        </div>
-
-                        <div className="flex shrink-0 flex-wrap items-center gap-2">
-                          <span className="rounded-full border border-cyan-300/20 bg-cyan-400/[0.06] px-2 py-0.5 text-[10px] font-medium text-cyan-100/85">
+                          <span className="rounded-full bg-cyan-400/[0.06] px-2 py-0.5 text-[10px] font-medium text-cyan-100/80">
                             {item.priorityScore} score
                           </span>
-
-                          {onViewDetails && (
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onViewDetails(item.rowIndex);
-                              }}
-                              className="rounded-full border border-cyan-300/25 bg-cyan-300/[0.09] px-3 py-1.5 text-[10px] font-semibold text-cyan-100 transition hover:border-cyan-200/45 hover:bg-cyan-300/[0.14] hover:text-white"
-                            >
-                              View full details
-                            </button>
-                          )}
                         </div>
+
+                        {item.issues.length > 0 && (
+                          <div className="mt-3 grid gap-2">
+                            {item.issues.slice(0, 3).map((issue, index) => (
+                              <IssueSummaryLine
+                                key={`${issue.field}-${issue.type}-${index}`}
+                                issue={issue}
+                              />
+                            ))}
+
+                            {item.issues.length > 3 && (
+                              <p className="text-xs text-slate-600">
+                                +{item.issues.length - 3} more issue
+                                {item.issues.length - 3 === 1 ? "" : "s"}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
-
-                      {item.issues.length > 0 ? (
-                        <div className="mt-4 grid gap-2">
-                          {item.issues.map((issue, index) => (
-                            <div
-                              key={`${issue.field}-${issue.type}-${index}`}
-                              className="rounded-lg border border-slate-700/45 bg-slate-900/45 p-3"
-                            >
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span
-                                  className={`rounded-full border px-2 py-0.5 text-[9px] font-medium ${
-                                    issue.severity === "critical"
-                                      ? "border-rose-400/20 bg-rose-400/[0.07] text-rose-100"
-                                      : "border-amber-300/20 bg-amber-300/[0.07] text-amber-100"
-                                  }`}
-                                >
-                                  {issue.severity}
-                                </span>
-
-                                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
-                                  {issue.field}
-                                </span>
-
-                                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-slate-400">
-                                  {formatRiskLabel(issue.risk)}
-                                </span>
-                              </div>
-
-                              <p className="mt-2 text-sm font-medium text-slate-50">
-                                {issue.problem}
-                              </p>
-
-                              <p className="mt-1 text-xs leading-5 text-slate-400">
-                                <span className="font-medium text-slate-200">
-                                  Fix:
-                                </span>{" "}
-                                {issue.fix}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="mt-4 rounded-lg border border-emerald-300/16 bg-emerald-400/[0.045] p-3">
-                          <p className="text-xs font-medium text-emerald-100">
-                            No issues detected. This row is import-ready based
-                            on the current mapping and validation rules.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Fragment>
-              );
-            })}
+                    )}
+                  </article>
+                );
+              })}
+            </div>
           </div>
         ))}
     </section>
   );
 }
 
-function MainIssueAlert({
+function MainIssueInline({
   issue,
-  compact = false,
+  selected,
 }: {
   issue: InvoicePreviewItem["issues"][number];
-  compact?: boolean;
+  selected: boolean;
 }) {
   const isCritical = issue.severity === "critical";
 
   return (
-    <div
-      className={`mt-3 rounded-xl border ${compact ? "px-3 py-2" : "p-3"} ${
-        isCritical
-          ? "border-rose-400/18 bg-rose-400/[0.055]"
-          : "border-amber-300/18 bg-amber-300/[0.055]"
-      }`}
-    >
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-xs">
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          isCritical ? "bg-rose-300" : "bg-amber-300"
+        }`}
+      />
+
+      <span
+        className={`font-medium ${
+          isCritical ? "text-rose-100" : "text-amber-100"
+        }`}
+      >
+        {issue.problem}
+      </span>
+
+      {selected && (
+        <>
+          <span className="text-slate-700">·</span>
+
+          <span className="text-slate-500">
+            Fix: <span className="text-slate-400">{issue.fix}</span>
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
+function IssueSummaryLine({
+  issue,
+}: {
+  issue: InvoicePreviewItem["issues"][number];
+}) {
+  const isCritical = issue.severity === "critical";
+
+  return (
+    <div className="grid gap-2 rounded-lg bg-slate-900/35 px-3 py-2 sm:grid-cols-[120px_1fr]">
+      <div className="flex flex-wrap items-center gap-1.5">
         <span
-          className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] ${
+          className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
             isCritical
-              ? "border-rose-400/20 bg-rose-400/[0.08] text-rose-100"
-              : "border-amber-300/20 bg-amber-300/[0.08] text-amber-100"
+              ? "bg-rose-400/[0.08] text-rose-100"
+              : "bg-amber-300/[0.08] text-amber-100"
           }`}
         >
-          Main issue
+          {issue.severity}
         </span>
 
-        <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
-          {issue.field}
-        </span>
-
-        <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
-          {formatRiskLabel(issue.risk)}
-        </span>
+        <span className="text-[10px] text-slate-600">{issue.field}</span>
       </div>
 
-      <p className="mt-2 text-sm font-semibold text-slate-50">
-        {issue.problem}
+      <p className="text-xs leading-5 text-slate-400">
+        <span className="text-slate-200">{issue.problem}</span>{" "}
+        <span className="text-slate-600">·</span> {issue.fix}
       </p>
-
-      {!compact && (
-        <p className="mt-1 text-xs leading-5 text-slate-400">
-          <span className="font-medium text-slate-200">Fix:</span> {issue.fix}
-        </p>
-      )}
     </div>
   );
 }
@@ -374,30 +346,18 @@ function CountBadge({
   count: number;
 }) {
   const toneClasses = {
-    danger: "border-rose-400/20 bg-rose-400/[0.06] text-rose-100/85",
-    warning: "border-amber-300/20 bg-amber-300/[0.06] text-amber-100/85",
-    neutral: "border-slate-700/70 bg-slate-900/60 text-slate-400",
+    danger: "bg-rose-400/[0.06] text-rose-100/85",
+    warning: "bg-amber-300/[0.06] text-amber-100/85",
+    neutral: "bg-slate-900/60 text-slate-400",
   };
 
   return (
     <span
-      className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${toneClasses[tone]}`}
+      className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${toneClasses[tone]}`}
     >
       {count} row{count === 1 ? "" : "s"}
     </span>
   );
-}
-
-function getSectionToneClasses(tone: "neutral" | "danger" | "warning") {
-  if (tone === "danger") {
-    return "border-rose-400/15 bg-rose-950/[0.1]";
-  }
-
-  if (tone === "warning") {
-    return "border-amber-300/15 bg-amber-950/[0.1]";
-  }
-
-  return "border-slate-700/50 bg-slate-950/20";
 }
 
 function getStatusPriority(status: string | undefined) {
@@ -407,11 +367,11 @@ function getStatusPriority(status: string | undefined) {
 
 function PriorityBadge({ priority }: { priority: InvoicePriority }) {
   const priorityClasses: Record<InvoicePriority, string> = {
-    critical: "border-rose-400/25 bg-rose-400/[0.08] text-rose-100",
-    high: "border-orange-300/22 bg-orange-300/[0.07] text-orange-100",
-    medium: "border-amber-300/22 bg-amber-300/[0.07] text-amber-100",
-    low: "border-slate-500/30 bg-slate-700/25 text-slate-300",
-    clear: "border-emerald-300/18 bg-emerald-400/[0.055] text-emerald-100",
+    critical: "bg-rose-400/[0.08] text-rose-100",
+    high: "bg-orange-300/[0.07] text-orange-100",
+    medium: "bg-amber-300/[0.07] text-amber-100",
+    low: "bg-slate-700/25 text-slate-300",
+    clear: "bg-emerald-400/[0.055] text-emerald-100",
   };
 
   const labels: Record<InvoicePriority, string> = {
@@ -424,7 +384,7 @@ function PriorityBadge({ priority }: { priority: InvoicePriority }) {
 
   return (
     <span
-      className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${priorityClasses[priority]}`}
+      className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${priorityClasses[priority]}`}
     >
       {labels[priority]}
     </span>
@@ -442,7 +402,7 @@ function IssueBadge({
 }) {
   if (totalCount === 0) {
     return (
-      <span className="rounded-full border border-emerald-300/18 bg-emerald-400/[0.055] px-2 py-0.5 text-[10px] font-medium text-emerald-100">
+      <span className="rounded-full bg-emerald-400/[0.055] px-2 py-0.5 text-[10px] font-medium text-emerald-100">
         Ready
       </span>
     );
@@ -450,7 +410,7 @@ function IssueBadge({
 
   if (criticalCount > 0) {
     return (
-      <span className="rounded-full border border-rose-400/20 bg-rose-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-rose-100">
+      <span className="rounded-full bg-rose-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-rose-100">
         {criticalCount} critical
         {totalCount > criticalCount ? ` · ${totalCount}` : ""}
       </span>
@@ -458,7 +418,7 @@ function IssueBadge({
   }
 
   return (
-    <span className="rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-2 py-0.5 text-[10px] font-medium text-amber-100">
+    <span className="rounded-full bg-amber-300/[0.07] px-2 py-0.5 text-[10px] font-medium text-amber-100">
       {warningCount} warning{warningCount === 1 ? "" : "s"}
     </span>
   );
@@ -467,8 +427,4 @@ function IssueBadge({
 function formatMoneyValue(value: string | undefined) {
   if (!value) return "—";
   return value;
-}
-
-function formatRiskLabel(risk: string) {
-  return risk.replaceAll("_", " ");
 }
