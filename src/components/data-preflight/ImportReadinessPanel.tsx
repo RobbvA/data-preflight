@@ -1,10 +1,7 @@
 import type { ReactNode } from "react";
 
-import type { CsvRow } from "@/lib/parseCsv";
-import {
-  getExportBlockerSummaries,
-  getExportSafetyMessage,
-} from "@/lib/exportData";
+import type { ParsedRow } from "@/lib/parseCsv";
+import { getExportSafetyMessage } from "@/lib/exportData";
 import type { ValidationIssue } from "@/lib/validateRows";
 
 type ImportReadinessPanelProps = {
@@ -18,9 +15,9 @@ type ImportReadinessPanelProps = {
   criticalCount: number;
   hasSuspiciousVat: boolean;
   canExport: boolean;
-  cleanRows: CsvRow[];
+  cleanRows: ParsedRow[];
   issues: ValidationIssue[];
-  onDownloadCleanCsv: (filename: string, rows: CsvRow[]) => void;
+  onDownloadCleanCsv: (filename: string, rows: ParsedRow[]) => void;
   onDownloadErrorCsv: (filename: string, issues: ValidationIssue[]) => void;
 };
 
@@ -45,10 +42,10 @@ export function ImportReadinessPanel({
   const hasWarnings = warningCount > 0 || hasSuspiciousVat;
 
   const statusLabel = isBlocked
-    ? "Import blocked"
+    ? "Action required"
     : hasWarnings
       ? "Review recommended"
-      : "Ready for import";
+      : "Ready for export";
 
   const statusTone = isBlocked ? "danger" : hasWarnings ? "warning" : "success";
 
@@ -67,20 +64,17 @@ export function ImportReadinessPanel({
     issues,
   });
 
-  const exportBlockers = getExportBlockerSummaries(issues);
-  const hasExportBlockers = exportBlockers.length > 0;
-
   return (
-    <section className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
-      <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
+    <section className="rounded-[2rem] border border-slate-700/45 bg-slate-900/70 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
             Control center
           </p>
 
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+          <div className="mt-2 flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-semibold tracking-tight text-slate-50">
-              Import readiness
+              {totalInvoices} invoices analysed
             </h2>
 
             <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
@@ -89,144 +83,88 @@ export function ImportReadinessPanel({
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
             {importReadinessMessage}
           </p>
-
-          <div
-            className={`mt-4 rounded-2xl border p-3 ${
-              isBlocked
-                ? "border-rose-400/18 bg-rose-400/[0.055]"
-                : hasWarnings
-                  ? "border-amber-300/18 bg-amber-300/[0.055]"
-                  : "border-emerald-300/16 bg-emerald-400/[0.045]"
-            }`}
-          >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Next action
-            </p>
-
-            <p className="mt-1 text-sm font-medium text-slate-100">
-              {nextAction}
-            </p>
-          </div>
-
-          {hasExportBlockers && (
-            <div className="mt-4 rounded-2xl border border-rose-400/16 bg-rose-400/[0.045] p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-100/70">
-                    Export blockers
-                  </p>
-
-                  <p className="mt-1 text-sm text-slate-300">
-                    These issue groups contain critical validation failures and
-                    are excluded from clean export.
-                  </p>
-                </div>
-
-                <StatusPill tone="danger">
-                  {criticalCount} critical issue
-                  {criticalCount === 1 ? "" : "s"}
-                </StatusPill>
-              </div>
-
-              <div className="mt-3 grid gap-2">
-                {exportBlockers.slice(0, 4).map((blocker) => (
-                  <div
-                    key={`${blocker.type}-${blocker.field}-${blocker.risk}`}
-                    className="rounded-xl border border-slate-700/45 bg-slate-950/30 p-3"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium text-slate-100">
-                          {blocker.label}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          Field: {blocker.field} · Risk:{" "}
-                          {formatLabel(blocker.risk)}
-                        </p>
-                      </div>
-
-                      <span className="rounded-full border border-rose-400/20 bg-rose-400/[0.06] px-2.5 py-1 text-[11px] font-medium text-rose-100">
-                        {blocker.count} row
-                        {blocker.count === 1 ? "" : "s"}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {exportBlockers.length > 4 && (
-                <p className="mt-3 text-xs text-slate-500">
-                  +{exportBlockers.length - 4} more blocker group
-                  {exportBlockers.length - 4 === 1 ? "" : "s"} in the issue
-                  report.
-                </p>
-              )}
-            </div>
-          )}
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            <Metric label="Total invoices" value={totalInvoices} />
-            <Metric label="Ready" value={cleanCount} tone="success" />
-            <Metric label="Blocked" value={blockedCount} tone="danger" />
-            <Metric label="Critical" value={criticalCount} tone="danger" />
-            <Metric label="Warnings" value={warningCount} tone="warning" />
-          </div>
-
-          {(hasIncompleteMapping ||
-            hasDuplicateMappings ||
-            hasSuspiciousVat) && (
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              {hasIncompleteMapping && (
-                <StatusPill tone="warning">Mapping incomplete</StatusPill>
-              )}
-
-              {hasDuplicateMappings && (
-                <StatusPill tone="danger">Duplicate mapping</StatusPill>
-              )}
-
-              {hasSuspiciousVat && (
-                <StatusPill tone="info">VAT anomalies detected</StatusPill>
-              )}
-            </div>
-          )}
         </div>
 
-        <aside className="rounded-2xl border border-slate-700/45 bg-slate-950/35 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
-            Trusted export
+        <div className="flex flex-wrap items-center gap-2">
+          {hasIncompleteMapping && (
+            <StatusPill tone="warning">Mapping incomplete</StatusPill>
+          )}
+
+          {hasDuplicateMappings && (
+            <StatusPill tone="danger">Duplicate mapping</StatusPill>
+          )}
+
+          {hasSuspiciousVat && (
+            <StatusPill tone="warning">VAT anomalies</StatusPill>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <Metric label="Invoices" value={totalInvoices} />
+        <Metric label="Blocked" value={blockedCount} tone="danger" />
+        <Metric label="Need review" value={warningCount} tone="warning" />
+        <Metric label="Ready" value={cleanCount} tone="success" />
+        <Metric label="Critical" value={criticalCount} tone="danger" />
+      </div>
+
+      <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_360px]">
+        <div
+          className={`rounded-2xl border p-4 ${
+            isBlocked
+              ? "border-rose-400/18 bg-rose-400/[0.055]"
+              : hasWarnings
+                ? "border-amber-300/18 bg-amber-300/[0.055]"
+                : "border-emerald-300/16 bg-emerald-400/[0.045]"
+          }`}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            Next action
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base font-semibold text-slate-50">
-              Export clean output
-            </h3>
+          <p className="mt-2 text-base font-semibold text-slate-50">
+            {nextAction.title}
+          </p>
+
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
+            {nextAction.description}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => {
+              document
+                .getElementById("invoice-review-workspace")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="mt-4 rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white"
+          >
+            {nextAction.buttonLabel}
+          </button>
+        </div>
+
+        <aside className="rounded-2xl border border-slate-700/45 bg-slate-950/30 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
+                Export
+              </p>
+
+              <h3 className="mt-1 text-base font-semibold text-slate-50">
+                Clean output
+              </h3>
+            </div>
 
             <StatusPill tone={canExport ? "success" : "warning"}>
-              {canExport ? "Export available" : "Export guarded"}
+              {canExport ? "Available" : "Guarded"}
             </StatusPill>
           </div>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-xs leading-5 text-slate-500">
             {exportSafetyMessage}
           </p>
 
-          {!canExport && (
-            <div className="mt-4 rounded-xl border border-amber-300/16 bg-amber-300/[0.055] p-3 text-xs leading-5 text-amber-100/85">
-              Clean export stays disabled until mappings are safe and at least
-              one import-ready invoice is available.
-            </div>
-          )}
-
-          {canExport && blockedCount > 0 && (
-            <div className="mt-4 rounded-xl border border-cyan-300/14 bg-cyan-300/[0.045] p-3 text-xs leading-5 text-cyan-100/80">
-              Clean export will contain {cleanRows.length} ready invoice
-              {cleanRows.length === 1 ? "" : "s"}. Blocked invoices stay out of
-              the export.
-            </div>
-          )}
-
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="mt-4 grid gap-2">
             <button
               type="button"
               onClick={() =>
@@ -245,19 +183,6 @@ export function ImportReadinessPanel({
               className="rounded-xl border border-slate-700/60 bg-slate-900/55 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
             >
               Download issue report
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                navigator.clipboard.writeText(
-                  JSON.stringify(cleanRows, null, 2),
-                )
-              }
-              disabled={!canExport}
-              className="rounded-xl border border-slate-700/60 bg-slate-900/55 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
-            >
-              Copy clean JSON
             </button>
           </div>
         </aside>
@@ -280,30 +205,60 @@ function getNextActionMessage({
   cleanCount: number;
 }) {
   if (hasIncompleteMapping) {
-    return "Open field mapping and complete the required invoice fields before reviewing rows.";
+    return {
+      title: "Complete field mapping first.",
+      description:
+        "Required invoice fields are not mapped yet. Open field mapping before reviewing invoice rows.",
+      buttonLabel: "Review mapping",
+    };
   }
 
   if (hasDuplicateMappings) {
-    return "Open field mapping and resolve duplicate mappings before export.";
+    return {
+      title: "Resolve duplicate mappings.",
+      description:
+        "One or more source columns are mapped multiple times. Fix this before exporting trusted data.",
+      buttonLabel: "Review mapping",
+    };
   }
 
   if (blockedCount > 0) {
-    return `${blockedCount} blocked invoice${
-      blockedCount === 1 ? "" : "s"
-    } need fixes before export. Start with the Blocked invoices section below.`;
+    return {
+      title: `${blockedCount} blocked invoice${
+        blockedCount === 1 ? "" : "s"
+      } need attention.`,
+      description:
+        "Start with blocked invoices. These rows are excluded from clean export until critical issues are fixed.",
+      buttonLabel: "Review blocked invoices",
+    };
   }
 
   if (warningCount > 0) {
-    return `No blocking issues found. Review ${warningCount} warning${
-      warningCount === 1 ? "" : "s"
-    } in the Needs review section before export.`;
+    return {
+      title: `${warningCount} invoice${
+        warningCount === 1 ? "" : "s"
+      } need review.`,
+      description:
+        "No blocking issues found. Review warnings before importing or exporting the clean output.",
+      buttonLabel: "Review warnings",
+    };
   }
 
   if (cleanCount > 0) {
-    return "All mapped invoices are import-ready. Export the clean output when ready.";
+    return {
+      title: "All mapped invoices are ready.",
+      description:
+        "No blocking issues or warnings were detected. Export the clean output when ready.",
+      buttonLabel: "Review ready invoices",
+    };
   }
 
-  return "Upload invoice data to start the preflight check.";
+  return {
+    title: "Upload invoice data to start.",
+    description:
+      "DataPreflight will analyse, normalize, validate, and prepare trusted output.",
+    buttonLabel: "Start review",
+  };
 }
 
 function Metric({
@@ -316,16 +271,26 @@ function Metric({
   tone?: "neutral" | "success" | "warning" | "danger";
 }) {
   const toneClasses = {
-    neutral: "text-slate-100",
+    neutral: "text-slate-50",
     success: "text-emerald-100",
     warning: "text-amber-100",
     danger: "text-rose-100",
   };
 
+  const borderClasses = {
+    neutral: "border-slate-700/45 bg-slate-950/30",
+    success: "border-emerald-300/16 bg-emerald-400/[0.045]",
+    warning: "border-amber-300/18 bg-amber-300/[0.055]",
+    danger: "border-rose-400/18 bg-rose-400/[0.055]",
+  };
+
   return (
-    <div className="rounded-2xl border border-slate-700/45 bg-slate-950/30 p-3">
-      <p className="text-[11px] text-slate-600">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold ${toneClasses[tone]}`}>
+    <div className={`rounded-2xl border p-4 ${borderClasses[tone]}`}>
+      <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
+        {label}
+      </p>
+
+      <p className={`mt-2 text-4xl font-semibold ${toneClasses[tone]}`}>
         {value}
       </p>
     </div>
@@ -353,8 +318,4 @@ function StatusPill({
       {children}
     </span>
   );
-}
-
-function formatLabel(value: string) {
-  return value.replaceAll("_", " ");
 }
