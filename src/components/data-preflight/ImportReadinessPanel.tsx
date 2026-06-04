@@ -65,7 +65,7 @@ export function ImportReadinessPanel({
   });
 
   return (
-    <section className="rounded-[2rem] border border-slate-700/45 bg-slate-900/70 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
+    <section className="rounded-[2rem] bg-slate-900/55 p-6 shadow-xl shadow-black/15 backdrop-blur-xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
@@ -100,7 +100,7 @@ export function ImportReadinessPanel({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+      <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         <Metric label="Invoices" value={totalInvoices} />
         <Metric label="Blocked" value={blockedCount} tone="danger" />
         <Metric label="Need review" value={warningCount} tone="warning" />
@@ -108,25 +108,25 @@ export function ImportReadinessPanel({
         <Metric label="Critical" value={criticalCount} tone="danger" />
       </div>
 
-      <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_360px]">
+      <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_280px]">
         <div
-          className={`rounded-2xl border p-4 ${
+          className={`rounded-3xl p-5 ${
             isBlocked
-              ? "border-rose-400/18 bg-rose-400/[0.055]"
+              ? "bg-rose-400/[0.055]"
               : hasWarnings
-                ? "border-amber-300/18 bg-amber-300/[0.055]"
-                : "border-emerald-300/16 bg-emerald-400/[0.045]"
+                ? "bg-amber-300/[0.055]"
+                : "bg-emerald-400/[0.045]"
           }`}
         >
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
             Next action
           </p>
 
-          <p className="mt-2 text-base font-semibold text-slate-50">
+          <p className="mt-2 text-xl font-semibold text-slate-50">
             {nextAction.title}
           </p>
 
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-400">
+          <p className="mt-2 max-w-2xl text-base leading-7 text-slate-300">
             {nextAction.description}
           </p>
 
@@ -143,14 +143,14 @@ export function ImportReadinessPanel({
           </button>
         </div>
 
-        <aside className="rounded-2xl border border-slate-700/45 bg-slate-950/30 p-4">
+        <aside className="rounded-2xl bg-slate-950/20 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
                 Export
               </p>
 
-              <h3 className="mt-1 text-base font-semibold text-slate-50">
+              <h3 className="mt-1 text-sm font-semibold text-slate-300">
                 Clean output
               </h3>
             </div>
@@ -277,20 +277,22 @@ function Metric({
     danger: "text-rose-100",
   };
 
-  const borderClasses = {
-    neutral: "border-slate-700/45 bg-slate-950/30",
-    success: "border-emerald-300/16 bg-emerald-400/[0.045]",
-    warning: "border-amber-300/18 bg-amber-300/[0.055]",
-    danger: "border-rose-400/18 bg-rose-400/[0.055]",
+  const surfaceClasses = {
+    neutral: "bg-slate-950/20",
+    success: "bg-emerald-400/[0.045]",
+    warning: "bg-amber-300/[0.055]",
+    danger: "bg-rose-400/[0.055]",
   };
 
   return (
-    <div className={`rounded-2xl border p-4 ${borderClasses[tone]}`}>
+    <div className={`rounded-2xl p-4 ${surfaceClasses[tone]}`}>
       <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
         {label}
       </p>
 
-      <p className={`mt-2 text-4xl font-semibold ${toneClasses[tone]}`}>
+      <p
+        className={`mt-2 text-5xl font-semibold tracking-tight ${toneClasses[tone]}`}
+      >
         {value}
       </p>
     </div>
