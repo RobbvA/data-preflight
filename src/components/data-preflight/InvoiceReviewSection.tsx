@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+
 import { DataSetPreview } from "@/components/data-preflight/DataSetPreview";
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
 
@@ -18,6 +20,8 @@ type InvoiceReviewSectionProps = {
   onToggleBlockedOpen: () => void;
 };
 
+type ReviewTab = "blocked" | "warning" | "ready";
+
 export function InvoiceReviewSection({
   showOnlyBlocked,
   cleanInvoiceItems,
@@ -34,8 +38,67 @@ export function InvoiceReviewSection({
   onToggleWarningOpen,
   onToggleBlockedOpen,
 }: InvoiceReviewSectionProps) {
-  const visibleWarningInvoiceItems = showOnlyBlocked ? [] : warningInvoiceItems;
-  const visibleCleanInvoiceItems = showOnlyBlocked ? [] : cleanInvoiceItems;
+  const defaultTab: ReviewTab =
+    blockedInvoiceItems.length > 0
+      ? "blocked"
+      : warningInvoiceItems.length > 0
+        ? "warning"
+        : "ready";
+
+  const [activeTab, setActiveTab] = useState<ReviewTab>(defaultTab);
+
+  const activeTabConfig = useMemo(() => {
+    if (activeTab === "blocked") {
+      return {
+        title: "Blocked invoices",
+        description:
+          "These rows contain critical issues and are excluded from clean export.",
+        items: blockedInvoiceItems,
+        emptyMessage: "No blocked invoices.",
+        isOpen: isBlockedOpen,
+        onToggle: onToggleBlockedOpen,
+        tone: "danger" as const,
+        compact: false,
+      };
+    }
+
+    if (activeTab === "warning") {
+      return {
+        title: "Needs review",
+        description:
+          "These rows can export, but should be checked before import.",
+        items: warningInvoiceItems,
+        emptyMessage: "No warning-only invoices.",
+        isOpen: isWarningOpen,
+        onToggle: onToggleWarningOpen,
+        tone: "warning" as const,
+        compact: false,
+      };
+    }
+
+    return {
+      title: "Import-ready",
+      description:
+        "Rows that passed the current mapping and validation checks.",
+      items: cleanInvoiceItems,
+      emptyMessage: "No import-ready invoices yet.",
+      isOpen: isCleanOpen,
+      onToggle: onToggleCleanOpen,
+      tone: "neutral" as const,
+      compact: true,
+    };
+  }, [
+    activeTab,
+    blockedInvoiceItems,
+    warningInvoiceItems,
+    cleanInvoiceItems,
+    isBlockedOpen,
+    isWarningOpen,
+    isCleanOpen,
+    onToggleBlockedOpen,
+    onToggleWarningOpen,
+    onToggleCleanOpen,
+  ]);
 
   const totalReviewItems =
     blockedInvoiceItems.length +
@@ -51,7 +114,7 @@ export function InvoiceReviewSection({
   return (
     <section
       id="invoice-review-workspace"
-      className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl"
+      className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/55 p-5 shadow-xl shadow-black/20 backdrop-blur-xl"
     >
       <div className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-700/45 pb-5">
         <div>
@@ -70,8 +133,8 @@ export function InvoiceReviewSection({
           </div>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-            Review invoices by business risk. Blocked rows are excluded from
-            clean export; warning rows can export, but should be reviewed first.
+            Review one category at a time. Start with blocked invoices, then
+            warnings, then ready rows.
           </p>
         </div>
 
@@ -109,100 +172,46 @@ export function InvoiceReviewSection({
       </div>
 
       {totalReviewItems > 0 && (
-        <div className="mt-5 rounded-2xl border border-slate-700/45 bg-slate-950/25 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Review path
-          </p>
+        <div className="mt-5 grid gap-2 rounded-2xl border border-slate-700/45 bg-slate-950/25 p-2 sm:grid-cols-3">
+          <ReviewTabButton
+            label="Blocked"
+            count={blockedInvoiceItems.length}
+            active={activeTab === "blocked"}
+            tone="danger"
+            onClick={() => setActiveTab("blocked")}
+          />
 
-          <div className="mt-3 grid gap-3 lg:grid-cols-3">
-            <ReviewStep
-              title="1. Fix blocked"
-              description="Critical rows are excluded from clean export until fixed."
-              active={blockedInvoiceItems.length > 0}
-              tone="danger"
-            />
+          <ReviewTabButton
+            label="Needs Review"
+            count={warningInvoiceItems.length}
+            active={activeTab === "warning"}
+            tone="warning"
+            onClick={() => setActiveTab("warning")}
+          />
 
-            <ReviewStep
-              title="2. Check warnings"
-              description="Warning rows can export, but may still carry operational risk."
-              active={
-                blockedInvoiceItems.length === 0 &&
-                warningInvoiceItems.length > 0
-              }
-              tone="warning"
-            />
-
-            <ReviewStep
-              title="3. Export ready"
-              description="Clean rows passed current mapping and validation checks."
-              active={
-                blockedInvoiceItems.length === 0 &&
-                warningInvoiceItems.length === 0 &&
-                cleanInvoiceItems.length > 0
-              }
-              tone="success"
-            />
-          </div>
+          <ReviewTabButton
+            label="Ready"
+            count={cleanInvoiceItems.length}
+            active={activeTab === "ready"}
+            tone="success"
+            onClick={() => setActiveTab("ready")}
+          />
         </div>
       )}
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-5">
         <DataSetPreview
-          title="Blocked invoices"
-          description="These rows contain critical issues and are excluded from clean export."
-          items={blockedInvoiceItems}
-          emptyMessage="No blocked invoices."
+          title={activeTabConfig.title}
+          description={activeTabConfig.description}
+          items={activeTabConfig.items}
+          emptyMessage={activeTabConfig.emptyMessage}
           selectedRowIndex={selectedRowIndex}
           onSelectItem={onSelectInvoice}
           onViewDetails={onViewInvoiceDetails}
-          isOpen={isBlockedOpen}
-          onToggle={onToggleBlockedOpen}
-          tone="danger"
-          embedded
-        />
-
-        <DataSetPreview
-          title="Needs review"
-          description={
-            showOnlyBlocked
-              ? "Hidden while blocked-only mode is active."
-              : "These rows can export, but should be checked before import."
-          }
-          items={visibleWarningInvoiceItems}
-          emptyMessage={
-            showOnlyBlocked
-              ? "Warning-only invoices are hidden in blocked-only mode."
-              : "No warning-only invoices."
-          }
-          selectedRowIndex={selectedRowIndex}
-          onSelectItem={onSelectInvoice}
-          onViewDetails={onViewInvoiceDetails}
-          isOpen={isWarningOpen}
-          onToggle={onToggleWarningOpen}
-          tone="warning"
-          embedded
-        />
-
-        <DataSetPreview
-          title="Import-ready"
-          description={
-            showOnlyBlocked
-              ? "Hidden while blocked-only mode is active."
-              : "Rows that passed the current mapping and validation checks."
-          }
-          items={visibleCleanInvoiceItems}
-          emptyMessage={
-            showOnlyBlocked
-              ? "Import-ready invoices are hidden in blocked-only mode."
-              : "No import-ready invoices yet."
-          }
-          selectedRowIndex={selectedRowIndex}
-          onSelectItem={onSelectInvoice}
-          onViewDetails={onViewInvoiceDetails}
-          isOpen={isCleanOpen}
-          onToggle={onToggleCleanOpen}
-          tone="neutral"
-          compact
+          isOpen={activeTabConfig.isOpen}
+          onToggle={activeTabConfig.onToggle}
+          tone={activeTabConfig.tone}
+          compact={activeTabConfig.compact}
           embedded
         />
       </div>
@@ -271,32 +280,40 @@ function ReviewMetric({
   );
 }
 
-function ReviewStep({
-  title,
-  description,
+function ReviewTabButton({
+  label,
+  count,
   active,
   tone,
+  onClick,
 }: {
-  title: string;
-  description: string;
+  label: string;
+  count: number;
   active: boolean;
   tone: "danger" | "warning" | "success";
+  onClick: () => void;
 }) {
   const activeToneClasses = {
-    danger: "border-rose-400/20 bg-rose-400/[0.055]",
-    warning: "border-amber-300/20 bg-amber-300/[0.055]",
-    success: "border-emerald-300/18 bg-emerald-400/[0.045]",
+    danger: "border-rose-400/24 bg-rose-400/[0.08] text-rose-100",
+    warning: "border-amber-300/24 bg-amber-300/[0.08] text-amber-100",
+    success: "border-emerald-300/20 bg-emerald-400/[0.06] text-emerald-100",
   };
 
   return (
-    <div
-      className={`rounded-2xl border p-3 ${
-        active ? activeToneClasses[tone] : "border-slate-700/35 bg-slate-950/20"
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-xl border px-4 py-3 text-left transition ${
+        active
+          ? activeToneClasses[tone]
+          : "border-transparent bg-transparent text-slate-500 hover:border-slate-700/50 hover:bg-slate-900/50 hover:text-slate-200"
       }`}
     >
-      <p className="text-sm font-semibold text-slate-100">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
-    </div>
+      <p className="text-sm font-semibold">{label}</p>
+      <p className="mt-1 text-xs opacity-80">
+        {count} invoice{count === 1 ? "" : "s"}
+      </p>
+    </button>
   );
 }
 
