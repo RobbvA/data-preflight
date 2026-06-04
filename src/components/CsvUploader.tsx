@@ -296,124 +296,152 @@ export function CsvUploader() {
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#070b14] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
+    <main className="min-h-screen overflow-hidden bg-[#08111f] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-slate-500/12 blur-3xl" />
-        <div className="absolute right-[-220px] top-28 h-[500px] w-[620px] rounded-full bg-blue-500/7 blur-3xl" />
-        <div className="absolute bottom-[-220px] left-[-160px] h-[420px] w-[620px] rounded-full bg-cyan-500/6 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0.18),_rgba(7,11,20,1))]" />
+        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute right-[-220px] top-28 h-[500px] w-[620px] rounded-full bg-blue-500/8 blur-3xl" />
+        <div className="absolute bottom-[-220px] left-[-160px] h-[420px] w-[620px] rounded-full bg-slate-400/8 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0.16),_rgba(8,17,31,1))]" />
       </div>
 
       <div className="mx-auto max-w-[1380px] space-y-7">
-        <section className="grid gap-6 pt-4 lg:grid-cols-[1fr_400px] lg:items-start">
-          <div className="py-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
-              Data profile preflight
-            </p>
+        {!hasUploadedRows ? (
+          <section className="flex min-h-[calc(100vh-6rem)] items-center py-10">
+            <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1fr_520px] lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200/70">
+                  Operational invoice preflight
+                </p>
 
-            <h1 className="mt-4 max-w-3xl bg-gradient-to-r from-slate-50 via-slate-200 to-cyan-100 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
-              DataPreflight
-            </h1>
+                <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-slate-50 sm:text-6xl lg:text-7xl">
+                  Find risky invoice data before it enters your system.
+                </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-400">
-              A trust layer for messy business data exports. Map headers,
-              validate business rules, inspect issues, and export only trusted
-              data.
-            </p>
+                <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300">
+                  DataPreflight analyzes messy business exports, detects
+                  operational risks, explains what needs attention, and prepares
+                  trusted clean output.
+                </p>
 
-            {parsedDataSet && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
-                  Source: {sourceType.toUpperCase()}
-                </span>
+                <div className="mt-7 grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
+                  <ValuePoint text="Detect blocked invoices and risky rows" />
+                  <ValuePoint text="Normalize messy invoice data" />
+                  <ValuePoint text="Validate business rules before import" />
+                  <ValuePoint text="Export only trusted clean data" />
+                </div>
 
-                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
-                  {parsedDataSet.rowCount} parsed row
-                  {parsedDataSet.rowCount === 1 ? "" : "s"}
-                </span>
+                <div className="mt-7 flex flex-wrap items-center gap-2">
+                  <SourcePill label="CSV supported" tone="active" />
+                  <SourcePill label="Excel planned" />
+                  <SourcePill label="PDF planned" />
+                  <SourcePill label="Images planned" />
+                </div>
+              </div>
 
-                <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
-                  {headers.length} header
-                  {headers.length === 1 ? "" : "s"}
-                </span>
+              <UploadSection
+                fileName={fileName}
+                isLoading={isLoading}
+                error={error}
+                hasActiveFile={false}
+                onFileChange={handleFileChange}
+                onReset={resetFlow}
+              />
+            </div>
+          </section>
+        ) : (
+          <>
+            <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_420px] lg:items-start">
+              <div className="py-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
+                  Operational invoice preflight
+                </p>
+
+                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
+                  DataPreflight
+                </h1>
+
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-400">
+                  Review the analysis summary first, then inspect only the rows
+                  that need action.
+                </p>
+
+                {parsedDataSet && (
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                      {parsedDataSet.rowCount} invoices detected
+                    </span>
+
+                    <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                      {sourceType.toUpperCase()} source
+                    </span>
+
+                    <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                      {headers.length} mapped header
+                      {headers.length === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <UploadSection
+                fileName={fileName}
+                isLoading={isLoading}
+                error={error}
+                hasActiveFile={
+                  rows.length > 0 || Boolean(error) || Boolean(fileName)
+                }
+                onFileChange={handleFileChange}
+                onReset={resetFlow}
+              />
+            </section>
+
+            <ImportReadinessPanel
+              importReadinessMessage={importReadinessMessage}
+              totalInvoices={normalizedRows.length}
+              hasIncompleteMapping={hasIncompleteMapping}
+              hasDuplicateMappings={hasDuplicateMappings}
+              blockedCount={blockedCount}
+              warningCount={warningCount}
+              cleanCount={cleanCount}
+              criticalCount={criticalCount}
+              hasSuspiciousVat={hasSuspiciousVat}
+              canExport={canExport}
+              cleanRows={validationResult.cleanRows}
+              issues={validationResult.issues}
+              onDownloadCleanCsv={downloadCsv}
+              onDownloadErrorCsv={downloadErrorCsv}
+            />
+
+            <InvoiceReviewSection
+              showOnlyBlocked={showOnlyBlocked}
+              cleanInvoiceItems={cleanInvoiceItems}
+              warningInvoiceItems={warningInvoiceItems}
+              blockedInvoiceItems={blockedInvoiceItems}
+              selectedRowIndex={selectedPreviewRowIndex}
+              isCleanOpen={isCleanOpen}
+              isWarningOpen={isWarningOpen}
+              isBlockedOpen={isBlockedOpen}
+              onToggleBlockedFilter={toggleBlockedFilter}
+              onSelectInvoice={toggleSelectedPreviewInvoice}
+              onViewInvoiceDetails={viewInvoiceDetails}
+              onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
+              onToggleWarningOpen={() =>
+                setIsWarningOpen((current) => !current)
+              }
+              onToggleBlockedOpen={() =>
+                setIsBlockedOpen((current) => !current)
+              }
+            />
+
+            {selectedInvoice && (
+              <div ref={detailRef}>
+                <BlockedInvoiceDetail
+                  selectedInvoice={selectedInvoice}
+                  onClose={() => setSelectedDetailRowIndex(null)}
+                />
               </div>
             )}
-          </div>
-
-          <UploadSection
-            fileName={fileName}
-            isLoading={isLoading}
-            error={error}
-            hasActiveFile={
-              rows.length > 0 || Boolean(error) || Boolean(fileName)
-            }
-            onFileChange={handleFileChange}
-            onReset={resetFlow}
-          />
-        </section>
-
-        {hasUploadedRows && (
-          <ImportReadinessPanel
-            importReadinessMessage={importReadinessMessage}
-            totalInvoices={normalizedRows.length}
-            hasIncompleteMapping={hasIncompleteMapping}
-            hasDuplicateMappings={hasDuplicateMappings}
-            blockedCount={blockedCount}
-            warningCount={warningCount}
-            cleanCount={cleanCount}
-            criticalCount={criticalCount}
-            hasSuspiciousVat={hasSuspiciousVat}
-            canExport={canExport}
-            cleanRows={validationResult.cleanRows}
-            issues={validationResult.issues}
-            onDownloadCleanCsv={downloadCsv}
-            onDownloadErrorCsv={downloadErrorCsv}
-          />
-        )}
-
-        {hasUploadedRows && (
-          <InvoiceReviewSection
-            showOnlyBlocked={showOnlyBlocked}
-            cleanInvoiceItems={cleanInvoiceItems}
-            warningInvoiceItems={warningInvoiceItems}
-            blockedInvoiceItems={blockedInvoiceItems}
-            selectedRowIndex={selectedPreviewRowIndex}
-            isCleanOpen={isCleanOpen}
-            isWarningOpen={isWarningOpen}
-            isBlockedOpen={isBlockedOpen}
-            onToggleBlockedFilter={toggleBlockedFilter}
-            onSelectInvoice={toggleSelectedPreviewInvoice}
-            onViewInvoiceDetails={viewInvoiceDetails}
-            onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
-            onToggleWarningOpen={() => setIsWarningOpen((current) => !current)}
-            onToggleBlockedOpen={() => setIsBlockedOpen((current) => !current)}
-          />
-        )}
-
-        {selectedInvoice && (
-          <div ref={detailRef}>
-            <BlockedInvoiceDetail
-              selectedInvoice={selectedInvoice}
-              onClose={() => setSelectedDetailRowIndex(null)}
-            />
-          </div>
-        )}
-
-        {!hasHeaders && (
-          <section className="rounded-[1.75rem] border border-dashed border-slate-700/55 bg-slate-900/35 p-5 shadow-xl shadow-black/15 backdrop-blur">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-600">
-              Mapping setup
-            </p>
-
-            <h2 className="mt-2 text-xl font-semibold text-slate-100">
-              Waiting for source headers
-            </h2>
-
-            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-              Upload a source file to detect headers and create the field
-              mapping layer.
-            </p>
-          </section>
+          </>
         )}
 
         <ProductFooter />
@@ -423,7 +451,7 @@ export function CsvUploader() {
         <button
           type="button"
           onClick={() => setIsFieldMappingOpen(true)}
-          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-slate-700/60 bg-slate-950/70 text-slate-400 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-cyan-300/25 hover:bg-slate-900 hover:text-cyan-100"
+          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-slate-700/60 bg-slate-950/75 text-slate-400 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-cyan-300/25 hover:bg-slate-900 hover:text-cyan-100"
           aria-label="Open field mapping panel"
           title="Open field mapping"
         >
@@ -500,6 +528,35 @@ export function CsvUploader() {
         </div>
       )}
     </main>
+  );
+}
+
+function ValuePoint({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-700/45 bg-slate-900/45 px-4 py-3 text-slate-300">
+      <span className="mr-2 text-cyan-200">✓</span>
+      {text}
+    </div>
+  );
+}
+
+function SourcePill({
+  label,
+  tone = "neutral",
+}: {
+  label: string;
+  tone?: "active" | "neutral";
+}) {
+  return (
+    <span
+      className={`rounded-full border px-3 py-1 text-xs font-medium ${
+        tone === "active"
+          ? "border-cyan-300/25 bg-cyan-300/[0.08] text-cyan-100"
+          : "border-slate-700/60 bg-slate-900/45 text-slate-500"
+      }`}
+    >
+      {label}
+    </span>
   );
 }
 

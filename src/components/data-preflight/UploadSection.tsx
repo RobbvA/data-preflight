@@ -17,22 +17,22 @@ export function UploadSection({
 }: UploadSectionProps) {
   if (hasActiveFile) {
     return (
-      <section className="rounded-2xl border border-slate-700/45 bg-slate-950/35 p-3 shadow-lg shadow-black/10 backdrop-blur-xl">
+      <section className="rounded-2xl border border-slate-700/45 bg-slate-900/70 p-3 shadow-lg shadow-black/10 backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
-              Source file
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Current source
             </p>
 
-            <p className="mt-1 truncate text-sm font-medium text-slate-200">
+            <p className="mt-1 truncate text-sm font-medium text-slate-100">
               {isLoading
-                ? "Processing file..."
+                ? "Processing source..."
                 : fileName || "No file selected"}
             </p>
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <label className="cursor-pointer rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800 hover:text-slate-100">
+            <label className="cursor-pointer rounded-lg border border-slate-600/70 bg-slate-800/70 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:border-cyan-300/40 hover:bg-slate-700 hover:text-white">
               Replace
               <input
                 type="file"
@@ -46,7 +46,7 @@ export function UploadSection({
             <button
               type="button"
               onClick={onReset}
-              className="rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800 hover:text-slate-100"
+              className="rounded-lg border border-slate-700/70 bg-slate-950/40 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800 hover:text-slate-100"
             >
               Reset
             </button>
@@ -63,59 +63,40 @@ export function UploadSection({
   }
 
   return (
-    <section className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/55 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Source file
-          </p>
+    <section className="mx-auto w-full max-w-2xl rounded-[2rem] border border-slate-700/45 bg-slate-900/70 p-6 shadow-2xl shadow-black/25 backdrop-blur-xl">
+      <div className="text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-200/75">
+          Start here
+        </p>
 
-          <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-50">
-            Upload invoice CSV
-          </h2>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-50">
+          Upload invoice export
+        </h2>
 
-          <p className="mt-1 text-sm leading-6 text-slate-400">
-            Start by uploading a CSV export. DataPreflight will map, normalize,
-            validate, and prepare clean output.
-          </p>
-        </div>
-
-        {hasActiveFile && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="shrink-0 rounded-full border border-slate-700/70 bg-slate-950/40 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800/60 hover:text-slate-100"
-          >
-            Reset
-          </button>
-        )}
+        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">
+          Upload a business export to detect broken rows, risky invoice data,
+          mapping problems, and unsafe imports before they reach your system.
+        </p>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-dashed border-cyan-300/22 bg-cyan-300/[0.035] p-4">
+      <div className="mt-6 rounded-2xl border border-dashed border-cyan-300/30 bg-cyan-300/[0.055] p-5">
         <input
           type="file"
           accept=".csv"
           onChange={onFileChange}
           disabled={isLoading}
-          className="block w-full cursor-pointer text-xs text-slate-400 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan-100 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-slate-950 file:transition hover:file:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="block w-full cursor-pointer text-sm text-slate-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-cyan-100 file:px-5 file:py-2.5 file:text-sm file:font-semibold file:text-slate-950 file:transition hover:file:bg-white disabled:cursor-not-allowed disabled:opacity-50"
         />
 
         {isLoading && (
-          <p className="mt-3 text-xs font-medium text-cyan-100/85">
-            Processing file...
-          </p>
-        )}
-
-        {fileName && !isLoading && (
-          <p className="mt-3 truncate text-xs text-slate-400">
-            Selected:{" "}
-            <span className="font-medium text-slate-100">{fileName}</span>
+          <p className="mt-3 text-sm font-medium text-cyan-100/90">
+            Processing source...
           </p>
         )}
 
         {!fileName && !isLoading && (
           <p className="mt-3 text-xs leading-5 text-slate-500">
-            CSV only. Processing runs client-side in this MVP.
+            CSV supported now. Excel, PDF, and images are planned for later.
           </p>
         )}
       </div>
