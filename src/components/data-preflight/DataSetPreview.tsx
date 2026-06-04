@@ -48,9 +48,6 @@ export function DataSetPreview({
 }: DataSetPreviewProps) {
   const [sortMode, setSortMode] = useState<SortMode>("priority");
 
-  const isDanger = tone === "danger";
-  const isWarning = tone === "warning";
-
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
       if (sortMode === "priority") return b.priorityScore - a.priorityScore;
@@ -73,13 +70,7 @@ export function DataSetPreview({
     <section
       className={`rounded-2xl border backdrop-blur ${
         embedded ? "p-4 shadow-none" : "p-5 shadow-xl"
-      } ${
-        isDanger
-          ? "border-rose-400/15 bg-rose-950/[0.13]"
-          : isWarning
-            ? "border-amber-300/15 bg-amber-950/[0.12]"
-            : "border-slate-700/50 bg-slate-950/20"
-      }`}
+      } ${getSectionToneClasses(tone)}`}
     >
       <div className="flex w-full flex-wrap items-start justify-between gap-4">
         <button
@@ -90,17 +81,7 @@ export function DataSetPreview({
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold text-slate-100">{title}</h3>
 
-            <span
-              className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${
-                isDanger
-                  ? "border-rose-400/20 bg-rose-400/[0.06] text-rose-100/85"
-                  : isWarning
-                    ? "border-amber-300/20 bg-amber-300/[0.06] text-amber-100/85"
-                    : "border-slate-700/70 bg-slate-900/60 text-slate-400"
-              }`}
-            >
-              {items.length} row{items.length === 1 ? "" : "s"}
-            </span>
+            <CountBadge tone={tone} count={items.length} />
           </div>
 
           <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
@@ -114,9 +95,9 @@ export function DataSetPreview({
               className="rounded-full border border-slate-700/70 bg-slate-950/60 px-3 py-1.5 text-[10px] font-medium text-slate-300 outline-none transition hover:border-slate-500 focus:border-cyan-300/45"
             >
               <option value="priority">Sort: priority</option>
-              <option value="status">Sort: payment status</option>
-              <option value="row">Sort: CSV row</option>
-              <option value="issues">Sort: issue count</option>
+              <option value="status">Sort: status</option>
+              <option value="row">Sort: row</option>
+              <option value="issues">Sort: issues</option>
             </select>
           )}
 
@@ -138,7 +119,7 @@ export function DataSetPreview({
         ) : (
           <div
             className={`mt-4 space-y-2 overflow-y-auto pr-1 ${
-              compact ? "max-h-[420px]" : "max-h-[680px]"
+              compact ? "max-h-[420px]" : "max-h-[620px]"
             }`}
           >
             {sortedItems.map((item) => {
@@ -159,15 +140,15 @@ export function DataSetPreview({
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`rounded-xl border p-4 transition ${
+                    className={`rounded-xl border px-4 py-3 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
                         ? "border-cyan-300/25 bg-cyan-300/[0.045]"
-                        : "border-slate-700/45 bg-slate-950/35 hover:border-slate-500/55 hover:bg-slate-900/70"
+                        : "border-slate-700/45 bg-slate-950/30 hover:border-slate-500/55 hover:bg-slate-900/70"
                     }`}
                   >
-                    <div className="grid gap-4 lg:grid-cols-[170px_1.15fr_0.85fr_0.95fr_auto] lg:items-center">
+                    <div className="grid gap-3 xl:grid-cols-[150px_1.25fr_0.85fr_0.85fr_auto] xl:items-center">
                       <div className="flex flex-wrap items-center gap-2">
                         <PriorityBadge priority={item.priority} />
 
@@ -181,7 +162,7 @@ export function DataSetPreview({
                           {item.row.invoice_number || "Missing invoice number"}
                         </p>
 
-                        <p className="mt-1 truncate text-xs text-slate-500">
+                        <p className="mt-0.5 truncate text-xs text-slate-500">
                           {item.row.company || "Missing company"} ·{" "}
                           {item.row.email || "Missing email"}
                         </p>
@@ -189,11 +170,12 @@ export function DataSetPreview({
 
                       <div className="min-w-0">
                         <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-600">
-                          Financials
+                          Amount
                         </p>
 
-                        <p className="mt-1 truncate text-xs font-medium text-slate-300">
-                          {formatMoneyValue(item.row.amount)} · VAT{" "}
+                        <p className="mt-0.5 truncate text-xs font-medium text-slate-300">
+                          {formatMoneyValue(item.row.amount)}
+                          <span className="text-slate-600"> · VAT </span>
                           {formatMoneyValue(item.row.vat)}
                         </p>
                       </div>
@@ -203,31 +185,37 @@ export function DataSetPreview({
                           Context
                         </p>
 
-                        <p className="mt-1 truncate text-xs font-medium text-slate-300">
+                        <p className="mt-0.5 truncate text-xs font-medium text-slate-300">
                           {item.row.status || "unknown"} ·{" "}
                           {item.row.country || "—"} / {item.row.currency || "—"}
                         </p>
-
-                        <p className="mt-1 truncate text-[11px] text-slate-600">
-                          {item.row.invoice_date || "no invoice date"} →{" "}
-                          {item.row.due_date || "no due date"}
-                        </p>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                      <div className="flex flex-wrap items-center gap-2 xl:justify-end">
                         <IssueBadge
                           criticalCount={criticalIssues.length}
                           warningCount={warningIssues.length}
                           totalCount={item.issues.length}
                         />
 
-                        <span className="rounded-full border border-slate-700/60 bg-slate-950/30 px-2 py-0.5 text-[10px] font-medium text-slate-400">
-                          {item.actionLabel}
-                        </span>
+                        {onViewDetails && (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onViewDetails(item.rowIndex);
+                            }}
+                            className="rounded-full border border-slate-700/70 bg-slate-900/55 px-2.5 py-1 text-[10px] font-medium text-slate-300 transition hover:border-cyan-300/30 hover:bg-cyan-300/[0.08] hover:text-cyan-100"
+                          >
+                            Details
+                          </button>
+                        )}
                       </div>
                     </div>
 
-                    {mainIssue && <MainIssueAlert issue={mainIssue} />}
+                    {mainIssue && (
+                      <MainIssueAlert issue={mainIssue} compact={!isSelected} />
+                    )}
                   </article>
 
                   {isSelected && (
@@ -243,9 +231,9 @@ export function DataSetPreview({
                           </p>
 
                           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
-                            This overview shows what blocks or weakens trust for
-                            this invoice. Open full details only when you need
-                            normalized data and complete explanations.
+                            Review the issue summary below. Open full details
+                            only when you need normalized data and complete
+                            explanations.
                           </p>
                         </div>
 
@@ -330,14 +318,16 @@ export function DataSetPreview({
 
 function MainIssueAlert({
   issue,
+  compact = false,
 }: {
   issue: InvoicePreviewItem["issues"][number];
+  compact?: boolean;
 }) {
   const isCritical = issue.severity === "critical";
 
   return (
     <div
-      className={`mt-4 rounded-xl border p-3 ${
+      className={`mt-3 rounded-xl border ${compact ? "px-3 py-2" : "p-3"} ${
         isCritical
           ? "border-rose-400/18 bg-rose-400/[0.055]"
           : "border-amber-300/18 bg-amber-300/[0.055]"
@@ -367,11 +357,47 @@ function MainIssueAlert({
         {issue.problem}
       </p>
 
-      <p className="mt-1 text-xs leading-5 text-slate-400">
-        <span className="font-medium text-slate-200">Fix:</span> {issue.fix}
-      </p>
+      {!compact && (
+        <p className="mt-1 text-xs leading-5 text-slate-400">
+          <span className="font-medium text-slate-200">Fix:</span> {issue.fix}
+        </p>
+      )}
     </div>
   );
+}
+
+function CountBadge({
+  tone,
+  count,
+}: {
+  tone: "neutral" | "danger" | "warning";
+  count: number;
+}) {
+  const toneClasses = {
+    danger: "border-rose-400/20 bg-rose-400/[0.06] text-rose-100/85",
+    warning: "border-amber-300/20 bg-amber-300/[0.06] text-amber-100/85",
+    neutral: "border-slate-700/70 bg-slate-900/60 text-slate-400",
+  };
+
+  return (
+    <span
+      className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${toneClasses[tone]}`}
+    >
+      {count} row{count === 1 ? "" : "s"}
+    </span>
+  );
+}
+
+function getSectionToneClasses(tone: "neutral" | "danger" | "warning") {
+  if (tone === "danger") {
+    return "border-rose-400/15 bg-rose-950/[0.1]";
+  }
+
+  if (tone === "warning") {
+    return "border-amber-300/15 bg-amber-950/[0.1]";
+  }
+
+  return "border-slate-700/50 bg-slate-950/20";
 }
 
 function getStatusPriority(status: string | undefined) {
