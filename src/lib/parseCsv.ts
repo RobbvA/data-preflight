@@ -1,13 +1,42 @@
 import Papa from "papaparse";
 
+export type SourceType = "csv";
+
 export type ParsedRow = Record<string, string>;
 
+export type SourceCapability = {
+  hasHeaders: boolean;
+  hasRows: boolean;
+  supportsMultipleSheets: boolean;
+  supportsCellFormatting: boolean;
+  supportsTextExtraction: boolean;
+};
+
 export type ParsedDataSet = {
-  sourceType: "csv";
+  sourceType: SourceType;
   fileName: string;
   headers: string[];
   rows: ParsedRow[];
   rowCount: number;
+  capabilities: SourceCapability;
+};
+
+export type InputAdapter = {
+  sourceType: SourceType;
+  canParse: (file: File) => boolean;
+  parse: (file: File) => Promise<ParsedDataSet>;
+};
+
+export const csvAdapter: InputAdapter = {
+  sourceType: "csv",
+
+  canParse(file) {
+    return file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv");
+  },
+
+  parse(file) {
+    return parseCsvFile(file);
+  },
 };
 
 export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
@@ -26,7 +55,6 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
 
       complete: (result) => {
         const rows = sanitizeRows(result.data);
-
         const headers = extractHeaders(rows);
 
         resolve({
@@ -35,6 +63,13 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
           headers,
           rows,
           rowCount: rows.length,
+          capabilities: {
+            hasHeaders: headers.length > 0,
+            hasRows: rows.length > 0,
+            supportsMultipleSheets: false,
+            supportsCellFormatting: false,
+            supportsTextExtraction: false,
+          },
         });
       },
 
