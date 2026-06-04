@@ -2,11 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  parseCsvFile,
-  type ParsedDataSet,
-  type ParsedRow,
-} from "@/lib/parseCsv";
+import { csvAdapter, type ParsedDataSet, type ParsedRow } from "@/lib/parseCsv";
 import { validateRows, type ValidationIssue } from "@/lib/validateRows";
 import { normalizeInvoiceRows } from "@/lib/normalizeInvoice";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
@@ -88,14 +84,18 @@ export function CsvUploader() {
     setIsFieldMappingOpen(false);
 
     try {
-      const nextParsedDataSet = await parseCsvFile(file);
+      if (!csvAdapter.canParse(file)) {
+        throw new Error("Unsupported file type.");
+      }
+
+      const nextParsedDataSet = await csvAdapter.parse(file);
 
       if (nextParsedDataSet.rows.length === 0) {
-        throw new Error("CSV file is empty.");
+        throw new Error("Source file is empty.");
       }
 
       if (nextParsedDataSet.headers.length === 0) {
-        throw new Error("CSV file has no headers.");
+        throw new Error("Source file has no headers.");
       }
 
       setParsedDataSet(nextParsedDataSet);
@@ -106,7 +106,7 @@ export function CsvUploader() {
         ),
       );
     } catch {
-      setError("Failed to parse CSV file. Please check the file format.");
+      setError("Failed to parse source file. Please check the file format.");
       setParsedDataSet(null);
       setFieldMapping(createEmptyMapping());
       setSelectedPreviewRowIndex(null);
