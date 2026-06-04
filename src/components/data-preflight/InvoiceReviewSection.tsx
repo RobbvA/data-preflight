@@ -8,6 +8,7 @@ type InvoiceReviewSectionProps = {
   cleanInvoiceItems: InvoicePreviewItem[];
   warningInvoiceItems: InvoicePreviewItem[];
   blockedInvoiceItems: InvoicePreviewItem[];
+  criticalCount: number;
   selectedRowIndex: number | null;
   isCleanOpen: boolean;
   isWarningOpen: boolean;
@@ -27,6 +28,7 @@ export function InvoiceReviewSection({
   cleanInvoiceItems,
   warningInvoiceItems,
   blockedInvoiceItems,
+  criticalCount,
   selectedRowIndex,
   isCleanOpen,
   isWarningOpen,
@@ -139,6 +141,12 @@ export function InvoiceReviewSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <ReviewMetric
+            label="Critical issues"
+            value={criticalCount}
+            tone="critical"
+          />
+
           <ReviewMetric
             label="Blocked"
             value={blockedInvoiceItems.length}
@@ -262,17 +270,26 @@ function ReviewMetric({
 }: {
   label: string;
   value: number;
-  tone: "danger" | "warning" | "success";
+  tone: "critical" | "danger" | "warning" | "success";
 }) {
   const toneClasses = {
+    critical: "text-rose-200",
     danger: "text-rose-100",
     warning: "text-amber-100",
     success: "text-emerald-100",
   };
 
+  const surfaceClasses = {
+    critical: "bg-rose-400/[0.045]",
+    danger: "border border-slate-700/45 bg-slate-950/30",
+    warning: "border border-slate-700/45 bg-slate-950/30",
+    success: "border border-slate-700/45 bg-slate-950/30",
+  };
+
   return (
-    <div className="rounded-2xl border border-slate-700/45 bg-slate-950/30 px-3 py-2">
+    <div className={`rounded-2xl px-3 py-2 ${surfaceClasses[tone]}`}>
       <p className="text-[10px] text-slate-600">{label}</p>
+
       <p className={`mt-0.5 text-sm font-semibold ${toneClasses[tone]}`}>
         {value}
       </p>
@@ -310,6 +327,7 @@ function ReviewTabButton({
       }`}
     >
       <p className="text-sm font-semibold">{label}</p>
+
       <p className="mt-1 text-xs opacity-80">
         {count} invoice{count === 1 ? "" : "s"}
       </p>

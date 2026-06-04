@@ -258,16 +258,13 @@ export function CsvUploader() {
     invoiceItems.find((item) => item.rowIndex === selectedDetailRowIndex) ??
     null;
 
-  const warningCount = validationResult.issues.filter(
-    (issue) => issue.severity === "warning",
-  ).length;
+  const blockedCount = blockedInvoiceItems.length;
+  const warningCount = warningInvoiceItems.length;
+  const cleanCount = cleanInvoiceItems.length;
 
   const criticalCount = validationResult.issues.filter(
     (issue) => issue.severity === "critical",
   ).length;
-
-  const blockedCount = validationResult.errorRows.length;
-  const cleanCount = validationResult.cleanRows.length;
 
   const hasSuspiciousVat = validationResult.issues.some(
     (issue) =>
@@ -417,6 +414,7 @@ export function CsvUploader() {
               cleanInvoiceItems={cleanInvoiceItems}
               warningInvoiceItems={warningInvoiceItems}
               blockedInvoiceItems={blockedInvoiceItems}
+              criticalCount={criticalCount}
               selectedRowIndex={selectedPreviewRowIndex}
               isCleanOpen={isCleanOpen}
               isWarningOpen={isWarningOpen}
