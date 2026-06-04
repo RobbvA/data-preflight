@@ -49,7 +49,10 @@ export function InvoiceReviewSection({
   });
 
   return (
-    <section className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl">
+    <section
+      id="invoice-review-workspace"
+      className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/45 p-5 shadow-xl shadow-black/20 backdrop-blur-xl"
+    >
       <div className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-700/45 pb-5">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
