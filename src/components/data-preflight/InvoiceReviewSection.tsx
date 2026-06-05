@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { AlertTriangle, CheckCircle2, Search } from "lucide-react";
 
 import { DataSetPreview } from "@/components/data-preflight/DataSetPreview";
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
@@ -168,6 +169,7 @@ export function InvoiceReviewSection({
               count={blockedInvoiceItems.length}
               active={visibleActiveTab === "blocked"}
               tone="danger"
+              icon={<AlertTriangle className="h-4 w-4" />}
               onClick={() => setActiveTab("blocked")}
             />
 
@@ -177,6 +179,7 @@ export function InvoiceReviewSection({
               count={warningInvoiceItems.length}
               active={visibleActiveTab === "warning"}
               tone="warning"
+              icon={<Search className="h-4 w-4" />}
               onClick={() => setActiveTab("warning")}
             />
 
@@ -186,6 +189,7 @@ export function InvoiceReviewSection({
               count={cleanInvoiceItems.length}
               active={visibleActiveTab === "ready"}
               tone="success"
+              icon={<CheckCircle2 className="h-4 w-4" />}
               onClick={() => setActiveTab("ready")}
             />
           </div>
@@ -264,6 +268,7 @@ function ReviewTabButton({
   count,
   active,
   tone,
+  icon,
   onClick,
 }: {
   label: string;
@@ -271,6 +276,7 @@ function ReviewTabButton({
   count: number;
   active: boolean;
   tone: "danger" | "warning" | "success";
+  icon: ReactNode;
   onClick: () => void;
 }) {
   const activeToneClasses = {
@@ -285,6 +291,12 @@ function ReviewTabButton({
     success: "text-emerald-100",
   };
 
+  const iconToneClasses = {
+    danger: "text-rose-200/75",
+    warning: "text-amber-200/75",
+    success: "text-emerald-200/75",
+  };
+
   return (
     <button
       type="button"
@@ -297,7 +309,10 @@ function ReviewTabButton({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold">{label}</p>
+          <div className="flex items-center gap-2">
+            <span className={active ? "" : iconToneClasses[tone]}>{icon}</span>
+            <p className="text-sm font-semibold">{label}</p>
+          </div>
 
           <p className="mt-1 text-xs opacity-75">{description}</p>
         </div>

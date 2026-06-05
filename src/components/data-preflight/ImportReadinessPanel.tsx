@@ -1,4 +1,11 @@
 import type { ReactNode } from "react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Download,
+  FileWarning,
+  Search,
+} from "lucide-react";
 
 import type { ParsedRow } from "@/lib/parseCsv";
 import { getExportSafetyMessage } from "@/lib/exportData";
@@ -113,6 +120,7 @@ export function ImportReadinessPanel({
           value={blockedCount}
           description="Fix first"
           tone="danger"
+          icon={<AlertTriangle className="h-4 w-4" />}
         />
 
         <Metric
@@ -120,6 +128,7 @@ export function ImportReadinessPanel({
           value={warningCount}
           description="Check before export"
           tone="warning"
+          icon={<Search className="h-4 w-4" />}
         />
 
         <Metric
@@ -127,6 +136,7 @@ export function ImportReadinessPanel({
           value={cleanCount}
           description="Clean output"
           tone="success"
+          icon={<CheckCircle2 className="h-4 w-4" />}
         />
       </div>
 
@@ -140,9 +150,13 @@ export function ImportReadinessPanel({
                 : "border-emerald-300/12 bg-emerald-400/[0.055]"
           }`}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Next action
-          </p>
+          <div className="flex items-center gap-2">
+            <NextActionIcon tone={statusTone} />
+
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Next action
+            </p>
+          </div>
 
           <p className="mt-2 text-xl font-semibold text-slate-50">
             {nextAction.title}
@@ -159,8 +173,9 @@ export function ImportReadinessPanel({
                 .getElementById("invoice-review-workspace")
                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="mt-4 rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white"
           >
+            <Search className="h-4 w-4" />
             {nextAction.buttonLabel}
           </button>
         </div>
@@ -168,9 +183,13 @@ export function ImportReadinessPanel({
         <aside className="rounded-2xl border border-slate-700/35 bg-slate-950/25 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
-                Export
-              </p>
+              <div className="flex items-center gap-2">
+                <Download className="h-3.5 w-3.5 text-slate-600" />
+
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
+                  Export
+                </p>
+              </div>
 
               <h3 className="mt-1 text-sm font-semibold text-slate-300">
                 Clean output
@@ -193,8 +212,9 @@ export function ImportReadinessPanel({
                 onDownloadCleanCsv("clean-invoices.csv", cleanRows)
               }
               disabled={!canExport}
-              className="rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-35"
             >
+              <Download className="h-4 w-4" />
               Download clean CSV
             </button>
 
@@ -202,8 +222,9 @@ export function ImportReadinessPanel({
               type="button"
               onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
               disabled={issues.length === 0}
-              className="rounded-xl border border-slate-700/60 bg-slate-900/55 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700/60 bg-slate-900/55 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
             >
+              <FileWarning className="h-4 w-4" />
               Download issue report
             </button>
           </div>
@@ -288,16 +309,24 @@ function Metric({
   value,
   description,
   tone,
+  icon,
 }: {
   label: string;
   value: number;
   description: string;
   tone: "success" | "warning" | "danger";
+  icon: ReactNode;
 }) {
   const toneClasses = {
     success: "text-emerald-100",
     warning: "text-amber-100",
     danger: "text-rose-100",
+  };
+
+  const iconClasses = {
+    success: "text-emerald-200/75",
+    warning: "text-amber-200/75",
+    danger: "text-rose-200/75",
   };
 
   const surfaceClasses = {
@@ -308,9 +337,13 @@ function Metric({
 
   return (
     <div className={`rounded-2xl border p-4 ${surfaceClasses[tone]}`}>
-      <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
-        {label}
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
+          {label}
+        </p>
+
+        <span className={iconClasses[tone]}>{icon}</span>
+      </div>
 
       <p
         className={`mt-2 text-5xl font-semibold tracking-tight ${toneClasses[tone]}`}
@@ -321,6 +354,23 @@ function Metric({
       <p className="mt-1 text-xs font-medium text-slate-500">{description}</p>
     </div>
   );
+}
+
+function NextActionIcon({ tone }: { tone: "warning" | "danger" | "success" }) {
+  const toneClasses = {
+    warning: "text-amber-200/75",
+    danger: "text-rose-200/75",
+    success: "text-emerald-200/75",
+  };
+
+  const Icon =
+    tone === "danger"
+      ? AlertTriangle
+      : tone === "warning"
+        ? Search
+        : CheckCircle2;
+
+  return <Icon className={`h-4 w-4 ${toneClasses[tone]}`} />;
 }
 
 function StatusPill({
