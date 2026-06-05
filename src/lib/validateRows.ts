@@ -430,7 +430,7 @@ function validateDuplicateInvoiceNumber({
       type: "duplicate-invoice-number",
       category: "duplicates",
       problem: "Invoice number appears more than once.",
-      why: "Duplicate invoice numbers can create duplicate records or overwrite existing invoices.",
+      why: "Duplicate invoice numbers can create duplicate records, double processing, overwrites, or reconciliation conflicts.",
       fix: "Remove duplicates or assign unique invoice references before export.",
       severity: "critical",
       risk: "duplicate_risk",
@@ -545,7 +545,23 @@ function validateInvoiceDate({
 }: InvoiceValidationContext): ValidationIssue[] {
   const invoiceDate = normalizedRow.invoice_date;
 
-  if (!invoiceDate || isValidIsoDate(invoiceDate)) return [];
+  if (!invoiceDate) {
+    return [
+      createIssue({
+        rowIndex,
+        field: "invoice_date",
+        type: "missing-invoice-date",
+        category: "dates",
+        problem: "Invoice date is missing.",
+        why: "Missing invoice dates can create unclear accounting periods, reporting issues, VAT period problems, and audit questions.",
+        fix: "Add an invoice date in YYYY-MM-DD format before export.",
+        severity: "warning",
+        risk: "financial_reporting",
+      }),
+    ];
+  }
+
+  if (isValidIsoDate(invoiceDate)) return [];
 
   return [
     createIssue({
@@ -568,7 +584,23 @@ function validateDueDate({
 }: InvoiceValidationContext): ValidationIssue[] {
   const dueDate = normalizedRow.due_date;
 
-  if (!dueDate || isValidIsoDate(dueDate)) return [];
+  if (!dueDate) {
+    return [
+      createIssue({
+        rowIndex,
+        field: "due_date",
+        type: "missing-due-date",
+        category: "dates",
+        problem: "Due date is missing.",
+        why: "Missing due dates can break payment tracking, reminders, aging reports, and cash-flow planning.",
+        fix: "Add a due date in YYYY-MM-DD format or confirm that this invoice has no payment deadline.",
+        severity: "warning",
+        risk: "payment_terms",
+      }),
+    ];
+  }
+
+  if (isValidIsoDate(dueDate)) return [];
 
   return [
     createIssue({
