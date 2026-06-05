@@ -4,7 +4,19 @@ import {
   type InvoiceField,
 } from "@/lib/profiles/invoiceProfile";
 
-export type NormalizedInvoiceRow = ParsedRow;
+export type NormalizedInvoiceRow = ParsedRow & {
+  invoice_number: string;
+  company: string;
+  email: string;
+  amount: string;
+  vat: string;
+  status: string;
+  country: string;
+  invoice_date: string;
+  due_date: string;
+  currency: string;
+  normalized_invoice_key: string;
+};
 
 const statusAliases: Record<string, string> = {
   ready: "ready",
@@ -73,11 +85,15 @@ export function normalizeInvoiceRows(
 }
 
 export function normalizeInvoiceRow(row: ParsedRow): NormalizedInvoiceRow {
-  const normalizedRow: NormalizedInvoiceRow = {};
+  const normalizedRow = {} as NormalizedInvoiceRow;
 
   invoiceFieldKeys.forEach((field) => {
     normalizedRow[field] = normalizeInvoiceValue(field, row[field] ?? "");
   });
+
+  normalizedRow.normalized_invoice_key = normalizeTextKey(
+    normalizedRow.invoice_number,
+  );
 
   return normalizedRow;
 }

@@ -82,7 +82,7 @@ export function UploadSection({
       <div className="mt-6 rounded-2xl border border-dashed border-cyan-300/30 bg-cyan-300/[0.055] p-5">
         <input
           type="file"
-          accept=".csv"
+          accept=".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           onChange={onFileChange}
           disabled={isLoading}
           className="block w-full cursor-pointer text-sm text-slate-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-cyan-100 file:px-5 file:py-2.5 file:text-sm file:font-semibold file:text-slate-950 file:transition hover:file:bg-white disabled:cursor-not-allowed disabled:opacity-50"

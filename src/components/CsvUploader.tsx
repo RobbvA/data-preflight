@@ -335,7 +335,7 @@ export function CsvUploader() {
 
                 <div className="mt-7 flex flex-wrap items-center gap-2">
                   <SourcePill label="CSV supported" tone="active" />
-                  <SourcePill label="Excel planned" />
+                  <SourcePill label="Excel supported" tone="active" />
                   <SourcePill label="PDF planned" />
                   <SourcePill label="Images planned" />
                 </div>
