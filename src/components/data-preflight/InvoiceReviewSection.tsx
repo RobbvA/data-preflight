@@ -28,7 +28,6 @@ export function InvoiceReviewSection({
   cleanInvoiceItems,
   warningInvoiceItems,
   blockedInvoiceItems,
-  criticalCount,
   selectedRowIndex,
   isCleanOpen,
   isWarningOpen,
@@ -140,43 +139,17 @@ export function InvoiceReviewSection({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <ReviewMetric
-            label="Critical issues"
-            value={criticalCount}
-            tone="critical"
-          />
-
-          <ReviewMetric
-            label="Blocked"
-            value={blockedInvoiceItems.length}
-            tone="danger"
-          />
-
-          <ReviewMetric
-            label="Needs review"
-            value={warningInvoiceItems.length}
-            tone="warning"
-          />
-
-          <ReviewMetric
-            label="Ready"
-            value={cleanInvoiceItems.length}
-            tone="success"
-          />
-
-          <button
-            type="button"
-            onClick={onToggleBlockedFilter}
-            className={`rounded-full border px-3.5 py-2 text-xs font-medium transition ${
-              showOnlyBlocked
-                ? "border-rose-400/25 bg-rose-400/[0.08] text-rose-100"
-                : "border-slate-700/70 bg-slate-950/30 text-slate-400 hover:border-slate-500/70 hover:bg-slate-800/70 hover:text-slate-100"
-            }`}
-          >
-            {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onToggleBlockedFilter}
+          className={`rounded-full border px-3.5 py-2 text-xs font-medium transition ${
+            showOnlyBlocked
+              ? "border-rose-400/25 bg-rose-400/[0.08] text-rose-100"
+              : "border-slate-700/70 bg-slate-950/30 text-slate-400 hover:border-slate-500/70 hover:bg-slate-800/70 hover:text-slate-100"
+          }`}
+        >
+          {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
+        </button>
       </div>
 
       {totalReviewItems > 0 && (
@@ -263,40 +236,6 @@ function getReviewStatus({
   };
 }
 
-function ReviewMetric({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "critical" | "danger" | "warning" | "success";
-}) {
-  const toneClasses = {
-    critical: "text-rose-200",
-    danger: "text-rose-100",
-    warning: "text-amber-100",
-    success: "text-emerald-100",
-  };
-
-  const surfaceClasses = {
-    critical: "bg-rose-400/[0.045]",
-    danger: "border border-slate-700/45 bg-slate-950/30",
-    warning: "border border-slate-700/45 bg-slate-950/30",
-    success: "border border-slate-700/45 bg-slate-950/30",
-  };
-
-  return (
-    <div className={`rounded-2xl px-3 py-2 ${surfaceClasses[tone]}`}>
-      <p className="text-[10px] text-slate-600">{label}</p>
-
-      <p className={`mt-0.5 text-sm font-semibold ${toneClasses[tone]}`}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
 function ReviewTabButton({
   label,
   count,
@@ -311,9 +250,9 @@ function ReviewTabButton({
   onClick: () => void;
 }) {
   const activeToneClasses = {
-    danger: "border-rose-400/24 bg-rose-400/[0.08] text-rose-100",
-    warning: "border-amber-300/24 bg-amber-300/[0.08] text-amber-100",
-    success: "border-emerald-300/20 bg-emerald-400/[0.06] text-emerald-100",
+    danger: "border-rose-400/28 bg-rose-400/[0.1] text-rose-50",
+    warning: "border-amber-300/28 bg-amber-300/[0.1] text-amber-50",
+    success: "border-emerald-300/24 bg-emerald-400/[0.075] text-emerald-50",
   };
 
   return (

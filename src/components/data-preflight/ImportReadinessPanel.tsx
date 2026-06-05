@@ -78,6 +78,13 @@ export function ImportReadinessPanel({
             </h2>
 
             <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
+
+            {criticalCount > 0 && (
+              <StatusPill tone="danger">
+                {criticalCount} critical issue
+                {criticalCount === 1 ? "" : "s"}
+              </StatusPill>
+            )}
           </div>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
@@ -100,12 +107,10 @@ export function ImportReadinessPanel({
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        <Metric label="Invoices" value={totalInvoices} />
+      <div className="mt-6 grid gap-3 md:grid-cols-3">
         <Metric label="Blocked" value={blockedCount} tone="danger" />
         <Metric label="Need review" value={warningCount} tone="warning" />
         <Metric label="Ready" value={cleanCount} tone="success" />
-        <Metric label="Critical" value={criticalCount} tone="danger" />
       </div>
 
       <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_280px]">
@@ -264,24 +269,22 @@ function getNextActionMessage({
 function Metric({
   label,
   value,
-  tone = "neutral",
+  tone,
 }: {
   label: string;
   value: number;
-  tone?: "neutral" | "success" | "warning" | "danger";
+  tone: "success" | "warning" | "danger";
 }) {
   const toneClasses = {
-    neutral: "text-slate-50",
     success: "text-emerald-100",
     warning: "text-amber-100",
     danger: "text-rose-100",
   };
 
   const surfaceClasses = {
-    neutral: "bg-slate-950/20",
-    success: "bg-emerald-400/[0.045]",
-    warning: "bg-amber-300/[0.055]",
-    danger: "bg-rose-400/[0.055]",
+    success: "bg-emerald-400/[0.055]",
+    warning: "bg-amber-300/[0.065]",
+    danger: "bg-rose-400/[0.065]",
   };
 
   return (

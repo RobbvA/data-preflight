@@ -25,6 +25,7 @@ export function BlockedInvoiceDetail({
   });
 
   const primaryRisks = getPrimaryRisks(selectedInvoice.issues);
+  const primaryIssue = selectedInvoice.issues[0];
 
   return (
     <section className="rounded-[1.75rem] bg-slate-900/55 p-5 shadow-xl shadow-black/15 backdrop-blur-xl">
@@ -76,6 +77,33 @@ export function BlockedInvoiceDetail({
           </button>
         </div>
       </div>
+
+      {primaryIssue && (
+        <div
+          className={`mt-5 rounded-2xl p-4 ${
+            primaryIssue.severity === "critical"
+              ? "bg-rose-400/[0.06]"
+              : "bg-amber-300/[0.06]"
+          }`}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Primary review focus
+          </p>
+
+          <h3 className="mt-2 text-lg font-semibold text-slate-50">
+            {primaryIssue.problem}
+          </h3>
+
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+            {getOperationalImpact(primaryIssue)}
+          </p>
+
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            <span className="font-medium text-slate-100">Fix:</span>{" "}
+            {primaryIssue.fix}
+          </p>
+        </div>
+      )}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.78fr_1.22fr]">
         <div className="space-y-4">
@@ -219,16 +247,16 @@ function IssueExplanationCard({ issue }: { issue: ValidationIssue }) {
     <article
       className={`rounded-xl p-4 ${
         issue.severity === "critical"
-          ? "bg-rose-400/[0.055]"
-          : "bg-amber-300/[0.055]"
+          ? "bg-rose-400/[0.06]"
+          : "bg-amber-300/[0.06]"
       }`}
     >
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
             issue.severity === "critical"
-              ? "bg-rose-400/[0.08] text-rose-100"
-              : "bg-amber-300/[0.08] text-amber-100"
+              ? "bg-rose-400/[0.1] text-rose-50"
+              : "bg-amber-300/[0.09] text-amber-50"
           }`}
         >
           {issue.severity}
@@ -321,9 +349,9 @@ function StatusPill({
   children: React.ReactNode;
 }) {
   const toneClasses = {
-    danger: "bg-rose-400/[0.07] text-rose-100",
-    warning: "bg-amber-300/[0.07] text-amber-100",
-    success: "bg-emerald-400/[0.055] text-emerald-100",
+    danger: "bg-rose-400/[0.08] text-rose-100",
+    warning: "bg-amber-300/[0.08] text-amber-100",
+    success: "bg-emerald-400/[0.06] text-emerald-100",
     neutral: "bg-slate-700/25 text-slate-300",
   };
 

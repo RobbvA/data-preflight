@@ -69,7 +69,9 @@ export function DataSetPreview({
   return (
     <section
       className={`rounded-2xl backdrop-blur ${
-        embedded ? "bg-slate-950/10 p-3" : "bg-slate-950/20 p-5 shadow-xl"
+        embedded
+          ? `p-3 ${getEmbeddedToneClasses(tone)}`
+          : "bg-slate-950/20 p-5 shadow-xl"
       }`}
     >
       <div className="flex w-full flex-wrap items-start justify-between gap-4">
@@ -142,12 +144,12 @@ export function DataSetPreview({
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`group px-2 py-3 transition ${
+                    className={`group border-l-2 px-3 py-3 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "rounded-xl bg-cyan-300/[0.045]"
-                        : "hover:bg-slate-900/45"
+                        ? "rounded-xl border-l-cyan-300 bg-cyan-300/[0.055]"
+                        : `${getRowToneClasses(item.priority)} hover:bg-slate-900/45`
                     }`}
                   >
                     <div className="grid gap-3 xl:grid-cols-[138px_1.25fr_0.8fr_0.8fr_auto] xl:items-center">
@@ -346,9 +348,9 @@ function CountBadge({
   count: number;
 }) {
   const toneClasses = {
-    danger: "bg-rose-400/[0.06] text-rose-100/85",
-    warning: "bg-amber-300/[0.06] text-amber-100/85",
-    neutral: "bg-slate-900/60 text-slate-400",
+    danger: "bg-rose-400/[0.08] text-rose-100",
+    warning: "bg-amber-300/[0.08] text-amber-100",
+    neutral: "bg-emerald-400/[0.055] text-emerald-100",
   };
 
   return (
@@ -360,6 +362,30 @@ function CountBadge({
   );
 }
 
+function getEmbeddedToneClasses(tone: "neutral" | "danger" | "warning") {
+  if (tone === "danger") {
+    return "bg-rose-400/[0.035]";
+  }
+
+  if (tone === "warning") {
+    return "bg-amber-300/[0.035]";
+  }
+
+  return "bg-emerald-400/[0.025]";
+}
+
+function getRowToneClasses(priority: InvoicePriority) {
+  if (priority === "critical" || priority === "high") {
+    return "border-l-rose-300/40";
+  }
+
+  if (priority === "medium" || priority === "low") {
+    return "border-l-amber-300/35";
+  }
+
+  return "border-l-emerald-300/30";
+}
+
 function getStatusPriority(status: string | undefined) {
   const normalizedStatus = status?.trim().toLowerCase() ?? "";
   return statusPriority[normalizedStatus] ?? statusPriority.unknown;
@@ -367,11 +393,11 @@ function getStatusPriority(status: string | undefined) {
 
 function PriorityBadge({ priority }: { priority: InvoicePriority }) {
   const priorityClasses: Record<InvoicePriority, string> = {
-    critical: "bg-rose-400/[0.08] text-rose-100",
-    high: "bg-orange-300/[0.07] text-orange-100",
-    medium: "bg-amber-300/[0.07] text-amber-100",
-    low: "bg-slate-700/25 text-slate-300",
-    clear: "bg-emerald-400/[0.055] text-emerald-100",
+    critical: "bg-rose-400/[0.1] text-rose-50",
+    high: "bg-rose-300/[0.08] text-rose-100",
+    medium: "bg-amber-300/[0.09] text-amber-50",
+    low: "bg-amber-300/[0.06] text-amber-100",
+    clear: "bg-emerald-400/[0.065] text-emerald-100",
   };
 
   const labels: Record<InvoicePriority, string> = {
@@ -402,7 +428,7 @@ function IssueBadge({
 }) {
   if (totalCount === 0) {
     return (
-      <span className="rounded-full bg-emerald-400/[0.055] px-2 py-0.5 text-[10px] font-medium text-emerald-100">
+      <span className="rounded-full bg-emerald-400/[0.065] px-2 py-0.5 text-[10px] font-medium text-emerald-100">
         Ready
       </span>
     );
@@ -410,7 +436,7 @@ function IssueBadge({
 
   if (criticalCount > 0) {
     return (
-      <span className="rounded-full bg-rose-400/[0.07] px-2 py-0.5 text-[10px] font-medium text-rose-100">
+      <span className="rounded-full bg-rose-400/[0.09] px-2 py-0.5 text-[10px] font-medium text-rose-100">
         {criticalCount} critical
         {totalCount > criticalCount ? ` · ${totalCount}` : ""}
       </span>
@@ -418,7 +444,7 @@ function IssueBadge({
   }
 
   return (
-    <span className="rounded-full bg-amber-300/[0.07] px-2 py-0.5 text-[10px] font-medium text-amber-100">
+    <span className="rounded-full bg-amber-300/[0.09] px-2 py-0.5 text-[10px] font-medium text-amber-100">
       {warningCount} warning{warningCount === 1 ? "" : "s"}
     </span>
   );
