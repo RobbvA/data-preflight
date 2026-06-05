@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 
-export type SourceType = "csv";
+export type SourceType = "csv" | "excel";
 
 export type ParsedRow = Record<string, string>;
 
@@ -38,6 +38,14 @@ export const csvAdapter: InputAdapter = {
     return parseCsvFile(file);
   },
 };
+
+export function getInputAdapter(file: File): InputAdapter | null {
+  if (csvAdapter.canParse(file)) {
+    return csvAdapter;
+  }
+
+  return null;
+}
 
 export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
   return new Promise((resolve, reject) => {

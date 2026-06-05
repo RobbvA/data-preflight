@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { csvAdapter, type ParsedDataSet, type ParsedRow } from "@/lib/parseCsv";
+import {
+  getInputAdapter,
+  type ParsedDataSet,
+  type ParsedRow,
+} from "@/lib/parseCsv";
 import { validateRows, type ValidationIssue } from "@/lib/validateRows";
 import { normalizeInvoiceRows } from "@/lib/normalizeInvoice";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
@@ -84,11 +88,13 @@ export function CsvUploader() {
     setIsFieldMappingOpen(false);
 
     try {
-      if (!csvAdapter.canParse(file)) {
+      const adapter = getInputAdapter(file);
+
+      if (!adapter) {
         throw new Error("Unsupported file type.");
       }
 
-      const nextParsedDataSet = await csvAdapter.parse(file);
+      const nextParsedDataSet = await adapter.parse(file);
 
       if (nextParsedDataSet.rows.length === 0) {
         throw new Error("Source file is empty.");
