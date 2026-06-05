@@ -125,7 +125,7 @@ export function DataSetPreview({
               compact ? "max-h-[420px]" : "max-h-[620px]"
             }`}
           >
-            <div className="divide-y divide-slate-800/60">
+            <div className="space-y-2">
               {sortedItems.map((item) => {
                 const isSelected = selectedRowIndex === item.rowIndex;
                 const criticalIssues = item.issues.filter(
@@ -144,19 +144,19 @@ export function DataSetPreview({
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`group border-l-2 px-3 py-3 transition ${
+                    className={`group rounded-2xl border px-4 py-3 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "rounded-xl border-l-cyan-300 bg-cyan-300/[0.055]"
-                        : `${getRowToneClasses(item.priority)} hover:bg-slate-900/45`
+                        ? "border-cyan-300/24 bg-cyan-300/[0.06]"
+                        : `${getRowToneClasses(item.priority)} hover:border-slate-600/55 hover:bg-slate-900/55`
                     }`}
                   >
-                    <div className="grid gap-3 xl:grid-cols-[138px_1.25fr_0.8fr_0.8fr_auto] xl:items-center">
+                    <div className="grid gap-3 xl:grid-cols-[150px_1.3fr_0.9fr_0.9fr_auto] xl:items-center">
                       <div className="flex flex-wrap items-center gap-2">
                         <PriorityBadge priority={item.priority} />
 
-                        <span className="text-[10px] font-medium text-slate-600">
+                        <span className="rounded-full bg-slate-950/30 px-2 py-0.5 text-[10px] font-medium text-slate-600">
                           Row {item.rowIndex}
                         </span>
                       </div>
@@ -172,28 +172,19 @@ export function DataSetPreview({
                         </p>
                       </div>
 
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
-                          Amount
-                        </p>
+                      <ReviewDataPoint
+                        label="Amount"
+                        value={`${formatMoneyValue(item.row.amount)} · VAT ${formatMoneyValue(
+                          item.row.vat,
+                        )}`}
+                      />
 
-                        <p className="mt-0.5 truncate text-xs font-medium text-slate-300">
-                          {formatMoneyValue(item.row.amount)}
-                          <span className="text-slate-600"> · VAT </span>
-                          {formatMoneyValue(item.row.vat)}
-                        </p>
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
-                          Context
-                        </p>
-
-                        <p className="mt-0.5 truncate text-xs font-medium text-slate-300">
-                          {item.row.status || "unknown"} ·{" "}
-                          {item.row.country || "—"} / {item.row.currency || "—"}
-                        </p>
-                      </div>
+                      <ReviewDataPoint
+                        label="Context"
+                        value={`${item.row.status || "unknown"} · ${
+                          item.row.country || "—"
+                        } / ${item.row.currency || "—"}`}
+                      />
 
                       <div className="flex flex-wrap items-center gap-2 xl:justify-end">
                         <IssueBadge
@@ -225,11 +216,11 @@ export function DataSetPreview({
                     )}
 
                     {isSelected && (
-                      <div className="mt-3 rounded-xl bg-slate-950/25 p-3">
+                      <div className="mt-3 rounded-xl border border-slate-700/35 bg-slate-950/25 p-3">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/55">
-                              Quick review
+                              Review action
                             </p>
 
                             <p className="mt-1 text-sm font-medium text-slate-100">
@@ -271,6 +262,20 @@ export function DataSetPreview({
   );
 }
 
+function ReviewDataPoint({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
+        {label}
+      </p>
+
+      <p className="mt-0.5 truncate text-xs font-medium text-slate-300">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 function MainIssueInline({
   issue,
   selected,
@@ -281,30 +286,36 @@ function MainIssueInline({
   const isCritical = issue.severity === "critical";
 
   return (
-    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-xs">
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${
-          isCritical ? "bg-rose-300" : "bg-amber-300"
-        }`}
-      />
+    <div
+      className={`mt-3 rounded-xl px-3 py-2 text-xs ${
+        isCritical ? "bg-rose-400/[0.055]" : "bg-amber-300/[0.055]"
+      }`}
+    >
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${
+            isCritical ? "bg-rose-300" : "bg-amber-300"
+          }`}
+        />
 
-      <span
-        className={`font-medium ${
-          isCritical ? "text-rose-100" : "text-amber-100"
-        }`}
-      >
-        {issue.problem}
-      </span>
+        <span
+          className={`font-medium ${
+            isCritical ? "text-rose-100" : "text-amber-100"
+          }`}
+        >
+          {issue.problem}
+        </span>
 
-      {selected && (
-        <>
-          <span className="text-slate-700">·</span>
+        {selected && (
+          <>
+            <span className="text-slate-700">·</span>
 
-          <span className="text-slate-500">
-            Fix: <span className="text-slate-400">{issue.fix}</span>
-          </span>
-        </>
-      )}
+            <span className="text-slate-500">
+              Fix: <span className="text-slate-400">{issue.fix}</span>
+            </span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -376,14 +387,14 @@ function getEmbeddedToneClasses(tone: "neutral" | "danger" | "warning") {
 
 function getRowToneClasses(priority: InvoicePriority) {
   if (priority === "critical" || priority === "high") {
-    return "border-l-rose-300/40";
+    return "border-rose-400/18 bg-rose-400/[0.025]";
   }
 
   if (priority === "medium" || priority === "low") {
-    return "border-l-amber-300/35";
+    return "border-amber-300/18 bg-amber-300/[0.022]";
   }
 
-  return "border-l-emerald-300/30";
+  return "border-emerald-300/14 bg-emerald-400/[0.018]";
 }
 
 function getStatusPriority(status: string | undefined) {
