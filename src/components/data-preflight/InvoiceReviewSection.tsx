@@ -48,12 +48,19 @@ export function InvoiceReviewSection({
 
   const [activeTab, setActiveTab] = useState<ReviewTab>(defaultTab);
 
+  const visibleActiveTab =
+    activeTab === "blocked" && blockedInvoiceItems.length === 0
+      ? defaultTab
+      : activeTab === "warning" && warningInvoiceItems.length === 0
+        ? defaultTab
+        : activeTab;
+
   const activeTabConfig = useMemo(() => {
-    if (activeTab === "blocked") {
+    if (visibleActiveTab === "blocked") {
       return {
         title: "Blocked invoices",
         description:
-          "These rows contain critical issues and are excluded from clean export.",
+          "Critical rows that are excluded from clean export until fixed.",
         items: blockedInvoiceItems,
         emptyMessage: "No blocked invoices.",
         isOpen: isBlockedOpen,
@@ -63,11 +70,11 @@ export function InvoiceReviewSection({
       };
     }
 
-    if (activeTab === "warning") {
+    if (visibleActiveTab === "warning") {
       return {
         title: "Needs review",
         description:
-          "These rows can export, but should be checked before import.",
+          "Rows that can export, but should be checked before import.",
         items: warningInvoiceItems,
         emptyMessage: "No warning-only invoices.",
         isOpen: isWarningOpen,
@@ -89,7 +96,7 @@ export function InvoiceReviewSection({
       compact: true,
     };
   }, [
-    activeTab,
+    visibleActiveTab,
     blockedInvoiceItems,
     warningInvoiceItems,
     cleanInvoiceItems,
@@ -115,9 +122,9 @@ export function InvoiceReviewSection({
   return (
     <section
       id="invoice-review-workspace"
-      className="rounded-[1.75rem] border border-slate-700/45 bg-slate-900/55 p-5 shadow-xl shadow-black/20 backdrop-blur-xl"
+      className="rounded-[1.75rem] border border-slate-700/40 bg-slate-900/55 p-5 shadow-xl shadow-black/20 backdrop-blur-xl"
     >
-      <div className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-700/45 pb-5">
+      <div className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-700/40 pb-5">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Review workspace
@@ -134,8 +141,8 @@ export function InvoiceReviewSection({
           </div>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-            Review one category at a time. Start with blocked invoices, then
-            warnings, then ready rows.
+            Review the most important category first. Fix blocked invoices,
+            check warnings, then export clean rows.
           </p>
         </div>
 
@@ -152,50 +159,65 @@ export function InvoiceReviewSection({
         </button>
       </div>
 
-      {totalReviewItems > 0 && (
-        <div className="mt-5 grid gap-2 rounded-2xl border border-slate-700/45 bg-slate-950/25 p-2 sm:grid-cols-3">
-          <ReviewTabButton
-            label="Blocked"
-            count={blockedInvoiceItems.length}
-            active={activeTab === "blocked"}
-            tone="danger"
-            onClick={() => setActiveTab("blocked")}
-          />
+      {totalReviewItems > 0 ? (
+        <>
+          <div className="mt-5 grid gap-2 rounded-2xl border border-slate-700/40 bg-slate-950/25 p-2 sm:grid-cols-3">
+            <ReviewTabButton
+              label="Blocked"
+              description="Fix first"
+              count={blockedInvoiceItems.length}
+              active={visibleActiveTab === "blocked"}
+              tone="danger"
+              onClick={() => setActiveTab("blocked")}
+            />
 
-          <ReviewTabButton
-            label="Needs Review"
-            count={warningInvoiceItems.length}
-            active={activeTab === "warning"}
-            tone="warning"
-            onClick={() => setActiveTab("warning")}
-          />
+            <ReviewTabButton
+              label="Needs Review"
+              description="Check before export"
+              count={warningInvoiceItems.length}
+              active={visibleActiveTab === "warning"}
+              tone="warning"
+              onClick={() => setActiveTab("warning")}
+            />
 
-          <ReviewTabButton
-            label="Ready"
-            count={cleanInvoiceItems.length}
-            active={activeTab === "ready"}
-            tone="success"
-            onClick={() => setActiveTab("ready")}
-          />
+            <ReviewTabButton
+              label="Ready"
+              description="Clean output"
+              count={cleanInvoiceItems.length}
+              active={visibleActiveTab === "ready"}
+              tone="success"
+              onClick={() => setActiveTab("ready")}
+            />
+          </div>
+
+          <div className="mt-5">
+            <DataSetPreview
+              title={activeTabConfig.title}
+              description={activeTabConfig.description}
+              items={activeTabConfig.items}
+              emptyMessage={activeTabConfig.emptyMessage}
+              selectedRowIndex={selectedRowIndex}
+              onSelectItem={onSelectInvoice}
+              onViewDetails={onViewInvoiceDetails}
+              isOpen={activeTabConfig.isOpen}
+              onToggle={activeTabConfig.onToggle}
+              tone={activeTabConfig.tone}
+              compact={activeTabConfig.compact}
+              embedded
+            />
+          </div>
+        </>
+      ) : (
+        <div className="mt-5 rounded-2xl border border-slate-700/35 bg-slate-950/25 p-5">
+          <p className="text-sm font-medium text-slate-300">
+            No invoices ready for review.
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Upload and map invoice data to start the review workflow.
+          </p>
         </div>
       )}
-
-      <div className="mt-5">
-        <DataSetPreview
-          title={activeTabConfig.title}
-          description={activeTabConfig.description}
-          items={activeTabConfig.items}
-          emptyMessage={activeTabConfig.emptyMessage}
-          selectedRowIndex={selectedRowIndex}
-          onSelectItem={onSelectInvoice}
-          onViewDetails={onViewInvoiceDetails}
-          isOpen={activeTabConfig.isOpen}
-          onToggle={activeTabConfig.onToggle}
-          tone={activeTabConfig.tone}
-          compact={activeTabConfig.compact}
-          embedded
-        />
-      </div>
     </section>
   );
 }
@@ -238,12 +260,14 @@ function getReviewStatus({
 
 function ReviewTabButton({
   label,
+  description,
   count,
   active,
   tone,
   onClick,
 }: {
   label: string;
+  description: string;
   count: number;
   active: boolean;
   tone: "danger" | "warning" | "success";
@@ -253,6 +277,12 @@ function ReviewTabButton({
     danger: "border-rose-400/28 bg-rose-400/[0.1] text-rose-50",
     warning: "border-amber-300/28 bg-amber-300/[0.1] text-amber-50",
     success: "border-emerald-300/24 bg-emerald-400/[0.075] text-emerald-50",
+  };
+
+  const countToneClasses = {
+    danger: "text-rose-100",
+    warning: "text-amber-100",
+    success: "text-emerald-100",
   };
 
   return (
@@ -265,11 +295,21 @@ function ReviewTabButton({
           : "border-transparent bg-transparent text-slate-500 hover:border-slate-700/50 hover:bg-slate-900/50 hover:text-slate-200"
       }`}
     >
-      <p className="text-sm font-semibold">{label}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">{label}</p>
 
-      <p className="mt-1 text-xs opacity-80">
-        {count} invoice{count === 1 ? "" : "s"}
-      </p>
+          <p className="mt-1 text-xs opacity-75">{description}</p>
+        </div>
+
+        <p
+          className={`text-lg font-semibold leading-none ${
+            active ? "" : countToneClasses[tone]
+          }`}
+        >
+          {count}
+        </p>
+      </div>
     </button>
   );
 }
@@ -282,9 +322,9 @@ function StatusPill({
   children: React.ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-amber-300/20 bg-amber-300/[0.07] text-amber-100",
-    danger: "border-rose-400/20 bg-rose-400/[0.07] text-rose-100",
-    success: "border-emerald-300/18 bg-emerald-400/[0.055] text-emerald-100",
+    warning: "border-amber-300/22 bg-amber-300/[0.08] text-amber-100",
+    danger: "border-rose-400/22 bg-rose-400/[0.08] text-rose-100",
+    success: "border-emerald-300/20 bg-emerald-400/[0.065] text-emerald-100",
     neutral: "border-slate-500/30 bg-slate-700/25 text-slate-300",
   };
 
