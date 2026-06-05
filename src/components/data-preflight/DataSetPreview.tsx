@@ -116,7 +116,7 @@ export function DataSetPreview({
 
       {isOpen &&
         (items.length === 0 ? (
-          <p className="mt-4 rounded-xl bg-slate-950/25 p-4 text-sm text-slate-500">
+          <p className="mt-4 rounded-xl border border-slate-700/35 bg-slate-950/25 p-4 text-sm text-slate-500">
             {emptyMessage}
           </p>
         ) : (
@@ -125,7 +125,7 @@ export function DataSetPreview({
               compact ? "max-h-[420px]" : "max-h-[620px]"
             }`}
           >
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {sortedItems.map((item) => {
                 const isSelected = selectedRowIndex === item.rowIndex;
                 const criticalIssues = item.issues.filter(
@@ -144,39 +144,71 @@ export function DataSetPreview({
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`group rounded-2xl border px-4 py-3 transition ${
+                    className={`group rounded-2xl border p-4 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-cyan-300/24 bg-cyan-300/[0.06]"
+                        ? "border-cyan-300/28 bg-cyan-300/[0.065]"
                         : `${getRowToneClasses(item.priority)} hover:border-slate-600/55 hover:bg-slate-900/55`
                     }`}
                   >
-                    <div className="grid gap-3 xl:grid-cols-[150px_1.3fr_0.9fr_0.9fr_auto] xl:items-center">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <PriorityBadge priority={item.priority} />
-
-                        <span className="rounded-full bg-slate-950/30 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                          Row {item.rowIndex}
-                        </span>
-                      </div>
-
+                    <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-start">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-50">
-                          {item.row.invoice_number || "Missing invoice number"}
-                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <PriorityBadge priority={item.priority} />
 
-                        <p className="mt-0.5 truncate text-xs text-slate-500">
-                          {item.row.company || "Missing company"} ·{" "}
-                          {item.row.email || "Missing email"}
-                        </p>
+                          <span className="rounded-full bg-slate-950/30 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                            Row {item.rowIndex}
+                          </span>
+
+                          <IssueBadge
+                            criticalCount={criticalIssues.length}
+                            warningCount={warningIssues.length}
+                            totalCount={item.issues.length}
+                          />
+                        </div>
+
+                        <div className="mt-3">
+                          <p className="truncate text-base font-semibold text-slate-50">
+                            {item.row.invoice_number ||
+                              "Missing invoice number"}
+                          </p>
+
+                          <p className="mt-1 truncate text-sm text-slate-400">
+                            {item.row.company || "Missing company"}
+                          </p>
+
+                          <p className="mt-0.5 truncate text-xs text-slate-600">
+                            {item.row.email || "Missing email"}
+                          </p>
+                        </div>
                       </div>
 
+                      <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                        {onViewDetails && (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onViewDetails(item.rowIndex);
+                            }}
+                            className="rounded-full bg-slate-950/35 px-3 py-1.5 text-[10px] font-medium text-slate-400 transition hover:bg-cyan-300/[0.08] hover:text-cyan-100"
+                          >
+                            Details
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-2 md:grid-cols-3">
                       <ReviewDataPoint
                         label="Amount"
-                        value={`${formatMoneyValue(item.row.amount)} · VAT ${formatMoneyValue(
-                          item.row.vat,
-                        )}`}
+                        value={formatMoneyValue(item.row.amount)}
+                      />
+
+                      <ReviewDataPoint
+                        label="VAT"
+                        value={formatMoneyValue(item.row.vat)}
                       />
 
                       <ReviewDataPoint
@@ -185,27 +217,6 @@ export function DataSetPreview({
                           item.row.country || "—"
                         } / ${item.row.currency || "—"}`}
                       />
-
-                      <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-                        <IssueBadge
-                          criticalCount={criticalIssues.length}
-                          warningCount={warningIssues.length}
-                          totalCount={item.issues.length}
-                        />
-
-                        {onViewDetails && (
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onViewDetails(item.rowIndex);
-                            }}
-                            className="rounded-full bg-slate-950/35 px-2.5 py-1 text-[10px] font-medium text-slate-400 transition hover:bg-cyan-300/[0.08] hover:text-cyan-100"
-                          >
-                            Details
-                          </button>
-                        )}
-                      </div>
                     </div>
 
                     {mainIssue && (
@@ -264,12 +275,12 @@ export function DataSetPreview({
 
 function ReviewDataPoint({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0">
+    <div className="rounded-xl bg-slate-950/22 px-3 py-2.5">
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
         {label}
       </p>
 
-      <p className="mt-0.5 truncate text-xs font-medium text-slate-300">
+      <p className="mt-1 truncate text-xs font-medium text-slate-300">
         {value}
       </p>
     </div>
@@ -287,8 +298,10 @@ function MainIssueInline({
 
   return (
     <div
-      className={`mt-3 rounded-xl px-3 py-2 text-xs ${
-        isCritical ? "bg-rose-400/[0.055]" : "bg-amber-300/[0.055]"
+      className={`mt-3 rounded-xl border px-3 py-2 text-xs ${
+        isCritical
+          ? "border-rose-400/12 bg-rose-400/[0.06]"
+          : "border-amber-300/12 bg-amber-300/[0.06]"
       }`}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
