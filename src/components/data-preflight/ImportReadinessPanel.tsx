@@ -65,7 +65,7 @@ export function ImportReadinessPanel({
   });
 
   return (
-    <section className="rounded-[2rem] bg-slate-900/55 p-6 shadow-xl shadow-black/15 backdrop-blur-xl">
+    <section className="rounded-[2rem] border border-slate-700/35 bg-slate-900/60 p-6 shadow-xl shadow-black/15 backdrop-blur-xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
@@ -108,19 +108,36 @@ export function ImportReadinessPanel({
       </div>
 
       <div className="mt-6 grid gap-3 md:grid-cols-3">
-        <Metric label="Blocked" value={blockedCount} tone="danger" />
-        <Metric label="Need review" value={warningCount} tone="warning" />
-        <Metric label="Ready" value={cleanCount} tone="success" />
+        <Metric
+          label="Blocked"
+          value={blockedCount}
+          description="Fix first"
+          tone="danger"
+        />
+
+        <Metric
+          label="Need review"
+          value={warningCount}
+          description="Check before export"
+          tone="warning"
+        />
+
+        <Metric
+          label="Ready"
+          value={cleanCount}
+          description="Clean output"
+          tone="success"
+        />
       </div>
 
       <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_280px]">
         <div
-          className={`rounded-3xl p-5 ${
+          className={`rounded-3xl border p-5 ${
             isBlocked
-              ? "bg-rose-400/[0.055]"
+              ? "border-rose-400/12 bg-rose-400/[0.065]"
               : hasWarnings
-                ? "bg-amber-300/[0.055]"
-                : "bg-emerald-400/[0.045]"
+                ? "border-amber-300/12 bg-amber-300/[0.065]"
+                : "border-emerald-300/12 bg-emerald-400/[0.055]"
           }`}
         >
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -148,7 +165,7 @@ export function ImportReadinessPanel({
           </button>
         </div>
 
-        <aside className="rounded-2xl bg-slate-950/20 p-4">
+        <aside className="rounded-2xl border border-slate-700/35 bg-slate-950/25 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
@@ -269,10 +286,12 @@ function getNextActionMessage({
 function Metric({
   label,
   value,
+  description,
   tone,
 }: {
   label: string;
   value: number;
+  description: string;
   tone: "success" | "warning" | "danger";
 }) {
   const toneClasses = {
@@ -282,13 +301,13 @@ function Metric({
   };
 
   const surfaceClasses = {
-    success: "bg-emerald-400/[0.055]",
-    warning: "bg-amber-300/[0.065]",
-    danger: "bg-rose-400/[0.065]",
+    success: "border-emerald-300/14 bg-emerald-400/[0.065]",
+    warning: "border-amber-300/16 bg-amber-300/[0.075]",
+    danger: "border-rose-400/16 bg-rose-400/[0.075]",
   };
 
   return (
-    <div className={`rounded-2xl p-4 ${surfaceClasses[tone]}`}>
+    <div className={`rounded-2xl border p-4 ${surfaceClasses[tone]}`}>
       <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
         {label}
       </p>
@@ -298,6 +317,8 @@ function Metric({
       >
         {value}
       </p>
+
+      <p className="mt-1 text-xs font-medium text-slate-500">{description}</p>
     </div>
   );
 }
@@ -310,9 +331,9 @@ function StatusPill({
   children: ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-amber-300/20 bg-amber-300/[0.07] text-amber-100",
-    danger: "border-rose-400/20 bg-rose-400/[0.07] text-rose-100",
-    success: "border-emerald-300/18 bg-emerald-400/[0.055] text-emerald-100",
+    warning: "border-amber-300/22 bg-amber-300/[0.08] text-amber-100",
+    danger: "border-rose-400/22 bg-rose-400/[0.08] text-rose-100",
+    success: "border-emerald-300/20 bg-emerald-400/[0.065] text-emerald-100",
     info: "border-slate-500/30 bg-slate-700/25 text-slate-300",
   };
 
