@@ -90,7 +90,7 @@ export function BlockedInvoiceDetail({
             Primary review focus
           </p>
 
-          <h3 className="mt-2 text-lg font-semibold text-slate-50">
+          <h3 className="mt-2 text-xl font-semibold text-slate-50">
             {primaryIssue.problem}
           </h3>
 
@@ -124,7 +124,7 @@ export function BlockedInvoiceDetail({
               </span>
             </div>
 
-            <div className="mt-4 grid gap-2">
+            <div className="mt-4 grid gap-3">
               <SummaryItem
                 label="Decision"
                 value={inspectionSummary.decision}
@@ -266,7 +266,7 @@ function IssueExplanationCard({ issue }: { issue: ValidationIssue }) {
           {issue.field}
         </span>
 
-        <span className="rounded-full bg-slate-950/35 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-slate-400">
+        <span className="rounded-full bg-cyan-400/[0.06] px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-slate-400">
           {formatRiskLabel(issue.risk)}
         </span>
 
@@ -302,7 +302,9 @@ function ExplanationBlock({
   return (
     <p
       className={`rounded-lg bg-slate-950/25 p-3 text-xs leading-5 ${
-        stronger ? "text-slate-300" : "text-slate-500"
+        stronger
+          ? "border border-cyan-300/10 bg-cyan-300/[0.04] text-slate-200"
+          : "text-slate-500"
       }`}
     >
       <span className="font-medium text-slate-200">{label}:</span> {value}

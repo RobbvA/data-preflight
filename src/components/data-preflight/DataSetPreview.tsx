@@ -148,7 +148,7 @@ export function DataSetPreview({
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-cyan-300/28 bg-cyan-300/[0.065]"
+                        ? "border-cyan-300/400 bg-cyan-300/[0.09] ring-1 ring-cyan-300/20"
                         : `${getRowToneClasses(item.priority)} hover:border-slate-600/55 hover:bg-slate-900/55`
                     }`}
                   >
@@ -312,7 +312,7 @@ function MainIssueInline({
         />
 
         <span
-          className={`font-medium ${
+          className={`font-semibold ${
             isCritical ? "text-rose-100" : "text-amber-100"
           }`}
         >
@@ -417,11 +417,11 @@ function getStatusPriority(status: string | undefined) {
 
 function PriorityBadge({ priority }: { priority: InvoicePriority }) {
   const priorityClasses: Record<InvoicePriority, string> = {
-    critical: "bg-rose-400/[0.1] text-rose-50",
+    critical: "bg-rose-500/20 text-rose-50 ring-1 ring-rose-400/30",
     high: "bg-rose-300/[0.08] text-rose-100",
     medium: "bg-amber-300/[0.09] text-amber-50",
     low: "bg-amber-300/[0.06] text-amber-100",
-    clear: "bg-emerald-400/[0.065] text-emerald-100",
+    clear: "bg-emerald-400/[0.04] text-emerald-200",
   };
 
   const labels: Record<InvoicePriority, string> = {
