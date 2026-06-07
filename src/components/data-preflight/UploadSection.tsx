@@ -7,6 +7,9 @@ type UploadSectionProps = {
   onReset: () => void;
 };
 
+const ACCEPTED_SOURCE_TYPES =
+  ".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 export function UploadSection({
   fileName,
   isLoading,
@@ -36,7 +39,7 @@ export function UploadSection({
               Replace
               <input
                 type="file"
-                accept=".csv"
+                accept={ACCEPTED_SOURCE_TYPES}
                 onChange={onFileChange}
                 disabled={isLoading}
                 className="hidden"
@@ -74,15 +77,16 @@ export function UploadSection({
         </h2>
 
         <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-400">
-          Upload a business export to detect broken rows, risky invoice data,
-          mapping problems, and unsafe imports before they reach your system.
+          Upload a CSV or Excel export to detect broken rows, risky invoice
+          data, mapping problems, and unsafe imports before they reach your
+          system.
         </p>
       </div>
 
       <div className="mt-6 rounded-2xl border border-dashed border-cyan-300/30 bg-cyan-300/[0.055] p-5">
         <input
           type="file"
-          accept=".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          accept={ACCEPTED_SOURCE_TYPES}
           onChange={onFileChange}
           disabled={isLoading}
           className="block w-full cursor-pointer text-sm text-slate-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-cyan-100 file:px-5 file:py-2.5 file:text-sm file:font-semibold file:text-slate-950 file:transition hover:file:bg-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -96,7 +100,8 @@ export function UploadSection({
 
         {!fileName && !isLoading && (
           <p className="mt-3 text-xs leading-5 text-slate-500">
-            CSV supported now. Excel, PDF, and images are planned for later.
+            CSV and Excel are supported now. PDF and image imports are planned
+            for later.
           </p>
         )}
       </div>

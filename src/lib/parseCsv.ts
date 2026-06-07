@@ -13,6 +13,12 @@ export type SourceCapability = {
   supportsTextExtraction: boolean;
 };
 
+export type SourceMetadata = {
+  sheetName?: string;
+  sheetCount?: number;
+  availableSheets?: string[];
+};
+
 export type ParsedDataSet = {
   sourceType: SourceType;
   fileName: string;
@@ -20,6 +26,7 @@ export type ParsedDataSet = {
   rows: ParsedRow[];
   rowCount: number;
   capabilities: SourceCapability;
+  metadata?: SourceMetadata;
 };
 
 export type InputAdapter = {
@@ -139,6 +146,11 @@ export async function parseExcelFile(file: File): Promise<ParsedDataSet> {
       supportsMultipleSheets: workbook.SheetNames.length > 1,
       supportsCellFormatting: false,
       supportsTextExtraction: false,
+    },
+    metadata: {
+      sheetName: firstSheetName,
+      sheetCount: workbook.SheetNames.length,
+      availableSheets: workbook.SheetNames,
     },
   };
 }

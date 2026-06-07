@@ -58,8 +58,9 @@ export function CsvUploader() {
 
   const detailRef = useRef<HTMLDivElement | null>(null);
 
-  const rows = parsedDataSet?.rows ?? [];
-  const headers = parsedDataSet?.headers ?? [];
+  const rows = useMemo(() => parsedDataSet?.rows ?? [], [parsedDataSet]);
+  const headers = useMemo(() => parsedDataSet?.headers ?? [], [parsedDataSet]);
+
   const fileName = parsedDataSet?.fileName ?? "";
   const sourceType = parsedDataSet?.sourceType ?? "csv";
 
@@ -124,6 +125,7 @@ export function CsvUploader() {
       setIsFieldMappingOpen(false);
     } finally {
       setIsLoading(false);
+      event.target.value = "";
     }
   }
 
@@ -378,6 +380,19 @@ export function CsvUploader() {
                       {sourceType.toUpperCase()} source
                     </span>
 
+                    {parsedDataSet.metadata?.sheetName && (
+                      <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                        Sheet: {parsedDataSet.metadata.sheetName}
+                      </span>
+                    )}
+
+                    {parsedDataSet.metadata?.sheetCount &&
+                      parsedDataSet.metadata.sheetCount > 1 && (
+                        <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                          {parsedDataSet.metadata.sheetCount} sheets detected
+                        </span>
+                      )}
+
                     <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
                       {headers.length} mapped header
                       {headers.length === 1 ? "" : "s"}
@@ -500,6 +515,12 @@ export function CsvUploader() {
                   {parsedDataSet && (
                     <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
                       {parsedDataSet.sourceType.toUpperCase()} source
+                    </span>
+                  )}
+
+                  {parsedDataSet?.metadata?.sheetName && (
+                    <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                      Sheet: {parsedDataSet.metadata.sheetName}
                     </span>
                   )}
 
