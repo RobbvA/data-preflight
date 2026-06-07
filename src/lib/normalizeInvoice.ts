@@ -28,9 +28,9 @@ export function normalizeInvoiceRow(row: ParsedRow): NormalizedInvoiceRow {
 
   return {
     ...row,
-    invoice_number: invoiceNumber,
-    company: getCellValue(row, "company"),
-    email: getCellValue(row, "email"),
+    invoice_number: normalizeInvoiceNumber(invoiceNumber),
+    company: normalizeTextValue(getCellValue(row, "company")),
+    email: normalizeEmail(getCellValue(row, "email")),
     amount: normalizeNumber(getCellValue(row, "amount")),
     vat: normalizeNumber(getCellValue(row, "vat")),
     status: normalizeKey(getCellValue(row, "status")),
@@ -44,4 +44,16 @@ export function normalizeInvoiceRow(row: ParsedRow): NormalizedInvoiceRow {
 
 function getCellValue(row: ParsedRow, field: string) {
   return row[field]?.trim() ?? "";
+}
+
+function normalizeInvoiceNumber(value: string) {
+  return value.replaceAll(/\s+/g, " ").trim();
+}
+
+function normalizeTextValue(value: string) {
+  return value.replaceAll(/\s+/g, " ").trim();
+}
+
+function normalizeEmail(value: string) {
+  return value.replaceAll(/\s+/g, "").trim().toLowerCase();
 }
