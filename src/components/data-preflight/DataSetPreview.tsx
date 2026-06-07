@@ -125,7 +125,7 @@ export function DataSetPreview({
               compact ? "max-h-[420px]" : "max-h-[620px]"
             }`}
           >
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {sortedItems.map((item) => {
                 const isSelected = selectedRowIndex === item.rowIndex;
                 const criticalIssues = item.issues.filter(
@@ -144,7 +144,7 @@ export function DataSetPreview({
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`group rounded-2xl border p-4 transition ${
+                    className={`group rounded-2xl border p-3 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
@@ -152,7 +152,7 @@ export function DataSetPreview({
                         : `${getRowToneClasses(item.priority)} hover:border-slate-600/55 hover:bg-slate-900/55`
                     }`}
                   >
-                    <div className="grid gap-4 xl:grid-cols-[1fr_auto] xl:items-start">
+                    <div className="grid gap-3 xl:grid-cols-[1fr_auto] xl:items-start">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <PriorityBadge priority={item.priority} />
@@ -168,13 +168,13 @@ export function DataSetPreview({
                           />
                         </div>
 
-                        <div className="mt-3">
+                        <div className="mt-2">
                           <p className="truncate text-base font-semibold text-slate-50">
                             {item.row.invoice_number ||
                               "Missing invoice number"}
                           </p>
 
-                          <p className="mt-1 truncate text-sm text-slate-400">
+                          <p className="mt-0.5 truncate text-sm text-slate-400">
                             {item.row.company || "Missing company"}
                           </p>
 
@@ -200,7 +200,7 @@ export function DataSetPreview({
                       </div>
                     </div>
 
-                    <div className="mt-4 grid gap-2 md:grid-cols-3">
+                    <div className="mt-3 grid gap-2 md:grid-cols-3">
                       <ReviewDataPoint
                         label="Amount"
                         value={formatMoneyValue(item.row.amount)}
@@ -227,7 +227,7 @@ export function DataSetPreview({
                     )}
 
                     {isSelected && (
-                      <div className="mt-3 rounded-xl border border-slate-700/35 bg-slate-950/25 p-3">
+                      <div className="mt-2 rounded-lg border border-slate-700/35 bg-slate-950/25 p-3">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/55">
@@ -275,7 +275,7 @@ export function DataSetPreview({
 
 function ReviewDataPoint({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-slate-950/22 px-3 py-2.5">
+    <div className="rounded-lg bg-slate-950/22 px-3 py-2">
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
         {label}
       </p>
@@ -298,7 +298,7 @@ function MainIssueInline({
 
   return (
     <div
-      className={`mt-3 rounded-xl border px-3 py-2 text-xs ${
+      className={`mt-2 rounded-lg border px-3 py-1.5 text-xs ${
         isCritical
           ? "border-rose-400/12 bg-rose-400/[0.06]"
           : "border-amber-300/12 bg-amber-300/[0.06]"
