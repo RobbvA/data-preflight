@@ -95,7 +95,7 @@ export function DataSetPreview({
             <select
               value={sortMode}
               onChange={(event) => setSortMode(event.target.value as SortMode)}
-              className="rounded-full border border-slate-700/50 bg-slate-950/40 px-3 py-1.5 text-[10px] font-medium text-slate-400 outline-none transition hover:border-slate-500 focus:border-cyan-300/45"
+              className="rounded-full border border-slate-700/50 bg-slate-950/40 px-3 py-1.5 text-[10px] font-medium text-slate-400 outline-none transition hover:border-slate-500 focus:border-cyan-300/40"
             >
               <option value="priority">Sort: priority</option>
               <option value="status">Sort: status</option>
@@ -148,7 +148,7 @@ export function DataSetPreview({
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-cyan-300/400 bg-cyan-300/[0.09] ring-1 ring-cyan-300/20"
+                        ? "border-cyan-300/40 bg-cyan-300/[0.09] ring-1 ring-cyan-300/20"
                         : `${getRowToneClasses(item.priority)} hover:border-slate-600/55 hover:bg-slate-900/55`
                     }`}
                   >
