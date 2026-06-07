@@ -78,7 +78,6 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
     Papa.parse<ParsedRow>(file, {
       header: true,
       skipEmptyLines: "greedy",
-
       transformHeader: (header) => normalizeHeader(header),
       transform: (value) => normalizeCell(value),
 
@@ -102,9 +101,7 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
         });
       },
 
-      error: (error) => {
-        reject(error);
-      },
+      error: reject,
     });
   });
 }
@@ -117,18 +114,19 @@ export async function parseExcelFile(file: File): Promise<ParsedDataSet> {
     cellDates: false,
   });
 
-  const firstSheetName = workbook.SheetNames[0];
+  const sheetName = getFirstUsableSheetName(workbook);
 
-  if (!firstSheetName) {
-    throw new Error("Excel file has no sheets.");
+  if (!sheetName) {
+    throw new Error("Excel file has no readable sheets.");
   }
 
-  const worksheet = workbook.Sheets[firstSheetName];
+  const worksheet = workbook.Sheets[sheetName];
 
   const sheetRows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
     header: 1,
     defval: "",
     blankrows: false,
+    raw: false,
   });
 
   const rows = createRowsFromSheet(sheetRows);
@@ -148,17 +146,41 @@ export async function parseExcelFile(file: File): Promise<ParsedDataSet> {
       supportsTextExtraction: false,
     },
     metadata: {
-      sheetName: firstSheetName,
+      sheetName,
       sheetCount: workbook.SheetNames.length,
       availableSheets: workbook.SheetNames,
     },
   };
 }
 
+function getFirstUsableSheetName(workbook: XLSX.WorkBook) {
+  return workbook.SheetNames.find((sheetName) => {
+    const worksheet = workbook.Sheets[sheetName];
+
+    if (!worksheet) return false;
+
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
+      header: 1,
+      defval: "",
+      blankrows: false,
+    });
+
+    return rows.some((row) =>
+      row.some((cell) => normalizeCellValue(cell).length > 0),
+    );
+  });
+}
+
 function createRowsFromSheet(sheetRows: unknown[][]): ParsedRow[] {
   if (sheetRows.length === 0) return [];
 
-  const headerRow = sheetRows[0] ?? [];
+  const usableRows = sheetRows.filter((row) =>
+    row.some((cell) => normalizeCellValue(cell).length > 0),
+  );
+
+  if (usableRows.length === 0) return [];
+
+  const headerRow = usableRows[0] ?? [];
 
   const headers = createUniqueHeaders(
     headerRow.map((header, index) => {
@@ -167,7 +189,7 @@ function createRowsFromSheet(sheetRows: unknown[][]): ParsedRow[] {
     }),
   );
 
-  const dataRows = sheetRows.slice(1);
+  const dataRows = usableRows.slice(1);
 
   return sanitizeRows(
     dataRows.map((sheetRow) => {
