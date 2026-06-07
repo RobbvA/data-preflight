@@ -29,7 +29,7 @@ export function UploadSection({
 
             <p className="mt-1 truncate text-sm font-medium text-slate-100">
               {isLoading
-                ? "Processing source..."
+                ? "Reading source file..."
                 : fileName || "No file selected"}
             </p>
           </div>
@@ -94,14 +94,14 @@ export function UploadSection({
 
         {isLoading && (
           <p className="mt-3 text-sm font-medium text-cyan-100/90">
-            Processing source...
+            Reading source file and preparing invoice review...
           </p>
         )}
 
         {!fileName && !isLoading && (
           <p className="mt-3 text-xs leading-5 text-slate-500">
-            CSV and Excel are supported now. PDF and image imports are planned
-            for later.
+            CSV, XLSX, and XLS files are supported. PDF and image imports are
+            planned for later.
           </p>
         )}
       </div>
