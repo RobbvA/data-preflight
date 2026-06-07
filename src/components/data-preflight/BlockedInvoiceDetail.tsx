@@ -64,8 +64,8 @@ export function BlockedInvoiceDetail({
             {selectedInvoice.actionLabel}
           </span>
 
-          <span className="rounded-full bg-cyan-400/[0.07] px-2.5 py-1 text-[11px] font-medium text-cyan-100/85">
-            {selectedInvoice.priorityScore} score
+          <span className="rounded-full border border-cyan-300/15 bg-cyan-400/[0.08] px-2.5 py-1 text-[11px] font-semibold text-cyan-100">
+            Priority {selectedInvoice.priorityScore}
           </span>
 
           <button
@@ -93,6 +93,10 @@ export function BlockedInvoiceDetail({
           <h3 className="mt-2 text-xl font-semibold text-slate-50">
             {primaryIssue.problem}
           </h3>
+
+          <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+            Highest-priority issue detected
+          </p>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
             {getOperationalImpact(primaryIssue)}
@@ -275,7 +279,7 @@ function IssueExplanationCard({ issue }: { issue: ValidationIssue }) {
         </span>
       </div>
 
-      <h4 className="mt-3 text-sm font-semibold text-slate-50">
+      <h4 className="mt-3 text-base font-semibold text-slate-50">
         {issue.problem}
       </h4>
 
