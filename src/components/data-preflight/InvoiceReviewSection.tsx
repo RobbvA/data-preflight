@@ -127,12 +127,12 @@ export function InvoiceReviewSection({
     >
       <div className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-700/40 pb-5">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
             Review workspace
           </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-50">
+            <h2 className="text-[1.65rem] font-semibold leading-tight tracking-tight text-slate-50">
               Invoice review
             </h2>
 
@@ -141,7 +141,7 @@ export function InvoiceReviewSection({
             </StatusPill>
           </div>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-slate-400">
             Review the most important category first. Fix blocked invoices,
             check warnings, then export clean rows.
           </p>
@@ -311,14 +311,16 @@ function ReviewTabButton({
         <div>
           <div className="flex items-center gap-2">
             <span className={active ? "" : iconToneClasses[tone]}>{icon}</span>
-            <p className="text-sm font-semibold">{label}</p>
+            <p className="text-sm font-semibold leading-none">{label}</p>
           </div>
 
-          <p className="mt-1 text-xs opacity-75">{description}</p>
+          <p className="mt-1.5 text-xs leading-none opacity-75">
+            {description}
+          </p>
         </div>
 
         <p
-          className={`text-lg font-semibold leading-none ${
+          className={`text-2xl font-semibold leading-none tracking-tight ${
             active ? "" : countToneClasses[tone]
           }`}
         >

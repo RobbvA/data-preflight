@@ -75,12 +75,12 @@ export function ImportReadinessPanel({
     <section className="rounded-[2rem] border border-slate-700/35 bg-slate-900/60 p-6 shadow-xl shadow-black/15 backdrop-blur-xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
             Control center
           </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-50">
+            <h2 className="text-[1.7rem] font-semibold leading-tight tracking-tight text-slate-50">
               {totalInvoices} invoices analysed
             </h2>
 
@@ -94,7 +94,7 @@ export function ImportReadinessPanel({
             )}
           </div>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-slate-400">
             {importReadinessMessage}
           </p>
         </div>
@@ -153,16 +153,16 @@ export function ImportReadinessPanel({
           <div className="flex items-center gap-2">
             <NextActionIcon tone={statusTone} />
 
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
               Next action
             </p>
           </div>
 
-          <p className="mt-2 text-xl font-semibold text-slate-50">
+          <p className="mt-2 text-[1.35rem] font-semibold leading-snug tracking-tight text-slate-50">
             {nextAction.title}
           </p>
 
-          <p className="mt-2 max-w-2xl text-base leading-7 text-slate-300">
+          <p className="mt-2 max-w-2xl text-[0.95rem] leading-7 text-slate-300">
             {nextAction.description}
           </p>
 
@@ -338,7 +338,7 @@ function Metric({
   return (
     <div className={`rounded-2xl border p-4 ${surfaceClasses[tone]}`}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           {label}
         </p>
 
@@ -346,12 +346,12 @@ function Metric({
       </div>
 
       <p
-        className={`mt-2 text-5xl font-semibold tracking-tight ${toneClasses[tone]}`}
+        className={`mt-2 text-[3.4rem] font-semibold leading-none tracking-tight ${toneClasses[tone]}`}
       >
         {value}
       </p>
 
-      <p className="mt-1 text-xs font-medium text-slate-500">{description}</p>
+      <p className="mt-2 text-xs font-medium text-slate-500">{description}</p>
     </div>
   );
 }
