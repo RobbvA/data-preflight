@@ -1,11 +1,11 @@
-import type { CsvRow } from "@/lib/parseCsv";
+import type { ParsedRow } from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
 
 export type InvoicePriority = "critical" | "high" | "medium" | "low" | "clear";
 
 export type InvoicePreviewItem = {
   rowIndex: number;
-  row: CsvRow;
+  row: ParsedRow;
   issues: ValidationIssue[];
   priority: InvoicePriority;
   priorityScore: number;
@@ -42,7 +42,7 @@ export function createInvoicePreviewItem({
   issues,
 }: {
   rowIndex: number;
-  row: CsvRow;
+  row: ParsedRow;
   issues: ValidationIssue[];
 }): InvoicePreviewItem {
   const priorityScore = calculatePriorityScore(issues);

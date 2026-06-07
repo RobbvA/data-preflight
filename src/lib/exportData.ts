@@ -1,4 +1,4 @@
-import type { CsvRow } from "@/lib/parseCsv";
+import type { ParsedRow } from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
 
 export type ExportBlockerSummary = {
@@ -10,7 +10,7 @@ export type ExportBlockerSummary = {
   label: string;
 };
 
-export function downloadCsv(filename: string, rows: CsvRow[]) {
+export function downloadCsv(filename: string, rows: ParsedRow[]) {
   if (rows.length === 0) return;
 
   const headers = getStableHeaders(rows);
@@ -124,7 +124,7 @@ export function getExportSafetyMessage({
   return "Clean export is safe. All exported invoices passed blocking checks.";
 }
 
-function getStableHeaders(rows: CsvRow[]) {
+function getStableHeaders(rows: ParsedRow[]) {
   return Array.from(
     rows.reduce<Set<string>>((headers, row) => {
       Object.keys(row).forEach((header) => headers.add(header));
