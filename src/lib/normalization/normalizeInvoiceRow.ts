@@ -1,9 +1,9 @@
-import type { CsvRow } from "@/lib/parseCsv";
+import type { ParsedRow } from "@/lib/parseCsv";
 import { normalizeCode, normalizeKey } from "@/lib/normalization/normalizeCode";
 import { normalizeDate } from "@/lib/normalization/normalizeDate";
 import { normalizeNumber } from "@/lib/normalization/normalizeNumber";
 
-export type NormalizedInvoiceRow = CsvRow & {
+export type NormalizedInvoiceRow = ParsedRow & {
   invoice_number: string;
   company: string;
   email: string;
@@ -17,7 +17,7 @@ export type NormalizedInvoiceRow = CsvRow & {
   normalized_invoice_key: string;
 };
 
-export function normalizeInvoiceRow(row: CsvRow): NormalizedInvoiceRow {
+export function normalizeInvoiceRow(row: ParsedRow): NormalizedInvoiceRow {
   const invoiceNumber = getCellValue(row, "invoice_number");
 
   return {
@@ -36,6 +36,6 @@ export function normalizeInvoiceRow(row: CsvRow): NormalizedInvoiceRow {
   };
 }
 
-function getCellValue(row: CsvRow, field: string) {
+function getCellValue(row: ParsedRow, field: string) {
   return row[field]?.trim() ?? "";
 }

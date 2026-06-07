@@ -17,6 +17,12 @@ export type NormalizedInvoiceRow = ParsedRow & {
   normalized_invoice_key: string;
 };
 
+export function normalizeInvoiceRows(
+  rows: ParsedRow[],
+): NormalizedInvoiceRow[] {
+  return rows.map((row) => normalizeInvoiceRow(row));
+}
+
 export function normalizeInvoiceRow(row: ParsedRow): NormalizedInvoiceRow {
   const invoiceNumber = getCellValue(row, "invoice_number");
 
