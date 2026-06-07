@@ -13,13 +13,13 @@ export type InvoicePreviewItem = {
 };
 
 const SEVERITY_SCORES: Record<ValidationIssue["severity"], number> = {
-  critical: 100,
+  critical: 120,
   warning: 35,
 };
 
 const RISK_SCORES: Record<ValidationIssue["risk"], number> = {
-  import_failure: 45,
-  duplicate_risk: 40,
+  import_failure: 55,
+  duplicate_risk: 50,
   financial_reporting: 35,
   tax_risk: 35,
   payment_terms: 25,
@@ -29,11 +29,12 @@ const RISK_SCORES: Record<ValidationIssue["risk"], number> = {
 };
 
 const CATEGORY_BONUS: Partial<Record<ValidationIssue["category"], number>> = {
-  required_data: 25,
-  duplicates: 25,
+  required_data: 30,
+  duplicates: 30,
   financial: 15,
   tax: 15,
   dates: 10,
+  contact_data: 10,
 };
 
 export function createInvoicePreviewItem({
@@ -87,12 +88,15 @@ function getIssueCombinationBonus(issues: ValidationIssue[]) {
     (issue) =>
       issue.risk === "financial_reporting" || issue.risk === "tax_risk",
   );
+  const hasMultipleWarnings =
+    issues.filter((issue) => issue.severity === "warning").length >= 2;
 
   let bonus = 0;
 
-  if (hasCriticalIssue && hasImportFailure) bonus += 30;
-  if (hasDuplicateRisk) bonus += 25;
+  if (hasCriticalIssue && hasImportFailure) bonus += 35;
+  if (hasDuplicateRisk) bonus += 30;
   if (hasFinancialRisk && issues.length >= 2) bonus += 20;
+  if (hasMultipleWarnings) bonus += 10;
   if (issues.length >= 3) bonus += 15;
 
   return bonus;
@@ -108,9 +112,21 @@ function getInvoicePriority(
     (issue) => issue.severity === "critical",
   );
 
+  const hasImportFailure = issues.some(
+    (issue) => issue.risk === "import_failure",
+  );
+
+  const hasDuplicateRisk = issues.some(
+    (issue) => issue.risk === "duplicate_risk",
+  );
+
+  if (hasCriticalIssue && (hasImportFailure || hasDuplicateRisk)) {
+    return "critical";
+  }
+
   if (hasCriticalIssue && priorityScore >= 170) return "critical";
   if (hasCriticalIssue) return "high";
-  if (priorityScore >= 90) return "medium";
+  if (priorityScore >= 95) return "medium";
 
   return "low";
 }
@@ -121,9 +137,23 @@ function getActionLabel(
 ): string {
   if (issues.length === 0) return "Safe to import";
 
+  const hasCriticalIssue = issues.some(
+    (issue) => issue.severity === "critical",
+  );
+
+  const hasDuplicateRisk = issues.some(
+    (issue) => issue.risk === "duplicate_risk",
+  );
+
+  const hasImportFailure = issues.some(
+    (issue) => issue.risk === "import_failure",
+  );
+
+  if (hasDuplicateRisk) return "Resolve duplicate";
+  if (hasCriticalIssue && hasImportFailure) return "Fix blocking data";
   if (priority === "critical") return "Fix first";
   if (priority === "high") return "Fix before export";
-  if (priority === "medium") return "Review before export";
+  if (priority === "medium") return "Review before import";
   if (priority === "low") return "Quick review";
 
   return "Safe to import";
