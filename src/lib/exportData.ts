@@ -35,8 +35,9 @@ export function downloadErrorCsv(filename: string, issues: ValidationIssue[]) {
     "category",
     "type",
     "problem",
-    "why",
-    "fix",
+    "why_it_matters",
+    "operational_fix",
+    "export_decision",
   ];
 
   const csvRows = [
@@ -52,6 +53,7 @@ export function downloadErrorCsv(filename: string, issues: ValidationIssue[]) {
         issue.problem,
         issue.why,
         issue.fix,
+        getIssueExportDecision(issue),
       ]
         .map((value) => escapeCsvValue(String(value)))
         .join(","),
@@ -105,23 +107,43 @@ export function getExportSafetyMessage({
     (issue) => issue.severity === "critical",
   ).length;
 
+  const warningIssueCount = issues.filter(
+    (issue) => issue.severity === "warning",
+  ).length;
+
   if (hasIncompleteMapping) {
-    return "Clean export is blocked because required invoice fields are not mapped.";
+    return "Clean export is blocked because required invoice fields are not mapped. Complete mapping before creating trusted output.";
   }
 
   if (hasDuplicateMappings) {
-    return "Clean export is blocked because one or more source columns are mapped multiple times.";
+    return "Clean export is blocked because one or more source columns are mapped multiple times. Resolve duplicate mappings before export.";
   }
 
   if (cleanRowCount === 0) {
     return "Clean export is disabled because no import-ready invoices are available.";
   }
 
-  if (criticalIssueCount > 0) {
-    return "Clean export will include only import-ready invoices. Blocked invoices are excluded.";
+  if (criticalIssueCount > 0 && warningIssueCount > 0) {
+    return "Clean export includes only rows without critical issues. Blocked invoices are excluded; warning rows should still be reviewed before import.";
   }
 
-  return "Clean export is safe. All exported invoices passed blocking checks.";
+  if (criticalIssueCount > 0) {
+    return "Clean export includes only rows without critical issues. Blocked invoices are excluded from trusted output.";
+  }
+
+  if (warningIssueCount > 0) {
+    return "Clean export is available, but warning rows should be reviewed before import.";
+  }
+
+  return "Clean export is safe. All exported invoices passed the current blocking and review checks.";
+}
+
+function getIssueExportDecision(issue: ValidationIssue) {
+  if (issue.severity === "critical") {
+    return "excluded_from_clean_export";
+  }
+
+  return "included_with_review_warning";
 }
 
 function getStableHeaders(rows: ParsedRow[]) {
