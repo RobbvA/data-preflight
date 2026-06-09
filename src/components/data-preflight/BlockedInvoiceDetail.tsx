@@ -99,10 +99,10 @@ export function BlockedInvoiceDetail({
 
       {primaryIssue && (
         <div
-          className={`mt-4 rounded-2xl p-3.5 ${
+          className={`mt-4 rounded-2xl border p-3.5 ${
             primaryIssue.severity === "critical"
-              ? "bg-rose-400/[0.06]"
-              : "bg-amber-300/[0.06]"
+              ? "border-rose-400/24 bg-rose-400/[0.09]"
+              : "border-amber-300/22 bg-amber-300/[0.08]"
           }`}
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -111,7 +111,7 @@ export function BlockedInvoiceDetail({
                 Primary review focus
               </p>
 
-              <h3 className="mt-1.5 text-base font-semibold text-slate-50">
+              <h3 className="mt-1.5 text-lg font-semibold text-slate-50">
                 {primaryIssue.problem}
               </h3>
             </div>
@@ -119,27 +119,27 @@ export function BlockedInvoiceDetail({
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                 primaryIssue.severity === "critical"
-                  ? "bg-rose-400/[0.1] text-rose-50"
-                  : "bg-amber-300/[0.09] text-amber-50"
+                  ? "bg-rose-400/[0.14] text-rose-50"
+                  : "bg-amber-300/[0.12] text-amber-50"
               }`}
             >
               {primaryIssue.severity}
             </span>
           </div>
 
-          <p className="mt-2 text-xs leading-5 text-slate-400">
+          <p className="mt-2 text-xs leading-5 text-slate-300">
             <span className="font-medium text-slate-100">Fix:</span>{" "}
             {primaryIssue.fix}
           </p>
         </div>
       )}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[0.72fr_1.28fr]">
-        <div className="space-y-4">
-          <div className="rounded-2xl bg-slate-950/25 p-3.5">
+      <div className="mt-4 grid gap-4 lg:grid-cols-[0.66fr_1.34fr]">
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-slate-800/60 bg-slate-950/18 p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-slate-100">
+                <h3 className="text-sm font-semibold text-slate-200">
                   Operational summary
                 </h3>
 
@@ -153,7 +153,7 @@ export function BlockedInvoiceDetail({
               </span>
             </div>
 
-            <div className="mt-3 grid gap-2">
+            <div className="mt-3 grid gap-1.5">
               <SummaryItem
                 label="Decision"
                 value={inspectionSummary.decision}
@@ -194,9 +194,9 @@ export function BlockedInvoiceDetail({
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-950/25 p-3.5">
+          <div className="rounded-2xl border border-slate-800/60 bg-slate-950/18 p-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-100">
+              <h3 className="text-sm font-semibold text-slate-200">
                 Key invoice fields
               </h3>
 
@@ -231,15 +231,15 @@ export function BlockedInvoiceDetail({
           </div>
         </div>
 
-        <div className="rounded-2xl bg-slate-950/25 p-3.5">
+        <div className="rounded-2xl border border-slate-700/35 bg-slate-950/25 p-3.5">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-100">
+              <h3 className="text-base font-semibold text-slate-100">
                 Issue explanations
               </h3>
 
-              <p className="mt-1 text-xs leading-5 text-slate-600">
-                Review the risk and required fix for each detected issue.
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Review risks and fixes for detected issues.
               </p>
             </div>
 
@@ -260,10 +260,11 @@ export function BlockedInvoiceDetail({
 
           {hasIssues ? (
             <div className="space-y-2.5">
-              {selectedInvoice.issues.map((issue) => (
+              {selectedInvoice.issues.map((issue, index) => (
                 <IssueExplanationCard
                   key={`${issue.rowIndex}-${issue.field}-${issue.type}`}
                   issue={issue}
+                  primary={index === 0}
                 />
               ))}
             </div>
@@ -285,23 +286,33 @@ export function BlockedInvoiceDetail({
   );
 }
 
-function IssueExplanationCard({ issue }: { issue: ValidationIssue }) {
+function IssueExplanationCard({
+  issue,
+  primary,
+}: {
+  issue: ValidationIssue;
+  primary: boolean;
+}) {
   const impact = getOperationalImpact(issue);
 
   return (
     <article
-      className={`rounded-xl p-3 ${
-        issue.severity === "critical"
-          ? "bg-rose-400/[0.06]"
-          : "bg-amber-300/[0.06]"
+      className={`rounded-xl border p-3 ${
+        primary
+          ? issue.severity === "critical"
+            ? "border-rose-400/22 bg-rose-400/[0.085]"
+            : "border-amber-300/20 bg-amber-300/[0.08]"
+          : issue.severity === "critical"
+            ? "border-rose-400/10 bg-rose-400/[0.045]"
+            : "border-amber-300/10 bg-amber-300/[0.04]"
       }`}
     >
       <div className="flex flex-wrap items-center gap-1.5">
         <span
           className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
             issue.severity === "critical"
-              ? "bg-rose-400/[0.1] text-rose-50"
-              : "bg-amber-300/[0.09] text-amber-50"
+              ? "bg-rose-400/[0.12] text-rose-50"
+              : "bg-amber-300/[0.1] text-amber-50"
           }`}
         >
           {issue.severity}
@@ -320,7 +331,9 @@ function IssueExplanationCard({ issue }: { issue: ValidationIssue }) {
         </span>
       </div>
 
-      <h4 className="mt-2 text-sm font-semibold text-slate-50">
+      <h4
+        className={`mt-2 font-semibold text-slate-50 ${primary ? "text-base" : "text-sm"}`}
+      >
         {issue.problem}
       </h4>
 
@@ -366,7 +379,7 @@ function ExplanationLine({
 
 function DataField({ label, value }: { label: string; value: unknown }) {
   return (
-    <div className="grid gap-2 rounded-lg bg-slate-900/35 px-3 py-2 sm:grid-cols-[118px_1fr]">
+    <div className="grid gap-2 rounded-lg bg-slate-900/30 px-3 py-2 sm:grid-cols-[118px_1fr]">
       <dt className="text-[10px] font-medium uppercase tracking-[0.08em] text-slate-600">
         {label}
       </dt>
@@ -395,7 +408,7 @@ function SummaryItem({
   };
 
   return (
-    <div className="grid gap-2 rounded-lg bg-slate-900/35 px-3 py-2 sm:grid-cols-[82px_1fr]">
+    <div className="grid gap-2 rounded-lg bg-slate-900/30 px-3 py-2 sm:grid-cols-[82px_1fr]">
       <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-slate-600">
         {label}
       </p>
