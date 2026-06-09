@@ -72,15 +72,15 @@ export function ImportReadinessPanel({
   });
 
   return (
-    <section className="rounded-[1.75rem] border border-slate-700/35 bg-slate-900/60 p-5 shadow-xl shadow-black/15 backdrop-blur-xl">
+    <section className="rounded-[2rem] border border-slate-700/35 bg-slate-900/60 p-6 shadow-xl shadow-black/15 backdrop-blur-xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">
             Control center
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-2.5">
-            <h2 className="text-[1.45rem] font-semibold leading-tight tracking-tight text-slate-50">
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h2 className="text-[1.7rem] font-semibold leading-tight tracking-tight text-slate-50">
               {totalInvoices} invoices analysed
             </h2>
 
@@ -94,7 +94,7 @@ export function ImportReadinessPanel({
             )}
           </div>
 
-          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-400">
+          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-slate-400">
             {importReadinessMessage}
           </p>
         </div>
@@ -114,13 +114,12 @@ export function ImportReadinessPanel({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-2 rounded-2xl border border-slate-700/35 bg-slate-950/20 p-2 md:grid-cols-3">
+      <div className="mt-6 grid gap-3 md:grid-cols-3">
         <Metric
           label="Blocked"
           value={blockedCount}
           description="Fix first"
           tone="danger"
-          active={blockedCount > 0 || isBlocked}
           icon={<AlertTriangle className="h-4 w-4" />}
         />
 
@@ -129,7 +128,6 @@ export function ImportReadinessPanel({
           value={warningCount}
           description="Check before export"
           tone="warning"
-          active={!isBlocked && warningCount > 0}
           icon={<Search className="h-4 w-4" />}
         />
 
@@ -138,19 +136,18 @@ export function ImportReadinessPanel({
           value={cleanCount}
           description="Clean output"
           tone="success"
-          active={!isBlocked && !hasWarnings && cleanCount > 0}
           icon={<CheckCircle2 className="h-4 w-4" />}
         />
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_250px]">
+      <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_280px]">
         <div
-          className={`rounded-2xl border p-4 ${
+          className={`rounded-3xl border p-4 ${
             isBlocked
-              ? "border-rose-400/20 bg-rose-400/[0.08]"
+              ? "border-rose-400/12 bg-rose-400/[0.06]"
               : hasWarnings
-                ? "border-amber-300/18 bg-amber-300/[0.075]"
-                : "border-emerald-300/16 bg-emerald-400/[0.06]"
+                ? "border-amber-300/10 bg-amber-300/[0.04]"
+                : "border-emerald-300/10 bg-emerald-400/[0.035]"
           }`}
         >
           <div className="flex items-center gap-2">
@@ -161,7 +158,7 @@ export function ImportReadinessPanel({
             </p>
           </div>
 
-          <p className="mt-2 text-[1.15rem] font-semibold leading-snug tracking-tight text-slate-50">
+          <p className="mt-2 text-[1.25rem] font-semibold leading-snug tracking-tight text-slate-50">
             {nextAction.title}
           </p>
 
@@ -176,20 +173,20 @@ export function ImportReadinessPanel({
                 .getElementById("invoice-review-workspace")
                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-cyan-100 px-3.5 py-2 text-xs font-semibold text-slate-950 transition hover:bg-white"
+            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white"
           >
             <Search className="h-4 w-4" />
             {nextAction.buttonLabel}
           </button>
         </div>
 
-        <aside className="rounded-2xl border border-slate-700/35 bg-slate-950/25 p-3.5">
+        <aside className="rounded-2xl border border-slate-700/35 bg-slate-950/25 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
                 <Download className="h-3.5 w-3.5 text-slate-600" />
 
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-600">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-600">
                   Export
                 </p>
               </div>
@@ -208,14 +205,14 @@ export function ImportReadinessPanel({
             {exportSafetyMessage}
           </p>
 
-          <div className="mt-3 grid gap-2">
+          <div className="mt-4 grid gap-2">
             <button
               type="button"
               onClick={() =>
                 onDownloadCleanCsv("clean-invoices.csv", cleanRows)
               }
               disabled={!canExport}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-100 px-3.5 py-2 text-xs font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-100 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-35"
             >
               <Download className="h-4 w-4" />
               Download clean CSV
@@ -225,7 +222,7 @@ export function ImportReadinessPanel({
               type="button"
               onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
               disabled={issues.length === 0}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700/60 bg-slate-900/55 px-3.5 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700/60 bg-slate-900/55 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
             >
               <FileWarning className="h-4 w-4" />
               Download issue report
@@ -274,7 +271,7 @@ function getNextActionMessage({
         blockedCount === 1 ? "" : "s"
       } need attention.`,
       description:
-        "Start here. Blocked rows are excluded from clean export until critical issues are fixed.",
+        "Start with blocked invoices. These rows are excluded from clean export until critical issues are fixed.",
       buttonLabel: "Review blocked invoices",
     };
   }
@@ -312,14 +309,12 @@ function Metric({
   value,
   description,
   tone,
-  active,
   icon,
 }: {
   label: string;
   value: number;
   description: string;
   tone: "success" | "warning" | "danger";
-  active: boolean;
   icon: ReactNode;
 }) {
   const toneClasses = {
@@ -329,56 +324,43 @@ function Metric({
   };
 
   const iconClasses = {
-    success: "text-emerald-200/75",
-    warning: "text-amber-200/75",
+    success: "text-emerald-200/70",
+    warning: "text-amber-200/65",
     danger: "text-rose-200/75",
   };
 
-  const activeSurfaceClasses = {
-    success: "border-emerald-300/20 bg-emerald-400/[0.075]",
-    warning: "border-amber-300/22 bg-amber-300/[0.09]",
-    danger: "border-rose-400/28 bg-rose-400/[0.12]",
+  const surfaceClasses = {
+    success: "border-emerald-300/10 bg-emerald-400/[0.035]",
+    warning: "border-amber-300/12 bg-amber-300/[0.04]",
+    danger: "border-rose-400/16 bg-rose-400/[0.065]",
   };
 
-  const inactiveSurfaceClasses =
-    "border-slate-700/30 bg-slate-950/20 opacity-75";
-
   return (
-    <div
-      className={`rounded-xl border p-3 transition ${
-        active ? activeSurfaceClasses[tone] : inactiveSurfaceClasses
-      }`}
-    >
+    <div className={`rounded-2xl border p-4 ${surfaceClasses[tone]}`}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           {label}
         </p>
 
-        <span className={active ? iconClasses[tone] : "text-slate-600"}>
-          {icon}
-        </span>
+        <span className={iconClasses[tone]}>{icon}</span>
       </div>
 
       <p
-        className={`mt-1.5 font-semibold leading-none tracking-tight ${
-          active
-            ? `text-[2.65rem] ${toneClasses[tone]}`
-            : "text-3xl text-slate-500"
-        }`}
+        className={`mt-2 text-[2.75rem] font-semibold leading-none tracking-tight ${toneClasses[tone]}`}
       >
         {value}
       </p>
 
-      <p className="mt-1.5 text-xs font-medium text-slate-500">{description}</p>
+      <p className="mt-2 text-xs font-medium text-slate-500">{description}</p>
     </div>
   );
 }
 
 function NextActionIcon({ tone }: { tone: "warning" | "danger" | "success" }) {
   const toneClasses = {
-    warning: "text-amber-200/75",
+    warning: "text-amber-200/65",
     danger: "text-rose-200/75",
-    success: "text-emerald-200/75",
+    success: "text-emerald-200/70",
   };
 
   const Icon =
@@ -399,9 +381,9 @@ function StatusPill({
   children: ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-amber-300/22 bg-amber-300/[0.08] text-amber-100",
+    warning: "border-amber-300/18 bg-amber-300/[0.06] text-amber-100",
     danger: "border-rose-400/22 bg-rose-400/[0.08] text-rose-100",
-    success: "border-emerald-300/20 bg-emerald-400/[0.065] text-emerald-100",
+    success: "border-emerald-300/16 bg-emerald-400/[0.045] text-emerald-100",
     info: "border-slate-500/30 bg-slate-700/25 text-slate-300",
   };
 
