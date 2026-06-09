@@ -123,16 +123,16 @@ export function InvoiceReviewSection({
   return (
     <section
       id="invoice-review-workspace"
-      className="rounded-[1.75rem] border border-slate-700/40 bg-slate-900/55 p-5 shadow-xl shadow-black/20 backdrop-blur-xl"
+      className="rounded-[1.5rem] border border-slate-700/40 bg-slate-900/55 p-4 shadow-xl shadow-black/20 backdrop-blur-xl"
     >
-      <div className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-700/40 pb-5">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-700/40 pb-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Review workspace
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-[1.65rem] font-semibold leading-tight tracking-tight text-slate-50">
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-slate-50">
               Invoice review
             </h2>
 
@@ -141,7 +141,7 @@ export function InvoiceReviewSection({
             </StatusPill>
           </div>
 
-          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-slate-400">
+          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-400">
             Review the most important category first. Fix blocked invoices,
             check warnings, then export clean rows.
           </p>
@@ -150,7 +150,7 @@ export function InvoiceReviewSection({
         <button
           type="button"
           onClick={onToggleBlockedFilter}
-          className={`rounded-full border px-3.5 py-2 text-xs font-medium transition ${
+          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
             showOnlyBlocked
               ? "border-rose-400/25 bg-rose-400/[0.08] text-rose-100"
               : "border-slate-700/70 bg-slate-950/30 text-slate-400 hover:border-slate-500/70 hover:bg-slate-800/70 hover:text-slate-100"
@@ -162,7 +162,7 @@ export function InvoiceReviewSection({
 
       {totalReviewItems > 0 ? (
         <>
-          <div className="mt-5 grid gap-2 rounded-2xl border border-slate-700/40 bg-slate-950/25 p-2 sm:grid-cols-3">
+          <div className="mt-4 grid gap-2 rounded-2xl border border-slate-700/40 bg-slate-950/25 p-2 sm:grid-cols-3">
             <ReviewTabButton
               label="Blocked"
               description="Fix first"
@@ -194,7 +194,7 @@ export function InvoiceReviewSection({
             />
           </div>
 
-          <div className="mt-5">
+          <div className="mt-4">
             <DataSetPreview
               title={activeTabConfig.title}
               description={activeTabConfig.description}
@@ -212,7 +212,7 @@ export function InvoiceReviewSection({
           </div>
         </>
       ) : (
-        <div className="mt-5 rounded-2xl border border-slate-700/35 bg-slate-950/25 p-5">
+        <div className="mt-4 rounded-2xl border border-slate-700/35 bg-slate-950/25 p-4">
           <p className="text-sm font-medium text-slate-300">
             No invoices ready for review.
           </p>
@@ -301,7 +301,7 @@ function ReviewTabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border px-4 py-3 text-left transition ${
+      className={`rounded-xl border px-3 py-2.5 text-left transition ${
         active
           ? activeToneClasses[tone]
           : "border-transparent bg-transparent text-slate-500 hover:border-slate-700/50 hover:bg-slate-900/50 hover:text-slate-200"
@@ -320,7 +320,7 @@ function ReviewTabButton({
         </div>
 
         <p
-          className={`text-2xl font-semibold leading-none tracking-tight ${
+          className={`text-xl font-semibold leading-none tracking-tight ${
             active ? "" : countToneClasses[tone]
           }`}
         >
