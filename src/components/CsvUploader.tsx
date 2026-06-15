@@ -301,12 +301,12 @@ export function CsvUploader() {
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#08111f] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
+    <main className="min-h-screen overflow-hidden bg-[#252525] px-5 py-6 text-[#f7f0f0] sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-orange-500/8 blur-3xl" />
-        <div className="absolute right-[-220px] top-28 h-[500px] w-[620px] rounded-full bg-orange-900/10 blur-3xl" />
-        <div className="absolute bottom-[-220px] left-[-160px] h-[420px] w-[620px] rounded-full bg-stone-400/7 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(28,25,23,0.18),_rgba(8,17,31,1))]" />
+        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[#fa5f1a]/10 blur-3xl" />
+        <div className="absolute right-[-240px] top-20 h-[500px] w-[620px] rounded-full bg-[#fa5f1a]/8 blur-3xl" />
+        <div className="absolute bottom-[-240px] left-[-180px] h-[460px] w-[620px] rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(37,37,37,0.94),_rgba(24,24,24,1))]" />
       </div>
 
       <div className="mx-auto max-w-[1380px] space-y-7">
@@ -314,24 +314,24 @@ export function CsvUploader() {
           <section className="flex min-h-[calc(100vh-6rem)] items-center py-10">
             <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1fr_520px] lg:items-center">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-orange-200/70">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#fa5f1a]">
                   Business data quality control
                 </p>
 
-                <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-[#f1ece4] sm:text-6xl lg:text-7xl">
+                <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
                   DataPreflight
                 </h1>
 
-                <p className="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-[#f1ece4] sm:text-4xl">
+                <p className="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-[#f7f0f0] sm:text-4xl">
                   Trusted business data before import.
                 </p>
 
-                <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
+                <p className="mt-6 max-w-2xl text-base leading-8 text-[#d8d0cc]">
                   Detect risks, explain issues, and prepare clean invoice data
                   before it enters your accounting, ERP, or operational system.
                 </p>
 
-                <div className="mt-7 grid gap-3 text-sm text-stone-300 sm:grid-cols-2">
+                <div className="mt-7 grid gap-3 text-sm text-[#f7f0f0] sm:grid-cols-2">
                   <ValuePoint text="Detect operational risks" />
                   <ValuePoint text="Explain data quality issues" />
                   <ValuePoint text="Validate before import" />
@@ -360,43 +360,43 @@ export function CsvUploader() {
           <>
             <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_420px] lg:items-start">
               <div className="py-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-stone-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#fa5f1a]">
                   Business data quality control
                 </p>
 
-                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[#f1ece4] sm:text-5xl">
+                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
                   DataPreflight
                 </h1>
 
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-400">
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-[#d8d0cc]">
                   Trusted business data before import. Review the analysis
                   summary first, then inspect only the rows that need action.
                 </p>
 
                 {parsedDataSet && (
                   <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                       {parsedDataSet.rowCount} invoices detected
                     </span>
 
-                    <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                       {sourceType.toUpperCase()} source
                     </span>
 
                     {parsedDataSet.metadata?.sheetName && (
-                      <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                      <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                         Sheet: {parsedDataSet.metadata.sheetName}
                       </span>
                     )}
 
                     {parsedDataSet.metadata?.sheetCount &&
                       parsedDataSet.metadata.sheetCount > 1 && (
-                        <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                        <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                           {parsedDataSet.metadata.sheetCount} sheets detected
                         </span>
                       )}
 
-                    <span className="rounded-full border border-slate-700/60 bg-slate-900/55 px-2.5 py-1 text-[11px] text-slate-400">
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                       {headers.length} mapped header
                       {headers.length === 1 ? "" : "s"}
                     </span>
@@ -473,14 +473,14 @@ export function CsvUploader() {
         <button
           type="button"
           onClick={() => setIsFieldMappingOpen(true)}
-          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-slate-700/60 bg-slate-950/75 text-slate-400 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-orange-300/25 hover:bg-slate-900 hover:text-orange-100"
+          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-white/10 bg-[#252525]/90 text-[#f7f0f0] shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-[#fa5f1a]/60 hover:bg-[#2f2f2f] hover:text-[#fa5f1a]"
           aria-label="Open field mapping panel"
           title="Open field mapping"
         >
           <span className="text-base leading-none">⚙</span>
 
           {(hasIncompleteMapping || hasDuplicateMappings) && (
-            <span className="absolute left-1 top-2 h-2 w-2 rounded-full bg-amber-300 shadow-lg shadow-amber-300/35" />
+            <span className="absolute left-1 top-2 h-2 w-2 rounded-full bg-[#fa5f1a] shadow-lg shadow-[#fa5f1a]/35" />
           )}
         </button>
       )}
@@ -491,44 +491,44 @@ export function CsvUploader() {
             type="button"
             aria-label="Close mapping panel"
             onClick={() => setIsFieldMappingOpen(false)}
-            className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
           />
 
-          <aside className="absolute right-0 top-0 h-full w-full max-w-2xl overflow-y-auto border-l border-slate-700/55 bg-[#090f1d]/95 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl">
-            <div className="mb-5 flex items-start justify-between gap-4 border-b border-slate-700/45 pb-5">
+          <aside className="absolute right-0 top-0 h-full w-full max-w-2xl overflow-y-auto border-l border-white/10 bg-[#252525]/98 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl">
+            <div className="mb-5 flex items-start justify-between gap-4 border-b border-white/10 pb-5">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-500">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fa5f1a]">
                   Configuration layer
                 </p>
 
-                <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#f1ece4]">
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-white">
                   Field mapping
                 </h2>
 
-                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-[#b8b2ae]">
                   Review how source headers are mapped into invoice fields. Keep
                   this closed during normal invoice review.
                 </p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                  <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                     {mappedCount}/{mappingSuggestions.length} mapped
                   </span>
 
                   {parsedDataSet && (
-                    <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                       {parsedDataSet.sourceType.toUpperCase()} source
                     </span>
                   )}
 
                   {parsedDataSet?.metadata?.sheetName && (
-                    <span className="rounded-full border border-slate-700/60 bg-slate-950/35 px-2.5 py-1 text-[11px] text-slate-400">
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-[#d8d0cc]">
                       Sheet: {parsedDataSet.metadata.sheetName}
                     </span>
                   )}
 
                   {(hasIncompleteMapping || hasDuplicateMappings) && (
-                    <span className="rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-2.5 py-1 text-[11px] font-medium text-amber-100">
+                    <span className="rounded-full border border-[#fa5f1a]/35 bg-[#fa5f1a]/10 px-2.5 py-1 text-[11px] font-medium text-[#fa5f1a]">
                       Needs review
                     </span>
                   )}
@@ -538,7 +538,7 @@ export function CsvUploader() {
               <button
                 type="button"
                 onClick={() => setIsFieldMappingOpen(false)}
-                className="rounded-full border border-slate-700/70 bg-slate-950/40 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100"
+                className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-[#d8d0cc] transition hover:border-[#fa5f1a]/45 hover:bg-[#2f2f2f] hover:text-white"
               >
                 Close
               </button>
@@ -561,8 +561,8 @@ export function CsvUploader() {
 
 function ValuePoint({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-stone-700/45 bg-stone-950/30 px-4 py-3 text-stone-300">
-      <span className="mr-2 text-orange-200/80">✓</span>
+    <div className="rounded-2xl border border-white/10 bg-black/18 px-4 py-3 text-[#f7f0f0]">
+      <span className="mr-2 text-[#fa5f1a]">✓</span>
       {text}
     </div>
   );
@@ -579,8 +579,8 @@ function SourcePill({
     <span
       className={`rounded-full border px-3 py-1 text-xs font-medium ${
         tone === "active"
-          ? "border-orange-300/22 bg-orange-300/[0.06] text-orange-100"
-          : "border-slate-700/60 bg-slate-900/45 text-slate-500"
+          ? "border-[#fa5f1a]/40 bg-[#fa5f1a]/10 text-[#f7f0f0]"
+          : "border-white/10 bg-black/20 text-[#b8b2ae]"
       }`}
     >
       {label}
@@ -590,10 +590,10 @@ function SourcePill({
 
 function ProductFooter() {
   return (
-    <footer className="border-t border-slate-800/80 py-6">
-      <div className="flex flex-col gap-3 text-xs text-slate-600 md:flex-row md:items-center md:justify-between">
+    <footer className="border-t border-white/10 py-6">
+      <div className="flex flex-col gap-3 text-xs text-[#8f8986] md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="font-medium text-slate-500">
+          <p className="font-medium text-[#b8b2ae]">
             © 2026 DataPreflight. All rights reserved.
           </p>
 
@@ -602,9 +602,9 @@ function ProductFooter() {
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span>Privacy-first processing</span>
-          <span className="hidden text-slate-700 sm:inline">•</span>
+          <span className="hidden text-white/20 sm:inline">•</span>
           <span>Client-side validation</span>
-          <span className="hidden text-slate-700 sm:inline">•</span>
+          <span className="hidden text-white/20 sm:inline">•</span>
           <span>Explainable review</span>
         </div>
       </div>
