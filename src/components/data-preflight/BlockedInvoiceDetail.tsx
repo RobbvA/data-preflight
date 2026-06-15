@@ -83,7 +83,7 @@ export function BlockedInvoiceDetail({
             {selectedInvoice.actionLabel}
           </span>
 
-          <span className="rounded-full border border-cyan-300/15 bg-cyan-400/[0.08] px-2.5 py-1 text-[11px] font-semibold text-cyan-100">
+          <span className="rounded-full border border-cyan-300/15 bg-slate-950/35 px-2.5 py-1 text-[11px] font-semibold text-cyan-100">
             Priority {selectedInvoice.priorityScore}
           </span>
 
@@ -98,13 +98,7 @@ export function BlockedInvoiceDetail({
       </div>
 
       {primaryIssue && (
-        <div
-          className={`mt-4 rounded-2xl border p-3.5 ${
-            primaryIssue.severity === "critical"
-              ? "border-rose-400/24 bg-rose-400/[0.09]"
-              : "border-amber-300/22 bg-amber-300/[0.08]"
-          }`}
-        >
+        <div className="mt-4 rounded-2xl border border-rose-400/24 bg-slate-950/28 p-3.5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -127,7 +121,7 @@ export function BlockedInvoiceDetail({
             </span>
           </div>
 
-          <p className="mt-2 text-xs leading-5 text-slate-300">
+          <p className="mt-2 rounded-lg border border-rose-400/14 bg-rose-400/[0.045] px-3 py-2 text-xs leading-5 text-slate-300">
             <span className="font-medium text-slate-100">Fix:</span>{" "}
             {primaryIssue.fix}
           </p>
@@ -246,8 +240,8 @@ export function BlockedInvoiceDetail({
             <span
               className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
                 hasIssues
-                  ? "bg-amber-300/[0.07] text-amber-100"
-                  : "bg-emerald-400/[0.055] text-emerald-100"
+                  ? "bg-slate-950/35 text-amber-100"
+                  : "bg-slate-950/35 text-emerald-100"
               }`}
             >
               {hasIssues
@@ -269,7 +263,7 @@ export function BlockedInvoiceDetail({
               ))}
             </div>
           ) : (
-            <div className="rounded-xl bg-emerald-400/[0.045] p-3.5">
+            <div className="rounded-xl bg-slate-950/30 p-3.5">
               <p className="text-sm font-medium text-emerald-100">
                 No issues detected for this row.
               </p>
@@ -300,11 +294,11 @@ function IssueExplanationCard({
       className={`rounded-xl border p-3 ${
         primary
           ? issue.severity === "critical"
-            ? "border-rose-400/22 bg-rose-400/[0.085]"
-            : "border-amber-300/20 bg-amber-300/[0.08]"
+            ? "border-rose-400/24 bg-slate-950/30"
+            : "border-amber-300/20 bg-slate-950/28"
           : issue.severity === "critical"
-            ? "border-rose-400/10 bg-rose-400/[0.045]"
-            : "border-amber-300/10 bg-amber-300/[0.04]"
+            ? "border-rose-400/14 bg-slate-950/24"
+            : "border-amber-300/12 bg-slate-950/24"
       }`}
     >
       <div className="flex flex-wrap items-center gap-1.5">
@@ -318,15 +312,15 @@ function IssueExplanationCard({
           {issue.severity}
         </span>
 
-        <span className="rounded-full bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
+        <span className="rounded-full bg-slate-950/45 px-2 py-0.5 text-[9px] text-slate-500">
           {issue.field}
         </span>
 
-        <span className="rounded-full bg-cyan-400/[0.06] px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-slate-400">
+        <span className="rounded-full bg-slate-950/45 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-slate-400">
           {formatRiskLabel(issue.risk)}
         </span>
 
-        <span className="rounded-full bg-slate-950/35 px-2 py-0.5 text-[9px] text-slate-500">
+        <span className="rounded-full bg-slate-950/45 px-2 py-0.5 text-[9px] text-slate-500">
           {formatIssueType(issue.type)}
         </span>
       </div>
@@ -342,7 +336,7 @@ function IssueExplanationCard({
         <ExplanationLine label="Fix" value={issue.fix} stronger />
       </div>
 
-      <details className="mt-2 rounded-lg bg-slate-950/20 px-3 py-2">
+      <details className="mt-2 rounded-lg bg-slate-950/22 px-3 py-2">
         <summary className="cursor-pointer text-[11px] font-medium text-slate-500 transition hover:text-slate-300">
           Show explanation
         </summary>
@@ -366,10 +360,10 @@ function ExplanationLine({
 }) {
   return (
     <p
-      className={`rounded-lg bg-slate-950/25 px-3 py-2 text-xs leading-5 ${
+      className={`rounded-lg px-3 py-2 text-xs leading-5 ${
         stronger
-          ? "border border-cyan-300/10 bg-cyan-300/[0.04] text-slate-200"
-          : "text-slate-500"
+          ? "border border-rose-400/12 bg-rose-400/[0.035] text-slate-200"
+          : "bg-slate-950/25 text-slate-500"
       }`}
     >
       <span className="font-medium text-slate-200">{label}:</span> {value}
@@ -430,9 +424,9 @@ function StatusPill({
   children: React.ReactNode;
 }) {
   const toneClasses = {
-    danger: "bg-rose-400/[0.08] text-rose-100",
-    warning: "bg-amber-300/[0.08] text-amber-100",
-    success: "bg-emerald-400/[0.06] text-emerald-100",
+    danger: "bg-slate-950/35 text-rose-100",
+    warning: "bg-slate-950/35 text-amber-100",
+    success: "bg-slate-950/35 text-emerald-100",
     neutral: "bg-slate-700/25 text-slate-300",
   };
 

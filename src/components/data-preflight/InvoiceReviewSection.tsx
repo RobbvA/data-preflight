@@ -152,7 +152,7 @@ export function InvoiceReviewSection({
           onClick={onToggleBlockedFilter}
           className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
             showOnlyBlocked
-              ? "border-rose-400/25 bg-rose-400/[0.08] text-rose-100"
+              ? "border-rose-400/25 bg-slate-950/35 text-rose-100"
               : "border-slate-700/70 bg-slate-950/30 text-slate-400 hover:border-slate-500/70 hover:bg-slate-800/70 hover:text-slate-100"
           }`}
         >
@@ -280,9 +280,9 @@ function ReviewTabButton({
   onClick: () => void;
 }) {
   const activeToneClasses = {
-    danger: "border-rose-400/28 bg-rose-400/[0.1] text-rose-50",
-    warning: "border-amber-300/28 bg-amber-300/[0.1] text-amber-50",
-    success: "border-emerald-300/24 bg-emerald-400/[0.075] text-emerald-50",
+    danger: "border-rose-400/32 bg-slate-950/35 text-rose-50",
+    warning: "border-amber-300/28 bg-slate-950/35 text-amber-50",
+    success: "border-emerald-300/24 bg-slate-950/35 text-emerald-50",
   };
 
   const countToneClasses = {
@@ -310,7 +310,11 @@ function ReviewTabButton({
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className={active ? "" : iconToneClasses[tone]}>{icon}</span>
+            <span
+              className={active ? iconToneClasses[tone] : iconToneClasses[tone]}
+            >
+              {icon}
+            </span>
             <p className="text-sm font-semibold leading-none">{label}</p>
           </div>
 
@@ -321,7 +325,7 @@ function ReviewTabButton({
 
         <p
           className={`text-xl font-semibold leading-none tracking-tight ${
-            active ? "" : countToneClasses[tone]
+            active ? countToneClasses[tone] : countToneClasses[tone]
           }`}
         >
           {count}
@@ -339,9 +343,9 @@ function StatusPill({
   children: React.ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-amber-300/22 bg-amber-300/[0.08] text-amber-100",
-    danger: "border-rose-400/22 bg-rose-400/[0.08] text-rose-100",
-    success: "border-emerald-300/20 bg-emerald-400/[0.065] text-emerald-100",
+    warning: "border-amber-300/22 bg-slate-950/35 text-amber-100",
+    danger: "border-rose-400/22 bg-slate-950/35 text-rose-100",
+    success: "border-emerald-300/20 bg-slate-950/35 text-emerald-100",
     neutral: "border-slate-500/30 bg-slate-700/25 text-slate-300",
   };
 
