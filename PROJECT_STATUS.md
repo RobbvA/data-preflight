@@ -69,3 +69,18 @@ Git: Green
 - OCR Support
 
 Currently out of scope.
+
+## Current Focus
+
+Milestone 4.4 — Spacing Hierarchy Pass
+
+### Active Work
+
+- Compacting Control Center
+- Compacting Review Workspace
+- Compacting Inspection Mode
+- Preparing demo datasets for outreach
+
+### Next Step
+
+Create demo dataset library for realistic testing and future customer demonstrations.

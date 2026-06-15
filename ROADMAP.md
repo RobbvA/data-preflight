@@ -163,6 +163,28 @@ Status: Planned
 
 ---
 
+### 4.4.4 Demo Data Strategy
+
+Goal:
+
+Create reusable demo datasets that demonstrate:
+
+- Clean imports
+- Mixed quality imports
+- High-risk imports
+- Mapping problems
+- Regional compliance problems
+- Duplicate invoices
+- Financial reporting issues
+
+Deliverables:
+
+- Demo Dataset A — Clean
+- Demo Dataset B — Mixed
+- Demo Dataset C — High Risk
+- Demo Dataset D — Mapping Chaos
+- Demo Dataset E — Regional Compliance
+
 ## Milestone 5 — Validation Review Pass
 
 Status: Planned
