@@ -148,8 +148,8 @@ export function DataSetPreview({
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-cyan-300/40 bg-cyan-300/[0.09] ring-1 ring-cyan-300/20"
-                        : `${getRowToneClasses(item.priority)} hover:border-slate-600/55 hover:bg-slate-900/55`
+                        ? "border-cyan-300/40 bg-cyan-300/[0.075] ring-1 ring-cyan-300/20"
+                        : `${getRowToneClasses(item.priority)} hover:border-slate-500/45 hover:bg-slate-900/50`
                     }`}
                   >
                     <div className="grid gap-2 xl:grid-cols-[1fr_auto] xl:items-start">
@@ -275,7 +275,7 @@ export function DataSetPreview({
 
 function ReviewDataPoint({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-slate-950/22 px-2 py-1.5">
+    <div className="rounded-lg bg-slate-950/28 px-2 py-1.5">
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
         {label}
       </p>
@@ -300,8 +300,8 @@ function MainIssueInline({
     <div
       className={`mt-1 rounded-lg border px-2 py-1 text-xs ${
         isCritical
-          ? "border-rose-400/12 bg-rose-400/[0.06]"
-          : "border-amber-300/12 bg-amber-300/[0.06]"
+          ? "border-rose-400/24 bg-rose-400/[0.075]"
+          : "border-amber-300/20 bg-amber-300/[0.055]"
       }`}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -388,26 +388,26 @@ function CountBadge({
 
 function getEmbeddedToneClasses(tone: "neutral" | "danger" | "warning") {
   if (tone === "danger") {
-    return "bg-rose-400/[0.035]";
+    return "bg-slate-950/18";
   }
 
   if (tone === "warning") {
-    return "bg-amber-300/[0.035]";
+    return "bg-slate-950/16";
   }
 
-  return "bg-emerald-400/[0.025]";
+  return "bg-slate-950/14";
 }
 
 function getRowToneClasses(priority: InvoicePriority) {
   if (priority === "critical" || priority === "high") {
-    return "border-rose-400/18 bg-rose-400/[0.025]";
+    return "border-rose-400/20 bg-slate-950/26";
   }
 
   if (priority === "medium" || priority === "low") {
-    return "border-amber-300/18 bg-amber-300/[0.022]";
+    return "border-amber-300/18 bg-slate-950/24";
   }
 
-  return "border-emerald-300/14 bg-emerald-400/[0.018]";
+  return "border-emerald-300/14 bg-slate-950/22";
 }
 
 function getStatusPriority(status: string | undefined) {
