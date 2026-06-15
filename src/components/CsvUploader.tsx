@@ -303,10 +303,10 @@ export function CsvUploader() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#08111f] px-5 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute right-[-220px] top-28 h-[500px] w-[620px] rounded-full bg-blue-500/8 blur-3xl" />
-        <div className="absolute bottom-[-220px] left-[-160px] h-[420px] w-[620px] rounded-full bg-slate-400/8 blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0.16),_rgba(8,17,31,1))]" />
+        <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-orange-500/8 blur-3xl" />
+        <div className="absolute right-[-220px] top-28 h-[500px] w-[620px] rounded-full bg-orange-900/10 blur-3xl" />
+        <div className="absolute bottom-[-220px] left-[-160px] h-[420px] w-[620px] rounded-full bg-stone-400/7 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(28,25,23,0.18),_rgba(8,17,31,1))]" />
       </div>
 
       <div className="mx-auto max-w-[1380px] space-y-7">
@@ -314,32 +314,35 @@ export function CsvUploader() {
           <section className="flex min-h-[calc(100vh-6rem)] items-center py-10">
             <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1fr_520px] lg:items-center">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200/70">
-                  Operational invoice preflight
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-orange-200/70">
+                  Business data quality control
                 </p>
 
-                <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-slate-50 sm:text-6xl lg:text-7xl">
-                  Find risky invoice data before it enters your system.
+                <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-[#f1ece4] sm:text-6xl lg:text-7xl">
+                  DataPreflight
                 </h1>
 
-                <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300">
-                  DataPreflight analyzes messy business exports, detects
-                  operational risks, explains what needs attention, and prepares
-                  trusted clean output.
+                <p className="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-[#f1ece4] sm:text-4xl">
+                  Trusted business data before import.
                 </p>
 
-                <div className="mt-7 grid gap-3 text-sm text-slate-300 sm:grid-cols-2">
-                  <ValuePoint text="Detect blocked invoices and risky rows" />
-                  <ValuePoint text="Normalize messy invoice data" />
-                  <ValuePoint text="Validate business rules before import" />
-                  <ValuePoint text="Export only trusted clean data" />
+                <p className="mt-6 max-w-2xl text-base leading-8 text-stone-300">
+                  Detect risks, explain issues, and prepare clean invoice data
+                  before it enters your accounting, ERP, or operational system.
+                </p>
+
+                <div className="mt-7 grid gap-3 text-sm text-stone-300 sm:grid-cols-2">
+                  <ValuePoint text="Detect operational risks" />
+                  <ValuePoint text="Explain data quality issues" />
+                  <ValuePoint text="Validate before import" />
+                  <ValuePoint text="Export trusted business data" />
                 </div>
 
                 <div className="mt-7 flex flex-wrap items-center gap-2">
-                  <SourcePill label="CSV supported" tone="active" />
-                  <SourcePill label="Excel supported" tone="active" />
-                  <SourcePill label="PDF planned" />
-                  <SourcePill label="Images planned" />
+                  <SourcePill label="CSV" tone="active" />
+                  <SourcePill label="Excel" tone="active" />
+                  <SourcePill label="Explainable validation" tone="active" />
+                  <SourcePill label="Trusted export" tone="active" />
                 </div>
               </div>
 
@@ -357,17 +360,17 @@ export function CsvUploader() {
           <>
             <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_420px] lg:items-start">
               <div className="py-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
-                  Operational invoice preflight
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-stone-500">
+                  Business data quality control
                 </p>
 
-                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-50 sm:text-5xl">
+                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[#f1ece4] sm:text-5xl">
                   DataPreflight
                 </h1>
 
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-400">
-                  Review the analysis summary first, then inspect only the rows
-                  that need action.
+                <p className="mt-4 max-w-2xl text-sm leading-6 text-stone-400">
+                  Trusted business data before import. Review the analysis
+                  summary first, then inspect only the rows that need action.
                 </p>
 
                 {parsedDataSet && (
@@ -470,7 +473,7 @@ export function CsvUploader() {
         <button
           type="button"
           onClick={() => setIsFieldMappingOpen(true)}
-          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-slate-700/60 bg-slate-950/75 text-slate-400 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-cyan-300/25 hover:bg-slate-900 hover:text-cyan-100"
+          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-slate-700/60 bg-slate-950/75 text-slate-400 shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-orange-300/25 hover:bg-slate-900 hover:text-orange-100"
           aria-label="Open field mapping panel"
           title="Open field mapping"
         >
@@ -494,11 +497,11 @@ export function CsvUploader() {
           <aside className="absolute right-0 top-0 h-full w-full max-w-2xl overflow-y-auto border-l border-slate-700/55 bg-[#090f1d]/95 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl">
             <div className="mb-5 flex items-start justify-between gap-4 border-b border-slate-700/45 pb-5">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-500">
                   Configuration layer
                 </p>
 
-                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-50">
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#f1ece4]">
                   Field mapping
                 </h2>
 
@@ -558,8 +561,8 @@ export function CsvUploader() {
 
 function ValuePoint({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-slate-700/45 bg-slate-900/45 px-4 py-3 text-slate-300">
-      <span className="mr-2 text-cyan-200">✓</span>
+    <div className="rounded-2xl border border-stone-700/45 bg-stone-950/30 px-4 py-3 text-stone-300">
+      <span className="mr-2 text-orange-200/80">✓</span>
       {text}
     </div>
   );
@@ -576,7 +579,7 @@ function SourcePill({
     <span
       className={`rounded-full border px-3 py-1 text-xs font-medium ${
         tone === "active"
-          ? "border-cyan-300/25 bg-cyan-300/[0.08] text-cyan-100"
+          ? "border-orange-300/22 bg-orange-300/[0.06] text-orange-100"
           : "border-slate-700/60 bg-slate-900/45 text-slate-500"
       }`}
     >
@@ -594,9 +597,7 @@ function ProductFooter() {
             © 2026 DataPreflight. All rights reserved.
           </p>
 
-          <p className="mt-1">
-            Built for trusted operational imports and explainable data review.
-          </p>
+          <p className="mt-1">Trusted business data before import.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -604,7 +605,7 @@ function ProductFooter() {
           <span className="hidden text-slate-700 sm:inline">•</span>
           <span>Client-side validation</span>
           <span className="hidden text-slate-700 sm:inline">•</span>
-          <span>MVP v1</span>
+          <span>Explainable review</span>
         </div>
       </div>
     </footer>
