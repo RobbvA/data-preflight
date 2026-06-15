@@ -70,11 +70,11 @@ export function DataSetPreview({
     <section
       className={`rounded-2xl backdrop-blur ${
         embedded
-          ? `p-3 ${getEmbeddedToneClasses(tone)}`
+          ? `p-2.5 ${getEmbeddedToneClasses(tone)}`
           : "bg-slate-950/20 p-4 shadow-xl"
       }`}
     >
-      <div className="flex w-full flex-wrap items-start justify-between gap-3">
+      <div className="flex w-full flex-wrap items-start justify-between gap-2.5">
         <button
           type="button"
           onClick={onToggle}
@@ -121,11 +121,11 @@ export function DataSetPreview({
           </p>
         ) : (
           <div
-            className={`mt-3 overflow-y-auto pr-1 ${
+            className={`mt-2.5 overflow-y-auto pr-1 ${
               compact ? "max-h-[420px]" : "max-h-[620px]"
             }`}
           >
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {sortedItems.map((item) => {
                 const isSelected = selectedRowIndex === item.rowIndex;
                 const criticalIssues = item.issues.filter(
@@ -144,7 +144,7 @@ export function DataSetPreview({
                         ? () => onSelectItem(item.rowIndex)
                         : undefined
                     }
-                    className={`group rounded-xl border p-2.5 transition ${
+                    className={`group rounded-xl border p-2 transition ${
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
@@ -200,7 +200,7 @@ export function DataSetPreview({
                       </div>
                     </div>
 
-                    <div className="mt-2 grid gap-1.5 md:grid-cols-3">
+                    <div className="mt-1.5 grid gap-1 md:grid-cols-3">
                       <ReviewDataPoint
                         label="Amount"
                         value={formatMoneyValue(item.row.amount)}
@@ -227,7 +227,7 @@ export function DataSetPreview({
                     )}
 
                     {isSelected && (
-                      <div className="mt-2 rounded-lg border border-slate-700/35 bg-slate-950/25 p-2.5">
+                      <div className="mt-1.5 rounded-lg border border-slate-700/35 bg-slate-950/25 p-2">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100/55">
@@ -275,7 +275,7 @@ export function DataSetPreview({
 
 function ReviewDataPoint({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-slate-950/22 px-2.5 py-1.5">
+    <div className="rounded-lg bg-slate-950/22 px-2 py-1.5">
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-700">
         {label}
       </p>
@@ -298,7 +298,7 @@ function MainIssueInline({
 
   return (
     <div
-      className={`mt-1.5 rounded-lg border px-2.5 py-1.5 text-xs ${
+      className={`mt-1 rounded-lg border px-2 py-1 text-xs ${
         isCritical
           ? "border-rose-400/12 bg-rose-400/[0.06]"
           : "border-amber-300/12 bg-amber-300/[0.06]"
@@ -341,7 +341,7 @@ function IssueSummaryLine({
   const isCritical = issue.severity === "critical";
 
   return (
-    <div className="grid gap-2 rounded-lg bg-slate-900/35 px-2.5 py-1.5 sm:grid-cols-[110px_1fr]">
+    <div className="grid gap-2 rounded-lg bg-slate-900/35 px-2 py-1.5 sm:grid-cols-[105px_1fr]">
       <div className="flex flex-wrap items-center gap-1.5">
         <span
           className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${

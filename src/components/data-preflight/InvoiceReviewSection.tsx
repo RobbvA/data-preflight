@@ -125,7 +125,7 @@ export function InvoiceReviewSection({
       id="invoice-review-workspace"
       className="rounded-[1.5rem] border border-slate-700/40 bg-slate-900/55 p-4 shadow-xl shadow-black/20 backdrop-blur-xl"
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-700/40 pb-4">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-700/40 pb-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
             Review workspace
@@ -162,7 +162,7 @@ export function InvoiceReviewSection({
 
       {totalReviewItems > 0 ? (
         <>
-          <div className="mt-4 grid gap-2 rounded-2xl border border-slate-700/40 bg-slate-950/25 p-2 sm:grid-cols-3">
+          <div className="mt-3 grid gap-2 rounded-2xl border border-slate-700/40 bg-slate-950/25 p-2 sm:grid-cols-3">
             <ReviewTabButton
               label="Blocked"
               description="Fix first"
@@ -194,7 +194,7 @@ export function InvoiceReviewSection({
             />
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             <DataSetPreview
               title={activeTabConfig.title}
               description={activeTabConfig.description}
@@ -212,7 +212,7 @@ export function InvoiceReviewSection({
           </div>
         </>
       ) : (
-        <div className="mt-4 rounded-2xl border border-slate-700/35 bg-slate-950/25 p-4">
+        <div className="mt-3 rounded-2xl border border-slate-700/35 bg-slate-950/25 p-4">
           <p className="text-sm font-medium text-slate-300">
             No invoices ready for review.
           </p>
@@ -301,7 +301,7 @@ function ReviewTabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-xl border px-3 py-2.5 text-left transition ${
+      className={`rounded-xl border px-3 py-2 text-left transition ${
         active
           ? activeToneClasses[tone]
           : "border-transparent bg-transparent text-slate-500 hover:border-slate-700/50 hover:bg-slate-900/50 hover:text-slate-200"
