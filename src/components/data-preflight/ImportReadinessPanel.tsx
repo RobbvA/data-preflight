@@ -72,15 +72,15 @@ export function ImportReadinessPanel({
   });
 
   return (
-    <section className="rounded-[2rem] border border-stone-700/45 bg-[#11100d]/75 p-6 shadow-xl shadow-black/20 backdrop-blur-xl">
+    <section className="rounded-[2rem] border border-white/10 bg-[#2d2d2d]/75 p-6 shadow-xl shadow-black/20 backdrop-blur-xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-stone-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#fa5f1a]">
             Control center
           </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-[1.7rem] font-semibold leading-tight tracking-tight text-[#f1ece4]">
+            <h2 className="text-[1.7rem] font-semibold leading-tight tracking-tight text-white">
               {totalInvoices} invoices analysed
             </h2>
 
@@ -94,7 +94,7 @@ export function ImportReadinessPanel({
             )}
           </div>
 
-          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-stone-400">
+          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-[#cfc7c3]">
             {importReadinessMessage}
           </p>
         </div>
@@ -144,25 +144,25 @@ export function ImportReadinessPanel({
         <div
           className={`rounded-3xl border p-4 ${
             isBlocked
-              ? "border-rose-400/14 bg-[#18120f]"
+              ? "border-[#fa5f1a]/28 bg-[#252525]"
               : hasWarnings
-                ? "border-amber-300/14 bg-[#17130d]"
-                : "border-emerald-300/12 bg-[#10150f]"
+                ? "border-white/12 bg-[#252525]"
+                : "border-white/10 bg-[#252525]"
           }`}
         >
           <div className="flex items-center gap-2">
             <NextActionIcon tone={statusTone} />
 
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-500">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9f9793]">
               Next action
             </p>
           </div>
 
-          <p className="mt-2 text-[1.25rem] font-semibold leading-snug tracking-tight text-[#f1ece4]">
+          <p className="mt-2 text-[1.25rem] font-semibold leading-snug tracking-tight text-white">
             {nextAction.title}
           </p>
 
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-stone-300">
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-[#d8d0cc]">
             {nextAction.description}
           </p>
 
@@ -173,25 +173,25 @@ export function ImportReadinessPanel({
                 .getElementById("invoice-review-workspace")
                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#d19a6a] px-4 py-2.5 text-sm font-semibold text-[#0a0907] transition hover:bg-[#f1c49b]"
+            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#fa5f1a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#ff7538]"
           >
             <Search className="h-4 w-4" />
             {nextAction.buttonLabel}
           </button>
         </div>
 
-        <aside className="rounded-2xl border border-stone-700/45 bg-black/20 p-4">
+        <aside className="rounded-2xl border border-white/10 bg-[#252525] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <Download className="h-3.5 w-3.5 text-stone-600" />
+                <Download className="h-3.5 w-3.5 text-[#9f9793]" />
 
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-600">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9f9793]">
                   Export
                 </p>
               </div>
 
-              <h3 className="mt-1 text-sm font-semibold text-stone-300">
+              <h3 className="mt-1 text-sm font-semibold text-[#f7f0f0]">
                 Clean output
               </h3>
             </div>
@@ -201,7 +201,7 @@ export function ImportReadinessPanel({
             </StatusPill>
           </div>
 
-          <p className="mt-2 text-xs leading-5 text-stone-500">
+          <p className="mt-2 text-xs leading-5 text-[#aaa19d]">
             {exportSafetyMessage}
           </p>
 
@@ -212,7 +212,7 @@ export function ImportReadinessPanel({
                 onDownloadCleanCsv("clean-invoices.csv", cleanRows)
               }
               disabled={!canExport}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d19a6a] px-4 py-2.5 text-sm font-semibold text-[#0a0907] transition hover:bg-[#f1c49b] disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fa5f1a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#ff7538] disabled:cursor-not-allowed disabled:opacity-35"
             >
               <Download className="h-4 w-4" />
               Download clean CSV
@@ -222,7 +222,7 @@ export function ImportReadinessPanel({
               type="button"
               onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
               disabled={issues.length === 0}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-stone-700/60 bg-stone-950/35 px-4 py-2.5 text-sm font-medium text-stone-300 transition hover:border-stone-500 hover:bg-stone-900/70 hover:text-[#f1ece4] disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm font-medium text-[#d8d0cc] transition hover:border-[#fa5f1a]/45 hover:bg-[#2f2f2f] hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
             >
               <FileWarning className="h-4 w-4" />
               Download issue report
@@ -318,27 +318,35 @@ function Metric({
   icon: ReactNode;
 }) {
   const toneClasses = {
-    success: "text-emerald-100",
-    warning: "text-amber-100",
-    danger: "text-rose-100",
+    success: "text-[#f7f0f0]",
+    warning: "text-[#f7f0f0]",
+    danger: "text-[#f7f0f0]",
   };
 
   const iconClasses = {
-    success: "text-emerald-200/70",
-    warning: "text-amber-200/65",
-    danger: "text-rose-200/75",
+    success: "text-[#f7f0f0]/70",
+    warning: "text-[#f7f0f0]/70",
+    danger: "text-[#fa5f1a]",
   };
 
   const surfaceClasses = {
-    success: "border-emerald-300/13 bg-[#10150f]",
-    warning: "border-amber-300/14 bg-[#17130d]",
-    danger: "border-rose-400/16 bg-[#18120f]",
+    success: "border-white/10 bg-[#303030]",
+    warning: "border-white/10 bg-[#303030]",
+    danger: "border-[#fa5f1a]/35 bg-[#303030]",
+  };
+
+  const labelClasses = {
+    success: "text-[#b8b2ae]",
+    warning: "text-[#b8b2ae]",
+    danger: "text-[#fa5f1a]",
   };
 
   return (
     <div className={`rounded-2xl border p-4 ${surfaceClasses[tone]}`}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-stone-500">
+        <p
+          className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${labelClasses[tone]}`}
+        >
           {label}
         </p>
 
@@ -351,16 +359,16 @@ function Metric({
         {value}
       </p>
 
-      <p className="mt-2 text-xs font-medium text-stone-500">{description}</p>
+      <p className="mt-2 text-xs font-medium text-[#9f9793]">{description}</p>
     </div>
   );
 }
 
 function NextActionIcon({ tone }: { tone: "warning" | "danger" | "success" }) {
   const toneClasses = {
-    warning: "text-amber-200/65",
-    danger: "text-rose-200/75",
-    success: "text-emerald-200/70",
+    warning: "text-[#f7f0f0]/70",
+    danger: "text-[#fa5f1a]",
+    success: "text-[#f7f0f0]/70",
   };
 
   const Icon =
@@ -381,10 +389,10 @@ function StatusPill({
   children: ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-amber-300/18 bg-amber-300/[0.06] text-amber-100",
-    danger: "border-rose-400/22 bg-rose-400/[0.08] text-rose-100",
-    success: "border-emerald-300/16 bg-emerald-400/[0.045] text-emerald-100",
-    info: "border-stone-500/30 bg-stone-800/25 text-stone-300",
+    warning: "border-white/12 bg-white/[0.04] text-[#f7f0f0]",
+    danger: "border-[#fa5f1a]/40 bg-[#fa5f1a]/10 text-[#f7f0f0]",
+    success: "border-white/12 bg-white/[0.04] text-[#f7f0f0]",
+    info: "border-white/12 bg-white/[0.04] text-[#d8d0cc]",
   };
 
   return (
