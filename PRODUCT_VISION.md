@@ -2,7 +2,9 @@
 
 ## What Is DataPreflight?
 
-DataPreflight is an Operational Invoice Review Platform.
+DataPreflight is a Business Data Quality Control Platform.
+
+It helps organizations understand, validate, review, and trust business data before it enters critical downstream systems.
 
 It helps organizations validate business data before importing it into accounting systems, ERP systems, bookkeeping platforms, or operational workflows.
 
@@ -10,7 +12,7 @@ DataPreflight is not a spreadsheet viewer.
 
 DataPreflight is not a CSV tool.
 
-DataPreflight is a trust layer between imported business data and downstream systems.
+DataPreflight acts as a trusted intelligence layer between business data and downstream systems.
 
 ---
 
