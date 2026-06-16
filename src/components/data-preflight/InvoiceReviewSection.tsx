@@ -123,16 +123,16 @@ export function InvoiceReviewSection({
   return (
     <section
       id="invoice-review-workspace"
-      className="rounded-[1.5rem] border border-[#34373d] bg-[#171a20] p-4 shadow-xl shadow-black/20"
+      className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#34373d] pb-3">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#fa5f1a]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
             Review workspace
           </p>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[#f7f0f0]">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
               Invoice review
             </h2>
 
@@ -141,7 +141,7 @@ export function InvoiceReviewSection({
             </StatusPill>
           </div>
 
-          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-[#d0d4da]">
+          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
             Review the most important category first. Fix blocked invoices,
             check warnings, then export clean rows.
           </p>
@@ -152,8 +152,8 @@ export function InvoiceReviewSection({
           onClick={onToggleBlockedFilter}
           className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
             showOnlyBlocked
-              ? "border-[#fa5f1a]/45 bg-[#fa5f1a]/10 text-[#f7f0f0]"
-              : "border-[#34373d] bg-[#1c2027] text-[#d0d4da] hover:border-[#fa5f1a]/45 hover:bg-[#252525] hover:text-white"
+              ? "border-[color:rgba(182,111,58,0.45)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]"
+              : "border-white/10 bg-[var(--surface-raised)] text-[var(--text-secondary)] hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-deep)] hover:text-[var(--text-primary)]"
           }`}
         >
           {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
@@ -162,7 +162,7 @@ export function InvoiceReviewSection({
 
       {totalReviewItems > 0 ? (
         <>
-          <div className="mt-3 grid gap-2 rounded-2xl border border-[#34373d] bg-[#111318] p-2 sm:grid-cols-3">
+          <div className="mt-3 grid gap-2 rounded-2xl border border-white/10 bg-[var(--surface-deep)] p-2 sm:grid-cols-3">
             <ReviewTabButton
               label="Blocked"
               description="Fix first"
@@ -212,12 +212,12 @@ export function InvoiceReviewSection({
           </div>
         </>
       ) : (
-        <div className="mt-3 rounded-2xl border border-[#34373d] bg-[#1c2027] p-4">
-          <p className="text-sm font-medium text-[#f7f0f0]">
+        <div className="mt-3 rounded-2xl border border-white/10 bg-[var(--surface-raised)] p-4">
+          <p className="text-sm font-medium text-[var(--text-primary)]">
             No invoices ready for review.
           </p>
 
-          <p className="mt-1 text-xs leading-5 text-[#9ca3af]">
+          <p className="mt-1 text-xs leading-5 text-[var(--text-muted)]">
             Upload and map invoice data to start the review workflow.
           </p>
         </div>
@@ -280,21 +280,24 @@ function ReviewTabButton({
   onClick: () => void;
 }) {
   const activeToneClasses = {
-    danger: "border-[#fa5f1a]/45 bg-[#252525] text-[#f7f0f0]",
-    warning: "border-[#fa5f1a]/25 bg-[#252525] text-[#f7f0f0]",
-    success: "border-[#34373d] bg-[#252525] text-[#f7f0f0]",
+    danger:
+      "border-[color:rgba(182,111,58,0.45)] bg-[var(--surface-raised)] text-[var(--text-primary)]",
+    warning:
+      "border-[color:rgba(182,111,58,0.28)] bg-[var(--surface-raised)] text-[var(--text-primary)]",
+    success:
+      "border-white/10 bg-[var(--surface-raised)] text-[var(--text-primary)]",
   };
 
   const countToneClasses = {
-    danger: "text-[#f7f0f0]",
-    warning: "text-[#f7f0f0]",
-    success: "text-[#f7f0f0]",
+    danger: "text-[var(--text-primary)]",
+    warning: "text-[var(--text-primary)]",
+    success: "text-[var(--text-primary)]",
   };
 
   const iconToneClasses = {
-    danger: "text-[#fa5f1a]",
-    warning: "text-[#fa5f1a]/80",
-    success: "text-[#d0d4da]",
+    danger: "text-[var(--brand-accent)]",
+    warning: "text-[var(--brand-accent-soft)]",
+    success: "text-[var(--text-secondary)]",
   };
 
   return (
@@ -304,7 +307,7 @@ function ReviewTabButton({
       className={`rounded-xl border px-3 py-2 text-left transition ${
         active
           ? activeToneClasses[tone]
-          : "border-transparent bg-transparent text-[#8f969f] hover:border-[#34373d] hover:bg-[#1c2027] hover:text-[#f7f0f0]"
+          : "border-transparent bg-transparent text-[var(--text-muted)] hover:border-white/10 hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -337,10 +340,12 @@ function StatusPill({
   children: React.ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-[#fa5f1a]/25 bg-[#fa5f1a]/8 text-[#f7f0f0]",
-    danger: "border-[#fa5f1a]/40 bg-[#fa5f1a]/10 text-[#f7f0f0]",
-    success: "border-[#34373d] bg-white/[0.04] text-[#f7f0f0]",
-    neutral: "border-[#34373d] bg-white/[0.04] text-[#d0d4da]",
+    warning:
+      "border-[color:rgba(182,111,58,0.25)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
+    danger:
+      "border-[color:rgba(182,111,58,0.4)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]",
+    success: "border-white/10 bg-white/[0.04] text-[var(--text-primary)]",
+    neutral: "border-white/10 bg-white/[0.04] text-[var(--text-secondary)]",
   };
 
   return (

@@ -72,15 +72,15 @@ export function ImportReadinessPanel({
   });
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-[#2d2d2d]/75 p-6 shadow-xl shadow-black/20 backdrop-blur-xl">
+    <section className="rounded-[2rem] border border-white/10 bg-[var(--surface-base)] p-6 shadow-xl shadow-black/20">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#fa5f1a]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--brand-accent)]">
             Control center
           </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-[1.7rem] font-semibold leading-tight tracking-tight text-white">
+            <h2 className="text-[1.7rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
               {totalInvoices} invoices analysed
             </h2>
 
@@ -94,7 +94,7 @@ export function ImportReadinessPanel({
             )}
           </div>
 
-          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-[#cfc7c3]">
+          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-[var(--text-secondary)]">
             {importReadinessMessage}
           </p>
         </div>
@@ -144,25 +144,25 @@ export function ImportReadinessPanel({
         <div
           className={`rounded-3xl border p-4 ${
             isBlocked
-              ? "border-[#fa5f1a]/28 bg-[#252525]"
+              ? "border-[color:rgba(182,111,58,0.28)] bg-[var(--surface-raised)]"
               : hasWarnings
-                ? "border-white/12 bg-[#252525]"
-                : "border-white/10 bg-[#252525]"
+                ? "border-white/10 bg-[var(--surface-raised)]"
+                : "border-white/10 bg-[var(--surface-raised)]"
           }`}
         >
           <div className="flex items-center gap-2">
             <NextActionIcon tone={statusTone} />
 
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9f9793]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
               Next action
             </p>
           </div>
 
-          <p className="mt-2 text-[1.25rem] font-semibold leading-snug tracking-tight text-white">
+          <p className="mt-2 text-[1.25rem] font-semibold leading-snug tracking-tight text-[var(--text-primary)]">
             {nextAction.title}
           </p>
 
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-[#d8d0cc]">
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
             {nextAction.description}
           </p>
 
@@ -173,25 +173,25 @@ export function ImportReadinessPanel({
                 .getElementById("invoice-review-workspace")
                 ?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#fa5f1a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#ff7538]"
+            className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)]"
           >
             <Search className="h-4 w-4" />
             {nextAction.buttonLabel}
           </button>
         </div>
 
-        <aside className="rounded-2xl border border-white/10 bg-[#252525] p-4">
+        <aside className="rounded-2xl border border-white/10 bg-[var(--surface-raised)] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <Download className="h-3.5 w-3.5 text-[#9f9793]" />
+                <Download className="h-3.5 w-3.5 text-[var(--text-muted)]" />
 
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9f9793]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
                   Export
                 </p>
               </div>
 
-              <h3 className="mt-1 text-sm font-semibold text-[#f7f0f0]">
+              <h3 className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                 Clean output
               </h3>
             </div>
@@ -201,7 +201,7 @@ export function ImportReadinessPanel({
             </StatusPill>
           </div>
 
-          <p className="mt-2 text-xs leading-5 text-[#aaa19d]">
+          <p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">
             {exportSafetyMessage}
           </p>
 
@@ -212,7 +212,7 @@ export function ImportReadinessPanel({
                 onDownloadCleanCsv("clean-invoices.csv", cleanRows)
               }
               disabled={!canExport}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#fa5f1a] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#ff7538] disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
             >
               <Download className="h-4 w-4" />
               Download clean CSV
@@ -222,7 +222,7 @@ export function ImportReadinessPanel({
               type="button"
               onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
               disabled={issues.length === 0}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm font-medium text-[#d8d0cc] transition hover:border-[#fa5f1a]/45 hover:bg-[#2f2f2f] hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-base)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
             >
               <FileWarning className="h-4 w-4" />
               Download issue report
@@ -318,27 +318,27 @@ function Metric({
   icon: ReactNode;
 }) {
   const toneClasses = {
-    success: "text-[#f7f0f0]",
-    warning: "text-[#f7f0f0]",
-    danger: "text-[#f7f0f0]",
+    success: "text-[var(--text-primary)]",
+    warning: "text-[var(--text-primary)]",
+    danger: "text-[var(--text-primary)]",
   };
 
   const iconClasses = {
-    success: "text-[#f7f0f0]/70",
-    warning: "text-[#f7f0f0]/70",
-    danger: "text-[#fa5f1a]",
+    success: "text-[var(--text-secondary)]",
+    warning: "text-[var(--text-secondary)]",
+    danger: "text-[var(--brand-accent)]",
   };
 
   const surfaceClasses = {
-    success: "border-white/10 bg-[#303030]",
-    warning: "border-white/10 bg-[#303030]",
-    danger: "border-[#fa5f1a]/35 bg-[#303030]",
+    success: "border-white/10 bg-[var(--surface-raised)]",
+    warning: "border-white/10 bg-[var(--surface-raised)]",
+    danger: "border-[color:rgba(182,111,58,0.35)] bg-[var(--surface-raised)]",
   };
 
   const labelClasses = {
-    success: "text-[#b8b2ae]",
-    warning: "text-[#b8b2ae]",
-    danger: "text-[#fa5f1a]",
+    success: "text-[var(--text-secondary)]",
+    warning: "text-[var(--text-secondary)]",
+    danger: "text-[var(--brand-accent)]",
   };
 
   return (
@@ -359,16 +359,18 @@ function Metric({
         {value}
       </p>
 
-      <p className="mt-2 text-xs font-medium text-[#9f9793]">{description}</p>
+      <p className="mt-2 text-xs font-medium text-[var(--text-muted)]">
+        {description}
+      </p>
     </div>
   );
 }
 
 function NextActionIcon({ tone }: { tone: "warning" | "danger" | "success" }) {
   const toneClasses = {
-    warning: "text-[#f7f0f0]/70",
-    danger: "text-[#fa5f1a]",
-    success: "text-[#f7f0f0]/70",
+    warning: "text-[var(--text-secondary)]",
+    danger: "text-[var(--brand-accent)]",
+    success: "text-[var(--text-secondary)]",
   };
 
   const Icon =
@@ -389,10 +391,11 @@ function StatusPill({
   children: ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-white/12 bg-white/[0.04] text-[#f7f0f0]",
-    danger: "border-[#fa5f1a]/40 bg-[#fa5f1a]/10 text-[#f7f0f0]",
-    success: "border-white/12 bg-white/[0.04] text-[#f7f0f0]",
-    info: "border-white/12 bg-white/[0.04] text-[#d8d0cc]",
+    warning: "border-white/10 bg-white/[0.04] text-[var(--text-primary)]",
+    danger:
+      "border-[color:rgba(182,111,58,0.4)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]",
+    success: "border-white/10 bg-white/[0.04] text-[var(--text-primary)]",
+    info: "border-white/10 bg-white/[0.04] text-[var(--text-secondary)]",
   };
 
   return (

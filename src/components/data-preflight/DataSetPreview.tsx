@@ -68,10 +68,10 @@ export function DataSetPreview({
 
   return (
     <section
-      className={`rounded-2xl border border-[#34373d] ${
+      className={`rounded-2xl border border-white/10 ${
         embedded
           ? `p-2.5 ${getEmbeddedToneClasses(tone)}`
-          : "bg-[#171a20] p-4 shadow-xl shadow-black/20"
+          : "bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
       }`}
     >
       <div className="flex w-full flex-wrap items-start justify-between gap-2.5">
@@ -81,11 +81,14 @@ export function DataSetPreview({
           className="min-w-0 flex-1 text-left"
         >
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-[#f7f0f0]">{title}</h3>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+              {title}
+            </h3>
+
             <CountBadge tone={tone} count={items.length} />
           </div>
 
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-[#8f969f]">
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--text-muted)]">
             {description}
           </p>
         </button>
@@ -95,7 +98,7 @@ export function DataSetPreview({
             <select
               value={sortMode}
               onChange={(event) => setSortMode(event.target.value as SortMode)}
-              className="rounded-full border border-[#34373d] bg-[#252525] px-3 py-1.5 text-[10px] font-medium text-[#d0d4da] outline-none transition hover:border-[#fa5f1a]/45 focus:border-[#fa5f1a]/60"
+              className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] outline-none transition hover:border-[color:rgba(182,111,58,0.45)] focus:border-[color:rgba(182,111,58,0.6)]"
             >
               <option value="priority">Sort: priority</option>
               <option value="status">Sort: status</option>
@@ -107,7 +110,7 @@ export function DataSetPreview({
           <button
             type="button"
             onClick={onToggle}
-            className="rounded-full border border-[#34373d] bg-[#252525] px-3 py-1.5 text-[10px] font-medium text-[#d0d4da] transition hover:border-[#fa5f1a]/45 hover:bg-[#2f2f2f] hover:text-white"
+            className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-base)] hover:text-[var(--text-primary)]"
           >
             {isOpen ? "Collapse" : "Expand"}
           </button>
@@ -116,7 +119,7 @@ export function DataSetPreview({
 
       {isOpen &&
         (items.length === 0 ? (
-          <p className="mt-3 rounded-xl border border-[#34373d] bg-[#1c2027] p-3 text-sm text-[#8f969f]">
+          <p className="mt-3 rounded-xl border border-white/10 bg-[var(--surface-raised)] p-3 text-sm text-[var(--text-muted)]">
             {emptyMessage}
           </p>
         ) : (
@@ -148,8 +151,8 @@ export function DataSetPreview({
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-[#fa5f1a]/45 bg-[#fa5f1a]/10 ring-1 ring-[#fa5f1a]/20"
-                        : `${getRowToneClasses(item.priority)} hover:border-[#fa5f1a]/35 hover:bg-[#252525]`
+                        ? "border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.12)] ring-1 ring-[rgba(182,111,58,0.22)]"
+                        : `${getRowToneClasses(item.priority)} hover:border-[color:rgba(182,111,58,0.35)] hover:bg-[var(--surface-base)]`
                     }`}
                   >
                     <div className="grid gap-2 xl:grid-cols-[1fr_auto] xl:items-start">
@@ -157,7 +160,7 @@ export function DataSetPreview({
                         <div className="flex flex-wrap items-center gap-1.5">
                           <PriorityBadge priority={item.priority} />
 
-                          <span className="rounded-full bg-[#111318] px-2 py-0.5 text-[10px] font-medium text-[#8f969f]">
+                          <span className="rounded-full bg-[var(--surface-deep)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)]">
                             Row {item.rowIndex}
                           </span>
 
@@ -169,16 +172,16 @@ export function DataSetPreview({
                         </div>
 
                         <div className="mt-1.5">
-                          <p className="truncate text-sm font-semibold text-[#f7f0f0]">
+                          <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
                             {item.row.invoice_number ||
                               "Missing invoice number"}
                           </p>
 
-                          <p className="truncate text-xs text-[#d0d4da]">
+                          <p className="truncate text-xs text-[var(--text-secondary)]">
                             {item.row.company || "Missing company"}
                           </p>
 
-                          <p className="truncate text-[11px] text-[#8f969f]">
+                          <p className="truncate text-[11px] text-[var(--text-muted)]">
                             {item.row.email || "Missing email"}
                           </p>
                         </div>
@@ -192,7 +195,7 @@ export function DataSetPreview({
                               event.stopPropagation();
                               onViewDetails(item.rowIndex);
                             }}
-                            className="rounded-full border border-[#34373d] bg-[#111318] px-3 py-1.5 text-[10px] font-medium text-[#d0d4da] transition hover:border-[#fa5f1a]/45 hover:bg-[#fa5f1a]/10 hover:text-white"
+                            className="rounded-full border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[rgba(182,111,58,0.1)] hover:text-[var(--text-primary)]"
                           >
                             Details
                           </button>
@@ -227,19 +230,19 @@ export function DataSetPreview({
                     )}
 
                     {isSelected && (
-                      <div className="mt-1.5 rounded-lg border border-[#34373d] bg-[#111318] p-2">
+                      <div className="mt-1.5 rounded-lg border border-white/10 bg-[var(--surface-deep)] p-2">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#fa5f1a]">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent)]">
                               Review action
                             </p>
 
-                            <p className="mt-0.5 text-sm font-medium text-[#f7f0f0]">
+                            <p className="mt-0.5 text-sm font-medium text-[var(--text-primary)]">
                               {item.actionLabel}
                             </p>
                           </div>
 
-                          <span className="rounded-full border border-[#fa5f1a]/25 bg-[#fa5f1a]/10 px-2 py-0.5 text-[10px] font-medium text-[#f7f0f0]">
+                          <span className="rounded-full border border-[color:rgba(182,111,58,0.28)] bg-[rgba(182,111,58,0.1)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-primary)]">
                             {item.priorityScore} score
                           </span>
                         </div>
@@ -254,7 +257,7 @@ export function DataSetPreview({
                             ))}
 
                             {item.issues.length > 3 && (
-                              <p className="text-xs text-[#8f969f]">
+                              <p className="text-xs text-[var(--text-muted)]">
                                 +{item.issues.length - 3} more issue
                                 {item.issues.length - 3 === 1 ? "" : "s"}
                               </p>
@@ -275,12 +278,12 @@ export function DataSetPreview({
 
 function ReviewDataPoint({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-[#111318] px-2 py-1.5">
-      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#8f969f]">
+    <div className="rounded-lg bg-[var(--surface-deep)] px-2 py-1.5">
+      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
         {label}
       </p>
 
-      <p className="mt-0.5 truncate text-xs font-medium text-[#d0d4da]">
+      <p className="mt-0.5 truncate text-xs font-medium text-[var(--text-secondary)]">
         {value}
       </p>
     </div>
@@ -300,25 +303,30 @@ function MainIssueInline({
     <div
       className={`mt-1 rounded-lg border px-2 py-1 text-xs ${
         isCritical
-          ? "border-[#fa5f1a]/30 bg-[#fa5f1a]/10"
-          : "border-[#fa5f1a]/18 bg-[#fa5f1a]/6"
+          ? "border-[color:rgba(182,111,58,0.32)] bg-[rgba(182,111,58,0.11)]"
+          : "border-[color:rgba(182,111,58,0.2)] bg-[rgba(182,111,58,0.07)]"
       }`}
     >
       <div className="flex min-w-0 flex-wrap items-center gap-2">
         <span
           className={`h-1.5 w-1.5 rounded-full ${
-            isCritical ? "bg-[#fa5f1a]" : "bg-[#fa5f1a]/70"
+            isCritical
+              ? "bg-[var(--brand-accent)]"
+              : "bg-[rgba(182,111,58,0.7)]"
           }`}
         />
 
-        <span className="font-semibold text-[#f7f0f0]">{issue.problem}</span>
+        <span className="font-semibold text-[var(--text-primary)]">
+          {issue.problem}
+        </span>
 
         {selected && (
           <>
-            <span className="text-[#8f969f]">·</span>
+            <span className="text-[var(--text-muted)]">·</span>
 
-            <span className="text-[#9ca3af]">
-              Fix: <span className="text-[#d0d4da]">{issue.fix}</span>
+            <span className="text-[var(--text-muted)]">
+              Fix:{" "}
+              <span className="text-[var(--text-secondary)]">{issue.fix}</span>
             </span>
           </>
         )}
@@ -335,24 +343,26 @@ function IssueSummaryLine({
   const isCritical = issue.severity === "critical";
 
   return (
-    <div className="grid gap-2 rounded-lg bg-[#1c2027] px-2 py-1.5 sm:grid-cols-[105px_1fr]">
+    <div className="grid gap-2 rounded-lg bg-[var(--surface-raised)] px-2 py-1.5 sm:grid-cols-[105px_1fr]">
       <div className="flex flex-wrap items-center gap-1.5">
         <span
           className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
             isCritical
-              ? "border border-[#fa5f1a]/30 bg-[#fa5f1a]/10 text-[#f7f0f0]"
-              : "border border-white/10 bg-white/[0.04] text-[#d0d4da]"
+              ? "border border-[color:rgba(182,111,58,0.32)] bg-[rgba(182,111,58,0.11)] text-[var(--text-primary)]"
+              : "border border-white/10 bg-white/[0.04] text-[var(--text-secondary)]"
           }`}
         >
           {issue.severity}
         </span>
 
-        <span className="text-[10px] text-[#8f969f]">{issue.field}</span>
+        <span className="text-[10px] text-[var(--text-muted)]">
+          {issue.field}
+        </span>
       </div>
 
-      <p className="text-xs leading-5 text-[#d0d4da]">
-        <span className="text-[#f7f0f0]">{issue.problem}</span>{" "}
-        <span className="text-[#8f969f]">·</span> {issue.fix}
+      <p className="text-xs leading-5 text-[var(--text-secondary)]">
+        <span className="text-[var(--text-primary)]">{issue.problem}</span>{" "}
+        <span className="text-[var(--text-muted)]">·</span> {issue.fix}
       </p>
     </div>
   );
@@ -366,9 +376,12 @@ function CountBadge({
   count: number;
 }) {
   const toneClasses = {
-    danger: "border border-[#fa5f1a]/35 bg-[#fa5f1a]/10 text-[#f7f0f0]",
-    warning: "border border-[#fa5f1a]/22 bg-[#fa5f1a]/8 text-[#f7f0f0]",
-    neutral: "border border-white/10 bg-white/[0.04] text-[#f7f0f0]",
+    danger:
+      "border border-[color:rgba(182,111,58,0.35)] bg-[rgba(182,111,58,0.11)] text-[var(--text-primary)]",
+    warning:
+      "border border-[color:rgba(182,111,58,0.24)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
+    neutral:
+      "border border-white/10 bg-white/[0.04] text-[var(--text-primary)]",
   };
 
   return (
@@ -380,28 +393,20 @@ function CountBadge({
   );
 }
 
-function getEmbeddedToneClasses(tone: "neutral" | "danger" | "warning") {
-  if (tone === "danger") {
-    return "bg-[#171a20]";
-  }
-
-  if (tone === "warning") {
-    return "bg-[#171a20]";
-  }
-
-  return "bg-[#171a20]";
+function getEmbeddedToneClasses(_tone: "neutral" | "danger" | "warning") {
+  return "bg-[var(--surface-base)]";
 }
 
 function getRowToneClasses(priority: InvoicePriority) {
   if (priority === "critical" || priority === "high") {
-    return "border-[#fa5f1a]/30 bg-[#252525]";
+    return "border-[color:rgba(182,111,58,0.28)] bg-[var(--surface-raised)]";
   }
 
   if (priority === "medium" || priority === "low") {
-    return "border-[#34373d] bg-[#252525]";
+    return "border-white/10 bg-[var(--surface-raised)]";
   }
 
-  return "border-[#34373d] bg-[#252525]";
+  return "border-white/10 bg-[var(--surface-raised)]";
 }
 
 function getStatusPriority(status: string | undefined) {
@@ -411,11 +416,14 @@ function getStatusPriority(status: string | undefined) {
 
 function PriorityBadge({ priority }: { priority: InvoicePriority }) {
   const priorityClasses: Record<InvoicePriority, string> = {
-    critical: "border border-[#fa5f1a]/35 bg-[#fa5f1a]/12 text-[#f7f0f0]",
-    high: "border border-[#fa5f1a]/25 bg-[#fa5f1a]/10 text-[#f7f0f0]",
-    medium: "border border-white/10 bg-white/[0.04] text-[#d0d4da]",
-    low: "border border-white/10 bg-white/[0.04] text-[#d0d4da]",
-    clear: "border border-white/10 bg-white/[0.04] text-[#d0d4da]",
+    critical:
+      "border border-[color:rgba(182,111,58,0.35)] bg-[rgba(182,111,58,0.12)] text-[var(--text-primary)]",
+    high: "border border-[color:rgba(182,111,58,0.28)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]",
+    medium:
+      "border border-white/10 bg-white/[0.04] text-[var(--text-secondary)]",
+    low: "border border-white/10 bg-white/[0.04] text-[var(--text-secondary)]",
+    clear:
+      "border border-white/10 bg-white/[0.04] text-[var(--text-secondary)]",
   };
 
   const labels: Record<InvoicePriority, string> = {
@@ -446,7 +454,7 @@ function IssueBadge({
 }) {
   if (totalCount === 0) {
     return (
-      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-[#d0d4da]">
+      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]">
         Ready
       </span>
     );
@@ -454,7 +462,7 @@ function IssueBadge({
 
   if (criticalCount > 0) {
     return (
-      <span className="rounded-full border border-[#fa5f1a]/30 bg-[#fa5f1a]/10 px-2 py-0.5 text-[10px] font-medium text-[#f7f0f0]">
+      <span className="rounded-full border border-[color:rgba(182,111,58,0.32)] bg-[rgba(182,111,58,0.11)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-primary)]">
         {criticalCount} critical
         {totalCount > criticalCount ? ` · ${totalCount}` : ""}
       </span>
@@ -462,7 +470,7 @@ function IssueBadge({
   }
 
   return (
-    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-[#d0d4da]">
+    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]">
       {warningCount} warning{warningCount === 1 ? "" : "s"}
     </span>
   );
