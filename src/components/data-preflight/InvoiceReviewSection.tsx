@@ -123,16 +123,16 @@ export function InvoiceReviewSection({
   return (
     <section
       id="invoice-review-workspace"
-      className="rounded-[1.5rem] border border-slate-700/40 bg-slate-900/55 p-4 shadow-xl shadow-black/20 backdrop-blur-xl"
+      className="rounded-[1.5rem] border border-[#34373d] bg-[#171a20] p-4 shadow-xl shadow-black/20"
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-700/40 pb-3">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#34373d] pb-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#fa5f1a]">
             Review workspace
           </p>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-slate-50">
+            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[#f7f0f0]">
               Invoice review
             </h2>
 
@@ -141,7 +141,7 @@ export function InvoiceReviewSection({
             </StatusPill>
           </div>
 
-          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-400">
+          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-[#d0d4da]">
             Review the most important category first. Fix blocked invoices,
             check warnings, then export clean rows.
           </p>
@@ -152,8 +152,8 @@ export function InvoiceReviewSection({
           onClick={onToggleBlockedFilter}
           className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
             showOnlyBlocked
-              ? "border-rose-400/25 bg-slate-950/35 text-rose-100"
-              : "border-slate-700/70 bg-slate-950/30 text-slate-400 hover:border-slate-500/70 hover:bg-slate-800/70 hover:text-slate-100"
+              ? "border-[#fa5f1a]/45 bg-[#fa5f1a]/10 text-[#f7f0f0]"
+              : "border-[#34373d] bg-[#1c2027] text-[#d0d4da] hover:border-[#fa5f1a]/45 hover:bg-[#252525] hover:text-white"
           }`}
         >
           {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
@@ -162,7 +162,7 @@ export function InvoiceReviewSection({
 
       {totalReviewItems > 0 ? (
         <>
-          <div className="mt-3 grid gap-2 rounded-2xl border border-slate-700/40 bg-slate-950/25 p-2 sm:grid-cols-3">
+          <div className="mt-3 grid gap-2 rounded-2xl border border-[#34373d] bg-[#111318] p-2 sm:grid-cols-3">
             <ReviewTabButton
               label="Blocked"
               description="Fix first"
@@ -212,12 +212,12 @@ export function InvoiceReviewSection({
           </div>
         </>
       ) : (
-        <div className="mt-3 rounded-2xl border border-slate-700/35 bg-slate-950/25 p-4">
-          <p className="text-sm font-medium text-slate-300">
+        <div className="mt-3 rounded-2xl border border-[#34373d] bg-[#1c2027] p-4">
+          <p className="text-sm font-medium text-[#f7f0f0]">
             No invoices ready for review.
           </p>
 
-          <p className="mt-1 text-xs leading-5 text-slate-500">
+          <p className="mt-1 text-xs leading-5 text-[#9ca3af]">
             Upload and map invoice data to start the review workflow.
           </p>
         </div>
@@ -280,21 +280,21 @@ function ReviewTabButton({
   onClick: () => void;
 }) {
   const activeToneClasses = {
-    danger: "border-rose-400/32 bg-slate-950/35 text-rose-50",
-    warning: "border-amber-300/28 bg-slate-950/35 text-amber-50",
-    success: "border-emerald-300/24 bg-slate-950/35 text-emerald-50",
+    danger: "border-[#fa5f1a]/45 bg-[#252525] text-[#f7f0f0]",
+    warning: "border-[#fa5f1a]/25 bg-[#252525] text-[#f7f0f0]",
+    success: "border-[#34373d] bg-[#252525] text-[#f7f0f0]",
   };
 
   const countToneClasses = {
-    danger: "text-rose-100",
-    warning: "text-amber-100",
-    success: "text-emerald-100",
+    danger: "text-[#f7f0f0]",
+    warning: "text-[#f7f0f0]",
+    success: "text-[#f7f0f0]",
   };
 
   const iconToneClasses = {
-    danger: "text-rose-200/75",
-    warning: "text-amber-200/75",
-    success: "text-emerald-200/75",
+    danger: "text-[#fa5f1a]",
+    warning: "text-[#fa5f1a]/80",
+    success: "text-[#d0d4da]",
   };
 
   return (
@@ -304,17 +304,13 @@ function ReviewTabButton({
       className={`rounded-xl border px-3 py-2 text-left transition ${
         active
           ? activeToneClasses[tone]
-          : "border-transparent bg-transparent text-slate-500 hover:border-slate-700/50 hover:bg-slate-900/50 hover:text-slate-200"
+          : "border-transparent bg-transparent text-[#8f969f] hover:border-[#34373d] hover:bg-[#1c2027] hover:text-[#f7f0f0]"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <span
-              className={active ? iconToneClasses[tone] : iconToneClasses[tone]}
-            >
-              {icon}
-            </span>
+            <span className={iconToneClasses[tone]}>{icon}</span>
             <p className="text-sm font-semibold leading-none">{label}</p>
           </div>
 
@@ -324,9 +320,7 @@ function ReviewTabButton({
         </div>
 
         <p
-          className={`text-xl font-semibold leading-none tracking-tight ${
-            active ? countToneClasses[tone] : countToneClasses[tone]
-          }`}
+          className={`text-xl font-semibold leading-none tracking-tight ${countToneClasses[tone]}`}
         >
           {count}
         </p>
@@ -343,10 +337,10 @@ function StatusPill({
   children: React.ReactNode;
 }) {
   const toneClasses = {
-    warning: "border-amber-300/22 bg-slate-950/35 text-amber-100",
-    danger: "border-rose-400/22 bg-slate-950/35 text-rose-100",
-    success: "border-emerald-300/20 bg-slate-950/35 text-emerald-100",
-    neutral: "border-slate-500/30 bg-slate-700/25 text-slate-300",
+    warning: "border-[#fa5f1a]/25 bg-[#fa5f1a]/8 text-[#f7f0f0]",
+    danger: "border-[#fa5f1a]/40 bg-[#fa5f1a]/10 text-[#f7f0f0]",
+    success: "border-[#34373d] bg-white/[0.04] text-[#f7f0f0]",
+    neutral: "border-[#34373d] bg-white/[0.04] text-[#d0d4da]",
   };
 
   return (

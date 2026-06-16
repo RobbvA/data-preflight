@@ -47,15 +47,15 @@ export function BlockedInvoiceDetail({
   );
 
   return (
-    <section className="rounded-[1.5rem] bg-slate-900/55 p-4 shadow-xl shadow-black/15 backdrop-blur-xl">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800/70 pb-4">
+    <section className="rounded-[1.5rem] border border-[#34373d] bg-[#171a20] p-4 shadow-xl shadow-black/20">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#34373d] pb-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#fa5f1a]">
             Inspection mode
           </p>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-semibold tracking-tight text-slate-50">
+            <h2 className="text-xl font-semibold tracking-tight text-[#f7f0f0]">
               Invoice detail
             </h2>
 
@@ -64,13 +64,13 @@ export function BlockedInvoiceDetail({
             </StatusPill>
           </div>
 
-          <p className="mt-1.5 text-xs leading-5 text-slate-500">
+          <p className="mt-1.5 text-xs leading-5 text-[#9ca3af]">
             Row{" "}
-            <span className="font-medium text-slate-200">
+            <span className="font-medium text-[#f7f0f0]">
               {selectedInvoice.rowIndex}
             </span>{" "}
             ·{" "}
-            <span className="font-medium text-slate-200">
+            <span className="font-medium text-[#f7f0f0]">
               {selectedInvoice.issues.length}
             </span>{" "}
             detected issue
@@ -79,18 +79,18 @@ export function BlockedInvoiceDetail({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-slate-950/30 px-2.5 py-1 text-[11px] font-medium text-slate-400">
+          <span className="rounded-full bg-[#111318] px-2.5 py-1 text-[11px] font-medium text-[#d0d4da]">
             {selectedInvoice.actionLabel}
           </span>
 
-          <span className="rounded-full border border-cyan-300/15 bg-slate-950/35 px-2.5 py-1 text-[11px] font-semibold text-cyan-100">
+          <span className="rounded-full border border-[#fa5f1a]/35 bg-[#fa5f1a]/10 px-2.5 py-1 text-[11px] font-semibold text-[#f7f0f0]">
             Priority {selectedInvoice.priorityScore}
           </span>
 
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-slate-700/70 bg-slate-950/40 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:border-slate-500 hover:bg-slate-800/70 hover:text-slate-100"
+            className="rounded-full border border-[#34373d] bg-[#1c2027] px-3 py-1.5 text-xs font-medium text-[#d0d4da] transition hover:border-[#fa5f1a]/45 hover:bg-[#252525] hover:text-white"
           >
             Close
           </button>
@@ -98,14 +98,14 @@ export function BlockedInvoiceDetail({
       </div>
 
       {primaryIssue && (
-        <div className="mt-4 rounded-2xl border border-rose-400/24 bg-slate-950/28 p-3.5">
+        <div className="mt-4 rounded-2xl border border-[#fa5f1a]/35 bg-[#1c2027] p-3.5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#fa5f1a]">
                 Primary review focus
               </p>
 
-              <h3 className="mt-1.5 text-lg font-semibold text-slate-50">
+              <h3 className="mt-1.5 text-lg font-semibold text-[#f7f0f0]">
                 {primaryIssue.problem}
               </h3>
             </div>
@@ -113,16 +113,16 @@ export function BlockedInvoiceDetail({
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                 primaryIssue.severity === "critical"
-                  ? "bg-rose-400/[0.14] text-rose-50"
-                  : "bg-amber-300/[0.12] text-amber-50"
+                  ? "bg-[#fa5f1a]/12 text-[#f7f0f0]"
+                  : "bg-white/[0.06] text-[#f7f0f0]"
               }`}
             >
               {primaryIssue.severity}
             </span>
           </div>
 
-          <p className="mt-2 rounded-lg border border-rose-400/14 bg-rose-400/[0.045] px-3 py-2 text-xs leading-5 text-slate-300">
-            <span className="font-medium text-slate-100">Fix:</span>{" "}
+          <p className="mt-2 rounded-lg border border-[#fa5f1a]/25 bg-[#fa5f1a]/8 px-3 py-2 text-xs leading-5 text-[#d0d4da]">
+            <span className="font-medium text-[#f7f0f0]">Fix:</span>{" "}
             {primaryIssue.fix}
           </p>
         </div>
@@ -130,19 +130,19 @@ export function BlockedInvoiceDetail({
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[0.66fr_1.34fr]">
         <div className="space-y-3">
-          <div className="rounded-2xl border border-slate-800/60 bg-slate-950/18 p-3">
+          <div className="rounded-2xl border border-[#34373d] bg-[#1c2027] p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-slate-200">
+                <h3 className="text-sm font-semibold text-[#f7f0f0]">
                   Operational summary
                 </h3>
 
-                <p className="mt-1 text-xs leading-5 text-slate-600">
+                <p className="mt-1 text-xs leading-5 text-[#8f969f]">
                   Import decision and review priority.
                 </p>
               </div>
 
-              <span className="rounded-full bg-slate-900/60 px-2 py-0.5 text-[10px] text-slate-500">
+              <span className="rounded-full bg-[#111318] px-2 py-0.5 text-[10px] text-[#9ca3af]">
                 row {selectedInvoice.rowIndex}
               </span>
             </div>
@@ -188,13 +188,13 @@ export function BlockedInvoiceDetail({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-800/60 bg-slate-950/18 p-3">
+          <div className="rounded-2xl border border-[#34373d] bg-[#1c2027] p-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-200">
+              <h3 className="text-sm font-semibold text-[#f7f0f0]">
                 Key invoice fields
               </h3>
 
-              <p className="mt-1 text-xs leading-5 text-slate-600">
+              <p className="mt-1 text-xs leading-5 text-[#8f969f]">
                 Most relevant mapped fields for review.
               </p>
             </div>
@@ -206,8 +206,8 @@ export function BlockedInvoiceDetail({
             </dl>
 
             {remainingFieldEntries.length > 0 && (
-              <details className="mt-3 rounded-xl bg-slate-900/30 px-3 py-2">
-                <summary className="cursor-pointer text-xs font-medium text-slate-400 transition hover:text-slate-200">
+              <details className="mt-3 rounded-xl bg-[#111318] px-3 py-2">
+                <summary className="cursor-pointer text-xs font-medium text-[#d0d4da] transition hover:text-white">
                   Show all normalized fields
                 </summary>
 
@@ -225,14 +225,14 @@ export function BlockedInvoiceDetail({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-700/35 bg-slate-950/25 p-3.5">
+        <div className="rounded-2xl border border-[#34373d] bg-[#1c2027] p-3.5">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-base font-semibold text-slate-100">
+              <h3 className="text-base font-semibold text-[#f7f0f0]">
                 Issue explanations
               </h3>
 
-              <p className="mt-1 text-xs leading-5 text-slate-500">
+              <p className="mt-1 text-xs leading-5 text-[#8f969f]">
                 Review risks and fixes for detected issues.
               </p>
             </div>
@@ -240,8 +240,8 @@ export function BlockedInvoiceDetail({
             <span
               className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
                 hasIssues
-                  ? "bg-slate-950/35 text-amber-100"
-                  : "bg-slate-950/35 text-emerald-100"
+                  ? "bg-[#fa5f1a]/10 text-[#f7f0f0]"
+                  : "bg-white/[0.06] text-[#f7f0f0]"
               }`}
             >
               {hasIssues
@@ -263,12 +263,12 @@ export function BlockedInvoiceDetail({
               ))}
             </div>
           ) : (
-            <div className="rounded-xl bg-slate-950/30 p-3.5">
-              <p className="text-sm font-medium text-emerald-100">
+            <div className="rounded-xl bg-[#111318] p-3.5">
+              <p className="text-sm font-medium text-[#f7f0f0]">
                 No issues detected for this row.
               </p>
 
-              <p className="mt-1 text-xs leading-5 text-slate-400">
+              <p className="mt-1 text-xs leading-5 text-[#d0d4da]">
                 This invoice is currently import-ready based on the mapped and
                 normalized fields.
               </p>
@@ -294,39 +294,39 @@ function IssueExplanationCard({
       className={`rounded-xl border p-3 ${
         primary
           ? issue.severity === "critical"
-            ? "border-rose-400/24 bg-slate-950/30"
-            : "border-amber-300/20 bg-slate-950/28"
+            ? "border-[#fa5f1a]/35 bg-[#252525]"
+            : "border-[#fa5f1a]/22 bg-[#252525]"
           : issue.severity === "critical"
-            ? "border-rose-400/14 bg-slate-950/24"
-            : "border-amber-300/12 bg-slate-950/24"
+            ? "border-[#fa5f1a]/22 bg-[#252525]"
+            : "border-[#34373d] bg-[#252525]"
       }`}
     >
       <div className="flex flex-wrap items-center gap-1.5">
         <span
           className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
             issue.severity === "critical"
-              ? "bg-rose-400/[0.12] text-rose-50"
-              : "bg-amber-300/[0.1] text-amber-50"
+              ? "bg-[#fa5f1a]/14 text-[#f7f0f0]"
+              : "bg-white/[0.06] text-[#d0d4da]"
           }`}
         >
           {issue.severity}
         </span>
 
-        <span className="rounded-full bg-slate-950/45 px-2 py-0.5 text-[9px] text-slate-500">
+        <span className="rounded-full bg-[#111318] px-2 py-0.5 text-[9px] text-[#9ca3af]">
           {issue.field}
         </span>
 
-        <span className="rounded-full bg-slate-950/45 px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-slate-400">
+        <span className="rounded-full bg-[#111318] px-2 py-0.5 text-[9px] font-medium uppercase tracking-[0.06em] text-[#d0d4da]">
           {formatRiskLabel(issue.risk)}
         </span>
 
-        <span className="rounded-full bg-slate-950/45 px-2 py-0.5 text-[9px] text-slate-500">
+        <span className="rounded-full bg-[#111318] px-2 py-0.5 text-[9px] text-[#9ca3af]">
           {formatIssueType(issue.type)}
         </span>
       </div>
 
       <h4
-        className={`mt-2 font-semibold text-slate-50 ${primary ? "text-base" : "text-sm"}`}
+        className={`mt-2 font-semibold text-[#f7f0f0] ${primary ? "text-base" : "text-sm"}`}
       >
         {issue.problem}
       </h4>
@@ -336,13 +336,13 @@ function IssueExplanationCard({
         <ExplanationLine label="Fix" value={issue.fix} stronger />
       </div>
 
-      <details className="mt-2 rounded-lg bg-slate-950/22 px-3 py-2">
-        <summary className="cursor-pointer text-[11px] font-medium text-slate-500 transition hover:text-slate-300">
+      <details className="mt-2 rounded-lg bg-[#111318] px-3 py-2">
+        <summary className="cursor-pointer text-[11px] font-medium text-[#9ca3af] transition hover:text-[#f7f0f0]">
           Show explanation
         </summary>
 
-        <p className="mt-2 text-xs leading-5 text-slate-400">
-          <span className="font-medium text-slate-200">Why:</span> {issue.why}
+        <p className="mt-2 text-xs leading-5 text-[#d0d4da]">
+          <span className="font-medium text-[#f7f0f0]">Why:</span> {issue.why}
         </p>
       </details>
     </article>
@@ -362,23 +362,23 @@ function ExplanationLine({
     <p
       className={`rounded-lg px-3 py-2 text-xs leading-5 ${
         stronger
-          ? "border border-rose-400/12 bg-rose-400/[0.035] text-slate-200"
-          : "bg-slate-950/25 text-slate-500"
+          ? "border border-[#fa5f1a]/22 bg-[#fa5f1a]/8 text-[#d0d4da]"
+          : "bg-[#111318] text-[#d0d4da]"
       }`}
     >
-      <span className="font-medium text-slate-200">{label}:</span> {value}
+      <span className="font-medium text-[#f7f0f0]">{label}:</span> {value}
     </p>
   );
 }
 
 function DataField({ label, value }: { label: string; value: unknown }) {
   return (
-    <div className="grid gap-2 rounded-lg bg-slate-900/30 px-3 py-2 sm:grid-cols-[118px_1fr]">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.08em] text-slate-600">
+    <div className="grid gap-2 rounded-lg bg-[#111318] px-3 py-2 sm:grid-cols-[118px_1fr]">
+      <dt className="text-[10px] font-medium uppercase tracking-[0.08em] text-[#8f969f]">
         {label}
       </dt>
 
-      <dd className="min-w-0 break-words text-xs font-medium text-slate-300">
+      <dd className="min-w-0 break-words text-xs font-medium text-[#d0d4da]">
         {String(value || "—")}
       </dd>
     </div>
@@ -395,15 +395,15 @@ function SummaryItem({
   tone: "danger" | "warning" | "success" | "neutral";
 }) {
   const toneClasses = {
-    danger: "text-rose-100",
-    warning: "text-amber-100",
-    success: "text-emerald-100",
-    neutral: "text-slate-300",
+    danger: "text-[#f7f0f0]",
+    warning: "text-[#f7f0f0]",
+    success: "text-[#f7f0f0]",
+    neutral: "text-[#d0d4da]",
   };
 
   return (
-    <div className="grid gap-2 rounded-lg bg-slate-900/30 px-3 py-2 sm:grid-cols-[82px_1fr]">
-      <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-slate-600">
+    <div className="grid gap-2 rounded-lg bg-[#111318] px-3 py-2 sm:grid-cols-[82px_1fr]">
+      <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[#8f969f]">
         {label}
       </p>
 
@@ -424,10 +424,10 @@ function StatusPill({
   children: React.ReactNode;
 }) {
   const toneClasses = {
-    danger: "bg-slate-950/35 text-rose-100",
-    warning: "bg-slate-950/35 text-amber-100",
-    success: "bg-slate-950/35 text-emerald-100",
-    neutral: "bg-slate-700/25 text-slate-300",
+    danger: "border border-[#fa5f1a]/35 bg-[#fa5f1a]/10 text-[#f7f0f0]",
+    warning: "border border-[#fa5f1a]/22 bg-[#fa5f1a]/8 text-[#f7f0f0]",
+    success: "border border-white/10 bg-white/[0.04] text-[#f7f0f0]",
+    neutral: "border border-white/10 bg-white/[0.04] text-[#d0d4da]",
   };
 
   return (
