@@ -372,36 +372,6 @@ export function CsvUploader() {
                   Trusted business data before import. Review the analysis
                   summary first, then inspect only the rows that need action.
                 </p>
-
-                {parsedDataSet && (
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-white/10 bg-[var(--surface-base)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                      {parsedDataSet.rowCount} invoices detected
-                    </span>
-
-                    <span className="rounded-full border border-white/10 bg-[var(--surface-base)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                      {sourceType.toUpperCase()} source
-                    </span>
-
-                    {parsedDataSet.metadata?.sheetName && (
-                      <span className="rounded-full border border-white/10 bg-[var(--surface-base)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                        Sheet: {parsedDataSet.metadata.sheetName}
-                      </span>
-                    )}
-
-                    {parsedDataSet.metadata?.sheetCount &&
-                      parsedDataSet.metadata.sheetCount > 1 && (
-                        <span className="rounded-full border border-white/10 bg-[var(--surface-base)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                          {parsedDataSet.metadata.sheetCount} sheets detected
-                        </span>
-                      )}
-
-                    <span className="rounded-full border border-white/10 bg-[var(--surface-base)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                      {headers.length} mapped header
-                      {headers.length === 1 ? "" : "s"}
-                    </span>
-                  </div>
-                )}
               </div>
 
               <UploadSection

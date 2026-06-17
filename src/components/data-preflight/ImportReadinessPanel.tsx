@@ -72,29 +72,22 @@ export function ImportReadinessPanel({
   });
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-[var(--surface-base)] p-6 shadow-xl shadow-black/20">
+    <section className="rounded-[2rem] border border-white/10 bg-[var(--surface-base)] p-5 shadow-xl shadow-black/20">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--brand-accent)]">
             Control center
           </p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h2 className="text-[1.7rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
+          <div className="mt-1.5 flex flex-wrap items-center gap-3">
+            <h2 className="text-[1.55rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
               {totalInvoices} invoices analysed
             </h2>
 
             <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
-
-            {criticalCount > 0 && (
-              <StatusPill tone="danger">
-                {criticalCount} critical issue
-                {criticalCount === 1 ? "" : "s"}
-              </StatusPill>
-            )}
           </div>
 
-          <p className="mt-2 max-w-3xl text-[0.93rem] leading-6 text-[var(--text-secondary)]">
+          <p className="mt-1.5 max-w-3xl text-[0.9rem] leading-6 text-[var(--text-secondary)]">
             {importReadinessMessage}
           </p>
         </div>
@@ -114,7 +107,25 @@ export function ImportReadinessPanel({
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-3">
+      {criticalCount > 0 && (
+        <div className="mt-4 rounded-2xl border border-[color:rgba(182,111,58,0.35)] bg-[rgba(182,111,58,0.08)] px-4 py-2.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-[var(--brand-accent)]" />
+
+            <p className="text-sm font-semibold text-[var(--text-primary)]">
+              {criticalCount} critical issue
+              {criticalCount === 1 ? "" : "s"} currently block clean export.
+            </p>
+          </div>
+
+          <p className="mt-0.5 text-xs leading-5 text-[var(--text-secondary)]">
+            Start with blocked invoices before reviewing warnings or exporting
+            clean rows.
+          </p>
+        </div>
+      )}
+
+      <div className="mt-4 grid gap-2.5 md:grid-cols-3">
         <Metric
           label="Blocked"
           value={blockedCount}
@@ -140,25 +151,33 @@ export function ImportReadinessPanel({
         />
       </div>
 
-      <div className="mt-5 grid gap-4 xl:grid-cols-[1fr_280px]">
+      <div className="mt-4 grid gap-3 xl:grid-cols-[1fr_280px]">
         <div
-          className={`rounded-3xl border p-4 ${
+          className={`rounded-3xl border px-4 py-3 ${
             isBlocked
-              ? "border-[color:rgba(182,111,58,0.28)] bg-[var(--surface-raised)]"
+              ? "border-[color:rgba(182,111,58,0.34)] bg-[var(--surface-raised)]"
               : hasWarnings
-                ? "border-white/10 bg-[var(--surface-raised)]"
+                ? "border-[color:rgba(182,111,58,0.2)] bg-[var(--surface-raised)]"
                 : "border-white/10 bg-[var(--surface-raised)]"
           }`}
         >
           <div className="flex items-center gap-2">
-            <NextActionIcon tone={statusTone} />
+            <span
+              className={`flex h-8 w-8 items-center justify-center rounded-xl border ${getNextActionIconFrame(
+                statusTone,
+              )}`}
+            >
+              <NextActionIcon tone={statusTone} />
+            </span>
 
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-              Next action
-            </p>
+            <div>
+              <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-[var(--brand-accent)]">
+                Next action
+              </p>
+            </div>
           </div>
 
-          <p className="mt-2 text-[1.25rem] font-semibold leading-snug tracking-tight text-[var(--text-primary)]">
+          <p className="mt-2 max-w-3xl text-[1.32rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
             {nextAction.title}
           </p>
 
@@ -205,7 +224,7 @@ export function ImportReadinessPanel({
             {exportSafetyMessage}
           </p>
 
-          <div className="mt-4 grid gap-2">
+          <div className="mt-3 grid gap-2">
             <button
               type="button"
               onClick={() =>
@@ -325,24 +344,32 @@ function Metric({
 
   const iconClasses = {
     success: "text-[var(--text-secondary)]",
-    warning: "text-[var(--text-secondary)]",
+    warning: "text-[var(--brand-accent-soft)]",
     danger: "text-[var(--brand-accent)]",
   };
 
   const surfaceClasses = {
-    success: "border-white/10 bg-[var(--surface-raised)]",
-    warning: "border-white/10 bg-[var(--surface-raised)]",
-    danger: "border-[color:rgba(182,111,58,0.35)] bg-[var(--surface-raised)]",
+    success:
+      "border-[color:rgba(120,180,120,0.25)] bg-[rgba(120,180,120,0.06)]",
+    warning:
+      "border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.09)]",
+    danger: "border-[color:rgba(182,111,58,0.50)] bg-[rgba(182,111,58,0.12)]",
   };
 
   const labelClasses = {
     success: "text-[var(--text-secondary)]",
-    warning: "text-[var(--text-secondary)]",
+    warning: "text-[var(--brand-accent-soft)]",
     danger: "text-[var(--brand-accent)]",
   };
 
+  const valueClasses = {
+    success: "text-[2.2rem]",
+    warning: "text-[2.35rem]",
+    danger: "text-[2.5rem]",
+  };
+
   return (
-    <div className={`rounded-2xl border p-4 ${surfaceClasses[tone]}`}>
+    <div className={`rounded-2xl border px-4 py-3 ${surfaceClasses[tone]}`}>
       <div className="flex items-center justify-between gap-3">
         <p
           className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${labelClasses[tone]}`}
@@ -354,21 +381,31 @@ function Metric({
       </div>
 
       <p
-        className={`mt-2 text-[2.75rem] font-semibold leading-none tracking-tight ${toneClasses[tone]}`}
+        className={`mt-1.5 font-semibold leading-none tracking-tight ${toneClasses[tone]} ${valueClasses[tone]}`}
       >
         {value}
       </p>
 
-      <p className="mt-2 text-xs font-medium text-[var(--text-muted)]">
+      <p className="mt-1.5 text-xs font-medium text-[var(--text-muted)]">
         {description}
       </p>
     </div>
   );
 }
 
+function getNextActionIconFrame(tone: "warning" | "danger" | "success") {
+  const toneClasses = {
+    warning: "border-[color:rgba(209,154,106,0.28)] bg-[rgba(182,111,58,0.08)]",
+    danger: "border-[color:rgba(182,111,58,0.38)] bg-[rgba(182,111,58,0.12)]",
+    success: "border-white/10 bg-white/[0.04]",
+  };
+
+  return toneClasses[tone];
+}
+
 function NextActionIcon({ tone }: { tone: "warning" | "danger" | "success" }) {
   const toneClasses = {
-    warning: "text-[var(--text-secondary)]",
+    warning: "text-[var(--brand-accent-soft)]",
     danger: "text-[var(--brand-accent)]",
     success: "text-[var(--text-secondary)]",
   };
