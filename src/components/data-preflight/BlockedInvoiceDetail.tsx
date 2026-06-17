@@ -98,14 +98,14 @@ export function BlockedInvoiceDetail({
       </div>
 
       {primaryIssue && (
-        <div className="mt-4 rounded-2xl border border-[color:rgba(182,111,58,0.35)] bg-[var(--surface-raised)] p-3.5">
+        <div className="mt-4 rounded-2xl border border-[color:rgba(182,111,58,0.4)] bg-[rgba(182,111,58,0.07)] p-3.5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                 Primary review focus
               </p>
 
-              <h3 className="mt-1.5 text-lg font-semibold text-[var(--text-primary)]">
+              <h3 className="mt-1.5 text-[1.35rem] font-semibold leading-tight text-[var(--text-primary)]">
                 {primaryIssue.problem}
               </h3>
             </div>
@@ -113,7 +113,7 @@ export function BlockedInvoiceDetail({
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                 primaryIssue.severity === "critical"
-                  ? "bg-[rgba(182,111,58,0.12)] text-[var(--text-primary)]"
+                  ? "bg-[rgba(182,111,58,0.14)] text-[var(--text-primary)]"
                   : "bg-white/[0.04] text-[var(--text-primary)]"
               }`}
             >
@@ -121,10 +121,15 @@ export function BlockedInvoiceDetail({
             </span>
           </div>
 
-          <p className="mt-2 rounded-lg border border-[color:rgba(182,111,58,0.25)] bg-[rgba(182,111,58,0.08)] px-3 py-2 text-xs leading-5 text-[var(--text-secondary)]">
-            <span className="font-medium text-[var(--text-primary)]">Fix:</span>{" "}
-            {primaryIssue.fix}
-          </p>
+          <div className="mt-3 rounded-xl border border-[color:rgba(182,111,58,0.28)] bg-[rgba(182,111,58,0.1)] px-3 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-accent)]">
+              Recommended fix
+            </p>
+
+            <p className="mt-1 text-sm leading-5 text-[var(--text-primary)]">
+              {primaryIssue.fix}
+            </p>
+          </div>
         </div>
       )}
 
@@ -294,8 +299,8 @@ function IssueExplanationCard({
       className={`rounded-xl border p-3 ${
         primary
           ? issue.severity === "critical"
-            ? "border-[color:rgba(182,111,58,0.35)] bg-[var(--surface-base)]"
-            : "border-[color:rgba(182,111,58,0.22)] bg-[var(--surface-base)]"
+            ? "border-[color:rgba(182,111,58,0.38)] bg-[rgba(182,111,58,0.06)]"
+            : "border-[color:rgba(182,111,58,0.24)] bg-[var(--surface-base)]"
           : issue.severity === "critical"
             ? "border-[color:rgba(182,111,58,0.22)] bg-[var(--surface-base)]"
             : "border-white/10 bg-[var(--surface-base)]"
@@ -326,16 +331,16 @@ function IssueExplanationCard({
       </div>
 
       <h4
-        className={`mt-2 font-semibold text-[var(--text-primary)] ${
-          primary ? "text-base" : "text-sm"
+        className={`mt-2 font-semibold leading-tight text-[var(--text-primary)] ${
+          primary ? "text-[1.05rem]" : "text-sm"
         }`}
       >
         {issue.problem}
       </h4>
 
       <div className="mt-2 grid gap-1.5">
-        <ExplanationLine label="Risk" value={impact} />
         <ExplanationLine label="Fix" value={issue.fix} stronger />
+        <ExplanationLine label="Risk" value={impact} />
       </div>
 
       <details className="mt-2 rounded-lg bg-[var(--surface-deep)] px-3 py-2">
@@ -365,11 +370,17 @@ function ExplanationLine({
     <p
       className={`rounded-lg px-3 py-2 text-xs leading-5 ${
         stronger
-          ? "border border-[color:rgba(182,111,58,0.22)] bg-[rgba(182,111,58,0.08)] text-[var(--text-secondary)]"
+          ? "border border-[color:rgba(182,111,58,0.28)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]"
           : "bg-[var(--surface-deep)] text-[var(--text-secondary)]"
       }`}
     >
-      <span className="font-medium text-[var(--text-primary)]">{label}:</span>{" "}
+      <span
+        className={`font-semibold ${
+          stronger ? "text-[var(--brand-accent)]" : "text-[var(--text-primary)]"
+        }`}
+      >
+        {label}:
+      </span>{" "}
       {value}
     </p>
   );

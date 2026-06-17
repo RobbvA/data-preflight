@@ -281,23 +281,29 @@ function ReviewTabButton({
 }) {
   const activeToneClasses = {
     danger:
-      "border-[color:rgba(182,111,58,0.45)] bg-[var(--surface-raised)] text-[var(--text-primary)]",
+      "border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
     warning:
-      "border-[color:rgba(182,111,58,0.28)] bg-[var(--surface-raised)] text-[var(--text-primary)]",
+      "border-[color:rgba(209,154,106,0.32)] bg-[rgba(209,154,106,0.06)] text-[var(--text-primary)]",
     success:
-      "border-white/10 bg-[var(--surface-raised)] text-[var(--text-primary)]",
+      "border-[color:rgba(120,180,120,0.24)] bg-[rgba(120,180,120,0.045)] text-[var(--text-primary)]",
   };
 
   const countToneClasses = {
     danger: "text-[var(--text-primary)]",
     warning: "text-[var(--text-primary)]",
-    success: "text-[var(--text-primary)]",
+    success: "text-[var(--text-secondary)]",
   };
 
   const iconToneClasses = {
     danger: "text-[var(--brand-accent)]",
     warning: "text-[var(--brand-accent-soft)]",
     success: "text-[var(--text-secondary)]",
+  };
+
+  const countSizeClasses = {
+    danger: "text-[1.45rem]",
+    warning: "text-[1.3rem]",
+    success: "text-xl",
   };
 
   return (
@@ -323,7 +329,7 @@ function ReviewTabButton({
         </div>
 
         <p
-          className={`text-xl font-semibold leading-none tracking-tight ${countToneClasses[tone]}`}
+          className={`font-semibold leading-none tracking-tight ${countToneClasses[tone]} ${countSizeClasses[tone]}`}
         >
           {count}
         </p>
