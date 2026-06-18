@@ -10,6 +10,21 @@ type UploadSectionProps = {
 const ACCEPTED_SOURCE_TYPES =
   ".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
+const DEMO_FILES = [
+  {
+    label: "Clean demo",
+    href: "/demo-data/clean-invoices.csv",
+  },
+  {
+    label: "Messy demo",
+    href: "/demo-data/messy-export.csv",
+  },
+  {
+    label: "High-risk demo",
+    href: "/demo-data/high-risk-invoices.csv",
+  },
+];
+
 export function UploadSection({
   fileName,
   isLoading,
@@ -104,6 +119,30 @@ export function UploadSection({
             planned for later.
           </p>
         )}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange-200/70">
+          Test safely
+        </p>
+
+        <p className="mt-1.5 text-sm leading-6 text-stone-400">
+          Want to try DataPreflight without using real company data? Download a
+          demo file first and upload it above.
+        </p>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {DEMO_FILES.map((file) => (
+            <a
+              key={file.href}
+              href={file.href}
+              download
+              className="rounded-full border border-orange-300/20 bg-orange-300/[0.06] px-3 py-1.5 text-xs font-medium text-orange-100 transition hover:border-orange-300/40 hover:bg-orange-300/[0.1]"
+            >
+              {file.label}
+            </a>
+          ))}
+        </div>
       </div>
 
       {error && (

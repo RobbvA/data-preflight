@@ -1,0 +1,5 @@
+Invoice No,Customer,Email Address,Total,VAT Amount,State,Country,Invoice Date,Due Date,Currency
+INV-2001,Northwind BV,finance@northwind.nl,1200,252,ready,NL,2026-06-01,2026-06-30,EUR
+INV-2002,Acme GmbH,billing@acme.de,850,500,pending,DE,2026-06-02,2026-07-02,EUR
+INV-2003,Blue Ocean Ltd,wrong-email,1450,304.5,sent,GB,2026-06-03,2026-07-03,GBP
+INV-2004,Globex Corp,finance@globex.com,-300,63,paid,US,2026-06-04,2026-07-04,USD
