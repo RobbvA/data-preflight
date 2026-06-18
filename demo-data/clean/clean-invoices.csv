@@ -1,0 +1,4 @@
+invoice_number,company,email,amount,vat,status,country,invoice_date,due_date,currency
+INV-1001,Northwind BV,finance@northwind.nl,1200,252,ready,NL,2026-06-01,2026-06-30,EUR
+INV-1002,Acme GmbH,billing@acme.de,850,178.5,ready,DE,2026-06-02,2026-07-02,EUR
+INV-1003,Blue Ocean Ltd,accounts@blueocean.co.uk,1450,304.5,ready,GB,2026-06-03,2026-07-03,GBP

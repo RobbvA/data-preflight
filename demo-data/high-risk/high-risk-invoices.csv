@@ -1,0 +1,5 @@
+invoice_number,company,email,amount,vat,status,country,invoice_date,due_date,currency
+INV-3001,Northwind BV,finance@northwind.nl,1200,252,ready,NL,2026-06-01,2026-06-30,EUR
+INV-3001,Northwind BV,finance@northwind.nl,1200,252,ready,NL,2026-06-01,2026-06-30,EUR
+,Acme GmbH,billing@acme.de,850,178.5,pending,DE,2026-06-02,2026-07-02,EUR
+INV-3004,Globex Corp,not-an-email,0,500,unknown,XX,2026-06-04,2026-05-01,ABC
