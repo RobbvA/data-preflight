@@ -62,7 +62,6 @@ export function CsvUploader() {
   const headers = useMemo(() => parsedDataSet?.headers ?? [], [parsedDataSet]);
 
   const fileName = parsedDataSet?.fileName ?? "";
-  const sourceType = parsedDataSet?.sourceType ?? "csv";
 
   useEffect(() => {
     if (!selectedDetailRowIndex || !detailRef.current) return;
@@ -439,6 +438,16 @@ export function CsvUploader() {
         <ProductFooter />
       </div>
 
+      {hasUploadedRows && (
+        <FloatingExportButton
+          canExport={canExport}
+          cleanRows={validationResult.cleanRows}
+          issues={validationResult.issues}
+          onDownloadCleanCsv={downloadCsv}
+          onDownloadErrorCsv={downloadErrorCsv}
+        />
+      )}
+
       {hasHeaders && !isFieldMappingOpen && (
         <button
           type="button"
@@ -526,6 +535,42 @@ export function CsvUploader() {
         </div>
       )}
     </main>
+  );
+}
+
+function FloatingExportButton({
+  canExport,
+  cleanRows,
+  issues,
+  onDownloadCleanCsv,
+  onDownloadErrorCsv,
+}: {
+  canExport: boolean;
+  cleanRows: ParsedRow[];
+  issues: ValidationIssue[];
+  onDownloadCleanCsv: (filename: string, rows: ParsedRow[]) => void;
+  onDownloadErrorCsv: (filename: string, issues: ValidationIssue[]) => void;
+}) {
+  return (
+    <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-2 rounded-2xl border border-white/10 bg-[var(--surface-base)]/95 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+      <button
+        type="button"
+        onClick={() => onDownloadCleanCsv("clean-invoices.csv", cleanRows)}
+        disabled={!canExport}
+        className="rounded-xl bg-[var(--brand-accent)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
+      >
+        Export clean CSV
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
+        disabled={issues.length === 0}
+        className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2 text-xs font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
+      >
+        Issue report
+      </button>
+    </div>
   );
 }
 
