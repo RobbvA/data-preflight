@@ -83,3 +83,29 @@ Focus:
 Expected outcome:
 
 DataPreflight should feel like a single product rather than a landing page attached to an older application.
+
+2026-06-18
+
+Completed
+
+- Deployed DataPreflight to Vercel
+- MVP publicly available
+- Added floating export actions
+- Export workflow refinement
+- Control Center hierarchy polish
+- Review Workspace hierarchy polish
+- Inspection Mode hierarchy polish
+
+Key Milestone
+
+DataPreflight MVP is now live.
+
+URL
+
+https://data-preflight.vercel.app/
+
+Next Phase
+
+✅ Milestone 4 Complete
+
+Milestone 5 — MVP Validation & User Feedback

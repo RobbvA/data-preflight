@@ -187,7 +187,22 @@ Deliverables:
 
 ## Milestone 5 — Validation Review Pass
 
-Status: Planned
+Milestone 5 — MVP Validation
+
+Goals
+
+- Deploy completed
+- Outreach campaign
+- User feedback collection
+- Demo dataset testing
+- Real-world workflow validation
+- Identify highest-value improvements
+
+Success Criteria
+
+- First external testers
+- First feedback collected
+- Clear priority list for next milestone
 
 ### Ideas
 

@@ -12,23 +12,31 @@ Trusted business data before import.
 
 Status:
 
-🟢 MVP Functioneel Compleet
+🟢 MVP Live
+
+🟢 Public Deployment Complete
+
+🟢 Outreach Ready
+
+Live URL:
+
+https://data-preflight.vercel.app/
 
 ---
 
 ## Current Milestone
 
-Milestone 4 — Design System & Brand Exploration
+Milestone 5 — MVP Validation & User Feedback
 
 Current Subphase:
 
-Milestone 4.7 — Brand Exploration Pass
+Milestone 5.1 — Outreach Preparation
 
 ---
 
 ## Recently Completed
 
-### Design System
+### Milestone 4 — Design System & Brand Exploration
 
 ✅ 4.1 Typography Hierarchy Pass
 
@@ -36,27 +44,65 @@ Milestone 4.7 — Brand Exploration Pass
 
 ✅ 4.3 Detail Density Pass
 
-✅ 4.4 Spacing Hierarchy Pass (eerste pass)
+✅ 4.4 Spacing Hierarchy Pass
 
-### Workflow
+✅ 4.5 Card Hierarchy Pass
 
-✅ Control Center hierarchy refinement
+✅ 4.6 Status Hierarchy Pass
 
-✅ Invoice card density improvements
+✅ 4.7 Brand Exploration Pass
 
-✅ Inspection Mode density improvements
+### Brand System
 
-### Platform
+✅ DataPreflight visual identity established
+
+✅ Black / Orange / Off-white design language
+
+✅ Landing Page redesign
+
+✅ Control Center redesign
+
+✅ Review Workspace redesign
+
+✅ Inspection Mode redesign
+
+✅ Configuration Layer redesign
+
+✅ Brand consistency pass completed
+
+### Product Workflow
 
 ✅ CSV Support
 
 ✅ Excel Support
 
+✅ Field Mapping
+
+✅ Normalization Layer
+
+✅ Validation Engine
+
 ✅ Explainability Layer
 
 ✅ Review Workspace
 
+✅ Inspection Mode
+
 ✅ Trusted Export
+
+✅ Floating Export Actions
+
+### Deployment
+
+✅ Production build successful
+
+✅ GitHub repository updated
+
+✅ Vercel deployment completed
+
+✅ Public URL available
+
+✅ End-to-end workflow validated
 
 ### Documentation
 
@@ -68,53 +114,43 @@ Milestone 4.7 — Brand Exploration Pass
 
 ✅ SESSION_LOG.md
 
-### Brand Exploration
-
-✅ Hero redesign
-
-✅ Product positioning update
-
-✅ DataPreflight identity introduced
-
-✅ Black / Orange / Off-white brand foundation
-
-✅ Control Center brand pass
-
-✅ Inspection Mode brand pass
-
-⏳ Review Workspace brand migration (in progress)
-
 ---
 
 ## Current Focus
 
-Brand Consistency
+MVP Validation
 
-Current observation:
+Current objective:
 
-Landing Page now feels like DataPreflight.
+Get the first real users and collect feedback from actual workflows.
 
-Review Workspace still contains remnants of the old blue/cyan design language.
+The focus has shifted from building to validation.
 
-Goal:
+The goal is no longer adding features.
 
-Create a single visual identity across the entire product.
+The goal is learning what users actually need.
 
 ---
 
 ## Next Step
 
-Complete Brand Migration Pass
+Milestone 5.1 — Outreach Preparation
 
 Focus:
 
-- DataSetPreview.tsx
-- InvoiceReviewSection.tsx
-- BlockedInvoiceDetail.tsx
-- Remaining cyan/slate removal
-- Consistent surfaces
-- Consistent borders
-- Consistent accent usage
+- Final MVP testing
+- Demo dataset validation
+- Export validation
+- First user outreach
+- Feedback collection
+- Identify highest-value improvements
+
+Success Criteria:
+
+- First external testers
+- First feedback received
+- First real-world usage scenarios
+- Clear priorities for Milestone 6
 
 ---
 
@@ -126,6 +162,10 @@ Lint: 🟢 Green
 
 Git: 🟢 Green
 
+Deployment: 🟢 Green
+
+Production URL: 🟢 Live
+
 ---
 
 ## Known Technical Debt
@@ -133,14 +173,16 @@ Git: 🟢 Green
 ### UX
 
 - Inspection Mode visibility controls
-- Explainability collapsing
+- Explainability collapsing improvements
 - Review density optimization
-- Large invoice cards
+- Mobile validation pass
 
 ### Testing
 
 - Excel edge-case validation campaign
+- Export validation campaign
 - Demo dataset validation campaign
+- Cross-browser testing
 
 ### Product
 
@@ -158,6 +200,21 @@ Not currently in scope:
 - Multi Dataset Workspace
 - PDF Support
 - OCR Support
+- AI Extraction
 - Direct Integrations
 
-Single-file workflow remains priority.
+Single-file workflow remains the priority until real user feedback indicates otherwise.
+
+---
+
+## Key Milestone Achieved
+
+June 2026
+
+DataPreflight successfully transitioned from local prototype to publicly accessible MVP.
+
+The platform is now ready for external validation and feedback collection.
+
+Current stage:
+
+Build → Validate → Learn

@@ -200,3 +200,8 @@ A user should be able to upload a dataset and determine within minutes:
 - How to resolve each issue
 
 without needing technical knowledge.
+
+Current Product Stage
+
+Live MVP
+Public validation phase
