@@ -1,6 +1,9 @@
 import type { ParsedRow } from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
 
+const CSV_DELIMITER = ";";
+const UTF8_BOM = "\uFEFF";
+
 export type ExportBlockerSummary = {
   type: ValidationIssue["type"];
   field: string;
@@ -15,13 +18,19 @@ export function downloadCsv(filename: string, rows: ParsedRow[]) {
 
   const headers = getStableHeaders(rows);
   const csvRows = [
-    headers.map(escapeCsvValue).join(","),
+    headers.map(escapeCsvValue).join(CSV_DELIMITER),
     ...rows.map((row) =>
-      headers.map((header) => escapeCsvValue(row[header] ?? "")).join(","),
+      headers
+        .map((header) => escapeCsvValue(row[header] ?? ""))
+        .join(CSV_DELIMITER),
     ),
   ];
 
-  downloadFile(filename, csvRows.join("\n"), "text/csv;charset=utf-8");
+  downloadFile(
+    filename,
+    `${UTF8_BOM}${csvRows.join("\n")}`,
+    "text/csv;charset=utf-8",
+  );
 }
 
 export function downloadErrorCsv(filename: string, issues: ValidationIssue[]) {
@@ -41,7 +50,7 @@ export function downloadErrorCsv(filename: string, issues: ValidationIssue[]) {
   ];
 
   const csvRows = [
-    headers.map(escapeCsvValue).join(","),
+    headers.map(escapeCsvValue).join(CSV_DELIMITER),
     ...issues.map((issue) =>
       [
         issue.rowIndex,
@@ -56,11 +65,15 @@ export function downloadErrorCsv(filename: string, issues: ValidationIssue[]) {
         getIssueExportDecision(issue),
       ]
         .map((value) => escapeCsvValue(String(value)))
-        .join(","),
+        .join(CSV_DELIMITER),
     ),
   ];
 
-  downloadFile(filename, csvRows.join("\n"), "text/csv;charset=utf-8");
+  downloadFile(
+    filename,
+    `${UTF8_BOM}${csvRows.join("\n")}`,
+    "text/csv;charset=utf-8",
+  );
 }
 
 export function getExportBlockerSummaries(
