@@ -121,23 +121,23 @@ export function UploadSection({
         )}
       </div>
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-orange-200/70">
-          Test safely
+      <div className="mt-4 rounded-2xl border border-[rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.08)] p-4 shadow-lg shadow-black/15">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d19a6a]">
+          Test safely with demo files
         </p>
 
-        <p className="mt-1.5 text-sm leading-6 text-stone-400">
-          Want to try DataPreflight without using real company data? Download a
-          demo file first and upload it above.
+        <p className="mt-2 text-sm font-medium leading-6 text-[#f1ece4]">
+          No real company data needed. Download a demo file and upload it above
+          to experience the complete DataPreflight workflow.
         </p>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {DEMO_FILES.map((file) => (
             <a
               key={file.href}
               href={file.href}
               download
-              className="rounded-full border border-orange-300/20 bg-orange-300/[0.06] px-3 py-1.5 text-xs font-medium text-orange-100 transition hover:border-orange-300/40 hover:bg-orange-300/[0.1]"
+              className="rounded-xl border border-[rgba(209,154,106,0.38)] bg-[rgba(209,154,106,0.14)] px-4 py-2 text-sm font-semibold text-[#f1ece4] transition hover:border-[rgba(209,154,106,0.6)] hover:bg-[rgba(209,154,106,0.2)]"
             >
               {file.label}
             </a>
