@@ -99,13 +99,22 @@ export function UploadSection({
       </div>
 
       <div className="mt-6 rounded-2xl border border-dashed border-orange-300/24 bg-orange-300/[0.045] p-5">
-        <input
-          type="file"
-          accept={ACCEPTED_SOURCE_TYPES}
-          onChange={onFileChange}
-          disabled={isLoading}
-          className="block w-full cursor-pointer text-sm text-stone-300 file:mr-4 file:cursor-pointer file:rounded-xl file:border-0 file:bg-[#d19a6a] file:px-5 file:py-2.5 file:text-sm file:font-semibold file:text-[#0a0907] file:transition hover:file:bg-[#f1c49b] disabled:cursor-not-allowed disabled:opacity-50"
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="cursor-pointer rounded-xl border-0 bg-[#d19a6a] px-5 py-2.5 text-sm font-semibold text-[#0a0907] transition hover:bg-[#f1c49b]">
+            Choose file
+            <input
+              type="file"
+              accept={ACCEPTED_SOURCE_TYPES}
+              onChange={onFileChange}
+              disabled={isLoading}
+              className="hidden"
+            />
+          </label>
+
+          <span className="text-sm font-medium text-stone-300">
+            {fileName || "No file selected"}
+          </span>
+        </div>
 
         {isLoading && (
           <p className="mt-3 text-sm font-medium text-orange-100/90">
