@@ -1,88 +1,60 @@
 # DataPreflight Project Status
 
-## Product
+# Product
 
 DataPreflight
 
-Business Data Quality Control Platform
+ERP Data Validation Platform
 
-Core Promise:
+Core Promise
 
 Trusted business data before import.
 
-Status:
+---
 
-🟢 MVP Live
+# Current Status
+
+🟢 Live MVP
 
 🟢 Public Deployment Complete
 
-🟢 Outreach Ready
+🟢 Industry Validation Completed
 
-Live URL:
+🟢 Product Direction Validated
+
+Live Demo
 
 https://data-preflight.vercel.app/
 
 ---
 
-## Current Milestone
+# Current Milestone
 
-Milestone 5 — MVP Validation & User Feedback
+Milestone 5 — Validated Product Direction
 
-Current Subphase:
+Current Sprint
 
-Milestone 5.1 — Outreach Preparation
+Sprint 5.1 — Product Positioning
 
 ---
 
-## Recently Completed
+# Major Milestones Completed
 
-### Milestone 4 — Design System & Brand Exploration
-
-✅ 4.1 Typography Hierarchy Pass
-
-✅ 4.2 Review Density Pass
-
-✅ 4.3 Detail Density Pass
-
-✅ 4.4 Spacing Hierarchy Pass
-
-✅ 4.5 Card Hierarchy Pass
-
-✅ 4.6 Status Hierarchy Pass
-
-✅ 4.7 Brand Exploration Pass
-
-### Brand System
-
-✅ DataPreflight visual identity established
-
-✅ Black / Orange / Off-white design language
-
-✅ Landing Page redesign
-
-✅ Control Center redesign
-
-✅ Review Workspace redesign
-
-✅ Inspection Mode redesign
-
-✅ Configuration Layer redesign
-
-✅ Brand consistency pass completed
-
-### Product Workflow
+## Product Foundation
 
 ✅ CSV Support
 
 ✅ Excel Support
 
-✅ Field Mapping
+✅ ParsedDataSet Architecture
 
-✅ Normalization Layer
+✅ Mapping Engine
+
+✅ Normalization Engine
 
 ✅ Validation Engine
 
-✅ Explainability Layer
+✅ Explainability Engine
 
 ✅ Review Workspace
 
@@ -90,131 +62,195 @@ Milestone 5.1 — Outreach Preparation
 
 ✅ Trusted Export
 
-✅ Floating Export Actions
+---
 
-### Deployment
+## Design System
 
-✅ Production build successful
+✅ Typography hierarchy
 
-✅ GitHub repository updated
+✅ Review density improvements
 
-✅ Vercel deployment completed
+✅ Inspection Mode improvements
 
-✅ Public URL available
+✅ Card hierarchy
 
-✅ End-to-end workflow validated
+✅ Brand exploration
 
-### Documentation
-
-✅ PROJECT_STATUS.md
-
-✅ ROADMAP.md
-
-✅ PRODUCT_VISION.md
-
-✅ SESSION_LOG.md
+✅ Orange / Black / Off-white identity
 
 ---
 
-## Current Focus
+## Deployment
 
-MVP Validation
+✅ Production build
 
-Current objective:
+✅ GitHub repository
 
-Get the first real users and collect feedback from actual workflows.
+✅ Vercel deployment
 
-The focus has shifted from building to validation.
-
-The goal is no longer adding features.
-
-The goal is learning what users actually need.
+✅ Public demo available
 
 ---
 
-## Next Step
+## Validation Phase
 
-Milestone 5.1 — Outreach Preparation
+Completed
 
-Focus:
+Collected feedback from:
 
-- Final MVP testing
-- Demo dataset validation
-- Export validation
-- First user outreach
-- Feedback collection
-- Identify highest-value improvements
+- ERP professionals
+- Data migration specialists
+- Business analysts
+- Developers
 
-Success Criteria:
+Validated themes:
 
-- First external testers
-- First feedback received
-- First real-world usage scenarios
-- Clear priorities for Milestone 6
+✅ Product positioning
 
----
+✅ Business rules
 
-## Build Status
+✅ Explainability
 
-Build: 🟢 Green
+✅ Workflow
 
-Lint: 🟢 Green
+✅ ERP validation
 
-Git: 🟢 Green
+✅ Master data
 
-Deployment: 🟢 Green
+✅ Data migration
 
-Production URL: 🟢 Live
+These findings now define the next product direction.
 
 ---
 
-## Known Technical Debt
+# Current Focus
 
-### UX
+The focus has shifted.
 
-- Inspection Mode visibility controls
-- Explainability collapsing improvements
-- Review density optimization
-- Mobile validation pass
+Previous objective
 
-### Testing
+Build a working MVP.
 
-- Excel edge-case validation campaign
-- Export validation campaign
-- Demo dataset validation campaign
+Current objective
+
+Build a professional ERP Data Validation Platform based on validated industry feedback.
+
+Priority areas
+
+- Product positioning
+- Business rules
+- Validation architecture
+- Explainability
+- Master data foundation
+- Configurable validation
+
+---
+
+# Product Direction
+
+DataPreflight is evolving from an Invoice Validation MVP into a configurable ERP Data Validation Platform.
+
+Key principles
+
+- Trust before import
+- Explain everything
+- Workflow first
+- Business logic over technical validation
+- Configurable validation profiles
+
+---
+
+# Build Status
+
+Build
+
+🟢 Green
+
+Lint
+
+🟢 Green
+
+Git
+
+🟢 Green
+
+Deployment
+
+🟢 Live
+
+---
+
+# Known Technical Debt
+
+## UX
+
+- Inspection workflow improvements
+- Review density improvements
+- Mobile optimization
+
+## Validation
+
+- Configurable rule engine
+- ERP validation profiles
+- Business rule expansion
+- Explainability improvements
+
+## Testing
+
+- Excel edge cases
+- Demo dataset expansion
 - Cross-browser testing
 
-### Product
-
-- Saved mappings
-- Batch processing
-- Multi dataset workflow
-
 ---
 
-## Future Considerations
+# Out of Scope
 
-Not currently in scope:
+The following remain intentionally postponed:
 
 - Batch Processing
 - Multi Dataset Workspace
-- PDF Support
-- OCR Support
-- AI Extraction
-- Direct Integrations
+- SQL Imports
+- XML Imports
+- PDF
+- OCR
+- ERP integrations
+- AI-assisted validation
 
-Single-file workflow remains the priority until real user feedback indicates otherwise.
+These features will only be considered after the validation workflow is mature and trusted.
 
 ---
 
-## Key Milestone Achieved
+# Latest Industry Insights
 
-June 2026
+Industry feedback consistently highlighted:
 
-DataPreflight successfully transitioned from local prototype to publicly accessible MVP.
+- Product positioning needs to be sharper.
+- Business logic creates the real value.
+- Explainability builds trust.
+- Master data offers significant opportunities.
+- ERP-specific validation is highly valuable.
+- Data migration is a promising long-term market.
 
-The platform is now ready for external validation and feedback collection.
+These insights now guide all future development.
 
-Current stage:
+---
 
-Build → Validate → Learn
+# Current Stage
+
+Build
+
+↓
+
+Validate
+
+↓
+
+Learn
+
+↓
+
+Rebuild from validated feedback
+
+↓
+
+Grow

@@ -1,10 +1,12 @@
 # DataPreflight Roadmap
 
-## Milestone 1 — Upload & Parsing
+---
 
-Status: Completed
+# Milestone 1 — Upload & Parsing
 
-### Scope
+Status: ✅ Completed
+
+## Scope
 
 - CSV Upload
 - CSV Parsing
@@ -13,11 +15,11 @@ Status: Completed
 
 ---
 
-## Milestone 2 — Mapping Platform
+# Milestone 2 — Mapping Platform
 
-Status: Completed
+Status: ✅ Completed
 
-### Scope
+## Scope
 
 - Invoice Profile
 - Synonym Engine
@@ -27,11 +29,11 @@ Status: Completed
 
 ---
 
-## Milestone 3 — Validation Platform
+# Milestone 3 — Validation Platform
 
-Status: Completed
+Status: ✅ Completed
 
-### Scope
+## Scope
 
 - Normalization Engine
 - Validation Engine
@@ -42,207 +44,338 @@ Status: Completed
 
 ---
 
-## Milestone 3.7 — Excel Support
+# Milestone 3.7 — Excel Support
 
-Status: Functionally Completed
+Status: ✅ Completed
 
-### Completed
+## Completed
 
 - Excel Upload
 - Excel Parsing
 - Excel Adapter
 - Excel Integration
-- Build Green
-- Lint Green
-- Git Green
+- Public Release
 
-### Future Quality Improvements
+Future improvements
 
-- Excel Edge Cases
-- Sheet Validation
-- Metadata Improvements
-- Workflow Polish
+- Excel edge cases
+- Sheet metadata
+- Import metadata
+- Workflow polish
 
 ---
 
-## Milestone 4 — Design System Pass
+# Milestone 4 — Design System & MVP
 
-Status: Active
+Status: ✅ Completed
 
-### 4.0 Documentation Foundation
+## Completed
 
-Status: Active
-
-#### Scope
+### Documentation Foundation
 
 - PROJECT_STATUS.md
-- ROADMAP.md
 - PRODUCT_VISION.md
+- ROADMAP.md
 - SESSION_LOG.md
 
----
+### Design System
 
-### 4.1 Typography Hierarchy Pass
+- Typography hierarchy
+- Density improvements
+- Card hierarchy
+- Spacing system
+- Status hierarchy
+- Brand exploration
 
-Status: Completed
+### Branding
 
----
+- Orange / Black / Off-white identity
+- Landing Page redesign
+- Review Workspace redesign
+- Inspection Mode redesign
+- Configuration Layer redesign
 
-### 4.2 Review Density Pass
+### Demo Strategy
 
-Status: First Pass Completed
-
----
-
-### 4.3 Detail Density Pass
-
-Status: First Pass Completed
-
----
-
-### 4.4 Spacing Hierarchy Pass
-
-Status: Planned
-
-#### Focus
-
-- Control Center
-- Review Workspace
-- Inspection Mode
-- Consistent Vertical Rhythm
-- Consistent Padding System
-
----
-
-### 4.5 Card Hierarchy Pass
-
-Status: Planned
-
-#### Focus
-
-- Control Center Priority
-- Review Priority
-- Inspection Priority
-- Visual Weight
-
----
-
-### 4.6 Status Hierarchy Pass
-
-Status: Planned
-
-#### Focus
-
-- Blocked
-- Need Review
-- Ready
-
----
-
-### 4.7 Brand Exploration
-
-Status: Planned
-
-#### Variants
-
-- Current Cyan
-- Dark + Orange
-- Dark + Orange + Off-white
-
----
-
-### 4.8 Icon System
-
-Status: Planned
-
----
-
-### 4.9 Micro Interactions
-
-Status: Planned
-
----
-
-### 4.4.4 Demo Data Strategy
-
-Goal:
-
-Create reusable demo datasets that demonstrate:
+Created reusable datasets for:
 
 - Clean imports
-- Mixed quality imports
+- Mixed imports
 - High-risk imports
-- Mapping problems
-- Regional compliance problems
-- Duplicate invoices
-- Financial reporting issues
+- Mapping failures
+- Regional compliance
 
-Deliverables:
+---
 
-- Demo Dataset A — Clean
-- Demo Dataset B — Mixed
-- Demo Dataset C — High Risk
-- Demo Dataset D — Mapping Chaos
-- Demo Dataset E — Regional Compliance
+# Milestone 5 — Validated Product Direction
 
-## Milestone 5 — Validation Review Pass
+Status: 🟡 In Progress
 
-Milestone 5 — MVP Validation
+Purpose
+
+Build the next generation of DataPreflight based entirely on validated industry feedback.
+
+The objective is no longer to prove the MVP works.
+
+The objective is to transform the MVP into a scalable ERP Data Validation Platform.
+
+---
+
+## Sprint 5.1 — Product Positioning
+
+Status: Planned
 
 Goals
 
-- Deploy completed
-- Outreach campaign
-- User feedback collection
-- Demo dataset testing
-- Real-world workflow validation
-- Identify highest-value improvements
+- Clarify target audience
+- Clarify product positioning
+- Rewrite landing page messaging
+- Show Review Workspace on homepage
+- Promote browser privacy
+- Explain why DataPreflight exists
+- Clearly communicate business value
 
 Success Criteria
 
-- First external testers
-- First feedback collected
-- Clear priority list for next milestone
+A new visitor understands within seconds:
 
-### Ideas
-
-- Better Validation Explanations
-- Risk Scoring Improvements
-- Trust Indicators
-- Business Rule Expansion
+- What the product does
+- Who it is for
+- Why it is valuable
 
 ---
 
-## Milestone 6 — Workflow Polish
+## Sprint 5.2 — Validation Architecture
 
 Status: Planned
 
-### Ideas
+Goals
 
-- Review Workflow Improvements
-- Inspection Improvements
-- User Control Improvements
-- Explainability Controls
+Separate validation into multiple layers.
+
+Layer 1
+
+Generic validation
+
+Examples
+
+- Missing values
+- Invalid email
+- Invalid date
+- Duplicate values
+
+Layer 2
+
+Business validation
+
+Examples
+
+- Financial consistency
+- VAT logic
+- Payment terms
+- Country rules
+
+Layer 3
+
+ERP Profiles
+
+Examples
+
+- Exact Globe
+- SAP ECC
+- SAP S/4HANA
+- Microsoft Dynamics
+
+Success Criteria
+
+Validation becomes configurable rather than hardcoded.
 
 ---
 
-## Future Milestones (Out Of Scope)
+## Sprint 5.3 — Master Data Foundation
 
-### Batch Processing
+Status: Planned
 
-- Multi-file Upload
-- Upload Queue
-- Batch Review
-- Batch Export
+Goals
 
-### Multi Dataset Workspace
+Prepare DataPreflight for datasets beyond invoices.
 
-- Multiple Datasets
-- Dataset Dashboard
-- Dataset States
+First validation domains:
 
-### Additional Inputs
+- Customer
+- Vendor
+- Material
 
+Objectives
+
+- Shared validation model
+- Domain profiles
+- Business rule preparation
+
+Invoices remain fully supported.
+
+---
+
+## Sprint 5.4 — Workflow Improvements
+
+Status: Planned
+
+Focus
+
+Improve the operational workflow.
+
+Validate
+
+↓
+
+Review
+
+↓
+
+Fix
+
+↓
+
+Export
+
+Ideas
+
+- Better prioritization
+- Review improvements
+- Explainability improvements
+- Better inspection workflow
+- Improved navigation
+
+---
+
+## Sprint 5.5 — Explainability
+
+Status: Planned
+
+Goals
+
+Improve trust.
+
+Every issue should explain:
+
+- What failed
+- Why it failed
+- Business impact
+- Suggested resolution
+
+Long-term
+
+AI-assisted explanations may complement the explainability engine.
+
+---
+
+## Sprint 5.6 — Validation Profiles
+
+Status: Planned
+
+Goals
+
+Introduce configurable validation profiles.
+
+Examples
+
+Generic
+
+- CSV Validation
+
+Finance
+
+- Invoice Validation
+
+ERP
+
+- Exact Globe
+
+Future
+
+- SAP ECC
+- SAP S/4HANA
+- Dynamics
+- Oracle
+
+---
+
+# Milestone 6 — Data Migration Platform
+
+Status: Future
+
+Possible scope
+
+- XML Support
+- SQL Import
+- ERP Extracts
+- Multi-format datasets
+- Migration validation
+- Data profiling
+- Rule templates
+
+---
+
+# Milestone 7 — AI Assisted Validation
+
+Status: Future
+
+Focus
+
+AI should strengthen—not replace—the validation process.
+
+Ideas
+
+- AI explanations
+- AI recommendations
+- AI Readiness Score
+- AI workflow summaries
+- AI import risk analysis
+
+Explainability always remains the primary source of truth.
+
+---
+
+# Future Vision
+
+Possible future capabilities
+
+## Additional Inputs
+
+- XML
+- SQL
+- APIs
 - PDF
 - OCR
-- Images
+
+## Workspace
+
+- Multi Dataset Workspace
+- Batch Processing
+- Saved Projects
+
+## Validation
+
+- ERP Profiles
+- Master Data Profiles
+- Custom Business Rules
+- Validation Templates
+
+## Integrations
+
+- ERP Connectors
+- Accounting Platforms
+- Cloud Storage
+
+---
+
+# Current Focus
+
+Do not expand into additional integrations until:
+
+- Product positioning is clear.
+- Validation architecture is configurable.
+- Business rules are mature.
+- Workflow is trusted by real users.
+
+The priority is building a product that professionals trust before building a product that supports every possible data source.
