@@ -21,6 +21,7 @@ import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
 
 import { BlockedInvoiceDetail } from "@/components/data-preflight/BlockedInvoiceDetail";
 import { FieldMappingSection } from "@/components/data-preflight/FieldMappingSection";
+import { HomeProductPreview } from "@/components/data-preflight/HomeProductPreview";
 import { ImportReadinessPanel } from "@/components/data-preflight/ImportReadinessPanel";
 import { InvoiceReviewSection } from "@/components/data-preflight/InvoiceReviewSection";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
@@ -310,40 +311,28 @@ export function CsvUploader() {
 
       <div className="mx-auto max-w-[1380px] space-y-7">
         {!hasUploadedRows ? (
-          <section className="flex min-h-[calc(100vh-6rem)] items-center py-10">
-            <div className="mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-[1fr_520px] lg:items-center">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--brand-accent)]">
-                  Business data quality control
-                </p>
+          <section className="mx-auto w-full max-w-6xl py-10 lg:py-16">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-accent)]">
+                ERP data validation
+              </p>
 
-                <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
-                  DataPreflight
-                </h1>
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-5xl">
+                DataPreflight
+              </h1>
 
-                <p className="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-[var(--text-primary)] sm:text-4xl">
-                  Trusted business data before import.
-                </p>
+              <p className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-[var(--text-primary)] sm:text-4xl">
+                Catch data issues before ERP import.
+              </p>
 
-                <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--text-secondary)]">
-                  Detect risks, explain issues, and prepare clean invoice data
-                  before it enters your accounting, ERP, or operational system.
-                </p>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
+                Apply explainable business rules, review the records that need
+                attention, and export trusted data.
+              </p>
+            </div>
 
-                <div className="mt-7 grid gap-3 text-sm text-[var(--text-primary)] sm:grid-cols-2">
-                  <ValuePoint text="Detect operational risks" />
-                  <ValuePoint text="Explain data quality issues" />
-                  <ValuePoint text="Validate before import" />
-                  <ValuePoint text="Export trusted business data" />
-                </div>
-
-                <div className="mt-7 flex flex-wrap items-center gap-2">
-                  <SourcePill label="CSV" tone="active" />
-                  <SourcePill label="Excel" tone="active" />
-                  <SourcePill label="Explainable validation" tone="active" />
-                  <SourcePill label="Trusted export" tone="active" />
-                </div>
-              </div>
+            <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:gap-7">
+              <HomeProductPreview />
 
               <UploadSection
                 fileName={fileName}
@@ -360,7 +349,7 @@ export function CsvUploader() {
             <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_420px] lg:items-start">
               <div className="py-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--brand-accent)]">
-                  Business data quality control
+                  Invoice validation workspace
                 </p>
 
                 <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-5xl">
@@ -368,8 +357,8 @@ export function CsvUploader() {
                 </h1>
 
                 <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
-                  Trusted business data before import. Review the analysis
-                  summary first, then inspect only the rows that need action.
+                  Review the analysis summary, then inspect the invoice rows
+                  that need action.
                 </p>
               </div>
 
@@ -571,35 +560,6 @@ function FloatingExportButton({
         Issue report
       </button>
     </div>
-  );
-}
-
-function ValuePoint({ text }: { text: string }) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-[var(--surface-base)] px-4 py-3 text-[var(--text-primary)]">
-      <span className="mr-2 text-[var(--brand-accent)]">✓</span>
-      {text}
-    </div>
-  );
-}
-
-function SourcePill({
-  label,
-  tone = "neutral",
-}: {
-  label: string;
-  tone?: "active" | "neutral";
-}) {
-  return (
-    <span
-      className={`rounded-full border px-3 py-1 text-xs font-medium ${
-        tone === "active"
-          ? "border-[color:rgba(182,111,58,0.4)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]"
-          : "border-white/10 bg-[var(--surface-base)] text-[var(--text-secondary)]"
-      }`}
-    >
-      {label}
-    </span>
   );
 }
 
