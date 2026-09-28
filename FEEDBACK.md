@@ -507,3 +507,18 @@ Future outreach should validate:
 - Product positioning
 - Pricing
 - Real-world adoption
+
+---
+
+# 2026-09-28 — Product Interpretation (Not Interview Feedback)
+
+The following is a product decision informed by the feedback above and subsequent product analysis. It is **not** a quote or independently validated conclusion from every interviewee.
+
+- Patrick's question about alternatives and AI makes differentiation an explicit positioning problem.
+- Adem's homepage and privacy feedback supports showing the real review workflow and explaining the current browser-processing path near upload.
+- Multiple professionals emphasized business rules, explainability, and the review workflow.
+- Archana's feedback supports investigating configurable profiles and Master Data; these remain future capabilities requiring further validation.
+
+The working product thesis is a **repeatable quality gate before ERP import**, built around mapping, reusable and versioned validation profiles, controlled processing, and deterministic results. AI may assist with mapping suggestions and explanations, but should not silently replace hard business-rule decisions.
+
+Next research should test whether users value repeatable profiles and mapping configurations enough to adopt the product, and whether the proposed privacy model matches their actual requirements. The current invoice MVP does not prove demand for every proposed domain or integration.

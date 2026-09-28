@@ -1,256 +1,73 @@
 # DataPreflight Project Status
 
-# Product
+Last reviewed: 2026-09-28
 
-DataPreflight
+## Product
 
-ERP Data Validation Platform
+DataPreflight is an invoice-review MVP evolving toward a repeatable ERP data quality gate.
 
-Core Promise
+Core promise: **Trusted business data before ERP import.**
 
-Trusted business data before import.
+[Live MVP](https://data-preflight.vercel.app/) · [Product vision](PRODUCT_VISION.md) · [Roadmap](ROADMAP.md)
 
----
+## Current milestone
 
-# Current Status
+**Milestone 5 — Validated Product Direction**
 
-🟢 Live MVP
+**Sprint 5.1 — Product Positioning: in progress**
 
-🟢 Public Deployment Complete
+Milestones 1–4, the public MVP, CSV and Excel support, and the initial industry-feedback phase are complete.
 
-🟢 Industry Validation Completed
+## Available now
 
-🟢 Product Direction Validated
+- CSV, XLSX, and XLS invoice input through browser-based adapters
+- `ParsedDataSet` representation and suggested, adjustable invoice field mapping
+- Invoice normalization and deterministic invoice validation rules
+- Explainable issues with severity, business risk, and suggested fix
+- Review Workspace with blocked, needs-review, and ready categories
+- Clean invoice CSV and issue-report CSV exports
+- Public static demo files that users can download and upload
 
-Live Demo
+The homepage now has sharper ERP-import copy, an **illustrative** invoice review preview, a privacy note beside the upload, aligned cards, and a subtle green Ready state. These changes are the first part of Sprint 5.1.
 
-https://data-preflight.vercel.app/
+## Next action in Sprint 5.1
 
----
+Make it clear within seconds that DataPreflight provides a **Review Workspace**. Add a primary **Try live demo** action that loads the existing messy demo directly into the same processing flow as a user-selected file. Keep **Upload your file** as the second action and keep the privacy claim next to it.
 
-# Current Milestone
+After this, review the first viewport on desktop and mobile, update copy where needed, and validate the positioning with new visitors. Do not mark Sprint 5.1 complete before this experience is checked.
 
-Milestone 5 — Validated Product Direction
+## Product decision
 
-Current Sprint
+The differentiating direction is **file mapping + reusable validation profiles + controlled processing + repeatable results**. AI may assist with suggestions and explanations; hard validation should remain deterministic where possible. The same logical input and versioned configuration should produce the same classification.
 
-Sprint 5.1 — Product Positioning
+Privacy claims must be checked against the actual data flow of each feature. The current file-processing flow runs in the browser. Future storage, server processing, integrations, and AI providers need separate review.
 
----
+See [PRODUCT_VISION.md](PRODUCT_VISION.md) for the full decision. This direction is a product hypothesis informed by feedback; it is not a claim that every pillar was independently validated by interviewees.
 
-# Major Milestones Completed
+## Not yet available
 
-## Product Foundation
+- One-click demo loading
+- User-selectable or configurable validation profiles
+- Master Data validation domains
+- Saved mappings, profile versions, or persisted projects
+- In-app record editing
+- XML or SQL inputs and ERP connectors
+- AI-assisted processing
 
-✅ CSV Support
+An invoice profile exists in code, but invoice-specific imports remain in the validation path. Source adapters are separate from domain rules only at the input layer.
 
-✅ Excel Support
+## Known technical debt
 
-✅ ParsedDataSet Architecture
+- `CsvUploader.tsx` combines homepage UI and workflow orchestration.
+- Validation and review still contain invoice-specific logic.
+- Profile and mapping versions are not stored, so strict cross-version repeatability is not yet guaranteed.
+- File-size behavior, Excel edge cases, and cross-browser behavior need explicit verification.
+- The meaning of “ready” must stay tied to checks actually applied; no universal ERP acceptance guarantee.
 
-✅ Mapping Engine
+## Documentation
 
-✅ Normalization Engine
-
-✅ Validation Engine
-
-✅ Explainability Engine
-
-✅ Review Workspace
-
-✅ Inspection Mode
-
-✅ Trusted Export
-
----
-
-## Design System
-
-✅ Typography hierarchy
-
-✅ Review density improvements
-
-✅ Inspection Mode improvements
-
-✅ Card hierarchy
-
-✅ Brand exploration
-
-✅ Orange / Black / Off-white identity
-
----
-
-## Deployment
-
-✅ Production build
-
-✅ GitHub repository
-
-✅ Vercel deployment
-
-✅ Public demo available
-
----
-
-## Validation Phase
-
-Completed
-
-Collected feedback from:
-
-- ERP professionals
-- Data migration specialists
-- Business analysts
-- Developers
-
-Validated themes:
-
-✅ Product positioning
-
-✅ Business rules
-
-✅ Explainability
-
-✅ Workflow
-
-✅ ERP validation
-
-✅ Master data
-
-✅ Data migration
-
-These findings now define the next product direction.
-
----
-
-# Current Focus
-
-The focus has shifted.
-
-Previous objective
-
-Build a working MVP.
-
-Current objective
-
-Build a professional ERP Data Validation Platform based on validated industry feedback.
-
-Priority areas
-
-- Product positioning
-- Business rules
-- Validation architecture
-- Explainability
-- Master data foundation
-- Configurable validation
-
----
-
-# Product Direction
-
-DataPreflight is evolving from an Invoice Validation MVP into a configurable ERP Data Validation Platform.
-
-Key principles
-
-- Trust before import
-- Explain everything
-- Workflow first
-- Business logic over technical validation
-- Configurable validation profiles
-
----
-
-# Build Status
-
-Build
-
-🟢 Green
-
-Lint
-
-🟢 Green
-
-Git
-
-🟢 Green
-
-Deployment
-
-🟢 Live
-
----
-
-# Known Technical Debt
-
-## UX
-
-- Inspection workflow improvements
-- Review density improvements
-- Mobile optimization
-
-## Validation
-
-- Configurable rule engine
-- ERP validation profiles
-- Business rule expansion
-- Explainability improvements
-
-## Testing
-
-- Excel edge cases
-- Demo dataset expansion
-- Cross-browser testing
-
----
-
-# Out of Scope
-
-The following remain intentionally postponed:
-
-- Batch Processing
-- Multi Dataset Workspace
-- SQL Imports
-- XML Imports
-- PDF
-- OCR
-- ERP integrations
-- AI-assisted validation
-
-These features will only be considered after the validation workflow is mature and trusted.
-
----
-
-# Latest Industry Insights
-
-Industry feedback consistently highlighted:
-
-- Product positioning needs to be sharper.
-- Business logic creates the real value.
-- Explainability builds trust.
-- Master data offers significant opportunities.
-- ERP-specific validation is highly valuable.
-- Data migration is a promising long-term market.
-
-These insights now guide all future development.
-
----
-
-# Current Stage
-
-Build
-
-↓
-
-Validate
-
-↓
-
-Learn
-
-↓
-
-Rebuild from validated feedback
-
-↓
-
-Grow
+- `README.md`: current MVP, setup, and architecture
+- `PRODUCT_VISION.md`: product thesis and four pillars
+- `ROADMAP.md`: delivery sequence
+- `FEEDBACK.md`: historical professional feedback plus clearly labeled product interpretation
+- `SESSION_LOG.md`: dated progress and next steps

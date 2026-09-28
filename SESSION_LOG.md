@@ -284,3 +284,33 @@ Objectives
 Expected Outcome
 
 A significantly stronger product built on validated market feedback rather than assumptions.
+
+---
+
+# 2026-09-27 to 2026-09-28
+
+## Milestone 5 / Sprint 5.1 — Homepage and Product Thesis
+
+### Shipped on main
+
+- Reframed the hero around ERP import and invoice validation.
+- Added an illustrative Review Workspace preview with Blocked, Needs review, and subtly green Ready states.
+- Moved the current browser-processing privacy note beside file selection.
+- Aligned the preview and upload cards and shortened the opening copy.
+- Removed homepage cards advertising planned formats, profiles, and Master Data capabilities.
+
+The preview is illustrative; the real Review Workspace still appears after a file is loaded. Demo CSV files still require download and upload.
+
+### Product decision
+
+The long-term differentiation is file mapping, reusable validation profiles, controlled processing, and repeatable deterministic results. DataPreflight should become a quality gate before ERP import, not a generic AI file checker.
+
+The current MVP has browser-based CSV/Excel invoice processing and invoice rules in code. Configurable profiles, Master Data validation, and an AI provider are not available.
+
+### Next build task
+
+Make **Review** unmistakable in the first viewport. Add a primary **Try live demo** action that loads the existing messy demo through the same parsing and review path as a selected file. Keep **Upload your file** as the second action. Check the data flow before repeating privacy claims.
+
+### Documentation
+
+Synchronized README, PRODUCT_VISION, PROJECT_STATUS, ROADMAP, FEEDBACK, and SESSION_LOG on 2026-09-28. Historical interview notes remain separate from the new product interpretation.

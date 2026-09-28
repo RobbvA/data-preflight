@@ -2,19 +2,53 @@
 
 ## What Is DataPreflight?
 
-DataPreflight is an ERP Data Validation Platform.
+DataPreflight is evolving into a configurable ERP Data Validation Platform: a repeatable quality gate before ERP import.
 
 It helps organizations validate, understand, review, and trust business data before it enters ERP systems, accounting platforms, CRM systems, and other business-critical applications.
 
 Rather than simply displaying spreadsheets, DataPreflight applies explainable business validation to determine whether data is safe to import.
 
-DataPreflight acts as a trusted validation layer between raw business data and downstream systems.
+The current MVP reviews invoice data from CSV and Excel files. Reusable, user-selectable validation profiles and Master Data domains are product direction, not current user-facing capabilities.
 
 ---
 
 # Core Promise
 
-Trusted business data before import.
+Trusted business data before ERP import.
+
+---
+
+# Product Thesis — Four Pillars
+
+DataPreflight should not compete as a general-purpose AI file checker. Its differentiation should come from the following capabilities working together.
+
+## 1. File Mapping
+
+Different source headers can represent the same business field. For example, `Factuurnr`, `Invoice No.`, and `Inv ID` can map to `invoice_number`.
+
+Mapping suggestions must remain inspectable and adjustable. The current MVP already has invoice field mapping; reusable mapping configurations are future work.
+
+## 2. Validation Profiles
+
+A profile defines the fields and rules for a data domain, import type, ERP context, or workflow. Profiles should be reusable and versioned so recurring imports can be checked against agreed rules.
+
+The current invoice profile and validation rules are defined in code. Selecting or configuring profiles in the UI has not been built.
+
+## 3. Privacy and Controlled Processing
+
+Each feature must make clear where source data is read, processed, stored, and sent. Current CSV and Excel parsing and validation happen in the browser. Future server processing, persistence, integrations, or AI assistance require a fresh data-flow review.
+
+Privacy is a product advantage only where the implementation supports the exact claim.
+
+## 4. Repeatability
+
+The same logical input, mapping, normalization rules, and versioned profile should produce the same result. Hard validation rules should be deterministic wherever possible.
+
+AI may assist with mapping suggestions, explanations, and recommendations, but must not silently determine whether a record passes a hard rule. Unsupported file sizes should produce an explicit error rather than an incomplete result.
+
+## Feature Filter
+
+A new feature should strengthen mapping, reusable profiles, controlled handling of data, repeatable results, explainable review, or reliable ERP-oriented output.
 
 ---
 
@@ -118,6 +152,10 @@ Upload
 
 ↓
 
+Parse
+
+↓
+
 Mapping
 
 ↓
@@ -126,7 +164,7 @@ Normalization
 
 ↓
 
-Validation
+Validation Profile + Rules (target architecture)
 
 ↓
 
@@ -143,6 +181,8 @@ Fix
 ↓
 
 Trusted Export
+
+In the current MVP, invoice rules are applied in code. Users fix the source file and review it again; there is no in-app record editor. A clean export contains rows that passed the implemented checks, not a guarantee that every ERP will accept them.
 
 ---
 
@@ -211,6 +251,8 @@ Future versions should support reusable validation profiles that combine:
 
 without requiring code changes.
 
+Profiles and rule sets should be versioned. The current invoice profile is a code definition, not a selectable product feature.
+
 ---
 
 ## Explainable AI
@@ -227,6 +269,8 @@ AI should assist with:
 - future AI Readiness scoring
 
 while every validation remains transparent and explainable.
+
+AI-generated suggestions must remain distinguishable from deterministic validation results.
 
 ---
 
@@ -286,6 +330,8 @@ Supported
 - Excel (.xlsx)
 - Excel (.xls)
 
+Current processing uses browser-based adapters for these file types. The present validation and review flow is invoice-specific.
+
 ---
 
 # Long-Term Vision
@@ -314,8 +360,9 @@ These remain intentionally out of scope until the validation workflow feels matu
 
 # Success Criteria
 
-A user should be able to upload a dataset and determine within minutes:
+A user should be able to upload a supported dataset and determine within minutes:
 
+- Which mapping and rules were applied
 - Whether the dataset is safe
 - Which issues require immediate attention
 - Which records are ready
@@ -323,6 +370,8 @@ A user should be able to upload a dataset and determine within minutes:
 - How to resolve it
 
 without requiring technical knowledge.
+
+The same supported input and configuration should produce a repeatable result. “Safe” and “ready” refer to the applied rule set (and, later, the selected profile), not to an unconditional guarantee of downstream import success.
 
 ---
 
@@ -338,4 +387,4 @@ Validated Product Direction
 
 Focus:
 
-Build based on validated industry feedback rather than assumptions.
+Build from industry feedback and test the remaining product hypotheses with real users.
