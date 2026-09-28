@@ -73,11 +73,7 @@ export function CsvUploader() {
     });
   }, [selectedDetailRowIndex]);
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
+  async function loadSource(source: Promise<File>) {
     setError(null);
     setIsLoading(true);
     setSelectedPreviewRowIndex(null);
@@ -89,6 +85,7 @@ export function CsvUploader() {
     setIsFieldMappingOpen(false);
 
     try {
+      const file = await source;
       const adapter = getInputAdapter(file);
 
       if (!adapter) {
@@ -112,8 +109,12 @@ export function CsvUploader() {
           nextParsedDataSet.rows,
         ),
       );
-    } catch {
-      setError("Failed to parse source file. Please check the file format.");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to read source file. Please try again.",
+      );
       setParsedDataSet(null);
       setFieldMapping(createEmptyMapping());
       setSelectedPreviewRowIndex(null);
@@ -125,8 +126,29 @@ export function CsvUploader() {
       setIsFieldMappingOpen(false);
     } finally {
       setIsLoading(false);
-      event.target.value = "";
     }
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    void loadSource(Promise.resolve(file));
+    event.target.value = "";
+  }
+
+  function handleTryDemo() {
+    void loadSource(
+      fetch("/demo-data/messy-export.csv").then(async (response) => {
+        if (!response.ok) {
+          throw new Error("The demo could not be opened. Please try again.");
+        }
+
+        return new File([await response.blob()], "messy-export.csv", {
+          type: "text/csv",
+        });
+      }),
+    );
   }
 
   function resetFlow() {
@@ -301,7 +323,7 @@ export function CsvUploader() {
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[var(--surface-deep)] px-5 py-6 text-[var(--text-primary)] sm:px-6 lg:px-8">
+    <main className="min-h-screen overflow-hidden bg-[var(--surface-deep)] px-4 py-6 text-[var(--text-primary)] sm:px-8 lg:px-10 xl:px-12">
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[rgba(182,111,58,0.1)] blur-3xl" />
         <div className="absolute right-[-240px] top-20 h-[500px] w-[620px] rounded-full bg-[rgba(182,111,58,0.07)] blur-3xl" />
@@ -309,39 +331,44 @@ export function CsvUploader() {
         <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(10,9,7,0.94),_rgba(17,16,13,0.98),_rgba(10,9,7,1))]" />
       </div>
 
-      <div className="mx-auto max-w-[1380px] space-y-7">
+      <div className="mx-auto max-w-[1480px] space-y-7">
         {!hasUploadedRows ? (
-          <section className="mx-auto w-full max-w-6xl py-10 lg:py-16">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-accent)]">
+          <section className="w-full py-5 sm:py-8 lg:flex lg:min-h-[calc(100svh-9rem)] lg:flex-col lg:justify-center lg:py-10">
+            <div className="max-w-4xl">
+              <p className="text-2xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-3xl">
+                DataPreflight
+              </p>
+
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-accent)]">
                 ERP data validation
               </p>
 
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-5xl">
-                DataPreflight
+              <h1 className="mt-6 text-2xl font-semibold leading-[1.08] tracking-tight text-[var(--text-primary)] sm:text-3xl xl:text-4xl">
+                Review data before ERP import.
               </h1>
 
-              <p className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-[var(--text-primary)] sm:text-4xl">
-                Catch data issues before ERP import.
-              </p>
-
-              <p className="mt-4 max-w-xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
-                Apply explainable business rules, review the records that need
-                attention, and export trusted data.
+              <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
+                See what is blocked, what needs review, and what is ready to
+                export.
               </p>
             </div>
 
-            <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start lg:gap-7">
-              <HomeProductPreview />
+            <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.85fr)] lg:items-stretch lg:gap-7">
+              <div className="order-2 lg:order-1">
+                <HomeProductPreview />
+              </div>
 
-              <UploadSection
-                fileName={fileName}
-                isLoading={isLoading}
-                error={error}
-                hasActiveFile={false}
-                onFileChange={handleFileChange}
-                onReset={resetFlow}
-              />
+              <div className="order-1 lg:order-2">
+                <UploadSection
+                  fileName={fileName}
+                  isLoading={isLoading}
+                  error={error}
+                  hasActiveFile={false}
+                  onFileChange={handleFileChange}
+                  onTryDemo={handleTryDemo}
+                  onReset={resetFlow}
+                />
+              </div>
             </div>
           </section>
         ) : (
@@ -370,6 +397,7 @@ export function CsvUploader() {
                   rows.length > 0 || Boolean(error) || Boolean(fileName)
                 }
                 onFileChange={handleFileChange}
+                onTryDemo={handleTryDemo}
                 onReset={resetFlow}
               />
             </section>

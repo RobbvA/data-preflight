@@ -4,6 +4,7 @@ type UploadSectionProps = {
   error: string | null;
   hasActiveFile: boolean;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onTryDemo: () => void;
   onReset: () => void;
 };
 
@@ -31,6 +32,7 @@ export function UploadSection({
   error,
   hasActiveFile,
   onFileChange,
+  onTryDemo,
   onReset,
 }: UploadSectionProps) {
   if (hasActiveFile) {
@@ -84,23 +86,43 @@ export function UploadSection({
   }
 
   return (
-    <section className="w-full rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-5 shadow-xl shadow-black/20 sm:p-6">
+    <section className="flex h-full w-full flex-col rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-5 shadow-xl shadow-black/20 sm:p-7">
       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-accent)]">
-        Try DataPreflight
+        Demo
       </p>
 
-      <h2 className="mt-2 text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-        Upload CSV or Excel
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-3xl">
+        Validate data before import
       </h2>
 
       <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-        Start with an invoice export. See which records are blocked, need
-        review, or are ready.
+        Open the demo and inspect actual validation results.
       </p>
 
-      <div className="mt-5 rounded-2xl border border-dashed border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.05)] p-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="cursor-pointer rounded-xl bg-[var(--brand-accent-soft)] px-5 py-2.5 text-sm font-semibold text-[var(--surface-deep)] transition hover:bg-[#f1c49b] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
+      <button
+        type="button"
+        onClick={onTryDemo}
+        disabled={isLoading}
+        className="mt-5 w-full rounded-xl bg-[var(--brand-accent-soft)] px-5 py-3 text-left text-sm font-semibold text-[var(--surface-deep)] transition hover:bg-[#f1c49b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)] disabled:cursor-wait disabled:opacity-60"
+      >
+        {isLoading ? "Opening review..." : "Try the demo →"}
+      </button>
+
+      <p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">
+        Demo data. No file needed.
+      </p>
+
+      <div className="mt-6 border-t border-white/10 pt-5">
+        <h3 className="text-base font-semibold text-[var(--text-primary)]">
+          Upload your file
+        </h3>
+
+        <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+          CSV, XLSX, or XLS. Invoice validation is available now.
+        </p>
+
+        <div className="mt-3 rounded-xl border border-dashed border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.05)] p-4">
+          <label className="inline-flex cursor-pointer rounded-lg border border-white/15 bg-[var(--surface-raised)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
             Choose file
             <input
               type="file"
@@ -111,44 +133,36 @@ export function UploadSection({
             />
           </label>
 
-          <span className="text-xs text-[var(--text-secondary)]">
-            CSV, XLSX or XLS
-          </span>
-        </div>
-
-        <p className="mt-3 text-xs leading-5 text-[var(--text-secondary)]">
-          Your file is processed in your browser and is not sent to our
-          servers.
-        </p>
-
-        {isLoading && (
-          <p
-            role="status"
-            className="mt-3 text-xs font-medium text-[var(--brand-accent-soft)]"
-          >
-            Reading file and preparing invoice review...
+          <p className="mt-3 text-xs leading-5 text-[var(--text-secondary)]">
+            Your file is processed in your browser and is not sent to our
+            servers.
           </p>
-        )}
+        </div>
       </div>
 
-      <div className="mt-5 border-t border-white/10 pt-4">
-        <p className="text-xs font-medium text-[var(--text-secondary)]">
-          No file handy? Try a demo export:
+      {isLoading && (
+        <p role="status" className="mt-4 text-xs text-[var(--brand-accent-soft)]">
+          Preparing invoice review...
         </p>
+      )}
 
+      <details className="mt-auto pt-5 text-xs text-[var(--text-secondary)]">
+        <summary className="cursor-pointer hover:text-[var(--text-primary)]">
+          Download example CSV files
+        </summary>
         <div className="mt-3 flex flex-wrap gap-2">
           {DEMO_FILES.map((file) => (
             <a
               key={file.href}
               href={file.href}
               download
-              className="rounded-lg border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] transition hover:border-[color:rgba(209,154,106,0.45)]"
+              className="rounded-lg border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 font-medium text-[var(--text-primary)] transition hover:border-[color:rgba(209,154,106,0.45)]"
             >
               {file.label}
             </a>
           ))}
         </div>
-      </div>
+      </details>
 
       {error && (
         <p

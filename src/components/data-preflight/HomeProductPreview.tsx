@@ -43,32 +43,32 @@ export function HomeProductPreview() {
   return (
     <section
       aria-label="Illustrative invoice validation preview"
-      className="w-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] shadow-2xl shadow-black/30"
+      className="h-full w-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] shadow-2xl shadow-black/30"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-5 sm:px-7">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-accent)]">
-            Review workspace
+            Invoice example
           </p>
-          <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
-            Import readiness
+          <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)] sm:text-2xl">
+            Review workspace
           </h2>
         </div>
 
         <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] text-[var(--text-secondary)]">
-          Invoice example
+          Preview
         </span>
       </div>
 
-      <div className="p-5">
+      <div className="p-5 sm:p-7">
         <div className="grid grid-cols-3 gap-2">
           {statuses.map(({ label, count, icon: Icon, className }) => (
             <div
               key={label}
-              className={`min-w-0 rounded-xl border p-3 ${className}`}
+              className={`min-w-0 rounded-xl border p-2.5 sm:p-4 ${className}`}
             >
               <Icon aria-hidden="true" className="h-4 w-4" />
-              <p className="mt-3 text-2xl font-semibold leading-none text-[var(--text-primary)]">
+              <p className="mt-3 text-2xl font-semibold leading-none text-[var(--text-primary)] sm:text-3xl">
                 {count}
               </p>
               <p className="mt-2 text-[11px] leading-tight">{label}</p>
@@ -111,8 +111,8 @@ export function HomeProductPreview() {
         </div>
 
         <p className="mt-4 text-xs leading-5 text-[var(--text-muted)]">
-          Illustrative invoice result. Upload your own file to inspect its
-          actual validation results.
+          Illustrative result. Try the live review to inspect actual validation
+          results.
         </p>
       </div>
     </section>
