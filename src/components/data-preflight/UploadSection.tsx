@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type UploadSectionProps = {
   fileName: string;
   isLoading: boolean;
@@ -113,8 +115,30 @@ export function UploadSection({
       </p>
 
       <div className="mt-6 border-t border-white/10 pt-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--brand-accent)]">
+          Master data
+        </p>
+
+        <h3 className="mt-2 text-base font-semibold text-[var(--text-primary)]">
+          Validate customer records
+        </h3>
+
+        <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+          Map customer fields, review duplicates and export rows without
+          blockers.
+        </p>
+
+        <Link
+          href="/customers"
+          className="mt-3 inline-flex rounded-lg border border-white/15 bg-[var(--surface-raised)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)]"
+        >
+          Open customer review →
+        </Link>
+      </div>
+
+      <div className="mt-6 border-t border-white/10 pt-5">
         <h3 className="text-base font-semibold text-[var(--text-primary)]">
-          Use your own file
+          Use your own invoice file
         </h3>
 
         <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
@@ -150,6 +174,7 @@ export function UploadSection({
         <summary className="cursor-pointer hover:text-[var(--text-primary)]">
           Download example CSV files
         </summary>
+
         <div className="mt-3 flex flex-wrap gap-2">
           {DEMO_FILES.map((file) => (
             <a

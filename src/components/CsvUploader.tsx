@@ -7,8 +7,12 @@ import {
   type ParsedDataSet,
   type ParsedRow,
 } from "@/lib/parseCsv";
-import { validateRows, type ValidationIssue } from "@/lib/validateRows";
-import { normalizeInvoiceRows } from "@/lib/normalizeInvoice";
+import type { ValidationIssue } from "@/lib/validateRows";
+import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfile";
+import {
+  mapRowsToProfile,
+  runValidationProfile,
+} from "@/lib/validation/validationProfile";
 import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
 
 import {
@@ -201,28 +205,15 @@ export function CsvUploader() {
     return createMappingSuggestions(headers, rows);
   }, [headers, rows]);
 
-  const selectedRows = useMemo(() => {
-    return rows.map((row) => {
-      const mappedRow: ParsedRow = {};
+  const selectedRows = useMemo(
+    () => mapRowsToProfile(rows, fieldMapping, invoiceValidationProfile),
+    [rows, fieldMapping],
+  );
 
-      mappingSuggestions.forEach((suggestion) => {
-        const targetField = suggestion.targetField;
-        const sourceField = fieldMapping[targetField];
-
-        mappedRow[targetField] = sourceField ? (row[sourceField] ?? "") : "";
-      });
-
-      return mappedRow;
-    });
-  }, [rows, fieldMapping, mappingSuggestions]);
-
-  const normalizedRows = useMemo(() => {
-    return normalizeInvoiceRows(selectedRows);
-  }, [selectedRows]);
-
-  const validationResult = useMemo(() => {
-    return validateRows(normalizedRows);
-  }, [normalizedRows]);
+  const { normalizedRows, validationResult } = useMemo(
+    () => runValidationProfile(invoiceValidationProfile, selectedRows),
+    [selectedRows],
+  );
 
   const missingExpectedFields = useMemo(() => {
     return mappingSuggestions
