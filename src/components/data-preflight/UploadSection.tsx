@@ -88,15 +88,15 @@ export function UploadSection({
   return (
     <section className="flex h-full w-full flex-col rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-5 shadow-xl shadow-black/20 sm:p-7">
       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-accent)]">
-        Demo
+        Start here
       </p>
 
       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-3xl">
-        Validate data before import
+        Try DataPreflight
       </h2>
 
       <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-        Open the demo and inspect actual validation results.
+        Run the same validation used for your own file.
       </p>
 
       <button
@@ -105,20 +105,20 @@ export function UploadSection({
         disabled={isLoading}
         className="mt-5 w-full rounded-xl bg-[var(--brand-accent-soft)] px-5 py-3 text-left text-sm font-semibold text-[var(--surface-deep)] transition hover:bg-[#f1c49b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)] disabled:cursor-wait disabled:opacity-60"
       >
-        {isLoading ? "Opening review..." : "Try the demo →"}
+        {isLoading ? "Validating..." : "Validate example file →"}
       </button>
 
       <p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">
-        Demo data. No file needed.
+        Uses an example invoice export. No file needed.
       </p>
 
       <div className="mt-6 border-t border-white/10 pt-5">
         <h3 className="text-base font-semibold text-[var(--text-primary)]">
-          Upload your file
+          Use your own file
         </h3>
 
         <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
-          CSV, XLSX, or XLS. Invoice validation is available now.
+          CSV, XLSX, or XLS invoice exports are supported today.
         </p>
 
         <div className="mt-3 rounded-xl border border-dashed border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.05)] p-4">

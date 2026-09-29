@@ -141,7 +141,9 @@ export function CsvUploader() {
     void loadSource(
       fetch("/demo-data/messy-export.csv").then(async (response) => {
         if (!response.ok) {
-          throw new Error("The demo could not be opened. Please try again.");
+          throw new Error(
+            "The example file could not be opened. Please try again.",
+          );
         }
 
         return new File([await response.blob()], "messy-export.csv", {
@@ -307,16 +309,16 @@ export function CsvUploader() {
     validationResult.cleanRows.length > 0;
 
   const importReadinessMessage = hasIncompleteMapping
-    ? "Import blocked: required fields are not mapped."
+    ? "Review required: mandatory invoice fields are not mapped."
     : hasDuplicateMappings
-      ? "Import blocked: one or more source columns are mapped multiple times."
+      ? "Review required: a source column is mapped more than once."
       : blockedCount > 0
-        ? "Import will fail unless blocked invoices are fixed."
+        ? "Blocked invoices are excluded from clean export. Fix them in the source and recheck."
         : warningCount > 0
-          ? "Import possible, but warnings should be reviewed first."
+          ? "Warnings found. Review them before export."
           : cleanCount > 0
-            ? "All mapped invoices are ready for import."
-            : "Upload and map invoice data to start the preflight check.";
+            ? "All mapped invoices passed the current checks. Confirm target ERP requirements before import."
+            : "Upload and map an invoice export to start the review.";
 
   const hasUploadedRows = normalizedRows.length > 0;
   const hasHeaders = headers.length > 0;
@@ -335,25 +337,25 @@ export function CsvUploader() {
         {!hasUploadedRows ? (
           <section className="w-full py-5 sm:py-8 lg:flex lg:min-h-[calc(100svh-9rem)] lg:flex-col lg:justify-center lg:py-10">
             <div className="max-w-4xl">
-              <p className="text-2xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-3xl">
+              <h1 className="text-4xl font-semibold leading-tight tracking-tight text-[var(--text-primary)] sm:text-5xl xl:text-6xl">
                 DataPreflight
-              </p>
+              </h1>
 
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-accent)]">
+              <p className="mt-2 text-base font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)] sm:text-lg xl:text-xl">
                 ERP data validation
               </p>
 
-              <h1 className="mt-6 text-2xl font-semibold leading-[1.08] tracking-tight text-[var(--text-primary)] sm:text-3xl xl:text-4xl">
+              <h2 className="mt-7 text-xl font-semibold leading-snug tracking-tight text-[var(--text-primary)] sm:text-2xl">
                 Review data before ERP import.
-              </h1>
+              </h2>
 
-              <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--text-secondary)] sm:text-lg">
-                See what is blocked, what needs review, and what is ready to
-                export.
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
+                See what needs attention, why it matters, and which records
+                passed the current checks.
               </p>
             </div>
 
-            <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.85fr)] lg:items-stretch lg:gap-7">
+            <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-stretch lg:gap-7">
               <div className="order-2 lg:order-1">
                 <HomeProductPreview />
               </div>

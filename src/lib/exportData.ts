@@ -133,7 +133,7 @@ export function getExportSafetyMessage({
   }
 
   if (cleanRowCount === 0) {
-    return "Clean export is disabled because no import-ready invoices are available.";
+    return "Clean export is disabled because no invoices are exportable under the current rules.";
   }
 
   if (criticalIssueCount > 0 && warningIssueCount > 0) {
@@ -148,7 +148,7 @@ export function getExportSafetyMessage({
     return "Clean export is available, but warning rows should be reviewed before import.";
   }
 
-  return "Clean export is safe. All exported invoices passed the current blocking and review checks.";
+  return "Clean export is available. Exported invoices passed the current checks; verify target ERP requirements separately.";
 }
 
 function getIssueExportDecision(issue: ValidationIssue) {

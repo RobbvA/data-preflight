@@ -43,14 +43,14 @@ export function HomeProductPreview() {
   return (
     <section
       aria-label="Illustrative invoice validation preview"
-      className="h-full w-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] shadow-2xl shadow-black/30"
+      className="h-full w-full overflow-hidden rounded-[1.5rem] border border-white/[0.06] bg-[var(--surface-base)]/65"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-5 sm:px-7">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-accent)]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
             Invoice example
           </p>
-          <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)] sm:text-2xl">
+          <h2 className="mt-1 text-base font-medium text-[var(--text-secondary)] sm:text-lg">
             Review workspace
           </h2>
         </div>
@@ -111,8 +111,7 @@ export function HomeProductPreview() {
         </div>
 
         <p className="mt-4 text-xs leading-5 text-[var(--text-muted)]">
-          Illustrative result. Try the live review to inspect actual validation
-          results.
+          Example invoice data. Validate your own file to see its results.
         </p>
       </div>
     </section>
