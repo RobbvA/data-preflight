@@ -1,4 +1,7 @@
-import type { DataProfile } from "@/lib/dataProfile";
+import {
+  suggestProfileMapping,
+  type DataProfile,
+} from "@/lib/dataProfile";
 
 export const customerFieldKeys = [
   "customer_id",
@@ -112,28 +115,5 @@ export const customerProfile: DataProfile<CustomerField> = {
 };
 
 export function suggestCustomerMapping(headers: string[]): CustomerMapping {
-  const usedHeaders = new Set<string>();
-
-  return Object.fromEntries(
-    customerProfile.fields.map((field) => {
-      const synonyms = new Set(
-        [field.key, ...field.synonyms].map(normalizeHeader),
-      );
-      const match = headers.find(
-        (header) =>
-          !usedHeaders.has(header) && synonyms.has(normalizeHeader(header)),
-      );
-
-      if (match) usedHeaders.add(match);
-      return [field.key, match ?? ""];
-    }),
-  ) as CustomerMapping;
-}
-
-function normalizeHeader(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+  return suggestProfileMapping(customerProfile, headers);
 }

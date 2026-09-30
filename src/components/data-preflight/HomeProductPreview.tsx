@@ -1,54 +1,83 @@
 import { AlertTriangle, CheckCircle2, Search } from "lucide-react";
+import type { DataDomain } from "@/components/data-preflight/WorkspaceLayout";
 
-const statuses = [
-  {
-    label: "Blocked",
-    count: 2,
-    icon: AlertTriangle,
-    className:
-      "border-[color:rgba(182,111,58,0.45)] bg-[rgba(182,111,58,0.12)] text-[var(--brand-accent-soft)]",
-  },
-  {
-    label: "Needs review",
-    count: 1,
-    icon: Search,
-    className:
-      "border-[color:rgba(209,154,106,0.3)] bg-[rgba(209,154,106,0.07)] text-[var(--brand-accent-soft)]",
-  },
-  {
-    label: "Ready",
-    count: 3,
-    icon: CheckCircle2,
-    className:
-      "border-[color:rgba(120,180,120,0.3)] bg-[rgba(120,180,120,0.07)] text-[#a8c9a8]",
-  },
-];
+const toneClasses = {
+  blocked:
+    "border-[color:rgba(182,111,58,0.45)] bg-[rgba(182,111,58,0.12)] text-[var(--brand-accent-soft)]",
+  review:
+    "border-[color:rgba(209,154,106,0.3)] bg-[rgba(209,154,106,0.07)] text-[var(--brand-accent-soft)]",
+  ready:
+    "border-[color:rgba(120,180,120,0.3)] bg-[rgba(120,180,120,0.07)] text-[#a8c9a8]",
+};
 
-const issues = [
-  {
-    reference: "INV-1042",
-    problem: "Invoice number appears more than once",
-    status: "Blocked",
-    className: "text-[var(--brand-accent-soft)]",
+const examples = {
+  invoice: {
+    label: "Invoice example",
+    counts: [2, 1, 3],
+    issues: [
+      {
+        reference: "INV-1042",
+        problem: "Invoice number appears more than once",
+        status: "Blocked",
+      },
+      {
+        reference: "INV-1045",
+        problem: "Due date is before invoice date",
+        status: "Review",
+      },
+    ],
   },
-  {
-    reference: "INV-1045",
-    problem: "Due date is before invoice date",
-    status: "Review",
-    className: "text-[var(--text-secondary)]",
+  customer: {
+    label: "Customer example",
+    counts: [3, 0, 2],
+    issues: [
+      {
+        reference: "C-1002",
+        problem: "Customer ID appears more than once",
+        status: "Blocked",
+      },
+      {
+        reference: "Row 4",
+        problem: "Customer ID is missing",
+        status: "Blocked",
+      },
+    ],
   },
-];
+};
 
-export function HomeProductPreview() {
+export function HomeProductPreview({ domain }: { domain: DataDomain }) {
+  const example = examples[domain];
+
+  const statuses = [
+    {
+      label: "Blocked",
+      count: example.counts[0],
+      icon: AlertTriangle,
+      className: toneClasses.blocked,
+    },
+    {
+      label: "Needs review",
+      count: example.counts[1],
+      icon: Search,
+      className: toneClasses.review,
+    },
+    {
+      label: domain === "invoice" ? "Ready" : "Passed checks",
+      count: example.counts[2],
+      icon: CheckCircle2,
+      className: toneClasses.ready,
+    },
+  ];
+
   return (
     <section
-      aria-label="Illustrative invoice validation preview"
+      aria-label={`Illustrative ${domain} validation preview`}
       className="h-full w-full overflow-hidden rounded-[1.5rem] border border-white/[0.06] bg-[var(--surface-base)]/65"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-5 sm:px-7">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-            Invoice example
+            {example.label}
           </p>
           <h2 className="mt-1 text-base font-medium text-[var(--text-secondary)] sm:text-lg">
             Review workspace
@@ -87,9 +116,9 @@ export function HomeProductPreview() {
           </div>
 
           <div className="divide-y divide-white/10">
-            {issues.map((issue) => (
+            {example.issues.map((issue) => (
               <div
-                key={issue.reference}
+                key={`${issue.reference}-${issue.problem}`}
                 className="flex items-start justify-between gap-3 px-4 py-3"
               >
                 <div className="min-w-0">
@@ -100,9 +129,7 @@ export function HomeProductPreview() {
                     {issue.problem}
                   </p>
                 </div>
-                <span
-                  className={`shrink-0 text-[11px] font-medium ${issue.className}`}
-                >
+                <span className="shrink-0 text-[11px] font-medium text-[var(--brand-accent-soft)]">
                   {issue.status}
                 </span>
               </div>
@@ -111,7 +138,8 @@ export function HomeProductPreview() {
         </div>
 
         <p className="mt-4 text-xs leading-5 text-[var(--text-muted)]">
-          Example invoice data. Validate your own file to see its results.
+          Illustrative {domain} data. Open the example file to inspect actual
+          results.
         </p>
       </div>
     </section>

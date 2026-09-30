@@ -29,8 +29,6 @@ type ImportReadinessPanelProps = {
 };
 
 export function ImportReadinessPanel({
-  importReadinessMessage,
-  totalInvoices,
   hasIncompleteMapping,
   hasDuplicateMappings,
   blockedCount,
@@ -47,12 +45,6 @@ export function ImportReadinessPanel({
   const isBlocked =
     hasIncompleteMapping || hasDuplicateMappings || blockedCount > 0;
   const hasWarnings = warningCount > 0 || hasSuspiciousVat;
-
-  const statusLabel = isBlocked
-    ? "Action required"
-    : hasWarnings
-      ? "Review recommended"
-      : "Ready for export";
 
   const statusTone = isBlocked ? "danger" : hasWarnings ? "warning" : "success";
 
@@ -73,48 +65,16 @@ export function ImportReadinessPanel({
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-[var(--surface-base)] p-5 shadow-xl shadow-black/20">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--brand-accent)]">
-            Control center
-          </p>
-
-          <div className="mt-1.5 flex flex-wrap items-center gap-3">
-            <h2 className="text-[1.55rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
-              {totalInvoices} invoices analysed
-            </h2>
-
-            <StatusPill tone={statusTone}>{statusLabel}</StatusPill>
-          </div>
-
-          <p className="mt-1.5 max-w-3xl text-[0.9rem] leading-6 text-[var(--text-secondary)]">
-            {importReadinessMessage}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {hasIncompleteMapping && (
-            <StatusPill tone="warning">Mapping incomplete</StatusPill>
-          )}
-
-          {hasDuplicateMappings && (
-            <StatusPill tone="danger">Duplicate mapping</StatusPill>
-          )}
-
-          {hasSuspiciousVat && (
-            <StatusPill tone="warning">VAT anomalies</StatusPill>
-          )}
-        </div>
-      </div>
-
       {criticalCount > 0 && (
-        <div className="mt-4 rounded-2xl border border-[color:rgba(182,111,58,0.35)] bg-[rgba(182,111,58,0.08)] px-4 py-2.5">
+        <div className="rounded-2xl border border-[color:rgba(182,111,58,0.35)] bg-[rgba(182,111,58,0.08)] px-4 py-2.5">
           <div className="flex flex-wrap items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-[var(--brand-accent)]" />
 
             <p className="text-sm font-semibold text-[var(--text-primary)]">
               {criticalCount} critical issue
-              {criticalCount === 1 ? "" : "s"} currently block clean export.
+              {criticalCount === 1 ? "" : "s"} found. The affected invoice{" "}
+              {blockedCount === 1 ? "row is" : "rows are"} excluded from clean
+              export.
             </p>
           </div>
 
@@ -125,7 +85,9 @@ export function ImportReadinessPanel({
         </div>
       )}
 
-      <div className="mt-4 grid gap-2.5 md:grid-cols-3">
+      <div
+        className={`${criticalCount > 0 ? "mt-4 " : ""}grid gap-2.5 md:grid-cols-3`}
+      >
         <Metric
           label="Blocked"
           value={blockedCount}
