@@ -112,13 +112,19 @@ export function CsvUploader() {
         throw new Error("Source file has no headers.");
       }
 
-      setParsedDataSet(nextParsedDataSet);
-      setFieldMapping(
-        createSuggestedMapping(
-          nextParsedDataSet.headers,
-          nextParsedDataSet.rows,
-        ),
+      const suggestedMapping = createSuggestedMapping(
+        nextParsedDataSet.headers,
+        nextParsedDataSet.rows,
       );
+      const selectedHeaders = Object.values(suggestedMapping).filter(Boolean);
+      const requiresMappingReview =
+        invoiceValidationProfile.fields.some(
+          (field) => field.required && !suggestedMapping[field.key],
+        ) || new Set(selectedHeaders).size !== selectedHeaders.length;
+
+      setParsedDataSet(nextParsedDataSet);
+      setFieldMapping(suggestedMapping);
+      setIsFieldMappingOpen(requiresMappingReview);
     } catch (error) {
       setError(
         error instanceof Error
@@ -211,16 +217,6 @@ export function CsvUploader() {
     return createMappingSuggestions(headers, rows);
   }, [headers, rows]);
 
-  const selectedRows = useMemo(
-    () => mapRowsToProfile(rows, fieldMapping, invoiceValidationProfile),
-    [rows, fieldMapping],
-  );
-
-  const { normalizedRows, validationResult } = useMemo(
-    () => runValidationProfile(invoiceValidationProfile, selectedRows),
-    [selectedRows],
-  );
-
   const missingExpectedFields = useMemo(() => {
     return mappingSuggestions
       .filter((suggestion) => suggestion.required)
@@ -238,6 +234,26 @@ export function CsvUploader() {
 
   const hasDuplicateMappings = duplicateMappedHeaders.length > 0;
   const hasIncompleteMapping = missingExpectedFields.length > 0;
+  const mappingReady = !hasIncompleteMapping && !hasDuplicateMappings;
+
+  const selectedRows = useMemo(
+    () =>
+      mappingReady
+        ? mapRowsToProfile(rows, fieldMapping, invoiceValidationProfile)
+        : [],
+    [rows, fieldMapping, mappingReady],
+  );
+
+  const { normalizedRows, validationResult } = useMemo(
+    () =>
+      mappingReady
+        ? runValidationProfile(invoiceValidationProfile, selectedRows)
+        : {
+            normalizedRows: [],
+            validationResult: { issues: [], cleanRows: [], errorRows: [] },
+          },
+    [mappingReady, selectedRows],
+  );
 
   const issuesByRow = useMemo(() => {
     return validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
@@ -300,10 +316,7 @@ export function CsvUploader() {
       issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
   );
 
-  const canExport =
-    !hasIncompleteMapping &&
-    !hasDuplicateMappings &&
-    validationResult.cleanRows.length > 0;
+  const canExport = mappingReady && validationResult.cleanRows.length > 0;
 
   const importReadinessMessage = hasIncompleteMapping
     ? "Review required: mandatory invoice fields are not mapped."
@@ -317,7 +330,7 @@ export function CsvUploader() {
             ? "All mapped invoices passed the current checks. Confirm target ERP requirements before import."
             : "Upload and map an invoice export to start the review.";
 
-  const hasUploadedRows = normalizedRows.length > 0;
+  const hasUploadedRows = rows.length > 0;
   const hasHeaders = headers.length > 0;
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
@@ -373,57 +386,98 @@ export function CsvUploader() {
             }
           />
 
-          <ImportReadinessPanel
-            importReadinessMessage={importReadinessMessage}
-            totalInvoices={normalizedRows.length}
-            hasIncompleteMapping={hasIncompleteMapping}
-            hasDuplicateMappings={hasDuplicateMappings}
-            blockedCount={blockedCount}
-            warningCount={warningCount}
-            cleanCount={cleanCount}
-            criticalCount={criticalCount}
-            hasSuspiciousVat={hasSuspiciousVat}
-            canExport={canExport}
-            cleanRows={validationResult.cleanRows}
-            issues={validationResult.issues}
-            onDownloadCleanCsv={downloadCsv}
-            onDownloadErrorCsv={downloadErrorCsv}
-          />
-
-          <InvoiceReviewSection
-            showOnlyBlocked={showOnlyBlocked}
-            cleanInvoiceItems={cleanInvoiceItems}
-            warningInvoiceItems={warningInvoiceItems}
-            blockedInvoiceItems={blockedInvoiceItems}
-            criticalCount={criticalCount}
-            selectedRowIndex={selectedPreviewRowIndex}
-            isCleanOpen={isCleanOpen}
-            isWarningOpen={isWarningOpen}
-            isBlockedOpen={isBlockedOpen}
-            onToggleBlockedFilter={toggleBlockedFilter}
-            onSelectInvoice={toggleSelectedPreviewInvoice}
-            onViewInvoiceDetails={viewInvoiceDetails}
-            onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
-            onToggleWarningOpen={() =>
-              setIsWarningOpen((current) => !current)
-            }
-            onToggleBlockedOpen={() =>
-              setIsBlockedOpen((current) => !current)
-            }
-          />
-
-          {selectedInvoice && (
-            <div ref={detailRef}>
-              <BlockedInvoiceDetail
-                selectedInvoice={selectedInvoice}
-                onClose={() => setSelectedDetailRowIndex(null)}
+          {!mappingReady ? (
+            <section className="rounded-2xl border border-[color:rgba(209,154,106,0.35)] bg-[var(--surface-base)] p-5 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                Step 1 · Field mapping
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-[var(--text-primary)]">
+                Review the invoice field mapping
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
+                Choose a source column for every required field and resolve
+                duplicate column assignments. Validation and export will become
+                available after the mapping is complete.
+              </p>
+              {hasIncompleteMapping && (
+                <p className="mt-3 text-sm text-[var(--brand-accent-soft)]">
+                  Required mapping missing: {missingExpectedFields
+                    .map((key) =>
+                      invoiceValidationProfile.fields.find(
+                        (field) => field.key === key,
+                      )?.label ?? key,
+                    )
+                    .join(", ")}.
+                </p>
+              )}
+              {hasDuplicateMappings && (
+                <p className="mt-2 text-sm text-[var(--brand-accent-soft)]">
+                  One source column is mapped to multiple fields.
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsFieldMappingOpen(true)}
+                className="mt-4 rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)]"
+              >
+                Review field mapping
+              </button>
+            </section>
+          ) : (
+            <>
+              <ImportReadinessPanel
+                importReadinessMessage={importReadinessMessage}
+                totalInvoices={normalizedRows.length}
+                hasIncompleteMapping={hasIncompleteMapping}
+                hasDuplicateMappings={hasDuplicateMappings}
+                blockedCount={blockedCount}
+                warningCount={warningCount}
+                cleanCount={cleanCount}
+                criticalCount={criticalCount}
+                hasSuspiciousVat={hasSuspiciousVat}
+                canExport={canExport}
+                cleanRows={validationResult.cleanRows}
+                issues={validationResult.issues}
+                onDownloadCleanCsv={downloadCsv}
+                onDownloadErrorCsv={downloadErrorCsv}
               />
-            </div>
+
+              <InvoiceReviewSection
+                showOnlyBlocked={showOnlyBlocked}
+                cleanInvoiceItems={cleanInvoiceItems}
+                warningInvoiceItems={warningInvoiceItems}
+                blockedInvoiceItems={blockedInvoiceItems}
+                criticalCount={criticalCount}
+                selectedRowIndex={selectedPreviewRowIndex}
+                isCleanOpen={isCleanOpen}
+                isWarningOpen={isWarningOpen}
+                isBlockedOpen={isBlockedOpen}
+                onToggleBlockedFilter={toggleBlockedFilter}
+                onSelectInvoice={toggleSelectedPreviewInvoice}
+                onViewInvoiceDetails={viewInvoiceDetails}
+                onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
+                onToggleWarningOpen={() =>
+                  setIsWarningOpen((current) => !current)
+                }
+                onToggleBlockedOpen={() =>
+                  setIsBlockedOpen((current) => !current)
+                }
+              />
+
+              {selectedInvoice && (
+                <div ref={detailRef}>
+                  <BlockedInvoiceDetail
+                    selectedInvoice={selectedInvoice}
+                    onClose={() => setSelectedDetailRowIndex(null)}
+                  />
+                </div>
+              )}
+            </>
           )}
         </>
       )}
 
-      {hasUploadedRows && (
+      {hasUploadedRows && mappingReady && (
         <FloatingExportButton
           canExport={canExport}
           cleanRows={validationResult.cleanRows}

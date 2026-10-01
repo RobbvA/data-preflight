@@ -1,9 +1,0 @@
- src/app/customers/page.tsx                         |   5 [32m+[m
- src/components/CsvUploader.tsx                     |  37 [32m+[m[31m-[m
- .../data-preflight/CustomerWorkspace.tsx           | 472 [32m+++++++++++++++++++++[m
- src/components/data-preflight/UploadSection.tsx    |  27 [32m+[m[31m-[m
- src/lib/profiles/customerProfile.ts                | 139 [32m++++++[m
- src/lib/profiles/invoiceValidationProfile.ts       |  18 [32m+[m
- src/lib/validation/customerValidation.ts           | 151 [32m+++++++[m
- src/lib/validation/validationProfile.ts            |  41 [32m++[m
- 8 files changed, 866 insertions(+), 24 deletions(-)

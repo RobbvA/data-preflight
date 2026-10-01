@@ -77,7 +77,7 @@ const profileFields = activeProfile.fields.map(
 
 function getProfileField(field: InvoiceField) {
   return activeProfile.fields.find(
-    (profileField) => profileField.key === field,
+    (profileField) => field === profileField.key,
   );
 }
 
@@ -122,10 +122,13 @@ export function createMappingSuggestions(
       .map((header) => scoreHeaderAndValuesForField(header, targetField, rows))
       .sort((a, b) => b.score - a.score);
 
-    const bestAvailableMatch = rankedMatches.find(
+    const availableMatches = rankedMatches.filter(
+      (match) => !usedHeaders.has(match.header),
+    );
+
+    const bestAvailableMatch = availableMatches.find(
       (match) =>
-        match.score >= getMinimumAutoMapScore(targetField) &&
-        !usedHeaders.has(match.header),
+        match.score >= Math.max(getMinimumAutoMapScore(targetField), 72),
     );
 
     if (!bestAvailableMatch) {
@@ -138,6 +141,40 @@ export function createMappingSuggestions(
         score: 0,
         reason:
           "No safe automatic mapping found. Header, sample values, or column behavior were not reliable enough.",
+        alternatives: rankedMatches
+          .filter((match) => match.score > 0)
+          .slice(0, 3),
+      };
+    }
+
+    const competingMatch = availableMatches.find(
+      (match) => match.header !== bestAvailableMatch.header,
+    );
+    const bestHasExactHeader = getFieldSynonyms(targetField).some(
+      (synonym) =>
+        normalizeText(synonym) === normalizeText(bestAvailableMatch.header),
+    );
+    const competitorHasExactHeader = competingMatch
+      ? getFieldSynonyms(targetField).some(
+          (synonym) =>
+            normalizeText(synonym) === normalizeText(competingMatch.header),
+        )
+      : false;
+
+    if (
+      competingMatch &&
+      competingMatch.score >= bestAvailableMatch.score - 8 &&
+      (!bestHasExactHeader || competitorHasExactHeader)
+    ) {
+      return {
+        targetField,
+        targetLabel: profileField?.label ?? targetField,
+        required: profileField?.required ?? false,
+        suggestedHeader: "",
+        confidence: "none",
+        score: 0,
+        reason:
+          "More than one source column plausibly matches this field. Choose the correct column before validation.",
         alternatives: rankedMatches
           .filter((match) => match.score > 0)
           .slice(0, 3),

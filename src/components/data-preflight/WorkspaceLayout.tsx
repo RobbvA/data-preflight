@@ -40,7 +40,7 @@ export function LandingWorkspace({
         </p>
 
         <h2 className="mt-7 text-xl font-semibold leading-snug tracking-tight text-[var(--text-primary)] sm:text-2xl">
-          Review data before ERP import.
+          Validate data before ERP import.
         </h2>
 
         <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
