@@ -2,18 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  getInputAdapter,
-  type ParsedDataSet,
-  type ParsedRow,
-} from "@/lib/parseCsv";
+import { getInputAdapter, type ParsedDataSet } from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
 import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfile";
 import {
   mapRowsToProfile,
   runValidationProfile,
 } from "@/lib/validation/validationProfile";
-import { downloadCsv, downloadErrorCsv } from "@/lib/exportData";
+import {
+  downloadCsv,
+  downloadErrorCsv,
+  getExportSafetyMessage,
+} from "@/lib/exportData";
 
 import {
   createEmptyMapping,
@@ -32,7 +32,10 @@ import {
   type DataDomain,
 } from "@/components/data-preflight/WorkspaceLayout";
 import { ImportReadinessPanel } from "@/components/data-preflight/ImportReadinessPanel";
-import { InvoiceReviewSection } from "@/components/data-preflight/InvoiceReviewSection";
+import {
+  InvoiceReviewSection,
+  type ReviewTab,
+} from "@/components/data-preflight/InvoiceReviewSection";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
 
 import {
@@ -66,6 +69,7 @@ export function CsvUploader() {
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
 
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
+  const [activeReviewTab, setActiveReviewTab] = useState<ReviewTab>("blocked");
 
   const detailRef = useRef<HTMLDivElement | null>(null);
 
@@ -93,6 +97,7 @@ export function CsvUploader() {
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
     setIsFieldMappingOpen(false);
+    setActiveReviewTab("blocked");
 
     try {
       const file = await source;
@@ -140,6 +145,7 @@ export function CsvUploader() {
       setIsWarningOpen(true);
       setIsBlockedOpen(true);
       setIsFieldMappingOpen(false);
+      setActiveReviewTab("blocked");
     } finally {
       setIsLoading(false);
     }
@@ -181,6 +187,7 @@ export function CsvUploader() {
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
     setIsFieldMappingOpen(false);
+    setActiveReviewTab("blocked");
   }
 
   function updateFieldMapping(
@@ -200,6 +207,23 @@ export function CsvUploader() {
     setShowOnlyBlocked((currentValue) => !currentValue);
     setSelectedPreviewRowIndex(null);
     setSelectedDetailRowIndex(null);
+  }
+
+  function handleReviewAction(target: ReviewTab) {
+    setActiveReviewTab(target);
+    setShowOnlyBlocked(false);
+    setSelectedPreviewRowIndex(null);
+    setSelectedDetailRowIndex(null);
+
+    if (target === "blocked") setIsBlockedOpen(true);
+    if (target === "warning") setIsWarningOpen(true);
+    if (target === "ready") setIsCleanOpen(true);
+
+    requestAnimationFrame(() => {
+      document
+        .getElementById("invoice-review-workspace")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   function toggleSelectedPreviewInvoice(rowIndex: number) {
@@ -386,44 +410,52 @@ export function CsvUploader() {
             }
           />
 
-          {!mappingReady ? (
-            <section className="rounded-2xl border border-[color:rgba(209,154,106,0.35)] bg-[var(--surface-base)] p-5 sm:p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
-                Step 1 · Field mapping
-              </p>
-              <h2 className="mt-2 text-xl font-semibold text-[var(--text-primary)]">
-                Review the invoice field mapping
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-                Choose a source column for every required field and resolve
-                duplicate column assignments. Validation and export will become
-                available after the mapping is complete.
-              </p>
-              {hasIncompleteMapping && (
-                <p className="mt-3 text-sm text-[var(--brand-accent-soft)]">
-                  Required mapping missing: {missingExpectedFields
-                    .map((key) =>
-                      invoiceValidationProfile.fields.find(
-                        (field) => field.key === key,
-                      )?.label ?? key,
-                    )
-                    .join(", ")}.
+          <section
+            aria-label="Field mapping"
+            className={`rounded-2xl border bg-[var(--surface-base)] ${
+              mappingReady
+                ? "border-white/10 p-4"
+                : "border-[color:rgba(209,154,106,0.45)] p-5 sm:p-6"
+            }`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                  Step 1 · Field mapping
                 </p>
-              )}
-              {hasDuplicateMappings && (
-                <p className="mt-2 text-sm text-[var(--brand-accent-soft)]">
-                  One source column is mapped to multiple fields.
+                <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
+                  {mappedCount}/{mappingSuggestions.length} fields mapped
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
+                  {hasIncompleteMapping
+                    ? `Choose a column for: ${missingExpectedFields
+                        .map(
+                          (key) =>
+                            invoiceValidationProfile.fields.find(
+                              (field) => field.key === key,
+                            )?.label ?? key,
+                        )
+                        .join(", ")}.${hasDuplicateMappings ? " Resolve duplicate assignments too." : ""}`
+                    : hasDuplicateMappings
+                      ? "One source column is assigned to multiple fields."
+                      : "Required fields ready. Change a column if needed."}
                 </p>
-              )}
+              </div>
               <button
                 type="button"
                 onClick={() => setIsFieldMappingOpen(true)}
-                className="mt-4 rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)]"
+                className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                  mappingReady
+                    ? "border border-white/15 bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--brand-accent)]"
+                    : "bg-[var(--brand-accent)] text-[var(--text-primary)] hover:bg-[var(--brand-accent-soft)]"
+                }`}
               >
-                Review field mapping
+                {mappingReady ? "Edit mapping" : "Complete mapping"}
               </button>
-            </section>
-          ) : (
+            </div>
+          </section>
+
+          {mappingReady && (
             <>
               <ImportReadinessPanel
                 importReadinessMessage={importReadinessMessage}
@@ -440,9 +472,18 @@ export function CsvUploader() {
                 issues={validationResult.issues}
                 onDownloadCleanCsv={downloadCsv}
                 onDownloadErrorCsv={downloadErrorCsv}
+                onReviewAction={handleReviewAction}
+                onExportAction={() =>
+                  document.getElementById("invoice-export")?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  })
+                }
               />
 
               <InvoiceReviewSection
+                activeTab={activeReviewTab}
+                onTabChange={setActiveReviewTab}
                 showOnlyBlocked={showOnlyBlocked}
                 cleanInvoiceItems={cleanInvoiceItems}
                 warningInvoiceItems={warningInvoiceItems}
@@ -472,35 +513,56 @@ export function CsvUploader() {
                   />
                 </div>
               )}
+
+              <section
+                id="invoice-export"
+                className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                  Step 3 · Export
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
+                  Export reviewed data
+                </h2>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
+                  {getExportSafetyMessage({
+                    hasIncompleteMapping,
+                    hasDuplicateMappings,
+                    cleanRowCount: validationResult.cleanRows.length,
+                    issues: validationResult.issues,
+                  })}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      downloadCsv("clean-invoices.csv", validationResult.cleanRows)
+                    }
+                    disabled={!canExport}
+                    className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    Export rows without blockers
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      downloadErrorCsv(
+                        "invoice-errors.csv",
+                        validationResult.issues,
+                      )
+                    }
+                    disabled={validationResult.issues.length === 0}
+                    className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    Download issue report
+                  </button>
+                </div>
+              </section>
             </>
           )}
         </>
-      )}
-
-      {hasUploadedRows && mappingReady && (
-        <FloatingExportButton
-          canExport={canExport}
-          cleanRows={validationResult.cleanRows}
-          issues={validationResult.issues}
-          onDownloadCleanCsv={downloadCsv}
-          onDownloadErrorCsv={downloadErrorCsv}
-        />
-      )}
-
-      {hasHeaders && !isFieldMappingOpen && (
-        <button
-          type="button"
-          onClick={() => setIsFieldMappingOpen(true)}
-          className="fixed right-0 top-1/2 z-40 flex h-24 w-9 -translate-y-1/2 items-center justify-center rounded-l-xl border border-r-0 border-white/10 bg-[var(--surface-base)]/95 text-[var(--text-primary)] shadow-lg shadow-black/20 backdrop-blur-xl transition hover:w-10 hover:border-[color:rgba(182,111,58,0.6)] hover:bg-[var(--surface-raised)] hover:text-[var(--brand-accent)]"
-          aria-label="Open field mapping panel"
-          title="Open field mapping"
-        >
-          <span className="text-base leading-none">⚙</span>
-
-          {(hasIncompleteMapping || hasDuplicateMappings) && (
-            <span className="absolute left-1 top-2 h-2 w-2 rounded-full bg-[var(--brand-accent)] shadow-lg shadow-[rgba(182,111,58,0.35)]" />
-          )}
-        </button>
       )}
 
       {hasHeaders && isFieldMappingOpen && (
@@ -524,8 +586,8 @@ export function CsvUploader() {
                 </h2>
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--text-secondary)]">
-                  Review how source headers are mapped into invoice fields. Keep
-                  this closed during normal invoice review.
+                  Choose which source column belongs to each invoice field.
+                  Changes update the validation results immediately.
                 </p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -574,41 +636,5 @@ export function CsvUploader() {
         </div>
       )}
     </WorkspaceLayout>
-  );
-}
-
-function FloatingExportButton({
-  canExport,
-  cleanRows,
-  issues,
-  onDownloadCleanCsv,
-  onDownloadErrorCsv,
-}: {
-  canExport: boolean;
-  cleanRows: ParsedRow[];
-  issues: ValidationIssue[];
-  onDownloadCleanCsv: (filename: string, rows: ParsedRow[]) => void;
-  onDownloadErrorCsv: (filename: string, issues: ValidationIssue[]) => void;
-}) {
-  return (
-    <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-2 rounded-2xl border border-white/10 bg-[var(--surface-base)]/95 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
-      <button
-        type="button"
-        onClick={() => onDownloadCleanCsv("clean-invoices.csv", cleanRows)}
-        disabled={!canExport}
-        className="rounded-xl bg-[var(--brand-accent)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
-      >
-        Export clean CSV
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onDownloadErrorCsv("invoice-errors.csv", issues)}
-        disabled={issues.length === 0}
-        className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2 text-xs font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
-      >
-        Issue report
-      </button>
-    </div>
   );
 }

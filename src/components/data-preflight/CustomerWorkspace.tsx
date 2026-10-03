@@ -29,6 +29,8 @@ import {
   runValidationProfile,
 } from "@/lib/validation/validationProfile";
 
+type CustomerReviewTab = "blocked" | "review" | "ready";
+
 const EXAMPLE_CSV = [
   "Customer Number,Customer Name,Email,Country Code,VAT Number",
   "C-1001,Acme BV,finance@acme.nl,NL,NL123456789B01",
@@ -53,10 +55,11 @@ export function CustomerWorkspace({
   const [mapping, setMapping] = useState<CustomerMapping>(emptyMapping);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeReviewTab, setActiveReviewTab] =
+    useState<CustomerReviewTab | null>(null);
 
   const rows = useMemo(() => dataSet?.rows ?? [], [dataSet]);
   const headers = dataSet?.headers ?? [];
-
   const mappingCandidates = getProfileMappingCandidates(
     customerValidationProfile,
     headers,
@@ -69,7 +72,6 @@ export function CustomerWorkspace({
   const selectedHeaders = Object.values(mapping).filter(Boolean);
   const hasDuplicateMapping =
     new Set(selectedHeaders).size !== selectedHeaders.length;
-
   const mappingReady =
     requiredUnmapped.length === 0 && !hasDuplicateMapping;
 
@@ -86,7 +88,8 @@ export function CustomerWorkspace({
     [mappedRows],
   );
 
-  const canExport = mappingReady && validationResult.cleanRows.length > 0;
+  const canExport =
+    mappingReady && validationResult.cleanRows.length > 0;
 
   const issuesByRow = useMemo(() => {
     const grouped = new Map<number, CustomerIssue[]>();
@@ -113,6 +116,46 @@ export function CustomerWorkspace({
   }).length;
 
   const readyCount = normalizedRows.length - blockedCount - reviewCount;
+  const mappedCount = selectedHeaders.length;
+
+  const nextAction = !mappingReady
+    ? {
+        title: "Complete field mapping",
+        detail:
+          requiredUnmapped.length > 0
+            ? `Choose a source column for ${requiredUnmapped.join(", ")}.`
+            : "One source column is assigned to multiple fields.",
+        button: "Review mapping",
+        target: "customer-mapping",
+        tab: null,
+      }
+    : blockedCount > 0
+      ? {
+          title: `Review ${blockedCount} blocked customer${
+            blockedCount === 1 ? "" : "s"
+          }`,
+          detail: "See what failed and what to fix in the source file.",
+          button: "View blocked rows",
+          target: "customer-review",
+          tab: "blocked" as const,
+        }
+      : reviewCount > 0
+        ? {
+            title: `Review ${reviewCount} customer${
+              reviewCount === 1 ? "" : "s"
+            } with warnings`,
+            detail: "Check these rows before using the export.",
+            button: "View rows to review",
+            target: "customer-review",
+            tab: "review" as const,
+          }
+        : {
+            title: "Export the checked rows",
+            detail: "The current profile found no issues in these rows.",
+            button: "Go to export",
+            target: "customer-export",
+            tab: null,
+          };
 
   const sortedRows = normalizedRows
     .map((row, index) => ({
@@ -122,10 +165,40 @@ export function CustomerWorkspace({
     }))
     .sort((a, b) => getPriority(b.issues) - getPriority(a.issues));
 
+  const defaultReviewTab: CustomerReviewTab =
+    blockedCount > 0 ? "blocked" : reviewCount > 0 ? "review" : "ready";
+  const visibleReviewTab = activeReviewTab ?? defaultReviewTab;
+
+  const visibleRows = sortedRows.filter(({ issues }) => {
+    if (visibleReviewTab === "blocked") {
+      return issues.some((issue) => issue.severity === "critical");
+    }
+
+    if (visibleReviewTab === "review") {
+      return (
+        issues.length > 0 &&
+        issues.every((issue) => issue.severity === "warning")
+      );
+    }
+
+    return issues.length === 0;
+  });
+
+  function handleNextAction() {
+    if (nextAction.tab) setActiveReviewTab(nextAction.tab);
+
+    requestAnimationFrame(() => {
+      document
+        .getElementById(nextAction.target)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   async function loadFile(file: File) {
     setError(null);
     setDataSet(null);
     setMapping(emptyMapping());
+    setActiveReviewTab(null);
     setIsLoading(true);
 
     try {
@@ -172,6 +245,7 @@ export function CustomerWorkspace({
     setDataSet(null);
     setMapping(emptyMapping());
     setError(null);
+    setActiveReviewTab(null);
   }
 
   function exportIssues() {
@@ -211,7 +285,7 @@ export function CustomerWorkspace({
         <>
           <ActiveWorkspaceHeader
             domain="customer"
-            description="Review the mapping and customer records before export. Confirm target ERP requirements separately."
+            description="Validate the mapping, inspect records that need attention, then export."
             upload={
               <UploadSection
                 domain="customer"
@@ -227,14 +301,46 @@ export function CustomerWorkspace({
             }
           />
 
-          <section className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6">
+          <section className="rounded-2xl border border-[color:rgba(209,154,106,0.35)] bg-[var(--surface-base)] p-5 sm:p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+              Next action
+            </p>
+
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+                  {nextAction.title}
+                </h2>
+                <p
+                  role="status"
+                  className="mt-1 text-sm text-[var(--text-secondary)]"
+                >
+                  {nextAction.detail}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleNextAction}
+                className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)]"
+              >
+                {nextAction.button}
+              </button>
+            </div>
+          </section>
+
+          <section
+            id="customer-mapping"
+            className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 1
                 </p>
                 <h2 className="mt-1 text-xl font-semibold">
-                  Review field mapping
+                  Field mapping · {mappedCount}/
+                  {customerValidationProfile.fields.length} fields mapped
                 </h2>
               </div>
 
@@ -245,8 +351,7 @@ export function CustomerWorkspace({
             </div>
 
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              Known column names are suggested automatically. If more than one
-              column matches a field, choose the correct one before export.
+              Check the suggested columns. Required fields are marked *.
             </p>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -267,7 +372,15 @@ export function CustomerWorkspace({
                         [field.key]: event.target.value,
                       }))
                     }
-                    className="mt-1.5 w-full rounded-lg border border-white/15 bg-[var(--surface-deep)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                    className={`mt-1.5 w-full rounded-lg border bg-[var(--surface-deep)] px-3 py-2 text-sm text-[var(--text-primary)] ${
+                      (field.required && !mapping[field.key]) ||
+                      (mapping[field.key] &&
+                        selectedHeaders.filter(
+                          (header) => header === mapping[field.key],
+                        ).length > 1)
+                        ? "border-[var(--brand-accent)]"
+                        : "border-white/15"
+                    }`}
                   >
                     <option value="">Not mapped</option>
                     {headers.map((header) => (
@@ -287,36 +400,21 @@ export function CustomerWorkspace({
                 </label>
               ))}
             </div>
-
-            {requiredUnmapped.length > 0 && (
-              <p className="mt-4 text-sm text-[var(--brand-accent-soft)]">
-                Required mapping missing: {requiredUnmapped.join(", ")}.
-              </p>
-            )}
-
-            {hasDuplicateMapping && (
-              <p className="mt-2 text-sm text-[var(--brand-accent-soft)]">
-                One source column is mapped to multiple fields.
-              </p>
-            )}
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
-              Step 2
-            </p>
-            <h2 className="mt-1 text-xl font-semibold">Customer review</h2>
-
-            {!mappingReady ? (
-              <div
-                role="status"
-                className="mt-4 rounded-xl border border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.08)] p-4 text-sm leading-6 text-[var(--text-secondary)]"
+          {mappingReady && (
+            <>
+              <section
+                id="customer-review"
+                className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
-                Complete the required field mapping and resolve duplicate
-                column assignments before validating these customer records.
-              </div>
-            ) : (
-              <>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                  Step 2
+                </p>
+                <h2 className="mt-1 text-xl font-semibold">
+                  Customer review
+                </h2>
+
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   <Metric
                     label="Blocked"
@@ -335,8 +433,58 @@ export function CustomerWorkspace({
                   />
                 </div>
 
+                <div className="mt-4 grid gap-2 rounded-xl border border-white/10 bg-[var(--surface-deep)] p-2 sm:grid-cols-3">
+                  {(
+                    [
+                      {
+                        key: "blocked",
+                        label: "Blocked",
+                        count: blockedCount,
+                      },
+                      {
+                        key: "review",
+                        label: "Needs review",
+                        count: reviewCount,
+                      },
+                      {
+                        key: "ready",
+                        label: "Ready",
+                        count: readyCount,
+                      },
+                    ] as const
+                  ).map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      aria-pressed={visibleReviewTab === tab.key}
+                      onClick={() => setActiveReviewTab(tab.key)}
+                      className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition ${
+                        visibleReviewTab === tab.key
+                          ? "border-[color:rgba(209,154,106,0.45)] bg-[var(--surface-raised)] text-[var(--text-primary)]"
+                          : "border-transparent text-[var(--text-secondary)] hover:border-white/10 hover:bg-[var(--surface-raised)]"
+                      }`}
+                    >
+                      <span className="font-medium">{tab.label}</span>
+                      <span className="font-semibold">{tab.count}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <p
+                  role="status"
+                  className="mt-3 text-xs text-[var(--text-secondary)]"
+                >
+                  Showing {visibleRows.length}{" "}
+                  {visibleReviewTab === "blocked"
+                    ? "blocked"
+                    : visibleReviewTab === "review"
+                      ? "needs review"
+                      : "ready"}{" "}
+                  row{visibleRows.length === 1 ? "" : "s"}.
+                </p>
+
                 <div className="mt-5 space-y-2">
-                  {sortedRows.map(({ row, rowIndex, issues }) => (
+                  {visibleRows.map(({ row, rowIndex, issues }) => (
                     <article
                       key={rowIndex}
                       className="rounded-xl border border-white/10 bg-[var(--surface-deep)] p-4"
@@ -384,58 +532,65 @@ export function CustomerWorkspace({
                       )}
                     </article>
                   ))}
+
+                  {visibleRows.length === 0 && (
+                    <p className="rounded-xl border border-white/10 bg-[var(--surface-deep)] p-4 text-sm text-[var(--text-secondary)]">
+                      No rows in this category.
+                    </p>
+                  )}
                 </div>
-              </>
-            )}
-          </section>
+              </section>
 
-          <section className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
-              Step 3
-            </p>
-            <h2 className="mt-1 text-xl font-semibold">
-              Export reviewed data
-            </h2>
-
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              {mappingReady
-                ? "Rows with critical issues are excluded. Rows with warnings remain in the export; review them first. Confirm your target ERP requirements separately."
-                : "Complete the field mapping before validation and export become available."}
-            </p>
-
-            <div className="mt-4 flex flex-wrap gap-3">
-              <button
-                type="button"
-                disabled={!canExport}
-                onClick={() =>
-                  downloadCsv(
-                    "customer-rows-without-blockers.csv",
-                    validationResult.cleanRows,
-                  )
-                }
-                className="rounded-xl bg-[var(--brand-accent-soft)] px-4 py-2.5 text-sm font-semibold text-[var(--surface-deep)] disabled:cursor-not-allowed disabled:opacity-40"
+              <section
+                id="customer-export"
+                className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
-                Export rows without blockers
-              </button>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                  Step 3
+                </p>
+                <h2 className="mt-1 text-xl font-semibold">
+                  Export reviewed data
+                </h2>
 
-              <button
-                type="button"
-                disabled={validationResult.issues.length === 0}
-                onClick={exportIssues}
-                className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Download issue report
-              </button>
-            </div>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  Rows with critical issues are excluded. Check warnings before
+                  using the export, and confirm your target ERP requirements.
+                </p>
 
-            {!canExport && (
-              <p className="mt-3 text-xs text-[var(--text-muted)]">
-                {mappingReady
-                  ? "No rows without blockers are available to export. Fix the source file and validate it again."
-                  : "Complete required mapping and remove duplicate mappings to enable validation."}
-              </p>
-            )}
-          </section>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    disabled={!canExport}
+                    onClick={() =>
+                      downloadCsv(
+                        "customer-rows-without-blockers.csv",
+                        validationResult.cleanRows,
+                      )
+                    }
+                    className="rounded-xl bg-[var(--brand-accent-soft)] px-4 py-2.5 text-sm font-semibold text-[var(--surface-deep)] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Export rows without blockers
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={validationResult.issues.length === 0}
+                    onClick={exportIssues}
+                    className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Download issue report
+                  </button>
+                </div>
+
+                {!canExport && (
+                  <p className="mt-3 text-xs text-[var(--text-muted)]">
+                    No rows without blockers are available. Fix the source file
+                    and validate it again.
+                  </p>
+                )}
+              </section>
+            </>
+          )}
         </>
       )}
     </WorkspaceLayout>

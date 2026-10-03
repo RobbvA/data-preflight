@@ -82,8 +82,31 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
       transform: (value) => normalizeCell(value),
 
       complete: (result) => {
-        const rows = sanitizeRows(result.data);
-        const headers = extractHeaders(rows);
+        const structuralError = result.errors[0];
+
+        if (structuralError) {
+          const record =
+            typeof structuralError.row === "number" &&
+            structuralError.row >= 0
+              ? ` in data row ${structuralError.row + 1}`
+              : "";
+
+          reject(
+            new Error(
+              `Could not safely read CSV${record}: ${structuralError.code}. Check the source file's quotes and column counts.`,
+            ),
+          );
+          return;
+        }
+
+        const headers = result.meta.fields ?? extractHeaders(result.data);
+        const rows = sanitizeRows(
+          result.data.map((row) =>
+            Object.fromEntries(
+              headers.map((header) => [header, row[header] ?? ""]),
+            ),
+          ),
+        );
 
         resolve({
           sourceType: "csv",
@@ -218,7 +241,7 @@ function createUniqueHeaders(headers: string[]) {
 
 function sanitizeRows(rows: ParsedRow[]) {
   return rows.filter((row) => {
-    return Object.values(row).some((value) => value.trim().length > 0);
+    return Object.values(row).some((value) => (value ?? "").trim().length > 0);
   });
 }
 

@@ -1,403 +1,123 @@
 # DataPreflight Roadmap
 
----
+Last reviewed: 2026-10-03
 
-# Milestone 1 — Upload & Parsing
-
-Status: ✅ Completed
-
-## Scope
-
-- CSV Upload
-- CSV Parsing
-- ParsedDataSet Architecture
-- Upload Workflow
-
----
-
-# Milestone 2 — Mapping Platform
+## Milestones 1–4 — MVP foundation
 
 Status: ✅ Completed
 
-## Scope
+- Browser-based CSV upload and parsing with a shared `ParsedDataSet` model.
+- Invoice field mapping, normalization, deterministic rules, explainable review, and CSV export.
+- XLSX and XLS input adapters.
+- Initial design system, public MVP, example datasets, and professional feedback round.
 
-- Invoice Profile
-- Synonym Engine
-- Mapping Engine
-- Missing Mapping Detection
-- Duplicate Mapping Detection
+Later milestones may refine these parts; “completed” describes the original MVP scope.
 
----
+## Milestone 5 — Validated Product Direction
 
-# Milestone 3 — Validation Platform
+Status: 🟡 In progress
 
-Status: ✅ Completed
+Goal: turn the invoice MVP into a reliable, repeatable ERP data quality gate. Choose work that strengthens field mapping, validation profiles, local processing, repeatability, explainable review, or trustworthy output.
 
-## Scope
+**Working product flow:** Choose validation profile → Upload → Parse → Map → Normalize → Validate → Review → Export.
 
-- Normalization Engine
-- Validation Engine
-- Explainability Engine
-- Review Workspace
-- Control Center
-- Export Workflow
+Invoice and Customer are the two current test cases. Do not expand into more domains before their shared behavior and domain differences are understood.
 
----
+### 5.1 Product positioning and first use
 
-# Milestone 3.7 — Excel Support
+Status: 🟡 Implemented in the app; new-user validation pending
 
-Status: ✅ Completed
+Built:
 
-## Completed
+- ERP-import message and illustrative review preview on the landing page.
+- Profile choice before upload, with Invoice selected by default.
+- Direct example loading through the same processing path as a selected file.
+- Browser-processing explanation near file selection.
+- Clearer emphasis on trying the actual workflow.
 
-- Excel Upload
-- Excel Parsing
-- Excel Adapter
-- Excel Integration
-- Public Release
+Remaining:
 
-Future improvements
+- Check desktop and mobile comprehension with new visitors.
+- Keep privacy wording aligned with the complete deployed data flow.
+- Refine text hierarchy only where user testing exposes confusion.
 
-- Excel edge cases
-- Sheet metadata
-- Import metadata
-- Workflow polish
+### 5.2 Shared validation architecture
 
----
+Status: 🟡 In progress
 
-# Milestone 4 — Design System & MVP
+Built:
 
-Status: ✅ Completed
+- `DataProfile` field definitions and a shared `ValidationProfile` contract.
+- Shared mapping-to-profile and normalization/validation execution functions.
+- Versioned Invoice and Customer definitions in code.
+- Parsing separated from profile-specific validation.
 
-## Completed
+Next:
 
-### Documentation Foundation
+- Make profile ID/version and applied mapping traceable for a validation run and its output.
+- Verify deterministic results for repeated input, mapping, and profile version.
+- Extract common workspace behavior only after it is demonstrably the same in Invoice and Customer.
 
-- PROJECT_STATUS.md
-- PRODUCT_VISION.md
-- ROADMAP.md
-- SESSION_LOG.md
+Keep domain-specific business rules independent. A single generic workspace is a direction, not a required immediate rewrite.
 
-### Design System
+### 5.3 Customer master data foundation
 
-- Typography hierarchy
-- Density improvements
-- Card hierarchy
-- Spacing system
-- Status hierarchy
-- Brand exploration
+Status: 🟡 Initial domain working; broader master data pending
 
-### Branding
+Built:
 
-- Orange / Black / Off-white identity
-- Landing Page redesign
-- Review Workspace redesign
-- Inspection Mode redesign
-- Configuration Layer redesign
+- Customer profile, field mapping, normalization, required-field and duplicate-ID checks, email and country-code warnings.
+- Mapping guard before validation and export.
+- Customer review categories, explanations, and export.
 
-### Demo Strategy
+Next: validate Customer with representative real-world exports and use findings to improve the shared profile contract. Vendor, Product, Inventory, and other domains remain out of scope for now.
 
-Created reusable datasets for:
+### 5.4 Workflow and reliability
 
-- Clean imports
-- Mixed imports
-- High-risk imports
-- Mapping failures
-- Regional compliance
+Status: 🟡 In progress
 
----
+Built:
 
-# Milestone 5 — Validated Product Direction
+- Visible field mapping tool and mapped-field count.
+- One prominent next action in each workspace.
+- Blocked, Needs review, and Ready tabs in both domains.
+- Mapping → Review → Export steps in both domains.
+- CSV structural parse errors stop processing before validation.
 
-Status: 🟡 In Progress
+Next:
 
-Purpose
+- Show concise feedback after a mapping or review action: what changed and what still needs attention.
+- Reduce repeated instructions; move deeper explanations behind Details where useful.
+- Test malformed files, larger files, Excel edge cases, and browser behavior.
 
-Build the next generation of DataPreflight informed by industry feedback and explicit product hypotheses.
+### 5.5 Explainability
 
-The objective is no longer to prove the MVP works.
+Status: 🟡 Available, refinement pending
 
-The objective is to transform the MVP into a scalable ERP Data Validation Platform.
+Both domains show what failed, why it matters, and a suggested fix. Invoice has a richer issue model than Customer. Improve consistency where it helps users act, without erasing real domain differences. AI explanations may come later; hard results remain rule-based.
 
-Product filter for this milestone: strengthen file mapping, reusable validation profiles, controlled processing, repeatable results, explainable review, or reliable ERP-oriented output. This is the product team's direction; specific new capabilities still require implementation and validation.
+### 5.6 Configurable validation profiles
 
----
+Status: ⏳ Future
 
-## Sprint 5.1 — Product Positioning
+The user can currently **select between two code-defined profiles**. User-authored rules, saved profile configurations, target-ERP rule sets, and reusable saved mappings do not exist yet. Build them when the Invoice and Customer workflows show which configuration users actually need.
 
-Status: 🟡 In Progress
+## Milestone 5 exit criteria
 
-Goals
+- A new user can choose a profile and understand the next action without guidance.
+- Invoice and Customer produce explainable, repeatable classifications for representative files.
+- Exports exclude critical rows, describe warning handling, and identify the applied validation context.
+- Privacy claims match measured data flows.
+- Feedback from new users confirms the workflow is understandable and worth using.
 
-- Clarify target audience
-- Clarify product positioning
-- Rewrite landing page messaging
-- Show Review Workspace on homepage
-- Promote browser privacy
-- Explain why DataPreflight exists
-- Clearly communicate business value
+## Milestone 6 — Data migration platform
 
-Completed so far:
+Status: Future. Potential scope: more master data domains, migration checks, larger datasets, batch workflows, XML/SQL inputs, and ERP integration. Prioritize only after Milestone 5's reliability and adoption questions are answered.
 
-- Replaced broad “business data quality control” messaging with ERP-import context.
-- Added an illustrative invoice Review Workspace preview.
-- Placed a browser-processing privacy note beside file selection.
-- Aligned preview and upload cards and introduced a subtle green Ready state.
+## Milestone 7 — AI assistance
 
-Still to do:
+Status: Future. Possible uses: mapping proposals, explanations, and suggested fixes. AI output must remain distinguishable from deterministic rule results and must respect the data-handling model.
 
-- Make “Review” explicit in the first viewport.
-- Add a primary “Try live demo” action that opens an existing demo in the real Review Workspace without a download-and-upload step.
-- Keep “Upload your file” clear as a second action.
-- Check desktop and mobile hierarchy, then validate comprehension with new visitors.
-- Keep current invoice support distinct from planned profiles and Master Data domains.
+## Next build session
 
-Success Criteria
-
-A new visitor understands within seconds:
-
-- What the product does
-- Who it is for
-- Why it is valuable
-- How to try the real review workflow without supplying private data
-
----
-
-## Sprint 5.2 — Validation Architecture
-
-Status: Planned
-
-Goals
-
-Separate validation into multiple layers and define stable interfaces for mapping, normalization, rules, and future profiles. This sprint prepares the architecture; it does not claim user-selectable ERP profiles are complete.
-
-Layer 1
-
-Generic validation
-
-Examples
-
-- Missing values
-- Invalid email
-- Invalid date
-- Duplicate values
-
-Layer 2
-
-Business validation
-
-Examples
-
-- Financial consistency
-- VAT logic
-- Payment terms
-- Country rules
-
-Layer 3
-
-ERP Profiles
-
-Examples
-
-- Exact Globe
-- SAP ECC
-- SAP S/4HANA
-- Microsoft Dynamics
-
-Success Criteria
-
-Invoice validation no longer requires direct hardcoded imports throughout the generic validation path. The same supported input and rule configuration produce deterministic results.
-
----
-
-## Sprint 5.3 — Master Data Foundation
-
-Status: Planned
-
-Goals
-
-Prepare DataPreflight for datasets beyond invoices.
-
-First validation domains:
-
-- Customer
-- Vendor
-- Material
-
-Objectives
-
-- Shared validation model
-- Domain profiles
-- Business rule preparation
-
-Invoices remain fully supported.
-
----
-
-## Sprint 5.4 — Workflow Improvements
-
-Status: Planned
-
-Focus
-
-Improve the operational workflow.
-
-Validate
-
-↓
-
-Review
-
-↓
-
-Fix
-
-↓
-
-Export
-
-Ideas
-
-- Better prioritization
-- Review improvements
-- Explainability improvements
-- Better inspection workflow
-- Improved navigation
-
----
-
-## Sprint 5.5 — Explainability
-
-Status: Planned
-
-Goals
-
-Improve trust.
-
-Every issue should explain:
-
-- What failed
-- Why it failed
-- Business impact
-- Suggested resolution
-
-Long-term
-
-AI-assisted explanations may complement the explainability engine.
-
----
-
-## Sprint 5.6 — Validation Profiles
-
-Status: Planned
-
-Goals
-
-Introduce configurable validation profiles.
-
-Profiles should identify their domain, rules, and version so recurring imports can be reviewed against the same configuration. Preserve a clear distinction between suggested mappings and hard validation results.
-
-Examples
-
-Generic
-
-- CSV Validation
-
-Finance
-
-- Invoice Validation
-
-ERP
-
-- Exact Globe
-
-Future
-
-- SAP ECC
-- SAP S/4HANA
-- Dynamics
-- Oracle
-
----
-
-# Milestone 6 — Data Migration Platform
-
-Status: Future
-
-Possible scope
-
-- XML Support
-- SQL Import
-- ERP Extracts
-- Multi-format datasets
-- Migration validation
-- Data profiling
-- Rule templates
-
----
-
-# Milestone 7 — AI Assisted Validation
-
-Status: Future
-
-Focus
-
-AI should strengthen—not replace—the validation process.
-
-Ideas
-
-- AI explanations
-- AI recommendations
-- AI Readiness Score
-- AI workflow summaries
-- AI import risk analysis
-
-Explainability always remains the primary source of truth.
-
----
-
-# Future Vision
-
-Possible future capabilities
-
-## Additional Inputs
-
-- XML
-- SQL
-- APIs
-- PDF
-- OCR
-
-## Workspace
-
-- Multi Dataset Workspace
-- Batch Processing
-- Saved Projects
-
-## Validation
-
-- ERP Profiles
-- Master Data Profiles
-- Custom Business Rules
-- Validation Templates
-
-## Integrations
-
-- ERP Connectors
-- Accounting Platforms
-- Cloud Storage
-
----
-
-# Current Focus
-
-Do not expand into additional integrations until:
-
-- Product positioning is clear.
-- Validation architecture is configurable.
-- Business rules are mature.
-- Workflow is trusted by real users.
-
-The priority is building a product that professionals trust before building a product that supports every possible data source.
-
-Near-term order: finish Sprint 5.1's direct demo and review positioning, then establish the validation architecture before advertising configurable profiles or Master Data support as available.
+Strengthen repeatability with a small, reviewable validation-context step: make the selected profile ID/version and applied mapping visible or exportable alongside the result. Then exercise it with Invoice and Customer before designing persistent projects or adding profiles.

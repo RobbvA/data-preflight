@@ -20,9 +20,11 @@ type InvoiceReviewSectionProps = {
   onToggleCleanOpen: () => void;
   onToggleWarningOpen: () => void;
   onToggleBlockedOpen: () => void;
+  activeTab?: ReviewTab;
+  onTabChange?: (tab: ReviewTab) => void;
 };
 
-type ReviewTab = "blocked" | "warning" | "ready";
+export type ReviewTab = "blocked" | "warning" | "ready";
 
 export function InvoiceReviewSection({
   showOnlyBlocked,
@@ -39,6 +41,8 @@ export function InvoiceReviewSection({
   onToggleCleanOpen,
   onToggleWarningOpen,
   onToggleBlockedOpen,
+  activeTab: controlledTab,
+  onTabChange,
 }: InvoiceReviewSectionProps) {
   const defaultTab: ReviewTab =
     blockedInvoiceItems.length > 0
@@ -47,7 +51,16 @@ export function InvoiceReviewSection({
         ? "warning"
         : "ready";
 
-  const [activeTab, setActiveTab] = useState<ReviewTab>(defaultTab);
+  const [internalTab, setInternalTab] = useState<ReviewTab>(defaultTab);
+  const activeTab = controlledTab ?? internalTab;
+
+  function selectTab(tab: ReviewTab) {
+    if (onTabChange) {
+      onTabChange(tab);
+    } else {
+      setInternalTab(tab);
+    }
+  }
 
   const visibleActiveTab =
     activeTab === "blocked" && blockedInvoiceItems.length === 0
@@ -170,7 +183,7 @@ export function InvoiceReviewSection({
               active={visibleActiveTab === "blocked"}
               tone="danger"
               icon={<AlertTriangle className="h-4 w-4" />}
-              onClick={() => setActiveTab("blocked")}
+              onClick={() => selectTab("blocked")}
             />
 
             <ReviewTabButton
@@ -180,7 +193,7 @@ export function InvoiceReviewSection({
               active={visibleActiveTab === "warning"}
               tone="warning"
               icon={<Search className="h-4 w-4" />}
-              onClick={() => setActiveTab("warning")}
+              onClick={() => selectTab("warning")}
             />
 
             <ReviewTabButton
@@ -190,7 +203,7 @@ export function InvoiceReviewSection({
               active={visibleActiveTab === "ready"}
               tone="success"
               icon={<CheckCircle2 className="h-4 w-4" />}
-              onClick={() => setActiveTab("ready")}
+              onClick={() => selectTab("ready")}
             />
           </div>
 

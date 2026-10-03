@@ -1,390 +1,78 @@
 # DataPreflight Product Vision
 
-## What Is DataPreflight?
+## Purpose
 
-DataPreflight is evolving into a configurable ERP Data Validation Platform: a repeatable quality gate before ERP import.
+DataPreflight is a repeatable quality gate before ERP import. It helps people map source data, apply known business rules, understand problems, review records, and prepare controlled output.
 
-It helps organizations validate, understand, review, and trust business data before it enters ERP systems, accounting platforms, CRM systems, and other business-critical applications.
+**Product promise:** Validate data before ERP import.
 
-Rather than simply displaying spreadsheets, DataPreflight applies explainable business validation to determine whether data is safe to import.
+The intended users include ERP and data migration consultants, business analysts, master data specialists, finance teams, and operations teams. The problem is not merely whether a spreadsheet opens: inconsistent headers, missing identifiers, duplicates, invalid values, and business-rule conflicts create failed imports and rework.
 
-The current MVP reviews invoice data from CSV and Excel files. Reusable, user-selectable validation profiles and Master Data domains are product direction, not current user-facing capabilities.
+## Current product
 
----
+The app currently supports **Invoice data** and **Customer master data** as two selectable, code-defined validation profiles. A user chooses a profile before uploading a CSV, XLSX, or XLS file. The browser suggests field mapping, waits for required mapping to be resolved, normalizes values, applies the selected profile's rules, and shows Blocked, Needs review, and Ready records. Users can export rows without critical issues and download an issue report.
 
-# Core Promise
+Customer is a second test of the product model. It does not mean Vendor, Product, Inventory, or ERP-specific profiles already exist. The app does not offer user-authored rules, saved mappings, projects, connectors, or in-app source editing.
 
-Trusted business data before ERP import.
+## Four pillars
 
----
+### 1. Field mapping
 
-# Product Thesis — Four Pillars
+Source headers such as `Factuurnr` and `Invoice No.` can represent the same internal field. Suggestions must be visible and adjustable. Ambiguous matches should require a human decision rather than silently choosing a source column.
 
-DataPreflight should not compete as a general-purpose AI file checker. Its differentiation should come from the following capabilities working together.
+Mapping is part of the validation context: changing the mapping can change which records pass.
 
-## 1. File Mapping
+### 2. Validation profiles
 
-Different source headers can represent the same business field. For example, `Factuurnr`, `Invoice No.`, and `Inv ID` can map to `invoice_number`.
+A profile defines its data domain, fields, normalization, hard rules, labels, and version. Invoice and Customer currently use versioned definitions in code. Selecting between them is available; creating, editing, saving, or selecting a target ERP rule set is future work.
 
-Mapping suggestions must remain inspectable and adjustable. The current MVP already has invoice field mapping; reusable mapping configurations are future work.
+Do not add many new profiles now. Use the existing two domains to learn what should be shared before building a generic `ValidationWorkspace`.
 
-## 2. Validation Profiles
+### 3. Local-first processing
 
-A profile defines the fields and rules for a data domain, import type, ERP context, or workflow. Profiles should be reusable and versioned so recurring imports can be checked against agreed rules.
+In the current workflow, selected files are parsed, mapped, normalized, validated, and exported in the browser. The example Invoice file is fetched as a public static asset. Source files are not sent to a DataPreflight upload endpoint in this flow.
 
-The current invoice profile and validation rules are defined in code. Selecting or configuring profiles in the UI has not been built.
+Privacy claims must match the complete deployed data flow. Future analytics, logging, server processing, persistence, integrations, and AI features require a new review. Do not promise that data “never leaves the browser” without verifying every relevant path.
 
-## 3. Privacy and Controlled Processing
+### 4. Repeatability
 
-Each feature must make clear where source data is read, processed, stored, and sent. Current CSV and Excel parsing and validation happen in the browser. Future server processing, persistence, integrations, or AI assistance require a fresh data-flow review.
+The intended invariant is:
 
-Privacy is a product advantage only where the implementation supports the exact claim.
+```text
+same input + same mapping + same profile version = same result
+```
 
-## 4. Repeatability
+Hard validation should be deterministic, inspectable, and independent of an AI model's changing responses. Profile versions exist in code, but applied mappings and profile snapshots are not yet stored with exports. Reproducibility across releases needs explicit verification and traceable configuration.
 
-The same logical input, mapping, normalization rules, and versioned profile should produce the same result. Hard validation rules should be deterministic wherever possible.
+## Primary workflow
 
-AI may assist with mapping suggestions, explanations, and recommendations, but must not silently determine whether a record passes a hard rule. Unsupported file sizes should produce an explicit error rather than an incomplete result.
+1. **Choose a validation profile** so the expected data model is known before reading the file.
+2. **Upload** a supported file; detect CSV, XLSX, or XLS from the file itself.
+3. **Parse** headers and rows in the browser.
+4. **Map** source columns to the selected profile and resolve missing or duplicate assignments.
+5. **Normalize and validate** according to that profile's versioned rules.
+6. **Explain and review** blocked, warning-only, and ready records.
+7. **Fix in the source and recheck** when needed.
+8. **Export** rows without critical issues and an issue report.
 
-## Feature Filter
+The current workspace makes mapping, review, and export visible as three steps. A row with a warning can remain in the export; users should inspect it before import. “Ready” means it passed the checks currently implemented for the selected profile, not that a particular ERP will certainly accept it.
 
-A new feature should strengthen mapping, reusable profiles, controlled handling of data, repeatable results, explainable review, or reliable ERP-oriented output.
+## Architecture direction
 
----
+Keep file parsing separate from domain logic. Convert each supported input into a `ParsedDataSet`, map it to the selected profile's fields, then run normalization and deterministic rules. The selected profile should determine fields, mapping requirements, rules, copy, review details, and export behavior.
 
-# Product Mission
+Invoice and Customer currently share a profile contract, parsing, page shell, and parts of the mapping and export flow. They still have separate workspace components and domain-specific rules. Extract shared behavior when it is proven by both flows; preserve domain differences where they matter.
 
-Reduce costly import errors by validating business data before it reaches critical systems.
+An AI assistant may later propose mappings, explain issues, or suggest fixes. It must not silently decide whether a hard validation rule passes. Suggestions and deterministic results must remain distinguishable.
 
-DataPreflight aims to shorten review cycles, reduce manual validation work, and increase confidence during ERP implementations, data migration projects, and operational imports.
+## Product boundaries and next validation
 
----
+The initial industry feedback supports the problem, explainability, business rules, and the potential of ERP and master data validation. It does not prove demand for every future profile, integration, privacy model, or price point. See [FEEDBACK.md](FEEDBACK.md) for the historical notes and the separately labeled product interpretation.
 
-# Who Is It For?
+Next, strengthen the reliability and traceability of Invoice and Customer, verify the workflow with new users, and learn which recurring imports justify reusable mappings or configurable rules. Additional domains and ERP connectors should follow evidence from those workflows.
 
-## Primary Users
+Possible later directions include vendor and product master data, ERP-specific profiles, data migration checks, batch processing, XML or SQL inputs, and AI-assisted explanations. None should be presented as available until built and tested.
 
-- ERP Consultants
-- Data Migration Consultants
-- Business Analysts
-- Data Quality Specialists
-- Master Data Specialists
-- Finance Teams
-- Operations Teams
+## Success criteria
 
----
-
-## Secondary Users
-
-- Accounting Teams
-- Bookkeepers
-- ERP Administrators
-- Implementation Partners
-
----
-
-# Typical Data Sources
-
-Current
-
-- CSV exports
-- Excel exports
-
-Future
-
-- XML
-- SQL query results
-- ERP exports
-- API payloads
-- Additional structured business datasets
-
----
-
-# Core Problem
-
-Organizations regularly import business data into ERP and accounting systems.
-
-Small mistakes often cause:
-
-- Failed imports
-- Manual rework
-- Incorrect financial data
-- Duplicate records
-- Invalid master data
-- Broken workflows
-
-Most existing tools either:
-
-- only display spreadsheets,
-- or validate technical formats.
-
-Very few explain whether business data is actually safe to import.
-
----
-
-# Product Direction
-
-DataPreflight is evolving from an Invoice Validation MVP into a configurable ERP Data Validation Platform.
-
-Invoices remain an important use case, but they are no longer the only focus.
-
-Long-term validation domains include:
-
-- Customers
-- Vendors
-- Materials
-- Products
-- GL Accounts
-- Cost Centers
-- Price Lists
-- Invoice Data
-
-The platform should validate both:
-
-- Generic data quality
-- ERP-specific business rules
-
----
-
-# Core Workflow
-
-Upload
-
-↓
-
-Parse
-
-↓
-
-Mapping
-
-↓
-
-Normalization
-
-↓
-
-Validation Profile + Rules (target architecture)
-
-↓
-
-Explainability
-
-↓
-
-Review
-
-↓
-
-Fix
-
-↓
-
-Trusted Export
-
-In the current MVP, invoice rules are applied in code. Users fix the source file and review it again; there is no in-app record editor. A clean export contains rows that passed the implemented checks, not a guarantee that every ERP will accept them.
-
----
-
-# Product Principles
-
-## Trust First
-
-Business data should be trustworthy before import.
-
----
-
-## Explain Everything
-
-Every issue should clearly explain:
-
-- What is wrong
-- Why it matters
-- Which business risk it creates
-- How it can be resolved
-
-Users should never have to guess why data is blocked.
-
----
-
-## Business Logic Over Technical Validation
-
-Technical validation is only the foundation.
-
-The real value comes from validating business rules such as:
-
-- Duplicate business entities
-- Mandatory ERP fields
-- Country-specific rules
-- Financial consistency
-- Master data completeness
-- ERP-specific validation profiles
-
----
-
-## Workflow First
-
-DataPreflight is not simply a validation engine.
-
-It is an operational review workflow.
-
-Users should be able to:
-
-- Detect issues
-- Understand issues
-- Prioritize issues
-- Review issues
-- Fix issues
-- Export trusted data
-
----
-
-## Configurable Validation
-
-Validation should become configurable.
-
-Future versions should support reusable validation profiles that combine:
-
-- Generic validation rules
-- Business rules
-- ERP-specific validation rules
-
-without requiring code changes.
-
-Profiles and rule sets should be versioned. The current invoice profile is a code definition, not a selectable product feature.
-
----
-
-## Explainable AI
-
-Artificial Intelligence should strengthen DataPreflight.
-
-It should never replace explainability.
-
-AI should assist with:
-
-- explanations
-- recommendations
-- summaries
-- future AI Readiness scoring
-
-while every validation remains transparent and explainable.
-
-AI-generated suggestions must remain distinguishable from deterministic validation results.
-
----
-
-## Source Agnostic Architecture
-
-Every input is transformed into:
-
-ParsedDataSet
-
-allowing validation to remain independent from file format.
-
----
-
-# Current Architecture
-
-Input Layer
-
-↓
-
-Adapter Layer
-
-↓
-
-ParsedDataSet
-
-↓
-
-Mapping Engine
-
-↓
-
-Normalization Engine
-
-↓
-
-Validation Engine
-
-↓
-
-Explainability Engine
-
-↓
-
-Review Workspace
-
-↓
-
-Trusted Export
-
----
-
-# Current Supported Inputs
-
-Supported
-
-- CSV
-- Excel (.xlsx)
-- Excel (.xls)
-
-Current processing uses browser-based adapters for these file types. The present validation and review flow is invoice-specific.
-
----
-
-# Long-Term Vision
-
-DataPreflight should become a configurable validation platform capable of validating business-critical datasets before they enter ERP systems.
-
-Rather than replacing ERP systems, DataPreflight complements them by acting as a trusted validation layer.
-
-Future opportunities include:
-
-- Master Data Validation
-- ERP Validation Profiles
-- Data Migration Validation
-- Batch Processing
-- Multi Dataset Workspace
-- SQL Inputs
-- XML Inputs
-- AI Readiness Scoring
-- AI-assisted Validation
-- PDF Support
-- OCR Support
-
-These remain intentionally out of scope until the validation workflow feels mature, explainable, and trusted.
-
----
-
-# Success Criteria
-
-A user should be able to upload a supported dataset and determine within minutes:
-
-- Which mapping and rules were applied
-- Whether the dataset is safe
-- Which issues require immediate attention
-- Which records are ready
-- Why each issue exists
-- How to resolve it
-
-without requiring technical knowledge.
-
-The same supported input and configuration should produce a repeatable result. “Safe” and “ready” refer to the applied rule set (and, later, the selected profile), not to an unconditional guarantee of downstream import success.
-
----
-
-# Current Product Stage
-
-Live MVP
-
-Validation Phase Completed
-
-Entering Milestone 5:
-
-Validated Product Direction
-
-Focus:
-
-Build from industry feedback and test the remaining product hypotheses with real users.
+A user should quickly see which profile and mapping were applied, what needs attention, why it matters, what can be fixed, and which rows passed the current checks. The same input and versioned configuration should lead to a repeatable result that can be reviewed before ERP import.
