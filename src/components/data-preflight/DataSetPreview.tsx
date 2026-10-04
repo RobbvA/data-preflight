@@ -151,7 +151,7 @@ export function DataSetPreview({
                       onSelectItem ? "cursor-pointer" : ""
                     } ${
                       isSelected
-                        ? "border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.12)] ring-1 ring-[rgba(182,111,58,0.22)]"
+                        ? "border-[color:rgba(182,111,58,0.35)] bg-[var(--surface-base)]"
                         : `${getRowToneClasses(item.priority)} hover:border-[color:rgba(182,111,58,0.35)] hover:bg-[var(--surface-base)]`
                     }`}
                   >
@@ -191,13 +191,14 @@ export function DataSetPreview({
                         {onViewDetails && (
                           <button
                             type="button"
+                            aria-expanded={isSelected}
                             onClick={(event) => {
                               event.stopPropagation();
                               onViewDetails(item.rowIndex);
                             }}
                             className="rounded-full border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[rgba(182,111,58,0.1)] hover:text-[var(--text-primary)]"
                           >
-                            Details
+                            {isSelected ? "Hide details" : "Details"}
                           </button>
                         )}
                       </div>
@@ -222,48 +223,64 @@ export function DataSetPreview({
                       />
                     </div>
 
-                    {mainIssue && (
-                      <MainIssueInline
-                        issue={mainIssue}
-                        selected={isSelected}
-                      />
-                    )}
+                    {mainIssue && <MainIssueInline issue={mainIssue} />}
 
                     {isSelected && (
-                      <div className="mt-1.5 rounded-lg border border-white/10 bg-[var(--surface-deep)] p-2">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent)]">
-                              Review action
-                            </p>
+                      <div className="mt-3 space-y-3 rounded-lg border border-white/10 bg-[var(--surface-deep)] p-3">
+                        <p className="text-sm font-semibold text-[var(--text-primary)]">
+                          {item.actionLabel}
+                        </p>
 
-                            <p className="mt-0.5 text-sm font-medium text-[var(--text-primary)]">
-                              {item.actionLabel}
-                            </p>
-                          </div>
-
-                          <span className="rounded-full border border-[color:rgba(182,111,58,0.28)] bg-[rgba(182,111,58,0.1)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-primary)]">
-                            {item.priorityScore} score
-                          </span>
-                        </div>
-
-                        {item.issues.length > 0 && (
-                          <div className="mt-2 grid gap-1.5">
-                            {item.issues.slice(0, 3).map((issue, index) => (
-                              <IssueSummaryLine
+                        {item.issues.length > 0 ? (
+                          <div className="space-y-2">
+                            {item.issues.map((issue, index) => (
+                              <div
                                 key={`${issue.field}-${issue.type}-${index}`}
-                                issue={issue}
-                              />
+                                className="rounded-lg border border-white/10 bg-[var(--surface-raised)] p-3 text-xs leading-5"
+                              >
+                                <p className="font-semibold text-[var(--text-primary)]">
+                                  {issue.problem}
+                                </p>
+                                <p className="mt-1 text-[var(--text-secondary)]">
+                                  {issue.why}
+                                </p>
+                                <p className="mt-1 text-[var(--text-muted)]">
+                                  Fix: {issue.fix}
+                                </p>
+                              </div>
                             ))}
-
-                            {item.issues.length > 3 && (
-                              <p className="text-xs text-[var(--text-muted)]">
-                                +{item.issues.length - 3} more issue
-                                {item.issues.length - 3 === 1 ? "" : "s"}
-                              </p>
-                            )}
                           </div>
+                        ) : (
+                          <p className="text-xs text-[var(--text-secondary)]">
+                            This row passed the current profile checks.
+                          </p>
                         )}
+
+                        <details
+                          onClick={(event) => event.stopPropagation()}
+                          className="rounded-lg border border-white/10 bg-[var(--surface-raised)] p-3"
+                        >
+                          <summary className="cursor-pointer text-xs font-medium text-[var(--text-secondary)]">
+                            View row fields
+                          </summary>
+
+                          <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                            {Object.entries(item.row)
+                              .filter(
+                                ([field]) => field !== "normalized_invoice_key",
+                              )
+                              .map(([field, value]) => (
+                                <div key={field} className="min-w-0 text-xs">
+                                  <dt className="font-medium text-[var(--text-muted)]">
+                                    {field.replaceAll("_", " ")}
+                                  </dt>
+                                  <dd className="mt-0.5 break-words text-[var(--text-primary)]">
+                                    {value || "—"}
+                                  </dd>
+                                </div>
+                              ))}
+                          </dl>
+                        </details>
                       </div>
                     )}
                   </article>
@@ -292,10 +309,8 @@ function ReviewDataPoint({ label, value }: { label: string; value: string }) {
 
 function MainIssueInline({
   issue,
-  selected,
 }: {
   issue: InvoicePreviewItem["issues"][number];
-  selected: boolean;
 }) {
   const isCritical = issue.severity === "critical";
 
@@ -319,51 +334,7 @@ function MainIssueInline({
         <span className="font-semibold text-[var(--text-primary)]">
           {issue.problem}
         </span>
-
-        {selected && (
-          <>
-            <span className="text-[var(--text-muted)]">·</span>
-
-            <span className="text-[var(--text-muted)]">
-              Fix:{" "}
-              <span className="text-[var(--text-secondary)]">{issue.fix}</span>
-            </span>
-          </>
-        )}
       </div>
-    </div>
-  );
-}
-
-function IssueSummaryLine({
-  issue,
-}: {
-  issue: InvoicePreviewItem["issues"][number];
-}) {
-  const isCritical = issue.severity === "critical";
-
-  return (
-    <div className="grid gap-2 rounded-lg bg-[var(--surface-raised)] px-2 py-1.5 sm:grid-cols-[105px_1fr]">
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span
-          className={`rounded-full px-2 py-0.5 text-[9px] font-medium ${
-            isCritical
-              ? "border border-[color:rgba(182,111,58,0.32)] bg-[rgba(182,111,58,0.11)] text-[var(--text-primary)]"
-              : "border border-white/10 bg-white/[0.04] text-[var(--text-secondary)]"
-          }`}
-        >
-          {issue.severity}
-        </span>
-
-        <span className="text-[10px] text-[var(--text-muted)]">
-          {issue.field}
-        </span>
-      </div>
-
-      <p className="text-xs leading-5 text-[var(--text-secondary)]">
-        <span className="text-[var(--text-primary)]">{issue.problem}</span>{" "}
-        <span className="text-[var(--text-muted)]">·</span> {issue.fix}
-      </p>
     </div>
   );
 }

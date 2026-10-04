@@ -8,7 +8,9 @@ import {
 } from "@/lib/parseCsv";
 import { downloadCsv } from "@/lib/exportData";
 import { getProfileMappingCandidates } from "@/lib/dataProfile";
+import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
+import { ValidationContextPanel } from "@/components/data-preflight/ValidationContextPanel";
 import {
   ActiveWorkspaceHeader,
   LandingWorkspace,
@@ -214,6 +216,15 @@ export function CustomerWorkspace({
         throw new Error("The file has no readable rows and headers.");
       }
 
+      const mismatchMessage = getProfileMismatchMessage(
+        parsed.headers,
+        "customer",
+      );
+
+      if (mismatchMessage) {
+        throw new Error(mismatchMessage);
+      }
+
       setDataSet(parsed);
       setMapping(suggestCustomerMapping(parsed.headers));
     } catch (caught) {
@@ -301,7 +312,7 @@ export function CustomerWorkspace({
             }
           />
 
-          <section className="rounded-2xl border border-[color:rgba(209,154,106,0.35)] bg-[var(--surface-base)] p-5 sm:p-6">
+          <section className="rounded-2xl border border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.07)] p-5 sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
               Next action
             </p>
@@ -556,6 +567,18 @@ export function CustomerWorkspace({
                   Rows with critical issues are excluded. Check warnings before
                   using the export, and confirm your target ERP requirements.
                 </p>
+
+                <ValidationContextPanel
+                  profile={customerValidationProfile}
+                  fileName={dataSet.fileName}
+                  mapping={mapping}
+                  counts={{
+                    total: normalizedRows.length,
+                    blocked: blockedCount,
+                    needsReview: reviewCount,
+                    ready: readyCount,
+                  }}
+                />
 
                 <div className="mt-4 flex flex-wrap gap-3">
                   <button

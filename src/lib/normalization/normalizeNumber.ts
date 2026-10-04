@@ -10,11 +10,9 @@ export function normalizeNumber(value?: string): string {
 }
 
 export function parseNormalizedNumber(value?: string): number | null {
-  const normalizedValue = normalizeNumber(value);
+  if (!value) return null;
 
-  if (!normalizedValue) return null;
-
-  const parsedValue = Number(normalizedValue);
+  const parsedValue = Number(value);
 
   return Number.isFinite(parsedValue) ? parsedValue : null;
 }

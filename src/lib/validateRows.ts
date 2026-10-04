@@ -7,10 +7,7 @@ import {
   isValidIsoDate,
   parseIsoDate,
 } from "@/lib/normalization/normalizeDate";
-import {
-  normalizeInvoiceRow,
-  type NormalizedInvoiceRow,
-} from "@/lib/normalizeInvoice";
+import type { NormalizedInvoiceRow } from "@/lib/normalizeInvoice";
 import { parseNormalizedNumber } from "@/lib/normalization/normalizeNumber";
 import {
   invoiceAllowedStatuses,
@@ -173,8 +170,8 @@ const invoiceValidationRules: InvoiceValidationRule[] = [
   },
 ];
 
-export function validateRows(rows: ParsedRow[]): ValidationResult {
-  const normalizedRows = rows.map(normalizeInvoiceRow);
+export function validateRows(rows: NormalizedInvoiceRow[]): ValidationResult {
+  const normalizedRows = rows;
   const invoiceNumberCounts = countInvoiceNumbers(normalizedRows);
 
   const dataSet: ValidationDataSet = {

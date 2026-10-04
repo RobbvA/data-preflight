@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { getInputAdapter, type ParsedDataSet } from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
 import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfile";
+import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import {
   mapRowsToProfile,
   runValidationProfile,
@@ -22,7 +23,6 @@ import {
 } from "@/lib/fieldMapping";
 import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
 
-import { BlockedInvoiceDetail } from "@/components/data-preflight/BlockedInvoiceDetail";
 import { FieldMappingSection } from "@/components/data-preflight/FieldMappingSection";
 import { CustomerWorkspace } from "@/components/data-preflight/CustomerWorkspace";
 import {
@@ -37,6 +37,7 @@ import {
   type ReviewTab,
 } from "@/components/data-preflight/InvoiceReviewSection";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
+import { ValidationContextPanel } from "@/components/data-preflight/ValidationContextPanel";
 
 import {
   createInvoicePreviewItem,
@@ -44,7 +45,8 @@ import {
 } from "@/components/data-preflight/types";
 
 export function CsvUploader() {
-  const [activeDomain, setActiveDomain] = useState<DataDomain>("invoice");
+  const [activeDomain, setActiveDomain] = useState<DataDomain | null>(null);
+  const [profilePrompt, setProfilePrompt] = useState(false);
   const [parsedDataSet, setParsedDataSet] = useState<ParsedDataSet | null>(
     null,
   );
@@ -58,10 +60,6 @@ export function CsvUploader() {
   const [selectedPreviewRowIndex, setSelectedPreviewRowIndex] = useState<
     number | null
   >(null);
-  const [selectedDetailRowIndex, setSelectedDetailRowIndex] = useState<
-    number | null
-  >(null);
-
   const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
 
   const [isCleanOpen, setIsCleanOpen] = useState(false);
@@ -71,27 +69,20 @@ export function CsvUploader() {
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
   const [activeReviewTab, setActiveReviewTab] = useState<ReviewTab>("blocked");
 
-  const detailRef = useRef<HTMLDivElement | null>(null);
-
   const rows = useMemo(() => parsedDataSet?.rows ?? [], [parsedDataSet]);
   const headers = useMemo(() => parsedDataSet?.headers ?? [], [parsedDataSet]);
 
   const fileName = parsedDataSet?.fileName ?? "";
 
-  useEffect(() => {
-    if (!selectedDetailRowIndex || !detailRef.current) return;
-
-    detailRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, [selectedDetailRowIndex]);
-
   async function loadSource(source: Promise<File>) {
+    if (!activeDomain) {
+      setProfilePrompt(true);
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
     setSelectedPreviewRowIndex(null);
-    setSelectedDetailRowIndex(null);
     setShowOnlyBlocked(false);
     setIsCleanOpen(false);
     setIsWarningOpen(true);
@@ -117,6 +108,15 @@ export function CsvUploader() {
         throw new Error("Source file has no headers.");
       }
 
+      const mismatchMessage = getProfileMismatchMessage(
+        nextParsedDataSet.headers,
+        "invoice",
+      );
+
+      if (mismatchMessage) {
+        throw new Error(mismatchMessage);
+      }
+
       const suggestedMapping = createSuggestedMapping(
         nextParsedDataSet.headers,
         nextParsedDataSet.rows,
@@ -139,7 +139,6 @@ export function CsvUploader() {
       setParsedDataSet(null);
       setFieldMapping(createEmptyMapping());
       setSelectedPreviewRowIndex(null);
-      setSelectedDetailRowIndex(null);
       setShowOnlyBlocked(false);
       setIsCleanOpen(false);
       setIsWarningOpen(true);
@@ -155,11 +154,22 @@ export function CsvUploader() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!activeDomain) {
+      setProfilePrompt(true);
+      event.target.value = "";
+      return;
+    }
+
     void loadSource(Promise.resolve(file));
     event.target.value = "";
   }
 
   function handleTryExample() {
+    if (!activeDomain) {
+      setProfilePrompt(true);
+      return;
+    }
+
     void loadSource(
       fetch("/demo-data/messy-export.csv").then(async (response) => {
         if (!response.ok) {
@@ -181,7 +191,6 @@ export function CsvUploader() {
     setError(null);
     setIsLoading(false);
     setSelectedPreviewRowIndex(null);
-    setSelectedDetailRowIndex(null);
     setShowOnlyBlocked(false);
     setIsCleanOpen(false);
     setIsWarningOpen(true);
@@ -200,20 +209,17 @@ export function CsvUploader() {
     }));
 
     setSelectedPreviewRowIndex(null);
-    setSelectedDetailRowIndex(null);
   }
 
   function toggleBlockedFilter() {
     setShowOnlyBlocked((currentValue) => !currentValue);
     setSelectedPreviewRowIndex(null);
-    setSelectedDetailRowIndex(null);
   }
 
   function handleReviewAction(target: ReviewTab) {
     setActiveReviewTab(target);
     setShowOnlyBlocked(false);
     setSelectedPreviewRowIndex(null);
-    setSelectedDetailRowIndex(null);
 
     if (target === "blocked") setIsBlockedOpen(true);
     if (target === "warning") setIsWarningOpen(true);
@@ -230,11 +236,6 @@ export function CsvUploader() {
     setSelectedPreviewRowIndex((currentRowIndex) =>
       currentRowIndex === rowIndex ? null : rowIndex,
     );
-  }
-
-  function viewInvoiceDetails(rowIndex: number) {
-    setSelectedPreviewRowIndex(rowIndex);
-    setSelectedDetailRowIndex(rowIndex);
   }
 
   const mappingSuggestions = useMemo<MappingSuggestion[]>(() => {
@@ -323,10 +324,6 @@ export function CsvUploader() {
     return invoiceItems.filter((item) => item.issues.length === 0);
   }, [invoiceItems]);
 
-  const selectedInvoice =
-    invoiceItems.find((item) => item.rowIndex === selectedDetailRowIndex) ??
-    null;
-
   const blockedCount = blockedInvoiceItems.length;
   const warningCount = warningInvoiceItems.length;
   const cleanCount = cleanInvoiceItems.length;
@@ -359,6 +356,7 @@ export function CsvUploader() {
   const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   function changeDomain(nextDomain: DataDomain) {
+    setProfilePrompt(false);
     if (nextDomain === activeDomain) return;
 
     resetFlow();
@@ -373,11 +371,13 @@ export function CsvUploader() {
     <WorkspaceLayout>
       {!hasUploadedRows ? (
         <LandingWorkspace
-          domain="invoice"
+          domain={activeDomain ?? "invoice"}
           upload={
             <UploadSection
-              domain="invoice"
+              domain={activeDomain}
               onDomainChange={changeDomain}
+              profilePrompt={profilePrompt}
+              onProfileRequired={() => setProfilePrompt(true)}
               fileName={fileName}
               isLoading={isLoading}
               error={error}
@@ -495,7 +495,7 @@ export function CsvUploader() {
                 isBlockedOpen={isBlockedOpen}
                 onToggleBlockedFilter={toggleBlockedFilter}
                 onSelectInvoice={toggleSelectedPreviewInvoice}
-                onViewInvoiceDetails={viewInvoiceDetails}
+                onViewInvoiceDetails={toggleSelectedPreviewInvoice}
                 onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
                 onToggleWarningOpen={() =>
                   setIsWarningOpen((current) => !current)
@@ -504,15 +504,6 @@ export function CsvUploader() {
                   setIsBlockedOpen((current) => !current)
                 }
               />
-
-              {selectedInvoice && (
-                <div ref={detailRef}>
-                  <BlockedInvoiceDetail
-                    selectedInvoice={selectedInvoice}
-                    onClose={() => setSelectedDetailRowIndex(null)}
-                  />
-                </div>
-              )}
 
               <section
                 id="invoice-export"
@@ -532,6 +523,18 @@ export function CsvUploader() {
                     issues: validationResult.issues,
                   })}
                 </p>
+
+                <ValidationContextPanel
+                  profile={invoiceValidationProfile}
+                  fileName={fileName}
+                  mapping={fieldMapping}
+                  counts={{
+                    total: normalizedRows.length,
+                    blocked: blockedCount,
+                    needsReview: warningCount,
+                    ready: cleanCount,
+                  }}
+                />
 
                 <div className="mt-4 flex flex-wrap gap-3">
                   <button

@@ -1,8 +1,11 @@
+import { useRef } from "react";
 import type { DataDomain } from "@/components/data-preflight/WorkspaceLayout";
 
 type UploadSectionProps = {
-  domain: DataDomain;
+  domain: DataDomain | null;
   onDomainChange: (domain: DataDomain) => void;
+  profilePrompt?: boolean;
+  onProfileRequired?: () => void;
   fileName: string;
   isLoading: boolean;
   error: string | null;
@@ -24,6 +27,8 @@ const EXAMPLE_FILES = [
 export function UploadSection({
   domain,
   onDomainChange,
+  profilePrompt = false,
+  onProfileRequired,
   fileName,
   isLoading,
   error,
@@ -32,6 +37,13 @@ export function UploadSection({
   onTryExample,
   onReset,
 }: UploadSectionProps) {
+  const profileChoicesRef = useRef<HTMLDivElement | null>(null);
+
+  function promptForProfile() {
+    onProfileRequired?.();
+    profileChoicesRef.current?.querySelector("button")?.focus();
+  }
+
   if (hasActiveFile) {
     return (
       <section className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-3 shadow-lg shadow-black/10">
@@ -98,7 +110,7 @@ export function UploadSection({
         Choose the type of data you want to validate before ERP import.
       </p>
 
-      <div className="mt-5">
+      <div className="mt-5" ref={profileChoicesRef}>
         <h3
           className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent-soft)]"
           style={{ marginBottom: 20 }}
@@ -111,35 +123,47 @@ export function UploadSection({
           onDomainChange={onDomainChange}
           disabled={isLoading}
         />
+
+        {profilePrompt && !domain && (
+          <p
+            role="status"
+            className="mt-3 text-sm font-medium text-[var(--brand-accent-soft)]"
+          >
+            Choose Invoice data or Customer master data first.
+          </p>
+        )}
       </div>
 
       <div className="mt-5">
         <button
           type="button"
-          onClick={onTryExample}
+          onClick={domain ? onTryExample : promptForProfile}
           disabled={isLoading}
-          className="inline-flex max-w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-semibold text-[var(--text-primary)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)] disabled:cursor-wait disabled:opacity-60"
+          className="inline-flex max-w-full cursor-pointer items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-semibold text-[var(--text-primary)] transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)] disabled:cursor-wait disabled:opacity-60"
           style={{
             width: "max-content",
             maxWidth: "100%",
             backgroundColor: "var(--brand-accent)",
           }}
         >
-          {isLoading ? "Validating..." : `Validate example ${domain} file →`}
+          {isLoading
+            ? "Validating..."
+            : `Validate example ${domain ? `${domain} ` : ""}file →`}
         </button>
       </div>
 
       <p className="mt-2 text-xs leading-5 text-[var(--text-muted)]">
-        The example is processed using the same rules as your own {domain} file.
+        The example is processed using the same rules as your own{" "}
+        {domain ? `${domain} ` : ""}file.
       </p>
 
       <div className="mt-6 border-t border-white/10 pt-5">
         <h3 className="text-base font-semibold text-[var(--text-primary)]">
-          Use your own {domain} file
+          Use your own {domain ? `${domain} ` : ""}file
         </h3>
 
         <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
-          CSV, XLSX, or XLS {domain} exports are supported.
+          CSV, XLSX, or XLS {domain ? `${domain} ` : ""}exports are supported.
         </p>
 
         <div className="mt-3">
@@ -147,16 +171,26 @@ export function UploadSection({
             className="inline-flex max-w-full rounded-xl border border-dashed border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.05)] p-3"
             style={{ width: "max-content", maxWidth: "100%" }}
           >
-            <label className="inline-flex cursor-pointer rounded-lg border border-white/15 bg-[var(--surface-raised)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
-              Choose file
-              <input
-                type="file"
-                accept={ACCEPTED_SOURCE_TYPES}
-                onChange={onFileChange}
-                disabled={isLoading}
-                className="sr-only"
-              />
-            </label>
+            {domain ? (
+              <label className="inline-flex cursor-pointer rounded-lg border border-white/15 bg-[var(--surface-raised)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
+                Choose file
+                <input
+                  type="file"
+                  accept={ACCEPTED_SOURCE_TYPES}
+                  onChange={onFileChange}
+                  disabled={isLoading}
+                  className="sr-only"
+                />
+              </label>
+            ) : (
+              <button
+                type="button"
+                onClick={promptForProfile}
+                className="inline-flex cursor-pointer rounded-lg border border-white/15 bg-[var(--surface-raised)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]"
+              >
+                Choose file
+              </button>
+            )}
           </div>
         </div>
 
@@ -212,7 +246,7 @@ function ProfileSelector({
   onDomainChange,
   disabled,
 }: {
-  domain: DataDomain;
+  domain: DataDomain | null;
   onDomainChange: (domain: DataDomain) => void;
   disabled: boolean;
 }) {
@@ -229,7 +263,7 @@ function ProfileSelector({
           aria-pressed={domain === choice}
           disabled={disabled}
           onClick={() => onDomainChange(choice)}
-          className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
+          className={`cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
             domain === choice
               ? "border-[color:rgba(209,154,106,0.45)] bg-[rgba(209,154,106,0.07)] text-[var(--text-primary)]"
               : "border-white/10 bg-[var(--surface-deep)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
