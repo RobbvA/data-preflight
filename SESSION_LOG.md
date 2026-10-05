@@ -84,9 +84,7 @@ https://data-preflight.vercel.app/
 
 ### Next Phase
 
-Milestone 5
-
-MVP Validation
+Milestone 5 — MVP Validation
 
 ---
 
@@ -98,11 +96,9 @@ MVP Validation
 
 Validate whether DataPreflight solves a real business problem before continuing development.
 
-Instead of adding more features, focus shifted toward learning from professionals working with ERP systems, accounting platforms and data migration projects.
+Instead of adding more features, focus shifted toward learning from professionals working with ERP systems, accounting platforms, and data migration projects.
 
----
-
-## Outreach Results
+### Outreach Results
 
 Feedback collected from:
 
@@ -119,27 +115,21 @@ Key contributors:
 - Simon
 - Archana Kumari
 
----
+### Major Product Insights
 
-## Major Product Insights
-
-### Product Positioning
+#### Product Positioning
 
 Repeated feedback showed that positioning was too broad.
 
 DataPreflight should clearly communicate:
 
-- who it is for
-- which problem it solves
-- why it is different
+- who it is for;
+- which problem it solves;
+- why it is different.
 
----
+#### Business Logic
 
-### Business Logic
-
-The biggest opportunity is not technical validation.
-
-The biggest opportunity is explainable business validation.
+The biggest opportunity is explainable business validation, beyond technical file checks.
 
 Examples:
 
@@ -148,142 +138,52 @@ Examples:
 - Master Data validation
 - ERP-specific validation
 
----
+#### Workflow
 
-### Workflow
+The existing workflow received positive validation:
 
-The existing workflow received positive validation.
+Validate → Review → Fix → Export
 
-Validate
+This remains one of the strongest parts of the product.
 
-↓
+#### Master Data
 
-Review
+The direction expanded from Invoice Validation toward ERP Data Validation.
 
-↓
+Potential future domains mentioned in feedback include customers, vendors, materials, GL accounts, cost centers, and invoice data. These are opportunities, not commitments to build them immediately.
 
-Fix
+#### Data Migration
 
-↓
+Several conversations identified data migration as a promising long-term niche. Configurable validation before an ERP migration may become a future direction.
 
-Export
-
-This remains one of the strongest parts of the platform.
-
----
-
-### Master Data
-
-The product direction expanded.
-
-Originally:
-
-Invoice Validation
-
-Validated direction:
-
-ERP Data Validation
-
-Future validation domains include:
-
-- Customers
-- Vendors
-- Materials
-- GL Accounts
-- Cost Centers
-- Invoice Data
-
----
-
-### Data Migration
-
-Multiple conversations identified Data Migration as a promising long-term niche.
-
-DataPreflight should evolve into a configurable validation platform capable of validating datasets before ERP migrations.
-
----
-
-### Explainability
+#### Explainability
 
 Users need to understand:
 
-- why something failed
-- why it matters
-- how it should be fixed
+- what failed;
+- why it matters;
+- how to fix it.
 
-Explainability remains a core product principle.
+#### AI
 
----
+AI may later help with explanations, summaries, mapping proposals, or suggested fixes. Deterministic business rules remain the source of validation outcomes.
 
-### AI
+### Significant Milestone
 
-AI should strengthen the platform.
-
-Not replace it.
-
-Future ideas:
-
-- AI explanations
-- AI summaries
-- AI Readiness Score
-
-Explainability always remains the primary source of truth.
-
----
-
-## Significant Milestone
-
-A one-hour strategy discussion with an experienced ERP and Data Migration specialist fundamentally changed the long-term product direction.
+A one-hour strategy discussion with an experienced ERP and Data Migration specialist influenced the long-term direction.
 
 Key outcomes:
 
-- Strong validation of the underlying problem.
-- Shift toward Master Data.
-- Shift toward configurable business rules.
-- Confirmation that ERP validation offers significant value.
-- Potential introduction to additional ERP specialists.
-- Potential future collaboration in training or consulting environments.
+- Validation of the underlying business problem.
+- More attention to Master Data.
+- Interest in configurable business rules.
+- Potential introductions to other ERP specialists.
 
----
+### Direction After Feedback
 
-## Current Direction
+DataPreflight moved beyond a single Invoice Validation MVP toward a repeatable ERP data quality gate.
 
-DataPreflight is no longer viewed as simply an Invoice Validation MVP.
-
-The platform is evolving toward:
-
-Configurable ERP Data Validation Platform
-
-focused on:
-
-- Trust
-- Business Rules
-- Explainability
-- Workflow
-- Master Data
-- ERP Validation
-
----
-
-## Next Phase
-
-Milestone 5
-
-Validated Product Direction
-
-Objectives
-
-- Improve positioning
-- Improve homepage
-- Introduce configurable validation architecture
-- Prepare Master Data support
-- Expand business rules
-- Strengthen explainability
-- Continue validating with industry professionals after implementation
-
-Expected Outcome
-
-A significantly stronger product built on validated market feedback rather than assumptions.
+Milestone 5 became **Validated Product Direction**: strengthen the product based on feedback, then test the resulting workflow with new users.
 
 ---
 
@@ -295,25 +195,19 @@ A significantly stronger product built on validated market feedback rather than 
 
 - Reframed the hero around ERP import and invoice validation.
 - Added an illustrative Review Workspace preview with Blocked, Needs review, and subtly green Ready states.
-- Moved the current browser-processing privacy note beside file selection.
+- Moved the browser-processing privacy note beside file selection.
 - Aligned the preview and upload cards and shortened the opening copy.
 - Removed homepage cards advertising planned formats, profiles, and Master Data capabilities.
 
-The preview is illustrative; the real Review Workspace still appears after a file is loaded. Demo CSV files still require download and upload.
+At this point, the preview was illustrative and example CSV files still required manual download and upload. Later sessions changed the example-loading flow.
 
 ### Product decision
 
-The long-term differentiation is file mapping, reusable validation profiles, controlled processing, and repeatable deterministic results. DataPreflight should become a quality gate before ERP import, not a generic AI file checker.
-
-The current MVP has browser-based CSV/Excel invoice processing and invoice rules in code. Configurable profiles, Master Data validation, and an AI provider are not available.
-
-### Next build task
-
-Make **Review** unmistakable in the first viewport. Add a primary **Try live demo** action that loads the existing messy demo through the same parsing and review path as a selected file. Keep **Upload your file** as the second action. Check the data flow before repeating privacy claims.
+The long-term differentiation is field mapping, validation profiles, controlled processing, and repeatable deterministic results. DataPreflight should become a quality gate before ERP import rather than a generic AI file checker.
 
 ### Documentation
 
-Synchronized README, PRODUCT_VISION, PROJECT_STATUS, ROADMAP, FEEDBACK, and SESSION_LOG on 2026-09-28. Historical interview notes remain separate from the new product interpretation.
+Synchronized README, PRODUCT_VISION, PROJECT_STATUS, ROADMAP, FEEDBACK, and SESSION_LOG on 2026-09-28. Historical interview notes remained separate from the new product interpretation.
 
 ---
 
@@ -324,8 +218,8 @@ Synchronized README, PRODUCT_VISION, PROJECT_STATUS, ROADMAP, FEEDBACK, and SESS
 ### Built
 
 - Refined landing-page hierarchy and changed the primary copy to “Validate data before ERP import.”
-- Let users choose Invoice data or Customer master data before uploading. Invoice remains the default selection.
-- Added direct example loading through the same browser-side path as a selected file.
+- Let users choose Invoice data or Customer master data before uploading. Invoice was still the default selection at this stage; a later session removed that default.
+- Added direct example loading through the same browser-side path as an uploaded file.
 - Introduced a shared profile contract for field definitions, normalization, validation, and versioning.
 - Added Customer as a second working domain with mapping, deterministic checks, review, and export.
 - Required users to resolve missing or ambiguous required Customer mapping before validation and export.
@@ -334,12 +228,12 @@ Synchronized README, PRODUCT_VISION, PROJECT_STATUS, ROADMAP, FEEDBACK, and SESS
 ### Verified in the browser
 
 - Invoice and Customer example/test files produced blocked, warning-only, and ready results.
-- Leaving an ambiguous Customer ID unmapped prevented validation and export; choosing the correct source column restored the expected results.
+- Leaving an ambiguous Customer ID unmapped prevented validation and export. Choosing the correct source column restored the expected results.
 - The user confirmed the local app was working.
 
 ### Product decision
 
-Do not add more profiles yet. Use Invoice and Customer to discover which parts should become generic. The target is one profile-driven workflow over time, without prematurely forcing all domain differences into one component.
+Do not add more profiles yet. Use Invoice and Customer to discover which parts should become generic.
 
 ---
 
@@ -351,25 +245,108 @@ Do not add more profiles yet. Use Invoice and Customer to discover which parts s
 
 - Made field mapping a visible workspace tool with a mapped-field count instead of relying on a small side control.
 - Gave the current workflow a prominent next action.
-- Added Blocked, Needs review, and Ready tabs to Customer review, matching the Invoice review categories.
+- Added Blocked, Needs review, and Ready tabs to Customer review, matching Invoice.
 - Made Invoice show mapping, review, and export as three visible steps, matching Customer.
-- Moved Invoice export below review and removed the duplicate floating export controls.
-- The user placed these files locally and reported that the flow worked.
+- Moved Invoice export below review and removed duplicate floating export controls.
+- The user placed the files locally and reported that the flow worked.
 
 ### CSV parsing safeguard
 
-The CSV parser previously ignored structural errors returned by Papa Parse. It now rejects parsing errors, including inconsistent field counts, before mapping and validation. A subsequent correction removed an unsafe exception for `TooFewFields`: a short row can mean a missing delimiter in the middle, which could shift values into the wrong fields. Empty values must retain their CSV separators.
+The CSV parser previously ignored structural errors returned by Papa Parse. It now rejects parsing errors, including inconsistent field counts, before mapping and validation.
 
-The final one-line correction should be checked in the local file before the session commit.
+A correction removed an unsafe exception for `TooFewFields`: a short row can mean a missing delimiter in the middle, which could shift values into the wrong fields. Empty values must retain their CSV separators. The final correction was verified in `src/lib/parseCsv.ts` and committed in `2745fae`.
 
 ### Architecture and privacy review
 
-A source review found browser-side parsing, mapping, normalization, validation, and export in the current file flow. The Invoice example is fetched from a public static path. This was a targeted source review, not a blanket audit of every future or deployed integration. Keep privacy claims scoped to the actual flow.
+A source review found browser-side parsing, mapping, normalization, validation, and export in the current file flow. The Invoice example is fetched from a public static path.
 
-### Documentation handoff
+This was a targeted source review, not a blanket audit of every future or deployed integration. Keep privacy claims scoped to the actual flow.
 
-Updated `PROJECT_STATUS.md`, `README.md`, `PRODUCT_VISION.md`, and `ROADMAP.md` to reflect two working profiles and the current workflow. `FEEDBACK.md` remains unchanged as a historical feedback log. This session-log entry records the build changes and next step.
+### Documentation
 
-### Next build session
+Updated PROJECT_STATUS.md, README.md, PRODUCT_VISION.md, ROADMAP.md, and SESSION_LOG.md to reflect two working profiles and the current workflow. FEEDBACK.md remained unchanged as a historical feedback log.
 
-Make the selected profile ID/version and applied mapping traceable alongside a validation result or export. Then check repeated runs for both Invoice and Customer using the same input and mapping. Continue refining post-action feedback without adding another domain or starting a broad workspace rewrite.
+---
+
+# 2026-10-04
+
+## Milestone 5 — Profile-first flow, traceability, and inline review
+
+### Built
+
+- Removed the implicit Invoice selection. Users now explicitly choose Invoice data or Customer master data before uploading or loading an example.
+- Kept the upload and example actions visible before profile choice. Clicking one without a profile prompts the user to choose a profile.
+- Added conservative header-based profile mismatch detection. Clearly recognizable Customer files are rejected under Invoice, and clearly recognizable Invoice files are rejected under Customer.
+- Added **Validation details** to both workspaces. It shows profile ID/version, source filename, result counts, and applied field mapping.
+- Kept the customer-facing output focused on CSV; no technical JSON download was added.
+- Found and fixed a double-normalization error in Invoice numbers. Validation now reads the same normalized amount that is exported.
+- Advanced the Invoice validation profile from `1.0.0` to `1.0.1` because the validation behavior changed.
+- Removed the separate Invoice Inspection mode panel. Invoice review cards now reveal issues, explanations, fixes, and optional row fields inline.
+
+### Verified
+
+- The user placed the changes locally and confirmed the profile flow, mismatch handling, Validation details, and inline review worked in the browser.
+- A focused numeric check confirmed that values such as `1,234` are no longer interpreted differently by the validation step and exported data.
+- A full repeatability test across fixed Invoice and Customer files has **not** been completed.
+
+### Commit
+
+Changes were committed and pushed to `main` as `894542f` — `feat: improve profile review and fix invoice validation`.
+
+### Remaining limitation
+
+Profile mismatch detection deliberately catches clear header signatures only. It cannot prove that every unfamiliar file or manual mapping is semantically correct.
+
+The validation context is visible but cannot yet be downloaded as a standalone report.
+
+---
+
+# 2026-10-05
+
+## Milestone 5 — Documentation sync and next validation step
+
+### Product decision
+
+Finish Milestone 5 before adding another validation profile or starting a broad feature sprint.
+
+The agreed order is:
+
+1. Synchronize PROJECT_STATUS.md, ROADMAP.md, and SESSION_LOG.md with the current code.
+2. Add a readable `validation-report.csv`.
+3. Test repeatability with fixed Invoice and Customer files.
+4. Observe a new user completing the workflow without guidance.
+5. Reassess the Milestone 5 exit criteria.
+
+### Validation Report scope
+
+Use the validation context already available in the interface:
+
+- validation profile;
+- profile version;
+- source filename;
+- total rows;
+- blocked rows;
+- rows needing review;
+- ready rows;
+- applied field mapping from DataPreflight fields to source columns.
+
+Keep the first version as an understandable CSV. Do not add JSON, a generated timestamp, or a larger reporting system. An XLSX workbook with separate Summary, Field Mapping, Issues, and Ready Data sheets is a possible later direction.
+
+### Repeatability check
+
+Run the same Invoice and Customer files more than once with the same mapping and profile version. Compare:
+
+- applied mapping;
+- normalized values;
+- Blocked / Needs review / Ready counts;
+- issues;
+- clean export data;
+- Validation Report contents.
+
+The target is to demonstrate:
+
+**same input + same mapping + same profile version = same result**
+
+### Next build step
+
+Implement the small CSV Validation Report, then run the repeatability checks. After that, prioritize an external new-user test over new features.

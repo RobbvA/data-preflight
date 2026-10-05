@@ -1,5 +1,8 @@
 "use client";
 
+import { downloadCsv } from "@/lib/exportData";
+import { buildValidationReportRows } from "@/lib/validationReport";
+
 type ValidationContextPanelProps<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
@@ -23,6 +26,13 @@ export function ValidationContextPanel<TField extends string>({
       ([first], [second]) => first.localeCompare(second),
     ),
   );
+
+  function downloadReport() {
+    downloadCsv(
+      "validation-report.csv",
+      buildValidationReportRows({ profile, fileName, mapping, counts }),
+    );
+  }
 
   return (
     <section
@@ -75,6 +85,14 @@ export function ValidationContextPanel<TField extends string>({
             </dd>
           </div>
         </dl>
+
+        <button
+          type="button"
+          onClick={downloadReport}
+          className="mt-4 rounded-lg border border-white/15 bg-[var(--surface-raised)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] transition hover:border-[var(--brand-accent)]"
+        >
+          Download validation report CSV
+        </button>
       </details>
     </section>
   );
