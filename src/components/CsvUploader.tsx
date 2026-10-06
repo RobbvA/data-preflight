@@ -31,7 +31,6 @@ import {
   WorkspaceLayout,
   type DataDomain,
 } from "@/components/data-preflight/WorkspaceLayout";
-import { ImportReadinessPanel } from "@/components/data-preflight/ImportReadinessPanel";
 import {
   InvoiceReviewSection,
   type ReviewTab,
@@ -60,7 +59,6 @@ export function CsvUploader() {
   const [selectedPreviewRowIndex, setSelectedPreviewRowIndex] = useState<
     number | null
   >(null);
-  const [showOnlyBlocked, setShowOnlyBlocked] = useState(false);
 
   const [isCleanOpen, setIsCleanOpen] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(true);
@@ -83,7 +81,6 @@ export function CsvUploader() {
     setError(null);
     setIsLoading(true);
     setSelectedPreviewRowIndex(null);
-    setShowOnlyBlocked(false);
     setIsCleanOpen(false);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
@@ -139,7 +136,6 @@ export function CsvUploader() {
       setParsedDataSet(null);
       setFieldMapping(createEmptyMapping());
       setSelectedPreviewRowIndex(null);
-      setShowOnlyBlocked(false);
       setIsCleanOpen(false);
       setIsWarningOpen(true);
       setIsBlockedOpen(true);
@@ -191,7 +187,6 @@ export function CsvUploader() {
     setError(null);
     setIsLoading(false);
     setSelectedPreviewRowIndex(null);
-    setShowOnlyBlocked(false);
     setIsCleanOpen(false);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
@@ -209,27 +204,6 @@ export function CsvUploader() {
     }));
 
     setSelectedPreviewRowIndex(null);
-  }
-
-  function toggleBlockedFilter() {
-    setShowOnlyBlocked((currentValue) => !currentValue);
-    setSelectedPreviewRowIndex(null);
-  }
-
-  function handleReviewAction(target: ReviewTab) {
-    setActiveReviewTab(target);
-    setShowOnlyBlocked(false);
-    setSelectedPreviewRowIndex(null);
-
-    if (target === "blocked") setIsBlockedOpen(true);
-    if (target === "warning") setIsWarningOpen(true);
-    if (target === "ready") setIsCleanOpen(true);
-
-    requestAnimationFrame(() => {
-      document
-        .getElementById("invoice-review-workspace")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
   }
 
   function toggleSelectedPreviewInvoice(rowIndex: number) {
@@ -328,28 +302,7 @@ export function CsvUploader() {
   const warningCount = warningInvoiceItems.length;
   const cleanCount = cleanInvoiceItems.length;
 
-  const criticalCount = validationResult.issues.filter(
-    (issue) => issue.severity === "critical",
-  ).length;
-
-  const hasSuspiciousVat = validationResult.issues.some(
-    (issue) =>
-      issue.field.toLowerCase().includes("vat") && issue.severity === "warning",
-  );
-
   const canExport = mappingReady && validationResult.cleanRows.length > 0;
-
-  const importReadinessMessage = hasIncompleteMapping
-    ? "Review required: mandatory invoice fields are not mapped."
-    : hasDuplicateMappings
-      ? "Review required: a source column is mapped more than once."
-      : blockedCount > 0
-        ? "Blocked invoices are excluded from clean export. Fix them in the source and recheck."
-        : warningCount > 0
-          ? "Warnings found. Review them before export."
-          : cleanCount > 0
-            ? "All mapped invoices passed the current checks. Confirm target ERP requirements before import."
-            : "Upload and map an invoice export to start the review.";
 
   const hasUploadedRows = rows.length > 0;
   const hasHeaders = headers.length > 0;
@@ -392,7 +345,7 @@ export function CsvUploader() {
         <>
           <ActiveWorkspaceHeader
             domain="invoice"
-            description="Review the analysis summary, then inspect the invoice rows that need action."
+            description="Inspect invoice rows that need attention, then export rows without blockers."
             upload={
               <UploadSection
                 domain="invoice"
@@ -457,43 +410,16 @@ export function CsvUploader() {
 
           {mappingReady && (
             <>
-              <ImportReadinessPanel
-                importReadinessMessage={importReadinessMessage}
-                totalInvoices={normalizedRows.length}
-                hasIncompleteMapping={hasIncompleteMapping}
-                hasDuplicateMappings={hasDuplicateMappings}
-                blockedCount={blockedCount}
-                warningCount={warningCount}
-                cleanCount={cleanCount}
-                criticalCount={criticalCount}
-                hasSuspiciousVat={hasSuspiciousVat}
-                canExport={canExport}
-                cleanRows={validationResult.cleanRows}
-                issues={validationResult.issues}
-                onDownloadCleanCsv={downloadCsv}
-                onDownloadErrorCsv={downloadErrorCsv}
-                onReviewAction={handleReviewAction}
-                onExportAction={() =>
-                  document.getElementById("invoice-export")?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  })
-                }
-              />
-
               <InvoiceReviewSection
                 activeTab={activeReviewTab}
                 onTabChange={setActiveReviewTab}
-                showOnlyBlocked={showOnlyBlocked}
                 cleanInvoiceItems={cleanInvoiceItems}
                 warningInvoiceItems={warningInvoiceItems}
                 blockedInvoiceItems={blockedInvoiceItems}
-                criticalCount={criticalCount}
                 selectedRowIndex={selectedPreviewRowIndex}
                 isCleanOpen={isCleanOpen}
                 isWarningOpen={isWarningOpen}
                 isBlockedOpen={isBlockedOpen}
-                onToggleBlockedFilter={toggleBlockedFilter}
                 onSelectInvoice={toggleSelectedPreviewInvoice}
                 onViewInvoiceDetails={toggleSelectedPreviewInvoice}
                 onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}

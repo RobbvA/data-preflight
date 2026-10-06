@@ -287,7 +287,7 @@ Updated PROJECT_STATUS.md, README.md, PRODUCT_VISION.md, ROADMAP.md, and SESSION
 
 - The user placed the changes locally and confirmed the profile flow, mismatch handling, Validation details, and inline review worked in the browser.
 - A focused numeric check confirmed that values such as `1,234` are no longer interpreted differently by the validation step and exported data.
-- A full repeatability test across fixed Invoice and Customer files has **not** been completed.
+- A full repeatability test across fixed Invoice and Customer files had not yet been completed at this point.
 
 ### Commit
 
@@ -297,56 +297,91 @@ Changes were committed and pushed to `main` as `894542f` — `feat: improve prof
 
 Profile mismatch detection deliberately catches clear header signatures only. It cannot prove that every unfamiliar file or manual mapping is semantically correct.
 
-The validation context is visible but cannot yet be downloaded as a standalone report.
+At this point, the validation context was visible but could not yet be downloaded as a standalone report.
 
 ---
 
 # 2026-10-05
 
-## Milestone 5 — Documentation sync and next validation step
+## Milestone 5 — Downloadable Validation Report
 
 ### Product decision
 
 Finish Milestone 5 before adding another validation profile or starting a broad feature sprint.
 
-The agreed order is:
+The Validation Report should let a user identify which file, profile version, and mapping produced a result without requiring JSON or another technical format.
 
-1. Synchronize PROJECT_STATUS.md, ROADMAP.md, and SESSION_LOG.md with the current code.
-2. Add a readable `validation-report.csv`.
-3. Test repeatability with fixed Invoice and Customer files.
-4. Observe a new user completing the workflow without guidance.
-5. Reassess the Milestone 5 exit criteria.
+### Built
 
-### Validation Report scope
+- Added a readable `validation-report.csv` download to the Validation details for Invoice and Customer.
+- The report contains validation profile, profile ID/version, source filename, total rows, Blocked, Needs review, Ready, and the applied field mapping.
+- Kept the report deterministic by omitting a generated timestamp.
+- Preserved browser-side report generation.
 
-Use the validation context already available in the interface:
+### Checked
 
-- validation profile;
-- profile version;
-- source filename;
-- total rows;
-- blocked rows;
-- rows needing review;
-- ready rows;
-- applied field mapping from DataPreflight fields to source columns.
+- The report opened in Excel.
+- A comparison initially returned different hashes because two reports came from different source files. Comparing reports from identical runs produced matching hashes.
+- Two reports from repeated Customer runs with the same source and mapping were byte-identical.
 
-Keep the first version as an understandable CSV. Do not add JSON, a generated timestamp, or a larger reporting system. An XLSX workbook with separate Summary, Field Mapping, Issues, and Ready Data sheets is a possible later direction.
+### Commit
 
-### Repeatability check
+Changes were committed and pushed to `main` as `7a311a9` — `feat: add downloadable validation report`. The working tree was clean afterward.
 
-Run the same Invoice and Customer files more than once with the same mapping and profile version. Compare:
+### Next direction
 
-- applied mapping;
-- normalized values;
-- Blocked / Needs review / Ready counts;
-- issues;
-- clean export data;
-- Validation Report contents.
+Test repeatability further, then exercise more realistic CSV/XLSX files, malformed inputs, and performance before an unguided external user test.
 
-The target is to demonstrate:
+---
 
-**same input + same mapping + same profile version = same result**
+# 2026-10-06
+
+## Milestone 5 — Review clarity and reliability checks
+
+### Invoice review UI
+
+- Removed the duplicate separation between Invoice Step 2 and the review workspace so review appears as one coherent card.
+- Removed the redundant **Show only blocked** control, which did not change the visible tab contents.
+- Kept Blocked, Needs review, and Ready as the controls for switching between result categories.
+- The user checked all three tabs after the change and confirmed they still worked.
+
+### Repeatability baseline
+
+Repeated the same Invoice CSV run with the same mapping and compared downloads:
+
+- clean Invoice exports: byte-identical;
+- Invoice issue reports: byte-identical.
+
+Repeated the same Customer CSV run with the same mapping and compared downloads:
+
+- Customer exports without blockers: byte-identical;
+- Customer issue reports: byte-identical.
+
+Validation Reports for repeated identical runs were also checked and matched. This is an initial baseline for fixed fixtures, not proof that all possible files and edge cases are repeatable.
+
+### Reordered Excel fixtures
+
+Tested two XLSX files with reordered columns and representative edge cases:
+
+- Invoice: all 10 fields mapped; 6 rows produced **3 blocked / 1 needs review / 2 ready**.
+- Customer: all 5 fields mapped; 6 rows produced **3 blocked / 1 needs review / 2 ready**.
+
+The results matched the expectations for these fixtures. Broader Excel testing remains open.
+
+### Malformed CSV
+
+- Tested an Invoice CSV with an opening quote that was not closed.
+- DataPreflight stopped the file before validation.
+- The original error message referred to a misleading row number. The CSV error text was adjusted to avoid that incorrect location and guide the user to check quotes and column counts.
+- Whitespace normalization in `normalizeCellValue` was retained after correcting an accidental omission while transferring the file.
+- The user retested the malformed file and confirmed the guard worked under Invoice.
+
+### Current assessment
+
+Milestone 5 has a working Validation Report, an initial repeatability baseline, and successful targeted Excel and malformed-CSV checks. It remains in progress because representative file coverage, performance measurements, and an unguided new-user test are still missing.
 
 ### Next build step
 
-Implement the small CSV Validation Report, then run the repeatability checks. After that, prioritize an external new-user test over new features.
+Continue a focused reliability matrix, starting with an Excel edge case. Compare expected mapping, normalized values, individual issues, exports, and Validation Report. Then measure small, normal, and large files before deciding whether a file-size or row-count guard is needed.
+
+Keep Invoice and Customer as the only profiles during this milestone. Update project Markdown at the end of each build session.

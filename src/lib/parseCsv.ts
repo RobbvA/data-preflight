@@ -85,15 +85,14 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
         const structuralError = result.errors[0];
 
         if (structuralError) {
-          const record =
-            typeof structuralError.row === "number" &&
-            structuralError.row >= 0
-              ? ` in data row ${structuralError.row + 1}`
-              : "";
+          const detail =
+            structuralError.code === "MissingQuotes"
+              ? "A value starts with a quotation mark but has no matching closing quotation mark."
+              : "The file has inconsistent columns or quotation marks.";
 
           reject(
             new Error(
-              `Could not safely read CSV${record}: ${structuralError.code}. Check the source file's quotes and column counts.`,
+              `Could not read this CSV file. ${detail} Correct the source file and upload it again.`,
             ),
           );
           return;

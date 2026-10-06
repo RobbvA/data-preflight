@@ -5,16 +5,13 @@ import { DataSetPreview } from "@/components/data-preflight/DataSetPreview";
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
 
 type InvoiceReviewSectionProps = {
-  showOnlyBlocked: boolean;
   cleanInvoiceItems: InvoicePreviewItem[];
   warningInvoiceItems: InvoicePreviewItem[];
   blockedInvoiceItems: InvoicePreviewItem[];
-  criticalCount: number;
   selectedRowIndex: number | null;
   isCleanOpen: boolean;
   isWarningOpen: boolean;
   isBlockedOpen: boolean;
-  onToggleBlockedFilter: () => void;
   onSelectInvoice: (rowIndex: number) => void;
   onViewInvoiceDetails: (rowIndex: number) => void;
   onToggleCleanOpen: () => void;
@@ -27,7 +24,6 @@ type InvoiceReviewSectionProps = {
 export type ReviewTab = "blocked" | "warning" | "ready";
 
 export function InvoiceReviewSection({
-  showOnlyBlocked,
   cleanInvoiceItems,
   warningInvoiceItems,
   blockedInvoiceItems,
@@ -35,7 +31,6 @@ export function InvoiceReviewSection({
   isCleanOpen,
   isWarningOpen,
   isBlockedOpen,
-  onToggleBlockedFilter,
   onSelectInvoice,
   onViewInvoiceDetails,
   onToggleCleanOpen,
@@ -138,39 +133,20 @@ export function InvoiceReviewSection({
       id="invoice-review-workspace"
       className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
-            Review workspace
-          </p>
+      <div className="border-b border-white/10 pb-3">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
+          Step 2 · Review
+        </p>
 
-          <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
-              Invoice review
-            </h2>
+        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
+            Invoice results
+          </h2>
 
-            <StatusPill tone={reviewStatus.tone}>
-              {reviewStatus.label}
-            </StatusPill>
-          </div>
-
-          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
-            Review the most important category first. Fix blocked invoices,
-            check warnings, then export clean rows.
-          </p>
+          <StatusPill tone={reviewStatus.tone}>
+            {reviewStatus.label}
+          </StatusPill>
         </div>
-
-        <button
-          type="button"
-          onClick={onToggleBlockedFilter}
-          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-            showOnlyBlocked
-              ? "border-[color:rgba(182,111,58,0.45)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]"
-              : "border-white/10 bg-[var(--surface-raised)] text-[var(--text-secondary)] hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-deep)] hover:text-[var(--text-primary)]"
-          }`}
-        >
-          {showOnlyBlocked ? "Showing blocked only" : "Show only blocked"}
-        </button>
       </div>
 
       {totalReviewItems > 0 ? (
