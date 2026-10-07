@@ -10,6 +10,11 @@ type UploadSectionProps = {
   isLoading: boolean;
   error: string | null;
   hasActiveFile: boolean;
+  pendingExcelSheets?: {
+    fileName: string;
+    names: string[];
+  } | null;
+  onSelectExcelSheet?: (sheetName: string) => void;
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onTryExample: () => void;
   onReset: () => void;
@@ -33,6 +38,8 @@ export function UploadSection({
   isLoading,
   error,
   hasActiveFile,
+  pendingExcelSheets,
+  onSelectExcelSheet,
   onFileChange,
   onTryExample,
   onReset,
@@ -59,7 +66,9 @@ export function UploadSection({
               Current source
             </p>
             <p className="mt-1 truncate text-sm font-medium text-[var(--text-primary)]">
-              {isLoading ? "Reading source file..." : fileName || "No file selected"}
+              {isLoading
+                ? "Reading source file..."
+                : fileName || "No file selected"}
             </p>
           </div>
 
@@ -133,6 +142,46 @@ export function UploadSection({
           </p>
         )}
       </div>
+
+      {pendingExcelSheets && onSelectExcelSheet && (
+        <section
+          aria-label="Choose Excel worksheet"
+          className="mt-5 rounded-xl border border-[color:rgba(209,154,106,0.45)] bg-[rgba(209,154,106,0.07)] p-4"
+        >
+          <h3 className="text-base font-semibold text-[var(--text-primary)]">
+            Choose a worksheet
+          </h3>
+
+          <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+            {pendingExcelSheets.fileName} contains multiple sheets with data.
+            Select the sheet with the{" "}
+            {domain === "customer" ? "customer" : "invoice"} rows before field
+            mapping and validation.
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {pendingExcelSheets.names.map((sheetName) => (
+              <button
+                key={sheetName}
+                type="button"
+                onClick={() => onSelectExcelSheet(sheetName)}
+                disabled={isLoading}
+                className="rounded-lg border border-[color:rgba(209,154,106,0.5)] bg-[var(--surface-raised)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)] hover:bg-[var(--surface-deep)] disabled:cursor-wait disabled:opacity-50"
+              >
+                {sheetName}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={onReset}
+            className="mt-3 text-xs font-medium text-[var(--text-secondary)] underline-offset-2 hover:text-[var(--text-primary)] hover:underline"
+          >
+            Cancel file
+          </button>
+        </section>
+      )}
 
       <div className="mt-5">
         <button

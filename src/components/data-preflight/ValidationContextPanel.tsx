@@ -6,6 +6,7 @@ import { buildValidationReportRows } from "@/lib/validationReport";
 type ValidationContextPanelProps<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
+  sheetName?: string;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -18,6 +19,7 @@ type ValidationContextPanelProps<TField extends string> = {
 export function ValidationContextPanel<TField extends string>({
   profile,
   fileName,
+  sheetName,
   mapping,
   counts,
 }: ValidationContextPanelProps<TField>) {
@@ -30,7 +32,13 @@ export function ValidationContextPanel<TField extends string>({
   function downloadReport() {
     downloadCsv(
       "validation-report.csv",
-      buildValidationReportRows({ profile, fileName, mapping, counts }),
+      buildValidationReportRows({
+        profile,
+        fileName,
+        sheetName,
+        mapping,
+        counts,
+      }),
     );
   }
 
@@ -58,6 +66,15 @@ export function ValidationContextPanel<TField extends string>({
               {fileName}
             </dd>
           </div>
+
+          {sheetName && (
+            <div className="min-w-0">
+              <dt className="text-[var(--text-muted)]">Source worksheet</dt>
+              <dd className="mt-1 break-all text-[var(--text-primary)]">
+                {sheetName}
+              </dd>
+            </div>
+          )}
 
           <div className="sm:col-span-2">
             <dt className="text-[var(--text-muted)]">Validation result</dt>

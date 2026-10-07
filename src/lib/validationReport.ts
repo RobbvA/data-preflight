@@ -3,6 +3,7 @@ import type { ParsedRow } from "@/lib/parseCsv";
 type ValidationReportInput<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
+  sheetName?: string;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -15,6 +16,7 @@ type ValidationReportInput<TField extends string> = {
 export function buildValidationReportRows<TField extends string>({
   profile,
   fileName,
+  sheetName,
   mapping,
   counts,
 }: ValidationReportInput<TField>): ParsedRow[] {
@@ -37,6 +39,9 @@ export function buildValidationReportRows<TField extends string>({
     row("Validation", "Profile ID", profile.id),
     row("Validation", "Profile version", profile.version),
     row("Validation", "Source filename", fileName),
+    ...(sheetName
+      ? [row("Validation", "Source worksheet", sheetName)]
+      : []),
     row("Result", "Total rows", String(counts.total)),
     row("Result", "Blocked", String(counts.blocked)),
     row("Result", "Needs review", String(counts.needsReview)),

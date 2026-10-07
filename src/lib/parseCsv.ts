@@ -32,7 +32,7 @@ export type ParsedDataSet = {
 export type InputAdapter = {
   sourceType: SourceType;
   canParse: (file: File) => boolean;
-  parse: (file: File) => Promise<ParsedDataSet>;
+  parse: (file: File, sheetName?: string) => Promise<ParsedDataSet>;
 };
 
 export const csvAdapter: InputAdapter = {
@@ -62,8 +62,8 @@ export const excelAdapter: InputAdapter = {
     );
   },
 
-  parse(file) {
-    return parseExcelFile(file);
+  parse(file, sheetName) {
+    return parseExcelFile(file, sheetName);
   },
 };
 
@@ -128,20 +128,40 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
   });
 }
 
-export async function parseExcelFile(file: File): Promise<ParsedDataSet> {
-  const buffer = await file.arrayBuffer();
+export async function getReadableExcelSheetNames(
+  file: File,
+): Promise<string[]> {
+  const workbook = await readExcelWorkbook(file);
+  return getReadableSheetNames(workbook);
+}
 
-  const workbook = XLSX.read(buffer, {
-    type: "array",
-    cellDates: false,
-  });
+export async function parseExcelFile(
+  file: File,
+  selectedSheetName?: string,
+): Promise<ParsedDataSet> {
+  const workbook = await readExcelWorkbook(file);
+  const readableSheetNames = getReadableSheetNames(workbook);
 
-  const sheetName = getFirstUsableSheetName(workbook);
-
-  if (!sheetName) {
+  if (readableSheetNames.length === 0) {
     throw new Error("Excel file has no readable sheets.");
   }
 
+  if (
+    selectedSheetName &&
+    !readableSheetNames.includes(selectedSheetName)
+  ) {
+    throw new Error(
+      "The selected Excel sheet is empty or unavailable. Choose another sheet.",
+    );
+  }
+
+  if (!selectedSheetName && readableSheetNames.length > 1) {
+    throw new Error(
+      "This Excel file has multiple sheets with data. Choose a sheet before validation.",
+    );
+  }
+
+  const sheetName = selectedSheetName ?? readableSheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
   const sheetRows = XLSX.utils.sheet_to_json<unknown[]>(worksheet, {
@@ -175,8 +195,17 @@ export async function parseExcelFile(file: File): Promise<ParsedDataSet> {
   };
 }
 
-function getFirstUsableSheetName(workbook: XLSX.WorkBook) {
-  return workbook.SheetNames.find((sheetName) => {
+async function readExcelWorkbook(file: File): Promise<XLSX.WorkBook> {
+  const buffer = await file.arrayBuffer();
+
+  return XLSX.read(buffer, {
+    type: "array",
+    cellDates: false,
+  });
+}
+
+function getReadableSheetNames(workbook: XLSX.WorkBook): string[] {
+  return workbook.SheetNames.filter((sheetName) => {
     const worksheet = workbook.Sheets[sheetName];
 
     if (!worksheet) return false;

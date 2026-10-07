@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   getInputAdapter,
+  getReadableExcelSheetNames,
   type ParsedDataSet,
   type ParsedRow,
 } from "@/lib/parseCsv";
@@ -55,6 +56,10 @@ export function CustomerWorkspace({
 }) {
   const [dataSet, setDataSet] = useState<ParsedDataSet | null>(null);
   const [mapping, setMapping] = useState<CustomerMapping>(emptyMapping);
+  const [pendingExcelSheets, setPendingExcelSheets] = useState<{
+    file: File;
+    names: string[];
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeReviewTab, setActiveReviewTab] =
@@ -155,8 +160,8 @@ export function CustomerWorkspace({
             title: "Export the checked rows",
             detail: "The current profile found no issues in these rows.",
             button: "Go to export",
-            target: "customer-export",
             tab: null,
+            target: "customer-export",
           };
 
   const sortedRows = normalizedRows
@@ -196,10 +201,11 @@ export function CustomerWorkspace({
     });
   }
 
-  async function loadFile(file: File) {
+  async function loadFile(file: File, selectedSheetName?: string) {
     setError(null);
     setDataSet(null);
     setMapping(emptyMapping());
+    setPendingExcelSheets(null);
     setActiveReviewTab(null);
     setIsLoading(true);
 
@@ -210,7 +216,16 @@ export function CustomerWorkspace({
         throw new Error("Choose a CSV, XLSX, or XLS file.");
       }
 
-      const parsed = await adapter.parse(file);
+      if (adapter.sourceType === "excel" && !selectedSheetName) {
+        const sheetNames = await getReadableExcelSheetNames(file);
+
+        if (sheetNames.length > 1) {
+          setPendingExcelSheets({ file, names: sheetNames });
+          return;
+        }
+      }
+
+      const parsed = await adapter.parse(file, selectedSheetName);
 
       if (parsed.rows.length === 0 || parsed.headers.length === 0) {
         throw new Error("The file has no readable rows and headers.");
@@ -244,6 +259,11 @@ export function CustomerWorkspace({
     event.target.value = "";
   }
 
+  function handleExcelSheetSelect(sheetName: string) {
+    if (!pendingExcelSheets) return;
+    void loadFile(pendingExcelSheets.file, sheetName);
+  }
+
   function loadExample() {
     void loadFile(
       new File([EXAMPLE_CSV], "customer-example.csv", {
@@ -253,6 +273,7 @@ export function CustomerWorkspace({
   }
 
   function resetFlow() {
+    setPendingExcelSheets(null);
     setDataSet(null);
     setMapping(emptyMapping());
     setError(null);
@@ -286,6 +307,15 @@ export function CustomerWorkspace({
               isLoading={isLoading}
               error={error}
               hasActiveFile={false}
+              pendingExcelSheets={
+                pendingExcelSheets
+                  ? {
+                      fileName: pendingExcelSheets.file.name,
+                      names: pendingExcelSheets.names,
+                    }
+                  : null
+              }
+              onSelectExcelSheet={handleExcelSheetSelect}
               onFileChange={handleFileChange}
               onTryExample={loadExample}
               onReset={resetFlow}
@@ -571,6 +601,7 @@ export function CustomerWorkspace({
                 <ValidationContextPanel
                   profile={customerValidationProfile}
                   fileName={dataSet.fileName}
+                  sheetName={dataSet.metadata?.sheetName}
                   mapping={mapping}
                   counts={{
                     total: normalizedRows.length,

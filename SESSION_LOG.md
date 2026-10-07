@@ -385,3 +385,49 @@ Milestone 5 has a working Validation Report, an initial repeatability baseline, 
 Continue a focused reliability matrix, starting with an Excel edge case. Compare expected mapping, normalized values, individual issues, exports, and Validation Report. Then measure small, normal, and large files before deciding whether a file-size or row-count guard is needed.
 
 Keep Invoice and Customer as the only profiles during this milestone. Update project Markdown at the end of each build session.
+
+---
+
+# 2026-10-07
+
+## Milestone 5 — Excel worksheet selection and performance checks
+
+### Multi-sheet Excel issue
+
+An Invoice workbook was created with a populated `Read me` worksheet followed by the actual `Invoice export` worksheet. Before the change, DataPreflight read the first sheet as though it were invoice data and suggested an incorrect field mapping.
+
+### Built
+
+- Added an explicit worksheet choice for Excel files with multiple populated worksheets before their contents are mapped and validated.
+- Passed the chosen worksheet through the browser-side Excel parser for both Invoice and Customer.
+- Recorded the selected worksheet in the parsed dataset, Validation details, and the downloadable Validation Report.
+- Kept CSV report output unchanged when no worksheet applies.
+- Corrected the Customer review component while transferring the worksheet-selection changes.
+
+### Verified
+
+- Choosing `Invoice export` in the multi-sheet workbook mapped all 10 Invoice fields and produced **3 blocked / 1 needs review / 2 ready** from six rows.
+- The Validation Report identified the source workbook and selected worksheet.
+- Repeating the same Invoice workbook and worksheet selection produced byte-identical Validation Reports.
+- Selecting the Invoice worksheet under the Customer profile was rejected as a recognizable profile mismatch.
+- The existing reordered Customer XLSX still worked in the updated Customer workspace.
+
+### File-size observations
+
+Manually uploaded Invoice CSV files containing 100, 1,000, and 5,000 rows. The results appeared without noticeable browser delay.
+
+The first synthetic CSV fixtures contained values such as `Company 000001`. Those numeric-looking values lowered the automatic mapping confidence for the `Company` column despite its exact header. After `Company` was chosen manually, the runs produced Ready results. A separate 100-row CSV with ordinary business names mapped `Company` automatically.
+
+Manually uploaded Invoice XLSX files containing 1,000 and 5,000 rows with ordinary business names. Mapping completed automatically, and there was no noticeable browser delay.
+
+This was a responsiveness check, not a benchmark. No parse time, validation time, memory use, or maximum supported size was measured. Do not infer or advertise a file-size limit from these results.
+
+### Current assessment
+
+The worksheet-selection defect is resolved for the tested Invoice workbook. The Customer workspace still handles the existing XLSX fixture. The tested CSV and XLSX sizes did not reveal an obvious responsiveness problem.
+
+Milestone 5 remains in progress. More representative files, value-level validation checks, measured performance where needed, and an unguided new-user test remain open.
+
+### Next build step
+
+Use representative Invoice and Customer files with explicit expected mappings, normalized values, and individual issues. Record basic processing times for selected sizes if a performance guard is still being considered. Fix reproducible failures before moving to an unguided new-user test. Do not add another validation profile.

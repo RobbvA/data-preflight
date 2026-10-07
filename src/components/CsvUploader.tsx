@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react";
 
-import { getInputAdapter, type ParsedDataSet } from "@/lib/parseCsv";
+import {
+  getInputAdapter,
+  getReadableExcelSheetNames,
+  type ParsedDataSet,
+} from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
 import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
@@ -50,6 +54,11 @@ export function CsvUploader() {
     null,
   );
 
+  const [pendingExcelSheets, setPendingExcelSheets] = useState<{
+    file: File;
+    names: string[];
+  } | null>(null);
+
   const [fieldMapping, setFieldMapping] =
     useState<FieldMapping>(createEmptyMapping());
 
@@ -72,13 +81,19 @@ export function CsvUploader() {
 
   const fileName = parsedDataSet?.fileName ?? "";
 
-  async function loadSource(source: Promise<File>) {
+  async function loadSource(
+    source: Promise<File>,
+    selectedSheetName?: string,
+  ) {
     if (!activeDomain) {
       setProfilePrompt(true);
       return;
     }
 
     setError(null);
+    setParsedDataSet(null);
+    setFieldMapping(createEmptyMapping());
+    setPendingExcelSheets(null);
     setIsLoading(true);
     setSelectedPreviewRowIndex(null);
     setIsCleanOpen(false);
@@ -95,7 +110,16 @@ export function CsvUploader() {
         throw new Error("Unsupported file type.");
       }
 
-      const nextParsedDataSet = await adapter.parse(file);
+      if (adapter.sourceType === "excel" && !selectedSheetName) {
+        const sheetNames = await getReadableExcelSheetNames(file);
+
+        if (sheetNames.length > 1) {
+          setPendingExcelSheets({ file, names: sheetNames });
+          return;
+        }
+      }
+
+      const nextParsedDataSet = await adapter.parse(file, selectedSheetName);
 
       if (nextParsedDataSet.rows.length === 0) {
         throw new Error("Source file is empty.");
@@ -160,6 +184,11 @@ export function CsvUploader() {
     event.target.value = "";
   }
 
+  function handleExcelSheetSelect(sheetName: string) {
+    if (!pendingExcelSheets) return;
+    void loadSource(Promise.resolve(pendingExcelSheets.file), sheetName);
+  }
+
   function handleTryExample() {
     if (!activeDomain) {
       setProfilePrompt(true);
@@ -182,6 +211,7 @@ export function CsvUploader() {
   }
 
   function resetFlow() {
+    setPendingExcelSheets(null);
     setParsedDataSet(null);
     setFieldMapping(createEmptyMapping());
     setError(null);
@@ -335,6 +365,15 @@ export function CsvUploader() {
               isLoading={isLoading}
               error={error}
               hasActiveFile={false}
+              pendingExcelSheets={
+                pendingExcelSheets
+                  ? {
+                      fileName: pendingExcelSheets.file.name,
+                      names: pendingExcelSheets.names,
+                    }
+                  : null
+              }
+              onSelectExcelSheet={handleExcelSheetSelect}
               onFileChange={handleFileChange}
               onTryExample={handleTryExample}
               onReset={resetFlow}
@@ -453,6 +492,7 @@ export function CsvUploader() {
                 <ValidationContextPanel
                   profile={invoiceValidationProfile}
                   fileName={fileName}
+                  sheetName={parsedDataSet?.metadata?.sheetName}
                   mapping={fieldMapping}
                   counts={{
                     total: normalizedRows.length,
