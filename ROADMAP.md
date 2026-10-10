@@ -1,6 +1,6 @@
 # DataPreflight Roadmap
 
-Last reviewed: 2026-10-07
+Last reviewed: 2026-10-10
 
 ## Milestones 1–4 — MVP foundation
 
@@ -11,7 +11,7 @@ Status: ✅ Completed
 - XLSX and XLS input adapters.
 - Initial design system, public MVP, example datasets, and professional feedback round.
 
-“Completed” describes the original MVP scope. Later milestones may improve reliability and usability.
+“Completed” describes the original MVP scope. Later milestones improve reliability and usability.
 
 ## Milestone 5 — Validated Product Direction
 
@@ -21,13 +21,13 @@ Goal: prove that DataPreflight is a useful, repeatable quality gate before ERP i
 
 **Current workflow:** Choose validation profile → Upload → Parse → Map → Normalize → Validate → Review → Export.
 
-For workbooks with multiple populated worksheets, the user chooses the worksheet before its contents are used for mapping and validation.
+The user chooses a profile before loading a file. For workbooks with multiple populated worksheets, the user chooses the worksheet before its contents are used for mapping and validation.
 
 Invoice data and Customer master data are the two working profiles. Do not add another domain during this milestone.
 
 ### 5.1 Product positioning and first use
 
-Status: 🟡 Implemented; new-user validation pending
+Status: 🟡 Implemented; unguided new-user validation pending
 
 Built:
 
@@ -36,16 +36,20 @@ Built:
 - Visible upload and example actions that prompt for a profile when none is selected.
 - Example loading through the same browser-side processing path as an uploaded file.
 - Browser-processing explanation near file selection.
+- A visible Mapping → Review → Export sequence in both workspaces.
+- Compact mapping status when mapping is complete, with an Edit mapping tool when needed.
+- Review results presented as the main workspace activity in both domains.
 
 Next:
 
-- After internal reliability checks, observe whether a new visitor understands the profile choice and first action.
-- Check the experience on desktop and mobile.
+- Check whether profile choice and the first action are clear on desktop and mobile.
+- Reduce repeated instructions or unclear hierarchy where an internal walkthrough reveals a specific problem.
+- Observe whether a person new to the product can use the workflow without step-by-step guidance.
 - Keep privacy wording aligned with the complete deployed data flow.
 
 ### 5.2 Shared validation architecture and traceability
 
-Status: 🟡 Working foundation; broader repeatability testing pending
+Status: 🟡 Working foundation; broader real-world coverage pending
 
 Built:
 
@@ -58,25 +62,27 @@ Built:
 - Conservative header-based detection of clear profile mismatches.
 - Separate domain rules for Invoice and Customer.
 
-Evidence so far:
+Evidence:
 
-- Repeated runs of fixed Invoice and Customer CSV files with unchanged mappings produced byte-identical clean exports, issue reports, and Validation Reports.
-- Reordered Invoice and Customer XLSX fixtures produced the expected mappings and Blocked / Needs review / Ready counts.
+- Repeated runs of fixed Invoice and Customer CSV files with unchanged mappings produced byte-identical row exports, issue reports, and Validation Reports.
+- Reordered Invoice and Customer XLSX fixtures produced the expected mappings and **3 blocked / 1 needs review / 2 ready** classifications in each domain.
 - Repeated runs of the same Invoice workbook and selected worksheet produced byte-identical Validation Reports.
-
-Next:
-
-1. Compare individual normalized values and issues against explicit expectations for representative CSV and XLSX files.
-2. Repeat further representative runs with the same mapping, worksheet where applicable, and profile version.
-3. Compare classifications, clean exports, issue reports, and Validation Reports. Resolve any difference before broadening product scope.
+- Six-row Invoice and Customer CSV fixtures were checked against explicit expectations for mapping, normalized values, issues, classifications, and exported rows.
+- The Invoice numeric-normalization behavior changed during the value-level test. The Invoice profile version was advanced to `1.0.2` so reports distinguish it from the earlier behavior.
 
 **Repeatability target:** same input + same worksheet where applicable + same mapping + same profile version = same result.
+
+Remaining:
+
+- Exercise a few additional representative XLSX edge cases with explicit expected values and issues.
+- Investigate any reproducible mismatch before expanding product scope.
+- Keep version changes tied to changes in normalization or validation behavior.
 
 A generic `ValidationWorkspace` remains a possible direction. Extract shared behavior only after the two existing workspaces show what truly belongs in the shared layer.
 
 ### 5.3 Customer master data foundation
 
-Status: 🟡 Initial second domain working; representative user testing pending
+Status: 🟡 Second domain working; new-user understanding pending
 
 Built:
 
@@ -86,62 +92,72 @@ Built:
 - Blocked, Needs review, and Ready tabs.
 - Problem, why, and fix explanations.
 - Export of rows without critical issues, an issue report, and a Validation Report.
-- Excel worksheet selection through the updated Customer workspace.
+- Excel worksheet selection.
+- A layout aligned more closely with Invoice: compact completed mapping, a single review area, status tabs, and expandable row details.
 
 Checked:
 
-- The reordered Customer XLSX mapped all five fields and produced **3 blocked / 1 needs review / 2 ready**.
+- A reordered Customer XLSX mapped all five fields and produced **3 blocked / 1 needs review / 2 ready**.
 - The existing Customer XLSX still worked after worksheet selection was introduced.
 - A recognizable Invoice worksheet selected under Customer was rejected as a profile mismatch.
+- A six-row Customer CSV mapped all five fields automatically. A missing name and case-variant duplicate IDs were blocked; one row with email and country-code warnings remained exportable.
+- Its exported rows and normalized name, email, country, and VAT values matched the expected results.
 
 Next:
 
-- Test Customer with more representative source files and observe whether users understand the mapping and review results.
+- Check the workspace hierarchy on desktop and mobile.
+- Observe whether a new user understands the mapping tool, warning rows, and what to fix in the source file.
 
 Supplier, Product, Inventory, and other domains remain out of scope for Milestone 5.
 
 ### 5.4 Workflow and reliability
 
-Status: 🟡 Main workflow built; wider edge cases and measured performance pending
+Status: 🟡 Core workflow working; focused internal follow-up pending
 
 Built:
 
 - A visible field mapping tool and mapped-field count.
-- A prominent next action in each workspace.
 - Mapping → Review → Export steps in both domains.
 - Blocked, Needs review, and Ready tabs in both domains.
-- Invoice details shown within review cards instead of a separate Inspection mode.
-- Invoice Step 2 and its review workspace consolidated into one card.
-- Redundant **Show only blocked** control removed; status tabs remain available and were manually checked.
-- Structural CSV parse errors blocked before validation. A malformed-quotes fixture was manually checked.
+- Inline review details instead of a separate Invoice Inspection mode.
+- One coherent Invoice Step 2 review card.
+- Customer review aligned with the Invoice layout without a separate dominant next-action card.
+- Structural CSV parse errors blocked before validation.
 - Clear profile mismatches rejected before mapping.
-- Invoice amount validation corrected to use the same normalized value as the export; Invoice profile version advanced to `1.0.1`.
-- Explicit worksheet selection for Excel files with multiple populated worksheets. The selected worksheet is recorded in the validation context and report.
+- Explicit worksheet selection for Excel files with multiple populated worksheets.
+- The selected worksheet recorded in Validation details and the Validation Report.
+- Invoice amount validation using the same normalized value as the export.
+- European and US grouped decimal formats normalized consistently for the tested values.
+- Invoice header suggestions corrected after an unrelated `Source note` column was initially suggested for `invoice_number`.
+- The internal Invoice duplicate-detection key excluded from the downloaded row export.
 
 Reliability checks:
 
-- An Invoice workbook with a populated cover sheet before the data sheet exposed incorrect automatic sheet selection. Choosing the data sheet after the change produced the expected mapping and **3 blocked / 1 needs review / 2 ready**.
-- The selected Invoice worksheet produced byte-identical Validation Reports across repeated runs.
-- Invoice CSV files containing 100, 1,000, and 5,000 rows and XLSX files containing 1,000 and 5,000 rows showed no noticeable browser delay in manual checks.
-- The original synthetic CSV performance files used values such as `Company 000001`. Those numeric-looking values reduced the automatic mapping confidence for `Company`. A corrected 100-row file with ordinary company names mapped automatically.
-- These checks did not record parse time, validation time, memory use, or a maximum supported file size.
+- A populated cover sheet before an Invoice data sheet exposed incorrect automatic worksheet selection. Choosing the data sheet after the change produced the expected mapping and results.
+- A malformed-quotes CSV was rejected before validation.
+- Invoice CSV files with 100, 1,000, and 5,000 rows and XLSX files with 1,000 and 5,000 rows showed no noticeable browser delay in manual checks.
+- The six-row Invoice value-level fixture produced **3 blocked / 1 needs review / 2 ready** after the mapping and number-normalization fixes. The export contained exactly the three expected rows without blockers, including the warning row.
+- The six-row Customer value-level fixture produced **3 blocked / 1 needs review / 2 ready** with the expected three-row export.
+- The UI review tabs and the exported CSV content were checked separately.
 
-Reliability backlog:
+These checks did not record parse time, validation time, memory use, or a maximum supported file size. The 5,000-row result is a useful responsiveness observation, not a performance guarantee.
 
-- Exercise more malformed CSV files and Excel edge cases with explicit expected outcomes.
-- Test unusual headers, reordered columns, missing values, and representative real-world files for both profiles.
-- Compare individual normalized values and issues, not only result counts.
-- Measure file size, row count, parse and validation times, and responsiveness for representative datasets.
-- Determine a safe maximum file size or row count from measurements if a guard is needed.
-- Add a pre-parse limit and clear error message only after those measurements.
+Focused reliability backlog:
+
+- Try a few additional Excel edge cases with explicit expected mappings, values, issues, and exports.
+- Investigate a reproducible unexpected mapping, normalization, classification, or export result if one appears.
+- Measure file size, row count, parse and validation times only when larger datasets or a proposed limit make that decision necessary.
+- Add a pre-parse size or row guard only after establishing an evidence-based limit.
+
+Do not repeat completed tests merely to collect more runs without a concrete remaining risk.
 
 ### 5.5 Explainability
 
-Status: 🟡 Available; validate with new users
+Status: 🟡 Available; validate with a new user
 
-Both domains show what failed, why it matters, and a suggested fix. Invoice review cards show their details inline.
+Both domains show what failed, why it matters, and a suggested fix. Review cards show a concise issue summary and offer further details. Warning rows can remain in the export, and the UI explains that they should be checked before import.
 
-Next: observe whether a new user understands which source value to correct and what to do after reviewing an issue. Improve wording where the test reveals confusion.
+Next: observe whether a new user understands which source value to correct, why a row is blocked or needs review, and what to do after reviewing an issue. Improve wording where the test reveals confusion.
 
 AI explanations may come later. Validation outcomes remain rule-based.
 
@@ -157,10 +173,13 @@ Do not build them until feedback on Invoice and Customer shows which configurati
 
 1. ✅ Make the validation context downloadable as a readable CSV.
 2. ✅ Establish an initial repeatability baseline with fixed Invoice and Customer CSV files.
-3. 🟡 Expand reliability checks to more realistic CSV/XLSX files, malformed input, and Excel edge cases. Worksheet selection and one multi-sheet workbook have been checked; broader file coverage and value-level checks remain.
-4. 🟡 Measure performance before choosing limits. Manual CSV/XLSX checks reached 5,000 Invoice rows without noticeable delay, but timings and larger or more representative cases are still missing.
-5. ⏳ Let a new user complete the workflow without guidance after obvious technical issues are addressed.
-6. ⏳ Reassess the exit criteria using the results of those tests.
+3. ✅ Verify representative Invoice and Customer CSV values, issues, classifications, and row exports; fix the discovered mapping, number-normalization, and internal-export-column issues.
+4. 🟡 Complete a small, targeted internal check of remaining Excel edge cases and desktop/mobile workflow clarity.
+5. 🟡 Verify that the deployed privacy wording matches the actual data flow.
+6. ⏳ Let one person new to the product attempt the workflow without step-by-step guidance. Record confusion and fix issues that materially affect understanding.
+7. ⏳ Reassess the exit criteria and close the milestone only when the evidence supports it.
+
+Measured performance and an explicit file-size guard are not required to close this milestone unless a concrete responsiveness problem appears. Do not communicate an untested maximum.
 
 Documentation is updated at the end of each build session to reflect what was actually built and tested.
 
@@ -189,4 +208,4 @@ Possible uses: mapping proposals, explanations, and suggested fixes. AI output m
 
 ## Next build step
 
-Use a small set of representative Invoice and Customer CSV/XLSX files with explicit expected mappings, normalized values, and individual issues. Record basic processing times for selected file sizes if performance or a limit remains a concern. Fix reproducible failures before the unguided new-user test; do not add another validation profile.
+Perform a short internal desktop/mobile walkthrough and one or two targeted Excel edge-case checks. Verify the deployed privacy wording. Use feedback from an unguided new-user attempt to identify actual UI friction. Keep Invoice and Customer as the only profiles and revisit the Milestone 5 exit criteria after these checks.

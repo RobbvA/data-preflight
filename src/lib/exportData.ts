@@ -16,7 +16,9 @@ export type ExportBlockerSummary = {
 export function downloadCsv(filename: string, rows: ParsedRow[]) {
   if (rows.length === 0) return;
 
-  const headers = getStableHeaders(rows);
+  const headers = getStableHeaders(rows).filter(
+  (header) => header !== "normalized_invoice_key",
+);
   const csvRows = [
     headers.map(escapeCsvValue).join(CSV_DELIMITER),
     ...rows.map((row) =>

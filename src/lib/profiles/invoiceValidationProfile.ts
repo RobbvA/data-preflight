@@ -12,7 +12,7 @@ export const invoiceValidationProfile: ValidationProfile<
   ValidationResult
 > = {
   ...invoiceProfile,
-  version: "1.0.1",
+  version: "1.0.2",
   normalizeRows: normalizeInvoiceRows,
   validateRows,
 };

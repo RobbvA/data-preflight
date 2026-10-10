@@ -328,7 +328,10 @@ function scoreHeaderForField(header: string, field: InvoiceField): ScoredMatch {
       }
     }
 
-    if (normalizedHeader.includes(normalizedSynonym)) {
+    if (
+      normalizedSynonym.length >= 3 &&
+      normalizedHeader.includes(normalizedSynonym)
+    ) {
       if (bestScore < 80) {
         bestScore = 80;
         reason = `Header contains "${synonym}".`;
@@ -764,10 +767,11 @@ function parseBusinessNumber(value: string) {
     ? `-${cleanedValue.replaceAll(/[()]/g, "")}`
     : cleanedValue;
 
-  const sanitizedValue = withoutAccountingParentheses.replaceAll(
-    /[^0-9,.-]/g,
-    "",
-  );
+  if (!/^-?[0-9.,]+$/.test(withoutAccountingParentheses)) {
+    return null;
+  }
+
+  const sanitizedValue = withoutAccountingParentheses;
 
   if (!sanitizedValue || sanitizedValue === "-") return null;
 

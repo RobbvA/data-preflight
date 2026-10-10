@@ -17,7 +17,7 @@ Created project documentation:
 
 ### Design System
 
-Completed major UX improvements.
+Completed major UX improvements:
 
 - Improved Inspection Mode density
 - Improved Review Workspace density
@@ -28,7 +28,7 @@ Completed major UX improvements.
 
 ### Branding
 
-Established first visual identity.
+Established the first visual identity:
 
 - Orange / Black / Off-white palette
 - Landing Page redesign
@@ -38,9 +38,7 @@ Established first visual identity.
 
 ### Demo Strategy
 
-Created reusable demo datasets.
-
-Categories:
+Created reusable datasets:
 
 - Clean
 - Mixed
@@ -280,7 +278,7 @@ Updated PROJECT_STATUS.md, README.md, PRODUCT_VISION.md, ROADMAP.md, and SESSION
 - Added **Validation details** to both workspaces. It shows profile ID/version, source filename, result counts, and applied field mapping.
 - Kept the customer-facing output focused on CSV; no technical JSON download was added.
 - Found and fixed a double-normalization error in Invoice numbers. Validation now reads the same normalized amount that is exported.
-- Advanced the Invoice validation profile from `1.0.0` to `1.0.1` because the validation behavior changed.
+- Advanced the Invoice validation profile from `1.0.0` to `1.0.1` because validation behavior changed.
 - Removed the separate Invoice Inspection mode panel. Invoice review cards now reveal issues, explanations, fixes, and optional row fields inline.
 
 ### Verified
@@ -349,7 +347,7 @@ Test repeatability further, then exercise more realistic CSV/XLSX files, malform
 
 Repeated the same Invoice CSV run with the same mapping and compared downloads:
 
-- clean Invoice exports: byte-identical;
+- Invoice exports without blockers: byte-identical;
 - Invoice issue reports: byte-identical.
 
 Repeated the same Customer CSV run with the same mapping and compared downloads:
@@ -378,13 +376,11 @@ The results matched the expectations for these fixtures. Broader Excel testing r
 
 ### Current assessment
 
-Milestone 5 has a working Validation Report, an initial repeatability baseline, and successful targeted Excel and malformed-CSV checks. It remains in progress because representative file coverage, performance measurements, and an unguided new-user test are still missing.
+Milestone 5 has a working Validation Report, an initial repeatability baseline, and successful targeted Excel and malformed-CSV checks. It remains in progress because representative file coverage, performance evidence, and an unguided new-user test are still missing.
 
-### Next build step
+### Next build step at the time
 
-Continue a focused reliability matrix, starting with an Excel edge case. Compare expected mapping, normalized values, individual issues, exports, and Validation Report. Then measure small, normal, and large files before deciding whether a file-size or row-count guard is needed.
-
-Keep Invoice and Customer as the only profiles during this milestone. Update project Markdown at the end of each build session.
+Continue a focused reliability matrix. Compare expected mapping, normalized values, individual issues, exports, and Validation Report. Keep Invoice and Customer as the only profiles.
 
 ---
 
@@ -416,7 +412,7 @@ An Invoice workbook was created with a populated `Read me` worksheet followed by
 
 Manually uploaded Invoice CSV files containing 100, 1,000, and 5,000 rows. The results appeared without noticeable browser delay.
 
-The first synthetic CSV fixtures contained values such as `Company 000001`. Those numeric-looking values lowered the automatic mapping confidence for the `Company` column despite its exact header. After `Company` was chosen manually, the runs produced Ready results. A separate 100-row CSV with ordinary business names mapped `Company` automatically.
+The first synthetic CSV fixtures contained values such as `Company 000001`. Those numeric-looking values lowered automatic mapping confidence for the `Company` column despite its exact header. After `Company` was chosen manually, the runs produced Ready results. A separate 100-row CSV with ordinary business names mapped `Company` automatically.
 
 Manually uploaded Invoice XLSX files containing 1,000 and 5,000 rows with ordinary business names. Mapping completed automatically, and there was no noticeable browser delay.
 
@@ -426,8 +422,71 @@ This was a responsiveness check, not a benchmark. No parse time, validation time
 
 The worksheet-selection defect is resolved for the tested Invoice workbook. The Customer workspace still handles the existing XLSX fixture. The tested CSV and XLSX sizes did not reveal an obvious responsiveness problem.
 
-Milestone 5 remains in progress. More representative files, value-level validation checks, measured performance where needed, and an unguided new-user test remain open.
+### Next build step at the time
+
+Use representative Invoice and Customer files with explicit expected mappings, normalized values, and individual issues. Fix reproducible failures before moving to an unguided new-user test. Do not add another validation profile.
+
+---
+
+# 2026-10-10
+
+## Milestone 5 — Workspace alignment and value-level reliability
+
+### Customer workspace
+
+- Aligned the Customer layout more closely with Invoice.
+- A complete mapping now appears as a compact Step 1 summary with an **Edit mapping** tool.
+- Removed the separate dominant Customer next-action card.
+- Made Step 2 the main review area with Blocked, Needs review, and Ready tabs and expandable row details.
+- Kept Step 3 focused on exporting reviewed rows.
+- The user placed the changes locally and reviewed both domain layouts in the browser.
+
+### Invoice value-level fixture
+
+A six-row CSV was tested with European and US number formats, extra source columns, whitespace, mixed case, duplicate Invoice numbers, a date-order warning, and a missing amount.
+
+The first run revealed two real issues:
+
+1. `invoice_number` was automatically assigned to an unrelated `Source note` column. A short synonym, `no`, matched inside `note`, while numeric sample detection treated characters inside Invoice IDs as numeric values.
+2. A valid US grouped number, `1,234.56`, was treated as invalid.
+
+Header matching and numeric sample detection were corrected. Number normalization now recognizes the tested European and US formats. Because normalization behavior changed, the Invoice validation profile advanced from `1.0.1` to `1.0.2`.
+
+After a fresh upload, all ten Invoice fields mapped automatically, including `invoice_number` → `Invoice No.`. The six rows produced **3 blocked / 1 needs review / 2 ready** without a manual mapping change.
+
+The export contained the expected `INV-V101`, `INV-V102`, and `INV-V105` rows. The date-order warning row remained exportable; duplicate Invoice numbers and the missing-amount row were excluded. The exported dates and normalized number values were checked from the CSV.
+
+An internal `normalized_invoice_key` column was discovered in the row export. It was removed from the downloaded CSV header while remaining available internally for duplicate detection. The user confirmed that a new export no longer contained this column.
+
+### Customer value-level fixture
+
+A separate six-row Customer CSV included whitespace and casing, a missing name, invalid email, three-letter country code, case-variant duplicate IDs, and an unrelated `Source note` column.
+
+All five Customer profile fields mapped automatically. The result was **3 blocked / 1 needs review / 2 ready**:
+
+- `C-402` was blocked for a missing name.
+- `C-404` and `c-404` were blocked as duplicate IDs.
+- `C-403` had two warnings and remained exportable.
+- `C-401` and `C-405` passed the current checks.
+
+The export contained exactly `C-401`, `C-403`, and `C-405`. Direct inspection of the downloaded CSV confirmed that `C-401` became `Acme BV`, `finance@acme.example`, `NL`, and `NL123456789B01`. The other exported rows also matched the expected values.
+
+### Performance decision
+
+Earlier manual uploads of 100, 1,000, and 5,000 Invoice CSV rows and 1,000 and 5,000 Invoice XLSX rows showed no noticeable delay. This is sufficient to continue the current Milestone 5 workflow. Timed measurements and a file-size guard remain conditional work if larger files or responsiveness become a concrete concern. No tested maximum is claimed.
+
+### Current assessment
+
+The targeted Invoice and Customer CSV value-level checks passed after fixing the issues they exposed. The UI still needs a short internal desktop/mobile hierarchy review, a few targeted Excel edge-case checks, and verification that deployed privacy wording matches the data flow.
+
+An unguided attempt by a person new to DataPreflight remains a Milestone 5 exit criterion. Simon may be asked for a short test, but no feedback from this new attempt has been received or assessed in this session.
 
 ### Next build step
 
-Use representative Invoice and Customer files with explicit expected mappings, normalized values, and individual issues. Record basic processing times for selected sizes if a performance guard is still being considered. Fix reproducible failures before moving to an unguided new-user test. Do not add another validation profile.
+1. Review first action, mapping tool, review priority, and export wording on desktop and mobile.
+2. Check one or two remaining representative Excel edge cases with explicit expected outcomes.
+3. Verify deployed privacy wording against actual processing.
+4. Record feedback from an unguided new-user attempt when available; fix concrete confusion.
+5. Reassess the Milestone 5 exit criteria. Do not add a third profile.
+
+Update the remaining project Markdown at the end of the build session, then review the staged changes before committing and pushing.

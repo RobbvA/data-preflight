@@ -69,7 +69,7 @@ export function InvoiceReviewSection({
       return {
         title: "Blocked invoices",
         description:
-          "Critical rows that are excluded from clean export until fixed.",
+          "Rows with critical issues are excluded from the export until fixed.",
         items: blockedInvoiceItems,
         emptyMessage: "No blocked invoices.",
         isOpen: isBlockedOpen,
@@ -174,7 +174,7 @@ export function InvoiceReviewSection({
 
             <ReviewTabButton
               label="Ready"
-              description="Clean output"
+              description="No issues found"
               count={cleanInvoiceItems.length}
               active={visibleActiveTab === "ready"}
               tone="success"

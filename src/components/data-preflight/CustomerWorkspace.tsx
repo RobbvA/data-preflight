@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { AlertTriangle, CheckCircle2, Search } from "lucide-react";
 import {
   getInputAdapter,
   getReadableExcelSheetNames,
@@ -33,6 +34,7 @@ import {
 } from "@/lib/validation/validationProfile";
 
 type CustomerReviewTab = "blocked" | "review" | "ready";
+type ReviewSortMode = "priority" | "row" | "issues";
 
 const EXAMPLE_CSV = [
   "Customer Number,Customer Name,Email,Country Code,VAT Number",
@@ -64,9 +66,16 @@ export function CustomerWorkspace({
   const [isLoading, setIsLoading] = useState(false);
   const [activeReviewTab, setActiveReviewTab] =
     useState<CustomerReviewTab | null>(null);
+  const [isMappingOpen, setIsMappingOpen] = useState(false);
+  const [selectedCustomerRowIndex, setSelectedCustomerRowIndex] =
+    useState<number | null>(null);
+  const [isReviewListOpen, setIsReviewListOpen] = useState(true);
+  const [reviewSortMode, setReviewSortMode] =
+    useState<ReviewSortMode>("priority");
 
   const rows = useMemo(() => dataSet?.rows ?? [], [dataSet]);
   const headers = dataSet?.headers ?? [];
+
   const mappingCandidates = getProfileMappingCandidates(
     customerValidationProfile,
     headers,
@@ -124,59 +133,19 @@ export function CustomerWorkspace({
 
   const readyCount = normalizedRows.length - blockedCount - reviewCount;
   const mappedCount = selectedHeaders.length;
+  const showMappingFields = !mappingReady || isMappingOpen;
 
-  const nextAction = !mappingReady
-    ? {
-        title: "Complete field mapping",
-        detail:
-          requiredUnmapped.length > 0
-            ? `Choose a source column for ${requiredUnmapped.join(", ")}.`
-            : "One source column is assigned to multiple fields.",
-        button: "Review mapping",
-        target: "customer-mapping",
-        tab: null,
-      }
-    : blockedCount > 0
-      ? {
-          title: `Review ${blockedCount} blocked customer${
-            blockedCount === 1 ? "" : "s"
-          }`,
-          detail: "See what failed and what to fix in the source file.",
-          button: "View blocked rows",
-          target: "customer-review",
-          tab: "blocked" as const,
-        }
-      : reviewCount > 0
-        ? {
-            title: `Review ${reviewCount} customer${
-              reviewCount === 1 ? "" : "s"
-            } with warnings`,
-            detail: "Check these rows before using the export.",
-            button: "View rows to review",
-            target: "customer-review",
-            tab: "review" as const,
-          }
-        : {
-            title: "Export the checked rows",
-            detail: "The current profile found no issues in these rows.",
-            button: "Go to export",
-            tab: null,
-            target: "customer-export",
-          };
-
-  const sortedRows = normalizedRows
-    .map((row, index) => ({
-      row,
-      rowIndex: index + 1,
-      issues: issuesByRow.get(index + 1) ?? [],
-    }))
-    .sort((a, b) => getPriority(b.issues) - getPriority(a.issues));
+  const reviewRows = normalizedRows.map((row, index) => ({
+    row,
+    rowIndex: index + 1,
+    issues: issuesByRow.get(index + 1) ?? [],
+  }));
 
   const defaultReviewTab: CustomerReviewTab =
     blockedCount > 0 ? "blocked" : reviewCount > 0 ? "review" : "ready";
   const visibleReviewTab = activeReviewTab ?? defaultReviewTab;
 
-  const visibleRows = sortedRows.filter(({ issues }) => {
+  const visibleRows = reviewRows.filter(({ issues }) => {
     if (visibleReviewTab === "blocked") {
       return issues.some((issue) => issue.severity === "critical");
     }
@@ -191,14 +160,40 @@ export function CustomerWorkspace({
     return issues.length === 0;
   });
 
-  function handleNextAction() {
-    if (nextAction.tab) setActiveReviewTab(nextAction.tab);
+  visibleRows.sort((a, b) => {
+    if (reviewSortMode === "row") return a.rowIndex - b.rowIndex;
+    if (reviewSortMode === "issues") {
+      return b.issues.length - a.issues.length;
+    }
 
-    requestAnimationFrame(() => {
-      document
-        .getElementById(nextAction.target)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    return getPriority(b.issues) - getPriority(a.issues);
+  });
+
+  const reviewStatus =
+    blockedCount > 0
+      ? { label: "Fix blocked first", tone: "danger" as const }
+      : reviewCount > 0
+        ? { label: "Review warnings", tone: "warning" as const }
+        : { label: "Ready for export", tone: "success" as const };
+
+  const categoryTitle =
+    visibleReviewTab === "blocked"
+      ? "Blocked customers"
+      : visibleReviewTab === "review"
+        ? "Needs review"
+        : "Ready customers";
+
+  const categoryDescription =
+    visibleReviewTab === "blocked"
+      ? "Rows with critical issues are excluded from the export until fixed."
+      : visibleReviewTab === "review"
+        ? "Rows that can export, but should be checked before import."
+        : "Rows that passed the current profile checks.";
+
+  function selectReviewTab(tab: CustomerReviewTab) {
+    setActiveReviewTab(tab);
+    setSelectedCustomerRowIndex(null);
+    setIsReviewListOpen(true);
   }
 
   async function loadFile(file: File, selectedSheetName?: string) {
@@ -207,6 +202,10 @@ export function CustomerWorkspace({
     setMapping(emptyMapping());
     setPendingExcelSheets(null);
     setActiveReviewTab(null);
+    setIsMappingOpen(false);
+    setSelectedCustomerRowIndex(null);
+    setIsReviewListOpen(true);
+    setReviewSortMode("priority");
     setIsLoading(true);
 
     try {
@@ -278,6 +277,10 @@ export function CustomerWorkspace({
     setMapping(emptyMapping());
     setError(null);
     setActiveReviewTab(null);
+    setIsMappingOpen(false);
+    setSelectedCustomerRowIndex(null);
+    setIsReviewListOpen(true);
+    setReviewSortMode("priority");
   }
 
   function exportIssues() {
@@ -342,104 +345,107 @@ export function CustomerWorkspace({
             }
           />
 
-          <section className="rounded-2xl border border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.07)] p-5 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
-              Next action
-            </p>
-
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-semibold text-[var(--text-primary)]">
-                  {nextAction.title}
-                </h2>
-                <p
-                  role="status"
-                  className="mt-1 text-sm text-[var(--text-secondary)]"
-                >
-                  {nextAction.detail}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleNextAction}
-                className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)]"
-              >
-                {nextAction.button}
-              </button>
-            </div>
-          </section>
-
           <section
             id="customer-mapping"
-            className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
+            aria-label="Field mapping"
+            className={`rounded-2xl border bg-[var(--surface-base)] ${
+              mappingReady
+                ? "border-white/10 p-4"
+                : "border-[color:rgba(209,154,106,0.45)] p-5 sm:p-6"
+            }`}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
-                  Step 1
+                  Step 1 · Field mapping
                 </p>
-                <h2 className="mt-1 text-xl font-semibold">
-                  Field mapping · {mappedCount}/
-                  {customerValidationProfile.fields.length} fields mapped
+                <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
+                  {mappedCount}/{customerValidationProfile.fields.length} fields
+                  mapped
                 </h2>
+                <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
+                  {requiredUnmapped.length > 0
+                    ? `Choose a column for: ${requiredUnmapped.join(", ")}.${
+                        hasDuplicateMapping
+                          ? " Resolve duplicate assignments too."
+                          : ""
+                      }`
+                    : hasDuplicateMapping
+                      ? "One source column is assigned to multiple fields."
+                      : "Required fields ready. Change a column if needed."}
+                </p>
               </div>
 
-              <span className="text-xs text-[var(--text-muted)]">
-                Profile: {customerValidationProfile.name} v
-                {customerValidationProfile.version}
-              </span>
+              {mappingReady && (
+                <button
+                  type="button"
+                  aria-expanded={isMappingOpen}
+                  aria-controls="customer-mapping-fields"
+                  onClick={() => setIsMappingOpen((open) => !open)}
+                  className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-[var(--surface-raised)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)]"
+                >
+                  {isMappingOpen ? "Close mapping" : "Edit mapping"}
+                </button>
+              )}
             </div>
 
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              Check the suggested columns. Required fields are marked *.
-            </p>
+            <div id="customer-mapping-fields" hidden={!showMappingFields}>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4">
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Check the suggested columns. Required fields are marked *.
+                </p>
+                <span className="text-xs text-[var(--text-muted)]">
+                  Profile: {customerValidationProfile.name} v
+                  {customerValidationProfile.version}
+                </span>
+              </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {customerValidationProfile.fields.map((field) => (
-                <label key={field.key} className="block text-sm font-medium">
-                  {field.label}
-                  {field.required && (
-                    <span className="ml-1 text-[var(--brand-accent-soft)]">
-                      *
-                    </span>
-                  )}
-
-                  <select
-                    value={mapping[field.key]}
-                    onChange={(event) =>
-                      setMapping((current) => ({
-                        ...current,
-                        [field.key]: event.target.value,
-                      }))
-                    }
-                    className={`mt-1.5 w-full rounded-lg border bg-[var(--surface-deep)] px-3 py-2 text-sm text-[var(--text-primary)] ${
-                      (field.required && !mapping[field.key]) ||
-                      (mapping[field.key] &&
-                        selectedHeaders.filter(
-                          (header) => header === mapping[field.key],
-                        ).length > 1)
-                        ? "border-[var(--brand-accent)]"
-                        : "border-white/15"
-                    }`}
-                  >
-                    <option value="">Not mapped</option>
-                    {headers.map((header) => (
-                      <option key={header} value={header}>
-                        {header}
-                      </option>
-                    ))}
-                  </select>
-
-                  {!mapping[field.key] &&
-                    mappingCandidates[field.key].length > 1 && (
-                      <span className="mt-2 block text-xs leading-5 text-[var(--brand-accent-soft)]">
-                        Multiple possible columns:{" "}
-                        {mappingCandidates[field.key].join(", ")}. Choose one.
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {customerValidationProfile.fields.map((field) => (
+                  <label key={field.key} className="block text-sm font-medium">
+                    {field.label}
+                    {field.required && (
+                      <span className="ml-1 text-[var(--brand-accent-soft)]">
+                        *
                       </span>
                     )}
-                </label>
-              ))}
+
+                    <select
+                      value={mapping[field.key]}
+                      onChange={(event) =>
+                        setMapping((current) => ({
+                          ...current,
+                          [field.key]: event.target.value,
+                        }))
+                      }
+                      className={`mt-1.5 w-full rounded-lg border bg-[var(--surface-deep)] px-3 py-2 text-sm text-[var(--text-primary)] ${
+                        (field.required && !mapping[field.key]) ||
+                        (mapping[field.key] &&
+                          selectedHeaders.filter(
+                            (header) => header === mapping[field.key],
+                          ).length > 1)
+                          ? "border-[var(--brand-accent)]"
+                          : "border-white/15"
+                      }`}
+                    >
+                      <option value="">Not mapped</option>
+                      {headers.map((header) => (
+                        <option key={header} value={header}>
+                          {header}
+                        </option>
+                      ))}
+                    </select>
+
+                    {!mapping[field.key] &&
+                      mappingCandidates[field.key].length > 1 && (
+                        <span className="mt-2 block text-xs leading-5 text-[var(--brand-accent-soft)]">
+                          Multiple possible columns:{" "}
+                          {mappingCandidates[field.key].join(", ")}. Choose one.
+                        </span>
+                      )}
+                  </label>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -447,138 +453,214 @@ export function CustomerWorkspace({
             <>
               <section
                 id="customer-review"
-                className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
+                className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
-                  Step 2
-                </p>
-                <h2 className="mt-1 text-xl font-semibold">
-                  Customer review
-                </h2>
+                <div className="border-b border-white/10 pb-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
+                    Step 2 · Review
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
+                      Customer results
+                    </h2>
+                    <CustomerStatusPill tone={reviewStatus.tone}>
+                      {reviewStatus.label}
+                    </CustomerStatusPill>
+                  </div>
+                </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  <Metric
+                <div className="mt-3 grid gap-2 rounded-2xl border border-white/10 bg-[var(--surface-deep)] p-2 sm:grid-cols-3">
+                  <CustomerReviewTabButton
                     label="Blocked"
-                    value={blockedCount}
-                    tone="border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.12)]"
+                    description="Fix first"
+                    count={blockedCount}
+                    active={visibleReviewTab === "blocked"}
+                    tone="danger"
+                    icon={<AlertTriangle className="h-4 w-4" />}
+                    onClick={() => selectReviewTab("blocked")}
                   />
-                  <Metric
-                    label="Needs review"
-                    value={reviewCount}
-                    tone="border-[color:rgba(209,154,106,0.35)] bg-[rgba(209,154,106,0.08)]"
+                  <CustomerReviewTabButton
+                    label="Needs Review"
+                    description="Check before export"
+                    count={reviewCount}
+                    active={visibleReviewTab === "review"}
+                    tone="warning"
+                    icon={<Search className="h-4 w-4" />}
+                    onClick={() => selectReviewTab("review")}
                   />
-                  <Metric
-                    label="Passed checks"
-                    value={readyCount}
-                    tone="border-[color:rgba(120,180,120,0.3)] bg-[rgba(120,180,120,0.07)]"
+                  <CustomerReviewTabButton
+                    label="Ready"
+                    description="No issues found"
+                    count={readyCount}
+                    active={visibleReviewTab === "ready"}
+                    tone="success"
+                    icon={<CheckCircle2 className="h-4 w-4" />}
+                    onClick={() => selectReviewTab("ready")}
                   />
                 </div>
 
-                <div className="mt-4 grid gap-2 rounded-xl border border-white/10 bg-[var(--surface-deep)] p-2 sm:grid-cols-3">
-                  {(
-                    [
-                      {
-                        key: "blocked",
-                        label: "Blocked",
-                        count: blockedCount,
-                      },
-                      {
-                        key: "review",
-                        label: "Needs review",
-                        count: reviewCount,
-                      },
-                      {
-                        key: "ready",
-                        label: "Ready",
-                        count: readyCount,
-                      },
-                    ] as const
-                  ).map((tab) => (
-                    <button
-                      key={tab.key}
-                      type="button"
-                      aria-pressed={visibleReviewTab === tab.key}
-                      onClick={() => setActiveReviewTab(tab.key)}
-                      className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition ${
-                        visibleReviewTab === tab.key
-                          ? "border-[color:rgba(209,154,106,0.45)] bg-[var(--surface-raised)] text-[var(--text-primary)]"
-                          : "border-transparent text-[var(--text-secondary)] hover:border-white/10 hover:bg-[var(--surface-raised)]"
-                      }`}
-                    >
-                      <span className="font-medium">{tab.label}</span>
-                      <span className="font-semibold">{tab.count}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <p
-                  role="status"
-                  className="mt-3 text-xs text-[var(--text-secondary)]"
-                >
-                  Showing {visibleRows.length}{" "}
-                  {visibleReviewTab === "blocked"
-                    ? "blocked"
-                    : visibleReviewTab === "review"
-                      ? "needs review"
-                      : "ready"}{" "}
-                  row{visibleRows.length === 1 ? "" : "s"}.
-                </p>
-
-                <div className="mt-5 space-y-2">
-                  {visibleRows.map(({ row, rowIndex, issues }) => (
-                    <article
-                      key={rowIndex}
-                      className="rounded-xl border border-white/10 bg-[var(--surface-deep)] p-4"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs text-[var(--text-muted)]">
-                            Row {rowIndex} · {row.customer_id || "No ID"}
-                          </p>
-                          <h3 className="mt-1 font-medium">
-                            {row.name || "No customer name"}
-                          </h3>
-                        </div>
-
-                        <span className="text-xs text-[var(--text-secondary)]">
-                          {issues.some(
-                            (issue) => issue.severity === "critical",
-                          )
-                            ? "Blocked"
-                            : issues.length > 0
-                              ? "Needs review"
-                              : "Passed checks"}
+                <div className="mt-3 rounded-2xl border border-white/10 bg-[var(--surface-base)] p-2.5">
+                  <div className="flex flex-wrap items-start justify-between gap-2.5">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+                          {categoryTitle}
+                        </h3>
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--text-primary)]">
+                          {visibleRows.length} row
+                          {visibleRows.length === 1 ? "" : "s"}
                         </span>
                       </div>
+                      <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--text-muted)]">
+                        {categoryDescription}
+                      </p>
+                    </div>
 
-                      {issues.length > 0 && (
-                        <ul className="mt-3 space-y-2">
-                          {issues.map((issue) => (
-                            <li
-                              key={`${issue.ruleId}-${issue.field}`}
-                              className="border-t border-white/10 pt-2 text-sm"
-                            >
-                              <p className="font-medium text-[var(--text-primary)]">
-                                {issue.problem}
-                              </p>
-                              <p className="mt-1 text-[var(--text-secondary)]">
-                                {issue.why}
-                              </p>
-                              <p className="mt-1 text-[var(--text-muted)]">
-                                Fix: {issue.fix}
-                              </p>
-                            </li>
-                          ))}
-                        </ul>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {isReviewListOpen && visibleRows.length > 1 && (
+                        <select
+                          aria-label="Sort customers"
+                          value={reviewSortMode}
+                          onChange={(event) =>
+                            setReviewSortMode(
+                              event.target.value as ReviewSortMode,
+                            )
+                          }
+                          className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)]"
+                        >
+                          <option value="priority">Sort: priority</option>
+                          <option value="row">Sort: row</option>
+                          <option value="issues">Sort: issues</option>
+                        </select>
                       )}
-                    </article>
-                  ))}
+                      <button
+                        type="button"
+                        onClick={() => setIsReviewListOpen((open) => !open)}
+                        className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[var(--brand-accent)] hover:text-[var(--text-primary)]"
+                      >
+                        {isReviewListOpen ? "Collapse" : "Expand"}
+                      </button>
+                    </div>
+                  </div>
 
-                  {visibleRows.length === 0 && (
-                    <p className="rounded-xl border border-white/10 bg-[var(--surface-deep)] p-4 text-sm text-[var(--text-secondary)]">
-                      No rows in this category.
-                    </p>
-                  )}
+                  {isReviewListOpen &&
+                    (visibleRows.length === 0 ? (
+                      <p className="mt-3 rounded-xl border border-white/10 bg-[var(--surface-raised)] p-3 text-sm text-[var(--text-muted)]">
+                        No rows in this category.
+                      </p>
+                    ) : (
+                      <div className="mt-2.5 max-h-[620px] space-y-1.5 overflow-y-auto pr-1">
+                        {visibleRows.map(({ row, rowIndex, issues }) => {
+                          const isSelected =
+                            selectedCustomerRowIndex === rowIndex;
+                          const criticalCount = issues.filter(
+                            (issue) => issue.severity === "critical",
+                          ).length;
+                          const mainIssue = issues[0];
+
+                          return (
+                            <article
+                              key={rowIndex}
+                              className="rounded-xl border border-white/10 bg-[var(--surface-raised)] p-2 transition hover:border-[color:rgba(182,111,58,0.35)]"
+                            >
+                              <div className="grid gap-2 xl:grid-cols-[1fr_auto] xl:items-start">
+                                <div className="min-w-0">
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]">
+                                      {criticalCount > 0
+                                        ? "Critical"
+                                        : issues.length > 0
+                                          ? "Needs review"
+                                          : "Ready"}
+                                    </span>
+                                    <span className="rounded-full bg-[var(--surface-deep)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)]">
+                                      Row {rowIndex}
+                                    </span>
+                                    {issues.length > 0 && (
+                                      <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-[var(--text-secondary)]">
+                                        {issues.length} issue
+                                        {issues.length === 1 ? "" : "s"}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <p className="mt-1.5 truncate text-sm font-semibold text-[var(--text-primary)]">
+                                    {row.customer_id || "Missing customer ID"}
+                                  </p>
+                                  <p className="truncate text-xs text-[var(--text-secondary)]">
+                                    {row.name || "Missing customer name"}
+                                  </p>
+                                  <p className="truncate text-[11px] text-[var(--text-muted)]">
+                                    {row.email || "No email"}
+                                  </p>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  aria-expanded={isSelected}
+                                  onClick={() =>
+                                    setSelectedCustomerRowIndex(
+                                      isSelected ? null : rowIndex,
+                                    )
+                                  }
+                                  className="self-start rounded-full border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:text-[var(--text-primary)]"
+                                >
+                                  {isSelected ? "Hide details" : "Details"}
+                                </button>
+                              </div>
+
+                              <div className="mt-1.5 grid gap-1 md:grid-cols-3">
+                                <CustomerDataPoint
+                                  label="Country"
+                                  value={row.country || "—"}
+                                />
+                                <CustomerDataPoint
+                                  label="VAT number"
+                                  value={row.vat_number || "—"}
+                                />
+                                <CustomerDataPoint
+                                  label="Customer ID"
+                                  value={row.customer_id || "—"}
+                                />
+                              </div>
+
+                              {mainIssue && (
+                                <div className="mt-1 rounded-lg border border-[color:rgba(182,111,58,0.3)] bg-[rgba(182,111,58,0.08)] px-2 py-1 text-xs font-semibold text-[var(--text-primary)]">
+                                  {mainIssue.problem}
+                                </div>
+                              )}
+
+                              {isSelected && (
+                                <div className="mt-3 space-y-2 rounded-lg border border-white/10 bg-[var(--surface-deep)] p-3">
+                                  {issues.length > 0 ? (
+                                    issues.map((issue, index) => (
+                                      <div
+                                        key={`${issue.ruleId}-${issue.field}-${index}`}
+                                        className="rounded-lg border border-white/10 bg-[var(--surface-raised)] p-3 text-xs leading-5"
+                                      >
+                                        <p className="font-semibold text-[var(--text-primary)]">
+                                          {issue.problem}
+                                        </p>
+                                        <p className="mt-1 text-[var(--text-secondary)]">
+                                          {issue.why}
+                                        </p>
+                                        <p className="mt-1 text-[var(--text-muted)]">
+                                          Fix: {issue.fix}
+                                        </p>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <p className="text-xs text-[var(--text-secondary)]">
+                                      This row passed the current profile checks.
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </article>
+                          );
+                        })}
+                      </div>
+                    ))}
                 </div>
               </section>
 
@@ -587,9 +669,9 @@ export function CustomerWorkspace({
                 className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
-                  Step 3
+                  Step 3 · Export
                 </p>
-                <h2 className="mt-1 text-xl font-semibold">
+                <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
                   Export reviewed data
                 </h2>
 
@@ -621,7 +703,7 @@ export function CustomerWorkspace({
                         validationResult.cleanRows,
                       )
                     }
-                    className="rounded-xl bg-[var(--brand-accent-soft)] px-4 py-2.5 text-sm font-semibold text-[var(--surface-deep)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
                   >
                     Export rows without blockers
                   </button>
@@ -630,7 +712,7 @@ export function CustomerWorkspace({
                     type="button"
                     disabled={validationResult.issues.length === 0}
                     onClick={exportIssues}
-                    className="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
                   >
                     Download issue report
                   </button>
@@ -656,19 +738,109 @@ function getPriority(issues: CustomerIssue[]): number {
   return issues.length > 0 ? 1 : 0;
 }
 
-function Metric({
+function CustomerDataPoint({
   label,
   value,
-  tone,
 }: {
   label: string;
-  value: number;
-  tone: string;
+  value: string;
 }) {
   return (
-    <div className={`rounded-xl border p-4 ${tone}`}>
-      <p className="text-xs text-[var(--text-secondary)]">{label}</p>
-      <p className="mt-1 text-3xl font-semibold">{value}</p>
+    <div className="rounded-lg bg-[var(--surface-deep)] px-2 py-1.5">
+      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
+        {label}
+      </p>
+      <p className="mt-0.5 truncate text-xs font-medium text-[var(--text-secondary)]">
+        {value}
+      </p>
     </div>
+  );
+}
+
+function CustomerReviewTabButton({
+  label,
+  description,
+  count,
+  active,
+  tone,
+  icon,
+  onClick,
+}: {
+  label: string;
+  description: string;
+  count: number;
+  active: boolean;
+  tone: "danger" | "warning" | "success";
+  icon: ReactNode;
+  onClick: () => void;
+}) {
+  const activeToneClasses = {
+    danger:
+      "border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
+    warning:
+      "border-[color:rgba(209,154,106,0.32)] bg-[rgba(209,154,106,0.06)] text-[var(--text-primary)]",
+    success:
+      "border-[color:rgba(120,180,120,0.24)] bg-[rgba(120,180,120,0.045)] text-[var(--text-primary)]",
+  };
+
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`rounded-xl border px-3 py-2 text-left transition ${
+        active
+          ? activeToneClasses[tone]
+          : "border-transparent bg-transparent text-[var(--text-muted)] hover:border-white/10 hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <span
+              className={
+                tone === "danger"
+                  ? "text-[var(--brand-accent)]"
+                  : "text-[var(--text-secondary)]"
+              }
+            >
+              {icon}
+            </span>
+            <p className="text-sm font-semibold leading-none">{label}</p>
+          </div>
+          <p className="mt-1.5 text-xs leading-none opacity-75">
+            {description}
+          </p>
+        </div>
+        <p className="text-xl font-semibold leading-none tracking-tight">
+          {count}
+        </p>
+      </div>
+    </button>
+  );
+}
+
+function CustomerStatusPill({
+  tone,
+  children,
+}: {
+  tone: "warning" | "danger" | "success";
+  children: ReactNode;
+}) {
+  const toneClasses = {
+    warning:
+      "border-[color:rgba(182,111,58,0.25)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
+    danger:
+      "border-[color:rgba(182,111,58,0.4)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]",
+    success:
+      "border-white/10 bg-white/[0.04] text-[var(--text-primary)]",
+  };
+
+  return (
+    <span
+      className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${toneClasses[tone]}`}
+    >
+      {children}
+    </span>
   );
 }
