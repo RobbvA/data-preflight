@@ -490,3 +490,29 @@ An unguided attempt by a person new to DataPreflight remains a Milestone 5 exit 
 5. Reassess the Milestone 5 exit criteria. Do not add a third profile.
 
 Update the remaining project Markdown at the end of the build session, then review the staged changes before committing and pushing.
+
+---
+
+# 2026-10-11
+
+## Milestone 5 — Final internal checks and closeout
+
+### Deployed privacy check
+
+Chrome DevTools Network remained empty during the tested deployed Invoice upload/review and repeated downloads of the Validation Report, rows without blockers, and issue report. Source review found browser-side parsing, validation, and Blob-based downloads for the current file path, with no upload, analytics, or data-storage request in that path. This supports the current claim for the tested flow; future integrations require another check.
+
+### Excel edge case
+
+Created `invoice-empty-first-sheet.xlsx` with a genuinely empty first sheet and three Invoice records on a populated second sheet. The app processed `Invoice data`; the user confirmed **1 blocked / 1 needs review / 1 ready** and saw the worksheet in the Validation Report. The empty sheet was not offered as a readable data sheet. This was a focused parser/selection check, not a broad Excel compatibility audit.
+
+### UX assessment
+
+The user completed a mobile walkthrough and said the flow worked. Mobile spacing felt cramped but did not prevent use. Desktop Invoice/Customer flows and status tabs were exercised earlier. Simon's informal interaction did not produce reliable evidence for a first-action defect or an unguided usability pass; no change was made from it.
+
+### Decision
+
+Close M5 as **internally complete** based on reliability, repeatability, traceability, privacy, and workflow checks. An independent unguided new-user attempt was an earlier hard exit criterion; it was consciously moved to later product validation and **has not been fulfilled**. Do not claim self-service usability is externally proven.
+
+### Next session
+
+Plan M6 before implementation: minimum Vendor and Product profiles, consistent layout and shared behavior, local reusable mappings, a narrow reference-data experiment, acceptance fixtures, name availability research, and the point at which independent usage feedback is needed. No new profile or rebrand was implemented during this closeout.

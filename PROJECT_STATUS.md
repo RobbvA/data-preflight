@@ -1,6 +1,6 @@
 # DataPreflight Project Status
 
-Last reviewed: 2026-10-10
+Last reviewed: 2026-10-11
 
 ## Product
 
@@ -12,17 +12,17 @@ Core promise: **Validate data before ERP import.**
 
 ## Current milestone
 
-**Milestone 5 — Validated Product Direction: in progress**
+**Milestone 5 — Validated Product Direction: internally complete (2026-10-11)**
 
-Invoice data and Customer master data are working validation profiles. Profile-first selection, mapping guards, review categories, explanations, CSV exports, and a downloadable Validation Report are available.
+Invoice and Customer are working profiles with explicit selection, guarded mapping, deterministic review, explainable issues, controlled exports, and a Validation Report. Fixed runs produced byte-identical outputs. Representative value-level files matched expected normalization, issues, classifications, and exported rows.
 
-Fixed Invoice and Customer CSV runs produced byte-identical exports and reports when repeated with the same mapping. Representative value-level CSV tests for both domains now also match explicit expectations for normalization, individual issues, classifications, and exported rows.
+Targeted CSV and XLSX files with up to 5,000 Invoice rows worked without noticeable browser delay. This is not a measured performance limit.
 
-Targeted CSV and XLSX files with up to 5,000 Invoice rows worked without noticeable browser delay in manual testing. This does not establish a maximum supported file size.
+A deployed browser-network check during the tested Invoice upload and downloads showed no outgoing requests from those actions. An XLSX with an empty first sheet and populated Invoice sheet returned the expected **1 blocked / 1 needs review / 1 ready**. The user reported that the mobile flow worked, though the layout felt cramped.
 
-The remaining work is a focused internal check of Excel edge cases, desktop and mobile workflow clarity, and deployed privacy wording. An unguided test with someone new to the app remains a Milestone 5 exit criterion. Milestone 5 is not complete yet.
+**Scope of completion:** M5 is closed against internal reliability and workflow checks. An independent, unguided new-user test has not been completed; first-use understanding and adoption remain unverified. Carry these questions into later outreach. Simon's informal interaction is not treated as UX evidence.
 
-Milestones 1–4 and the initial industry-feedback phase are complete.
+Milestones 1–4 and the initial industry-feedback phase are also complete.
 
 ## Available now
 
@@ -94,7 +94,14 @@ The Invoice validation profile is at version `1.0.2` after the number-normalizat
 - Manually tested Invoice XLSX files with **1,000 and 5,000 rows**. Mapping completed automatically and the browser showed no noticeable delay.
 - No parse time, validation time, memory use, or maximum supported size was measured. A size guard should be based on evidence if one becomes necessary; these measurements are not a blocker for the current Milestone 5 flow.
 
-These checks provide a targeted reliability baseline. They do not cover every real-world workbook, prove a maximum supported file size, or replace an unguided new-user test.
+### Final internal checks on 2026-10-11
+
+- On the deployed site, Chrome Network stayed empty during the tested Invoice upload and downloads of the Validation Report, row export, and issue report. Source review found browser-side parsing and Blob downloads in this file flow. This verifies the tested path, not future integrations.
+- An XLSX with a genuinely empty first worksheet and three rows on the populated `Invoice data` worksheet gave the expected **1 blocked / 1 needs review / 1 ready**; the worksheet appeared in the Validation Report.
+- The user completed a mobile walkthrough and found the flow usable. Cramped spacing is later polish, not a blocker. Desktop Invoice/Customer flows and review tabs were exercised earlier.
+- No independent unguided new-user result was collected. Simon's informal interaction did not justify a UX change.
+
+These checks provide a targeted reliability baseline. They do not cover every real-world workbook, prove a maximum supported file size, or establish how an unfamiliar ERP/data user understands the product.
 
 ## Product boundaries
 
@@ -104,20 +111,20 @@ These checks provide a targeted reliability baseline. They do not cover every re
 - Invoice and Customer have separate workspace components. A generic, profile-driven workspace remains a possible later refactor based on proven shared behavior.
 - Users can select between two code-defined profiles. They cannot create or save their own profiles, rules, or mappings.
 - Source corrections happen in the original file, followed by another upload. There is no in-app record editor or ERP connector.
-- Source-file parsing, mapping, normalization, validation, and export in the current workflow run in the browser. Recheck the complete deployed data flow before expanding privacy claims or adding analytics, APIs, storage, or AI.
+- Source-file parsing, mapping, normalization, validation, and export in the current workflow run in the browser. The deployed Network check found no outgoing requests during the tested file and download flow. Recheck privacy whenever analytics, APIs, storage, AI, or deployment behavior changes.
 - The Validation Report captures profile, version, source filename, selected worksheet where applicable, result counts, and mapping. It does not contain a cryptographic input fingerprint or a full record of every normalized value and issue.
 - No file-size or row-count limit has been established from the current manual checks.
 
 ## Known debt and next work
 
-1. **Focused reliability follow-up:** check a few remaining representative XLSX edge cases and investigate any reproducible mismatch. Do not repeat the completed CSV value-level checks without a concrete reason.
-2. **Workflow clarity:** review the landing page and both workspaces on desktop and mobile. Make the first action, current result, available mapping tool, and export warning clear without repeated instructions.
-3. **Privacy wording:** compare the deployed product claims with the actual data flow before strengthening local-processing language.
-4. **Unguided new-user test:** let someone unfamiliar with DataPreflight choose a profile, load a file, understand mapping and issues, and export without step-by-step guidance. Record where they hesitate or misunderstand.
-5. **Architecture:** extract shared workspace behavior only where Invoice and Customer demonstrate a real common pattern. Keep domain-specific rules independent.
-6. **Performance limits, when needed:** if larger files or responsiveness become a concrete concern, measure file size, row count, parse time, validation time, and browser behavior before choosing a guard.
+1. **M6 planning:** define a cohesive platform increment before implementation. Candidates are Vendor/Supplier and Product/Material profiles, locally reusable mappings, and a narrow reference-data validation prototype. Keep the workspaces visually and behaviorally consistent.
+2. **Independent product understanding:** an unfamiliar ERP/data user has not completed an unguided workflow. Test before claiming self-service usability or using it as outreach evidence.
+3. **Focused polish:** mobile spacing, first-use hierarchy, landing preview consistency, and rule visibility can be revisited when concrete friction appears; avoid a speculative redesign.
+4. **Reliability on new scope:** repeat value-level and privacy checks as new profiles or processing paths are added. Establish a file-size guard only after measuring a real limit.
+5. **Architecture:** extract shared workspace behavior where Invoice and Customer show a stable common pattern; keep domain-specific rules independent.
+6. **Branding:** research and verify a more distinctive product name before broader outreach or launch.
 
-Do not add a third validation profile or start a broader feature sprint before checking the Milestone 5 exit criteria.
+No Vendor, Product, saved mapping, or reference-data feature was implemented as part of the M5 close. The independent usability question remains open.
 
 ## Documentation
 

@@ -1,6 +1,6 @@
 # DataPreflight Roadmap
 
-Last reviewed: 2026-10-10
+Last reviewed: 2026-10-11
 
 ## Milestones 1–4 — MVP foundation
 
@@ -15,9 +15,9 @@ Status: ✅ Completed
 
 ## Milestone 5 — Validated Product Direction
 
-Status: 🟡 In progress
+Status: ✅ Internally complete on 2026-10-11; independent self-service understanding remains unverified
 
-Goal: prove that DataPreflight is a useful, repeatable quality gate before ERP import.
+Goal: establish a repeatable, explainable quality gate before ERP import with Invoice and Customer. Closure is based on internal reliability and workflow checks, not an independent usability test.
 
 **Current workflow:** Choose validation profile → Upload → Parse → Map → Normalize → Validate → Review → Export.
 
@@ -27,7 +27,7 @@ Invoice data and Customer master data are the two working profiles. Do not add a
 
 ### 5.1 Product positioning and first use
 
-Status: 🟡 Implemented; unguided new-user validation pending
+Status: ✅ Implemented; independent first-use validation deferred to later outreach
 
 Built:
 
@@ -40,16 +40,11 @@ Built:
 - Compact mapping status when mapping is complete, with an Edit mapping tool when needed.
 - Review results presented as the main workspace activity in both domains.
 
-Next:
-
-- Check whether profile choice and the first action are clear on desktop and mobile.
-- Reduce repeated instructions or unclear hierarchy where an internal walkthrough reveals a specific problem.
-- Observe whether a person new to the product can use the workflow without step-by-step guidance.
-- Keep privacy wording aligned with the complete deployed data flow.
+Follow-up: the user completed a mobile walkthrough and found the flow usable, with cramped spacing noted for polish. Desktop flows were exercised earlier. First-use comprehension by an unfamiliar ERP/data user remains unverified. Keep privacy wording aligned with future changes.
 
 ### 5.2 Shared validation architecture and traceability
 
-Status: 🟡 Working foundation; broader real-world coverage pending
+Status: ✅ Working foundation for two domains; broader coverage is future work
 
 Built:
 
@@ -72,17 +67,13 @@ Evidence:
 
 **Repeatability target:** same input + same worksheet where applicable + same mapping + same profile version = same result.
 
-Remaining:
-
-- Exercise a few additional representative XLSX edge cases with explicit expected values and issues.
-- Investigate any reproducible mismatch before expanding product scope.
-- Keep version changes tied to changes in normalization or validation behavior.
+Final targeted XLSX check: an empty first sheet was skipped and three records on the populated Invoice sheet produced **1 blocked / 1 needs review / 1 ready**; the sheet appeared in the Validation Report. Investigate future reproducible mismatches and advance profile versions when behavior changes.
 
 A generic `ValidationWorkspace` remains a possible direction. Extract shared behavior only after the two existing workspaces show what truly belongs in the shared layer.
 
 ### 5.3 Customer master data foundation
 
-Status: 🟡 Second domain working; new-user understanding pending
+Status: ✅ Second domain working; independent user understanding unverified
 
 Built:
 
@@ -103,16 +94,13 @@ Checked:
 - A six-row Customer CSV mapped all five fields automatically. A missing name and case-variant duplicate IDs were blocked; one row with email and country-code warnings remained exportable.
 - Its exported rows and normalized name, email, country, and VAT values matched the expected results.
 
-Next:
-
-- Check the workspace hierarchy on desktop and mobile.
-- Observe whether a new user understands the mapping tool, warning rows, and what to fix in the source file.
+Internal workspace checks are sufficient for M5. Observe unfamiliar-user understanding of mapping and warnings in a later independent test.
 
 Supplier, Product, Inventory, and other domains remain out of scope for Milestone 5.
 
 ### 5.4 Workflow and reliability
 
-Status: 🟡 Core workflow working; focused internal follow-up pending
+Status: ✅ Core workflow and focused internal checks complete
 
 Built:
 
@@ -139,25 +127,27 @@ Reliability checks:
 - The six-row Invoice value-level fixture produced **3 blocked / 1 needs review / 2 ready** after the mapping and number-normalization fixes. The export contained exactly the three expected rows without blockers, including the warning row.
 - The six-row Customer value-level fixture produced **3 blocked / 1 needs review / 2 ready** with the expected three-row export.
 - The UI review tabs and the exported CSV content were checked separately.
+- An empty-first-sheet XLSX returned the expected three classifications from its populated Invoice worksheet; the report named the worksheet.
+- A mobile walkthrough found the flow usable; tighter spacing is later polish.
 
 These checks did not record parse time, validation time, memory use, or a maximum supported file size. The 5,000-row result is a useful responsiveness observation, not a performance guarantee.
 
-Focused reliability backlog:
+Reliability work as scope expands:
 
-- Try a few additional Excel edge cases with explicit expected mappings, values, issues, and exports.
-- Investigate a reproducible unexpected mapping, normalization, classification, or export result if one appears.
-- Measure file size, row count, parse and validation times only when larger datasets or a proposed limit make that decision necessary.
+- Investigate reproducible unexpected mapping, normalization, classification, or export results.
+- Test new profiles and reference checks at value level before presenting them as reliable.
+- Measure file size, row count, parse and validation times only if larger datasets or a proposed limit make that decision necessary.
 - Add a pre-parse size or row guard only after establishing an evidence-based limit.
 
 Do not repeat completed tests merely to collect more runs without a concrete remaining risk.
 
 ### 5.5 Explainability
 
-Status: 🟡 Available; validate with a new user
+Status: ✅ Available in both domains; unfamiliar-user comprehension unverified
 
 Both domains show what failed, why it matters, and a suggested fix. Review cards show a concise issue summary and offer further details. Warning rows can remain in the export, and the UI explains that they should be checked before import.
 
-Next: observe whether a new user understands which source value to correct, why a row is blocked or needs review, and what to do after reviewing an issue. Improve wording where the test reveals confusion.
+Independent follow-up: observe whether an unfamiliar user understands source corrections and warning rows in the export. Improve wording where a concrete test reveals confusion.
 
 AI explanations may come later. Validation outcomes remain rule-based.
 
@@ -169,36 +159,40 @@ Users can select two code-defined profiles. User-authored rules, saved configura
 
 Do not build them until feedback on Invoice and Customer shows which configuration users actually need.
 
-## Milestone 5 execution order
+## Milestone 5 closeout — 2026-10-11
 
-1. ✅ Make the validation context downloadable as a readable CSV.
-2. ✅ Establish an initial repeatability baseline with fixed Invoice and Customer CSV files.
-3. ✅ Verify representative Invoice and Customer CSV values, issues, classifications, and row exports; fix the discovered mapping, number-normalization, and internal-export-column issues.
-4. 🟡 Complete a small, targeted internal check of remaining Excel edge cases and desktop/mobile workflow clarity.
-5. 🟡 Verify that the deployed privacy wording matches the actual data flow.
-6. ⏳ Let one person new to the product attempt the workflow without step-by-step guidance. Record confusion and fix issues that materially affect understanding.
-7. ⏳ Reassess the exit criteria and close the milestone only when the evidence supports it.
+1. ✅ The Validation Report and repeated Invoice/Customer CSV runs produced traceable, byte-identical outputs for fixed input and mapping.
+2. ✅ Representative CSV and XLSX fixtures confirmed mapping, values, issues, classification, warning export, and worksheet selection. Malformed CSV was blocked.
+3. ✅ An empty-first-sheet XLSX produced **1 blocked / 1 needs review / 1 ready** from its populated Invoice sheet; the report identified the sheet.
+4. ✅ Chrome Network showed no outgoing request during the tested deployed upload and downloads. Current source uses browser-side parsing, validation, and downloads.
+5. ✅ The user completed a mobile walkthrough without a blocking issue; desktop flows were exercised earlier.
+6. ⏳ No independent unguided new-user test was completed. This earlier hard exit criterion was consciously moved out of M5 closeout. It remains necessary before claiming independently proven self-service usability.
 
-Measured performance and an explicit file-size guard are not required to close this milestone unless a concrete responsiveness problem appears. Do not communicate an untested maximum.
+M5 is **internally complete**, not proof for every workbook, large dataset, ERP target, or new-user journey. Manual 5,000-row checks do not establish a performance ceiling. Simon's informal interaction did not provide reliable UX evidence and prompted no change.
 
-Documentation is updated at the end of each build session to reflect what was actually built and tested.
+## Milestone 5 internal exit assessment
 
-## Milestone 5 exit criteria
+| Criterion | Evidence and limit |
+| --- | --- |
+| Profile choice and workflow | Implemented and exercised internally on desktop and mobile; independent first-use comprehension unverified. |
+| Explainable, repeatable Invoice/Customer results | Fixed runs, value-level fixtures, issue details, and matching reports/exports checked. |
+| Controlled export | Critical rows excluded; tested warning rows remain exportable with explanatory copy. |
+| Traceability | Report includes source filename, profile ID/version, mapping, counts, and selected worksheet when applicable. |
+| Privacy in current flow | Source review plus deployed Network observation during the tested file and download actions; recheck after changes. |
 
-- A new user can choose a profile and understand the next action without guidance.
-- Invoice and Customer produce explainable, repeatable classifications for representative files.
-- Exports exclude critical rows and clearly describe how warnings are handled.
-- A downloadable report identifies the source filename, selected worksheet where applicable, applied profile/version, mapping, and result counts.
-- Privacy claims match the verified data flow.
-- New-user feedback confirms that the workflow is understandable and useful.
+Documentation is updated at the end of each build session.
 
-Do not mark Milestone 5 complete solely because the features have been implemented.
+## Milestone 6 — Outreach-ready ERP validation platform
 
-## Milestone 6 — Data migration platform
+Status: ⏳ Planning; no M6 implementation started
 
-Status: Future
+Plan scope before building. Intended direction: a consistent platform across Invoice, Customer, Vendor/Supplier, and Product/Material, with one shared profile → upload/worksheet → mapping → review → export flow. Vendor is the first candidate, then a deliberately limited Product profile. Define minimal fields, rules, and acceptance fixtures before implementation.
 
-Potential scope: more master data domains, migration checks, larger datasets, batch workflows, XML/SQL inputs, and ERP integration. Prioritize only after Milestone 5's reliability and user-value questions are answered.
+Horizontal candidates: locally saved reusable mappings, a narrow local reference-data validation prototype, clearer export inclusion/exclusion, and stronger validation evidence where useful. Keep verdicts deterministic and processing browser-side. Research a distinctive name and verify candidates before broader positioning.
+
+Preserve status tabs, problem/why/fix explanations, profile versions, Validation Reports, and local exports in every domain. Avoid separate mini-apps per profile. Independent self-service and domain feedback must inform later outreach; closing internal M5 does not erase that open question.
+
+Do not automatically add AI, accounts, a dashboard, ERP connectors, a full rule builder, or extra profiles. M6 planning should turn candidates into a realistic sequence and stop conditions.
 
 ## Milestone 7 — AI assistance
 
@@ -208,4 +202,4 @@ Possible uses: mapping proposals, explanations, and suggested fixes. AI output m
 
 ## Next build step
 
-Perform a short internal desktop/mobile walkthrough and one or two targeted Excel edge-case checks. Verify the deployed privacy wording. Use feedback from an unguided new-user attempt to identify actual UI friction. Keep Invoice and Customer as the only profiles and revisit the Milestone 5 exit criteria after these checks.
+Plan M6 before new profile code: minimum Vendor and Product fields/rules, shared workspace behavior and layout, acceptance fixtures, locally saved mapping flow, bounded reference-data experiment, naming research, and timing for independent usage feedback.
