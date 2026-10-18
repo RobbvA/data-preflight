@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, Search } from "lucide-react";
 import {
   getInputAdapter,
@@ -11,6 +11,8 @@ import {
 import { downloadCsv } from "@/lib/exportData";
 import { getProfileMappingCandidates } from "@/lib/dataProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
+import { getMappingStatus } from "@/lib/mappingStatus";
+import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
 import { ValidationContextPanel } from "@/components/data-preflight/ValidationContextPanel";
 import {
@@ -56,6 +58,15 @@ export function CustomerWorkspace({
 }: {
   onDomainChange: (domain: DataDomain) => void;
 }) {
+  const loadRequestId = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      // Ignore any pending read when this workspace unmounts.
+      loadRequestId.current += 1;
+    };
+  }, []);
+
   const [dataSet, setDataSet] = useState<ParsedDataSet | null>(null);
   const [mapping, setMapping] = useState<CustomerMapping>(emptyMapping);
   const [pendingExcelSheets, setPendingExcelSheets] = useState<{
@@ -81,15 +92,16 @@ export function CustomerWorkspace({
     headers,
   );
 
-  const requiredUnmapped = customerValidationProfile.fields
-    .filter((field) => field.required && !mapping[field.key])
-    .map((field) => field.label);
-
-  const selectedHeaders = Object.values(mapping).filter(Boolean);
-  const hasDuplicateMapping =
-    new Set(selectedHeaders).size !== selectedHeaders.length;
-  const mappingReady =
-    requiredUnmapped.length === 0 && !hasDuplicateMapping;
+  const {
+    missingRequiredFields,
+    hasDuplicateMappings: hasDuplicateMapping,
+    mappingReady,
+    mappedCount,
+  } = useMemo(
+    () => getMappingStatus(customerValidationProfile, mapping),
+    [mapping],
+  );
+  const requiredUnmapped = missingRequiredFields.map((field) => field.label);
 
   const mappedRows = useMemo(
     () =>
@@ -132,8 +144,6 @@ export function CustomerWorkspace({
   }).length;
 
   const readyCount = normalizedRows.length - blockedCount - reviewCount;
-  const mappedCount = selectedHeaders.length;
-  const showMappingFields = !mappingReady || isMappingOpen;
 
   const reviewRows = normalizedRows.map((row, index) => ({
     row,
@@ -197,6 +207,8 @@ export function CustomerWorkspace({
   }
 
   async function loadFile(file: File, selectedSheetName?: string) {
+    const requestId = ++loadRequestId.current;
+
     setError(null);
     setDataSet(null);
     setMapping(emptyMapping());
@@ -217,6 +229,7 @@ export function CustomerWorkspace({
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
         const sheetNames = await getReadableExcelSheetNames(file);
+        if (requestId !== loadRequestId.current) return;
 
         if (sheetNames.length > 1) {
           setPendingExcelSheets({ file, names: sheetNames });
@@ -225,6 +238,7 @@ export function CustomerWorkspace({
       }
 
       const parsed = await adapter.parse(file, selectedSheetName);
+      if (requestId !== loadRequestId.current) return;
 
       if (parsed.rows.length === 0 || parsed.headers.length === 0) {
         throw new Error("The file has no readable rows and headers.");
@@ -239,14 +253,25 @@ export function CustomerWorkspace({
         throw new Error(mismatchMessage);
       }
 
+      const suggestedMapping = suggestCustomerMapping(parsed.headers);
+      const { mappingReady: suggestedMappingReady } = getMappingStatus(
+        customerValidationProfile,
+        suggestedMapping,
+      );
+
       setDataSet(parsed);
-      setMapping(suggestCustomerMapping(parsed.headers));
+      setMapping(suggestedMapping);
+      setIsMappingOpen(!suggestedMappingReady);
     } catch (caught) {
+      if (requestId !== loadRequestId.current) return;
+
       setError(
         caught instanceof Error ? caught.message : "Could not read the file.",
       );
     } finally {
-      setIsLoading(false);
+      if (requestId === loadRequestId.current) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -272,15 +297,24 @@ export function CustomerWorkspace({
   }
 
   function resetFlow() {
+    loadRequestId.current += 1;
     setPendingExcelSheets(null);
     setDataSet(null);
     setMapping(emptyMapping());
     setError(null);
+    setIsLoading(false);
     setActiveReviewTab(null);
     setIsMappingOpen(false);
     setSelectedCustomerRowIndex(null);
     setIsReviewListOpen(true);
     setReviewSortMode("priority");
+  }
+
+  function changeDomain(nextDomain: DataDomain) {
+    if (nextDomain === "customer") return;
+
+    resetFlow();
+    onDomainChange(nextDomain);
   }
 
   function exportIssues() {
@@ -305,7 +339,7 @@ export function CustomerWorkspace({
           upload={
             <UploadSection
               domain="customer"
-              onDomainChange={onDomainChange}
+              onDomainChange={changeDomain}
               fileName=""
               isLoading={isLoading}
               error={error}
@@ -333,7 +367,7 @@ export function CustomerWorkspace({
             upload={
               <UploadSection
                 domain="customer"
-                onDomainChange={onDomainChange}
+                onDomainChange={changeDomain}
                 fileName={dataSet.fileName}
                 isLoading={isLoading}
                 error={error}
@@ -359,10 +393,12 @@ export function CustomerWorkspace({
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 1 · Field mapping
                 </p>
+
                 <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
                   {mappedCount}/{customerValidationProfile.fields.length} fields
                   mapped
                 </h2>
+
                 <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
                   {requiredUnmapped.length > 0
                     ? `Choose a column for: ${requiredUnmapped.join(", ")}.${
@@ -376,76 +412,18 @@ export function CustomerWorkspace({
                 </p>
               </div>
 
-              {mappingReady && (
-                <button
-                  type="button"
-                  aria-expanded={isMappingOpen}
-                  aria-controls="customer-mapping-fields"
-                  onClick={() => setIsMappingOpen((open) => !open)}
-                  className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-[var(--surface-raised)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)]"
-                >
-                  {isMappingOpen ? "Close mapping" : "Edit mapping"}
-                </button>
-              )}
-            </div>
-
-            <div id="customer-mapping-fields" hidden={!showMappingFields}>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-4">
-                <p className="text-sm text-[var(--text-secondary)]">
-                  Check the suggested columns. Required fields are marked *.
-                </p>
-                <span className="text-xs text-[var(--text-muted)]">
-                  Profile: {customerValidationProfile.name} v
-                  {customerValidationProfile.version}
-                </span>
-              </div>
-
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {customerValidationProfile.fields.map((field) => (
-                  <label key={field.key} className="block text-sm font-medium">
-                    {field.label}
-                    {field.required && (
-                      <span className="ml-1 text-[var(--brand-accent-soft)]">
-                        *
-                      </span>
-                    )}
-
-                    <select
-                      value={mapping[field.key]}
-                      onChange={(event) =>
-                        setMapping((current) => ({
-                          ...current,
-                          [field.key]: event.target.value,
-                        }))
-                      }
-                      className={`mt-1.5 w-full rounded-lg border bg-[var(--surface-deep)] px-3 py-2 text-sm text-[var(--text-primary)] ${
-                        (field.required && !mapping[field.key]) ||
-                        (mapping[field.key] &&
-                          selectedHeaders.filter(
-                            (header) => header === mapping[field.key],
-                          ).length > 1)
-                          ? "border-[var(--brand-accent)]"
-                          : "border-white/15"
-                      }`}
-                    >
-                      <option value="">Not mapped</option>
-                      {headers.map((header) => (
-                        <option key={header} value={header}>
-                          {header}
-                        </option>
-                      ))}
-                    </select>
-
-                    {!mapping[field.key] &&
-                      mappingCandidates[field.key].length > 1 && (
-                        <span className="mt-2 block text-xs leading-5 text-[var(--brand-accent-soft)]">
-                          Multiple possible columns:{" "}
-                          {mappingCandidates[field.key].join(", ")}. Choose one.
-                        </span>
-                      )}
-                  </label>
-                ))}
-              </div>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                onClick={() => setIsMappingOpen(true)}
+                className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                  mappingReady
+                    ? "border border-white/15 bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--brand-accent)]"
+                    : "bg-[var(--brand-accent)] text-[var(--text-primary)] hover:bg-[var(--brand-accent-soft)]"
+                }`}
+              >
+                {mappingReady ? "Edit mapping" : "Complete mapping"}
+              </button>
             </div>
           </section>
 
@@ -459,6 +437,7 @@ export function CustomerWorkspace({
                   <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
                     Step 2 · Review
                   </p>
+
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
                       Customer results
@@ -479,6 +458,7 @@ export function CustomerWorkspace({
                     icon={<AlertTriangle className="h-4 w-4" />}
                     onClick={() => selectReviewTab("blocked")}
                   />
+
                   <CustomerReviewTabButton
                     label="Needs Review"
                     description="Check before export"
@@ -488,6 +468,7 @@ export function CustomerWorkspace({
                     icon={<Search className="h-4 w-4" />}
                     onClick={() => selectReviewTab("review")}
                   />
+
                   <CustomerReviewTabButton
                     label="Ready"
                     description="No issues found"
@@ -506,11 +487,13 @@ export function CustomerWorkspace({
                         <h3 className="text-sm font-semibold text-[var(--text-primary)]">
                           {categoryTitle}
                         </h3>
+
                         <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--text-primary)]">
                           {visibleRows.length} row
                           {visibleRows.length === 1 ? "" : "s"}
                         </span>
                       </div>
+
                       <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--text-muted)]">
                         {categoryDescription}
                       </p>
@@ -533,6 +516,7 @@ export function CustomerWorkspace({
                           <option value="issues">Sort: issues</option>
                         </select>
                       )}
+
                       <button
                         type="button"
                         onClick={() => setIsReviewListOpen((open) => !open)}
@@ -553,9 +537,11 @@ export function CustomerWorkspace({
                         {visibleRows.map(({ row, rowIndex, issues }) => {
                           const isSelected =
                             selectedCustomerRowIndex === rowIndex;
+
                           const criticalCount = issues.filter(
                             (issue) => issue.severity === "critical",
                           ).length;
+
                           const mainIssue = issues[0];
 
                           return (
@@ -573,9 +559,11 @@ export function CustomerWorkspace({
                                           ? "Needs review"
                                           : "Ready"}
                                     </span>
+
                                     <span className="rounded-full bg-[var(--surface-deep)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)]">
                                       Row {rowIndex}
                                     </span>
+
                                     {issues.length > 0 && (
                                       <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-[var(--text-secondary)]">
                                         {issues.length} issue
@@ -671,6 +659,7 @@ export function CustomerWorkspace({
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 3 · Export
                 </p>
+
                 <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
                   Export reviewed data
                 </h2>
@@ -728,6 +717,20 @@ export function CustomerWorkspace({
             </>
           )}
         </>
+      )}
+
+      {dataSet && isMappingOpen && (
+        <ProfileMappingPanel
+          profile={customerValidationProfile}
+          headers={headers}
+          mapping={mapping}
+          candidates={mappingCandidates}
+          onUpdateMapping={(field, header) => {
+            setMapping((current) => ({ ...current, [field]: header }));
+            setSelectedCustomerRowIndex(null);
+          }}
+          onClose={() => setIsMappingOpen(false)}
+        />
       )}
     </WorkspaceLayout>
   );
@@ -808,10 +811,12 @@ function CustomerReviewTabButton({
             </span>
             <p className="text-sm font-semibold leading-none">{label}</p>
           </div>
+
           <p className="mt-1.5 text-xs leading-none opacity-75">
             {description}
           </p>
         </div>
+
         <p className="text-xl font-semibold leading-none tracking-tight">
           {count}
         </p>

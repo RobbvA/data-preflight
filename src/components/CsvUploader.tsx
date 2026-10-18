@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   getInputAdapter,
@@ -10,6 +10,7 @@ import {
 import type { ValidationIssue } from "@/lib/validateRows";
 import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
+import { getMappingStatus } from "@/lib/mappingStatus";
 import {
   mapRowsToProfile,
   runValidationProfile,
@@ -27,7 +28,7 @@ import {
 } from "@/lib/fieldMapping";
 import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
 
-import { FieldMappingSection } from "@/components/data-preflight/FieldMappingSection";
+import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
 import { CustomerWorkspace } from "@/components/data-preflight/CustomerWorkspace";
 import {
   ActiveWorkspaceHeader,
@@ -48,6 +49,15 @@ import {
 } from "@/components/data-preflight/types";
 
 export function CsvUploader() {
+  const loadRequestId = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      // Ignore any pending read when this workspace unmounts.
+      loadRequestId.current += 1;
+    };
+  }, []);
+
   const [activeDomain, setActiveDomain] = useState<DataDomain | null>(null);
   const [profilePrompt, setProfilePrompt] = useState(false);
   const [parsedDataSet, setParsedDataSet] = useState<ParsedDataSet | null>(
@@ -90,6 +100,8 @@ export function CsvUploader() {
       return;
     }
 
+    const requestId = ++loadRequestId.current;
+
     setError(null);
     setParsedDataSet(null);
     setFieldMapping(createEmptyMapping());
@@ -104,6 +116,8 @@ export function CsvUploader() {
 
     try {
       const file = await source;
+      if (requestId !== loadRequestId.current) return;
+
       const adapter = getInputAdapter(file);
 
       if (!adapter) {
@@ -112,6 +126,7 @@ export function CsvUploader() {
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
         const sheetNames = await getReadableExcelSheetNames(file);
+        if (requestId !== loadRequestId.current) return;
 
         if (sheetNames.length > 1) {
           setPendingExcelSheets({ file, names: sheetNames });
@@ -120,6 +135,7 @@ export function CsvUploader() {
       }
 
       const nextParsedDataSet = await adapter.parse(file, selectedSheetName);
+      if (requestId !== loadRequestId.current) return;
 
       if (nextParsedDataSet.rows.length === 0) {
         throw new Error("Source file is empty.");
@@ -142,16 +158,17 @@ export function CsvUploader() {
         nextParsedDataSet.headers,
         nextParsedDataSet.rows,
       );
-      const selectedHeaders = Object.values(suggestedMapping).filter(Boolean);
-      const requiresMappingReview =
-        invoiceValidationProfile.fields.some(
-          (field) => field.required && !suggestedMapping[field.key],
-        ) || new Set(selectedHeaders).size !== selectedHeaders.length;
+      const { mappingReady: suggestedMappingReady } = getMappingStatus(
+        invoiceValidationProfile,
+        suggestedMapping,
+      );
 
       setParsedDataSet(nextParsedDataSet);
       setFieldMapping(suggestedMapping);
-      setIsFieldMappingOpen(requiresMappingReview);
+      setIsFieldMappingOpen(!suggestedMappingReady);
     } catch (error) {
+      if (requestId !== loadRequestId.current) return;
+
       setError(
         error instanceof Error
           ? error.message
@@ -166,7 +183,9 @@ export function CsvUploader() {
       setIsFieldMappingOpen(false);
       setActiveReviewTab("blocked");
     } finally {
-      setIsLoading(false);
+      if (requestId === loadRequestId.current) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -211,6 +230,7 @@ export function CsvUploader() {
   }
 
   function resetFlow() {
+    loadRequestId.current += 1;
     setPendingExcelSheets(null);
     setParsedDataSet(null);
     setFieldMapping(createEmptyMapping());
@@ -246,24 +266,16 @@ export function CsvUploader() {
     return createMappingSuggestions(headers, rows);
   }, [headers, rows]);
 
-  const missingExpectedFields = useMemo(() => {
-    return mappingSuggestions
-      .filter((suggestion) => suggestion.required)
-      .filter((suggestion) => !fieldMapping[suggestion.targetField])
-      .map((suggestion) => suggestion.targetField);
-  }, [fieldMapping, mappingSuggestions]);
-
-  const duplicateMappedHeaders = useMemo(() => {
-    const usedHeaders = Object.values(fieldMapping).filter(Boolean);
-
-    return usedHeaders.filter(
-      (header, index) => usedHeaders.indexOf(header) !== index,
-    );
-  }, [fieldMapping]);
-
-  const hasDuplicateMappings = duplicateMappedHeaders.length > 0;
-  const hasIncompleteMapping = missingExpectedFields.length > 0;
-  const mappingReady = !hasIncompleteMapping && !hasDuplicateMappings;
+  const {
+    missingRequiredFields,
+    hasIncompleteMapping,
+    hasDuplicateMappings,
+    mappingReady,
+    mappedCount,
+  } = useMemo(
+    () => getMappingStatus(invoiceValidationProfile, fieldMapping),
+    [fieldMapping],
+  );
 
   const selectedRows = useMemo(
     () =>
@@ -336,7 +348,6 @@ export function CsvUploader() {
 
   const hasUploadedRows = rows.length > 0;
   const hasHeaders = headers.length > 0;
-  const mappedCount = Object.values(fieldMapping).filter(Boolean).length;
 
   function changeDomain(nextDomain: DataDomain) {
     setProfilePrompt(false);
@@ -415,26 +426,25 @@ export function CsvUploader() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 1 · Field mapping
                 </p>
+
                 <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
                   {mappedCount}/{mappingSuggestions.length} fields mapped
                 </h2>
+
                 <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
                   {hasIncompleteMapping
-                    ? `Choose a column for: ${missingExpectedFields
-                        .map(
-                          (key) =>
-                            invoiceValidationProfile.fields.find(
-                              (field) => field.key === key,
-                            )?.label ?? key,
-                        )
+                    ? `Choose a column for: ${missingRequiredFields
+                        .map((field) => field.label)
                         .join(", ")}.${hasDuplicateMappings ? " Resolve duplicate assignments too." : ""}`
                     : hasDuplicateMappings
                       ? "One source column is assigned to multiple fields."
                       : "Required fields ready. Change a column if needed."}
                 </p>
               </div>
+
               <button
                 type="button"
+                aria-haspopup="dialog"
                 onClick={() => setIsFieldMappingOpen(true)}
                 className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   mappingReady
@@ -477,9 +487,11 @@ export function CsvUploader() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 3 · Export
                 </p>
+
                 <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
                   Export reviewed data
                 </h2>
+
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
                   {getExportSafetyMessage({
                     hasIncompleteMapping,
@@ -506,7 +518,10 @@ export function CsvUploader() {
                   <button
                     type="button"
                     onClick={() =>
-                      downloadCsv("clean-invoices.csv", validationResult.cleanRows)
+                      downloadCsv(
+                        "clean-invoices.csv",
+                        validationResult.cleanRows,
+                      )
                     }
                     disabled={!canExport}
                     className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
@@ -535,74 +550,14 @@ export function CsvUploader() {
       )}
 
       {hasHeaders && isFieldMappingOpen && (
-        <div className="fixed inset-0 z-50">
-          <button
-            type="button"
-            aria-label="Close mapping panel"
-            onClick={() => setIsFieldMappingOpen(false)}
-            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
-          />
-
-          <aside className="absolute right-0 top-0 h-full w-full max-w-2xl overflow-y-auto border-l border-white/10 bg-[var(--surface-base)]/98 p-5 shadow-2xl shadow-black/40 backdrop-blur-xl">
-            <div className="mb-5 flex items-start justify-between gap-4 border-b border-white/10 pb-5">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--brand-accent)]">
-                  Configuration layer
-                </p>
-
-                <h2 className="mt-2 text-xl font-semibold tracking-tight text-[var(--text-primary)]">
-                  Field mapping
-                </h2>
-
-                <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--text-secondary)]">
-                  Choose which source column belongs to each invoice field.
-                  Changes update the validation results immediately.
-                </p>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-white/10 bg-[var(--surface-deep)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                    {mappedCount}/{mappingSuggestions.length} mapped
-                  </span>
-
-                  {parsedDataSet && (
-                    <span className="rounded-full border border-white/10 bg-[var(--surface-deep)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                      {parsedDataSet.sourceType.toUpperCase()} source
-                    </span>
-                  )}
-
-                  {parsedDataSet?.metadata?.sheetName && (
-                    <span className="rounded-full border border-white/10 bg-[var(--surface-deep)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]">
-                      Sheet: {parsedDataSet.metadata.sheetName}
-                    </span>
-                  )}
-
-                  {(hasIncompleteMapping || hasDuplicateMappings) && (
-                    <span className="rounded-full border border-[color:rgba(182,111,58,0.35)] bg-[rgba(182,111,58,0.1)] px-2.5 py-1 text-[11px] font-medium text-[var(--brand-accent)]">
-                      Needs review
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsFieldMappingOpen(false)}
-                className="rounded-full border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
-              >
-                Close
-              </button>
-            </div>
-
-            <FieldMappingSection
-              headers={headers}
-              fieldMapping={fieldMapping}
-              mappingSuggestions={mappingSuggestions}
-              isOpen
-              onToggleOpen={() => setIsFieldMappingOpen(false)}
-              onUpdateFieldMapping={updateFieldMapping}
-            />
-          </aside>
-        </div>
+        <ProfileMappingPanel
+          profile={invoiceValidationProfile}
+          headers={headers}
+          mapping={fieldMapping}
+          suggestions={mappingSuggestions}
+          onUpdateMapping={updateFieldMapping}
+          onClose={() => setIsFieldMappingOpen(false)}
+        />
       )}
     </WorkspaceLayout>
   );

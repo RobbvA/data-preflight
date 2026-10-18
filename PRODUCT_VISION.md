@@ -1,87 +1,209 @@
 # DataPreflight Product Vision
 
+Last reviewed: 2026-10-18
+
 ## Purpose
 
-DataPreflight is a repeatable quality gate before ERP import. It helps people map source data, apply known business rules, understand problems, review records, and prepare controlled output.
+DataPreflight is a repeatable quality gate before ERP import.
+
+It helps people map source data, apply known validation rules, understand problems, review records, and prepare controlled output.
 
 **Product promise:** Validate data before ERP import.
 
-The intended users include ERP and data migration consultants, business analysts, master data specialists, finance teams, and operations teams. The problem is not merely whether a spreadsheet opens: inconsistent headers, missing identifiers, duplicates, invalid values, and business-rule conflicts create failed imports and rework.
+Long-term decision principle:
+
+“DataPreflight should be the tool you run before ERP data is allowed to go anywhere important.”
+
+This is a product ambition, not a claim that the current profiles guarantee safety or acceptance by a particular ERP.
+
+## Intended users
+
+- ERP and data migration consultants.
+- Business analysts.
+- Master data specialists.
+- Finance teams.
+- Operations teams preparing structured business data.
+
+The problem is not simply whether a spreadsheet opens. Inconsistent columns, missing identifiers, duplicates, invalid values, and business-rule conflicts can create failed imports and rework.
 
 ## Current product
 
-The app currently supports **Invoice data** and **Customer master data** as two selectable, code-defined validation profiles. A user chooses a profile before uploading a CSV, XLSX, or XLS file. The browser suggests field mapping. If the suggested mapping is complete and unambiguous, the user can continue without editing it; the mapping tool remains available.
+Invoice and Customer are working, selectable profiles defined and versioned in code.
 
-DataPreflight normalizes mapped values, applies the selected profile's rules, and shows Blocked, Needs review, and Ready records. Users can export rows without critical issues, download an issue report, and download a Validation Report with the profile, version, source filename, selected worksheet when applicable, applied mapping, and result counts.
+A user explicitly chooses a profile before uploading a CSV, XLSX, or XLS file.
 
-Customer is a second test of the product model. It does not mean Vendor, Product, Inventory, or ERP-specific profiles already exist. The app does not offer user-authored rules, saved mappings, projects, connectors, or in-app source editing.
+The browser suggests mappings. Correct automatic mappings do not require an extra confirmation step. Missing or duplicate mappings block validation until resolved.
 
-## Four pillars
+Both profiles use one mapping panel with consistent field feedback and keyboard behavior.
 
-### 1. Field mapping
+Mapped values are normalized and checked by deterministic rules. Results appear as Blocked, Needs review, and Ready.
 
-Source headers such as `Factuurnr` and `Invoice No.` can represent the same internal field. Suggestions must be visible and adjustable. A clear automatic suggestion should let the user proceed without opening the mapping tool. Missing or ambiguous required mappings should require a human decision rather than silently choosing a source column.
+Users can export rows without critical issues, download issue reports, and download a Validation Report.
 
-Mapping is part of the validation context: changing the mapping can change which records pass. The applied mapping is visible in Validation details and available in the downloadable Validation Report.
+Source corrections happen in the original file, followed by another upload.
 
-### 2. Validation profiles
+Vendor, Product, saved mappings, reference checks, custom rules, projects, and ERP connectors are not available yet.
 
-A profile defines its data domain, fields, normalization, hard rules, labels, and version. Invoice and Customer currently use versioned definitions in code. Selecting between them is available; creating, editing, saving, or selecting a target ERP rule set is future work.
+## Quality standard
 
-A behavior change in normalization or validation must advance the profile version so the version in a report identifies which rules produced its result.
+DataPreflight should feel simple while handling complex validation reliably.
 
-Do not add many new profiles now. Use the existing two domains to learn what should be shared before building a generic `ValidationWorkspace`.
+Each increment follows:
 
-### 3. Local-first processing
+Problem → Design → Implementation → Edge cases → UX → Testing → Polish → Done.
 
-In the current workflow, selected files are parsed, mapped, normalized, validated, and exported in the browser. The example Invoice file is fetched as a public static asset. Source files are not sent to a DataPreflight upload endpoint in this flow.
+Every implemented increment should provide:
 
-Privacy claims must match the complete deployed data flow. Future analytics, logging, server processing, persistence, integrations, and AI features require a new review. Do not promise that data “never leaves the browser” without verifying every relevant path.
+- A clear next action.
+- Useful feedback after actions.
+- Explainable and recoverable errors.
+- Predictable state transitions.
+- Consistent interaction and visual design.
+- Readable typography and spacing.
+- Essential keyboard and focus accessibility.
+- Focused checks with relevant invalid and incomplete input.
 
-### 4. Repeatability
+Visual quality is part of implementation, not a final cosmetic phase.
 
-The intended invariant is:
+A professional product requires trustworthy behavior as well as a polished appearance.
 
-```text
-same input + same worksheet where applicable + same mapping + same profile version = same result
-```
+## Core pillars
 
-Hard validation should be deterministic, inspectable, and independent of an AI model's changing responses.
+### Field mapping
 
-Fixed Invoice and Customer CSV runs have produced byte-identical row exports, issue reports, and Validation Reports. Representative six-row fixtures have also been checked against explicit normalized values, issues, classifications, and exported rows. This is evidence for the tested paths, not proof that every possible file behaves correctly.
+Source columns such as Factuurnr and Invoice No. can represent the same internal field.
 
-The downloadable Validation Report records the profile ID/version, source filename, selected worksheet where applicable, applied mapping, and result counts. It does not include a cryptographic fingerprint of the input, a complete rule snapshot, or every normalized value and issue. Reproducibility across releases requires version discipline and further verification for new file types and edge cases.
+Suggestions must remain visible and adjustable. Ambiguous required mappings need a human choice.
 
-## Primary workflow
+The selected mapping is part of validation context because changing a mapping can change the result.
 
-1. **Choose a validation profile** so the expected data model is known before reading the file.
-2. **Upload** a supported file; detect CSV, XLSX, or XLS from the file itself.
-3. **Choose a worksheet** when an Excel workbook contains multiple populated worksheets.
-4. **Parse** headers and rows in the browser.
-5. **Map** source columns to the selected profile. Accept a correct automatic suggestion or adjust missing or incorrect assignments.
-6. **Normalize and validate** according to that profile's versioned rules.
-7. **Explain and review** blocked, warning-only, and ready records.
-8. **Fix in the source and recheck** when needed.
-9. **Export** rows without critical issues, an issue report, and a Validation Report.
+Invoice retains a richer header/sample-based suggestion algorithm. Customer uses header-based suggestions.
 
-The current workspace makes mapping, review, and export visible as three steps. Completed mapping is compact so review can take priority. A row with a warning can remain in the export; users should inspect it before import. “Ready” means it passed the checks currently implemented for the selected profile, not that a particular ERP will certainly accept it.
+Both share the same readiness checks and mapping interface.
 
-## Architecture direction
+### Versioned validation profiles
 
-Keep file parsing separate from domain logic. Convert each supported input into a `ParsedDataSet`, map it to the selected profile's fields, then run normalization and deterministic rules. The selected profile should determine fields, mapping requirements, rules, copy, review details, and export behavior.
+A profile defines its fields, normalization, rules, labels, and version.
 
-Invoice and Customer currently share a profile contract, parsing, page shell, and parts of the mapping and export flow. They still have separate workspace components and domain-specific rules. Extract shared behavior when it is proven by both flows; preserve domain differences where they matter.
+A change to normalization or validation behavior must advance the relevant profile version.
 
-An AI assistant may later propose mappings, explain issues, or suggest fixes. It must not silently decide whether a hard validation rule passes. Suggestions and deterministic results must remain distinguishable.
+Keep domain logic independent while extracting proven common workflow behavior.
 
-## Product boundaries and next validation
+The current separate workspaces are being improved incrementally. Avoid a large speculative framework or four copied mini-apps.
 
-The initial industry feedback supports the problem, explainability, business rules, and the potential of ERP and master data validation. It does not prove demand for every future profile, integration, privacy model, or price point. See [FEEDBACK.md](FEEDBACK.md) for the historical notes and the separately labeled product interpretation.
+### Local processing
 
-Next, finish a focused internal reliability and UI review of Invoice and Customer, check deployed privacy wording, and observe whether a person new to the product can use the workflow without guidance. The result of that attempt should determine which remaining UX changes are needed before closing Milestone 5.
+Selected files are parsed, mapped, normalized, validated, and exported in the browser in the current workflow.
 
-Additional domains and ERP connectors should follow evidence from actual workflows. Possible later directions include vendor and product master data, ERP-specific profiles, data migration checks, batch processing, XML or SQL inputs, and AI-assisted explanations. None should be presented as available until built and tested.
+The Invoice example is fetched from a public static asset.
+
+Privacy wording must match actual deployed behavior. Analytics, logging, storage, integrations, server processing, and AI require renewed review.
+
+Browser-side processing is valuable, but not unique by itself.
+
+Future saved mappings should store configuration only, with clear browser/device scope.
+
+### Determinism and traceability
+
+Current repeatability target:
+
+same input + same worksheet where applicable + same mapping + same profile version = same result.
+
+A reference-data feature must additionally account for its effective reference values and check version.
+
+Hard validation must remain inspectable and independent of changing AI responses.
+
+Validation Reports record:
+
+- Profile ID and version.
+- Source filename.
+- Selected worksheet where applicable.
+- Applied mapping.
+- Result counts.
+
+The current report is not a complete rule snapshot, cryptographic input fingerprint, or full audit record of every value and issue.
+
+Fixed M5 runs demonstrated byte-identical downloads for tested cases. New scope requires new focused evidence.
+
+## Workflow
+
+Profile → Upload → Worksheet where applicable → Mapping → Normalize/Validate → Review → Export.
+
+Mapping, review, and export remain visible workspace steps.
+
+Outdated asynchronous file reads must not overwrite the current file, reset state, or newer error/loading state.
+
+Warnings can remain exportable. Ready means the selected profile's implemented checks passed.
+
+## Market learning
+
+Historical professional feedback supports investigating ERP data quality, business rules, explainability, and master data workflows.
+
+It does not prove demand for every proposed profile or price point.
+
+Online research provided signals around:
+
+- Repeated preparation and mapping work.
+- Difficulty handling large or unclear error lists.
+- Identifier quality.
+- Inconsistent product units.
+
+These are research signals, not interviews with DataPreflight customers or proof of an underserved market.
+
+Mapping reuse and local processing are also available in competing tools.
+
+The working opportunity is a clear, independently usable ERP validation tool with understandable domain checks and low setup effort. Its value must be tested with actual users.
+
+Historical interviews remain in FEEDBACK.md. Do not present assistant interpretation or internet research as new interview evidence.
+
+## M6 direction
+
+1. Strengthen shared behavior and interaction.
+2. Add a limited Vendor profile.
+3. Add local reusable mappings.
+4. Test independent usage.
+5. Add a deliberately limited Product profile.
+6. Add one local unit-code reference check.
+7. Complete consistency and outreach-readiness checks.
+
+Keep DataPreflight as the working name. Renaming is not a development prerequisite.
+
+## Validation status
+
+M5 is internally complete.
+
+An independent unguided new-user test remains outstanding and must not be treated as a proven result.
+
+M6 started locally on 2026-10-18 with upload lifecycle safety, shared mapping readiness, and the shared mapping panel.
+
+This local implementation and internal verification do not establish deployed M6 availability, market adoption, or willingness to pay.
+
+## Boundaries
+
+Do not automatically add:
+
+- AI.
+- Accounts or cloud storage.
+- A dashboard.
+- ERP connectors.
+- A full rule builder.
+- Additional profiles beyond the agreed scope.
+- In-app record correction.
+
+Performance work follows concrete limits or friction rather than speculative maximum-size claims.
 
 ## Success criteria
 
-A user should quickly see which profile and mapping were applied, what needs attention, why it matters, what can be fixed, and which rows passed the current checks. The same input and versioned configuration should lead to a repeatable result that can be reviewed before ERP import.
+A user should be able to identify:
+
+- Which profile and version ran.
+- Which mapping was applied.
+- What failed.
+- Why it matters.
+- How to fix it.
+- Which rows can export.
+- What was not checked.
+
+The same versioned inputs and configuration should produce the same result.
+
+The interface should make this process clear, predictable, efficient, and visually polished.

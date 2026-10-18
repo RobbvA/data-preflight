@@ -13,18 +13,26 @@ DataPreflight is a browser-based quality gate for structured business data. Choo
 | Invoice data | Required fields, duplicate invoice numbers, amounts, VAT, status, country, currency, dates, and related invoice rules. |
 | Customer master data | Required customer ID and name, duplicate customer IDs, email format, and country-code format. |
 
-Both profiles are defined and versioned in code. Users can select a profile, but cannot create or edit validation rules in the app. Customer is the second working domain; other master data and ERP-specific profiles are future work.
+Both profiles are defined and versioned in code. Users can select a profile, but cannot create or edit validation rules in the app.
+
+Vendor/Supplier, Product/Material, saved mappings, and reference-data validation are planned M6 work. They are not available yet.
 
 ## Workflow
 
-1. Choose **Invoice data** or **Customer master data**. Invoice is currently selected by default.
+1. Explicitly choose Invoice data or Customer master data. Neither is selected by default.
 2. Upload a CSV, XLSX, or XLS file, or load the matching example.
-3. Review suggested field mapping. Resolve missing required fields and duplicate source-column assignments.
-4. DataPreflight normalizes the mapped values and runs the selected profile's deterministic checks.
-5. Switch between **Blocked**, **Needs review**, and **Ready** to inspect results and suggested fixes.
-6. Correct the source file and upload it again if needed. Export rows without critical issues and download the issue report.
+3. Choose a worksheet if the Excel workbook contains multiple populated worksheets.
+4. Review suggested field mapping. Resolve missing required fields and duplicate source-column assignments.
+5. DataPreflight normalizes the mapped values and runs the selected profile's deterministic checks.
+6. Switch between Blocked, Needs review, and Ready to inspect results and suggested fixes.
+7. Correct the source file and upload it again if needed.
+8. Export rows without critical issues, download the issue report, and download the Validation Report.
 
-The workspaces present mapping, review, and export as visible steps. The homepage preview is illustrative; actual results come from a loaded file.
+Both workspaces show Mapping → Review → Export as visible steps. They use the same field mapping panel and shared mapping guards.
+
+The mapping panel provides required/optional labels, duplicate-assignment feedback, keyboard navigation, Escape dismissal, and focus restoration after manual opening. Invoice retains its header/sample-based mapping suggestions; Customer retains its header-based suggestions.
+
+The homepage preview is illustrative. Actual results come from a loaded file.
 
 **Export boundary:** blocked rows are excluded. Rows with warnings remain exportable and need review before import. “Ready” means the implemented checks passed for that profile; it does not guarantee acceptance by a specific ERP.
 
@@ -35,46 +43,68 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Choose a profile and load an example or your own file.
+Open http://localhost:3000.
 
-When a production check is needed:
+At a coherent implementation checkpoint, or when a change warrants it:
 
 ```bash
 npm run lint
 npm run build
 ```
 
+Use focused browser checks during smaller implementation steps. Do not repeat full checks after every minor edit without a reason.
+
 ## Code map
 
 | Responsibility | Location |
 | --- | --- |
-| CSV/Excel parsing and `ParsedDataSet` | `src/lib/parseCsv.ts` |
+| CSV/Excel parsing and ParsedDataSet | `src/lib/parseCsv.ts` |
 | Shared field definitions and Customer mapping candidates | `src/lib/dataProfile.ts` |
 | Invoice mapping suggestions | `src/lib/fieldMapping.ts` |
+| Shared mapping readiness and duplicate checks | `src/lib/mappingStatus.ts` |
 | Shared profile mapping and execution contract | `src/lib/validation/validationProfile.ts` |
-| Invoice and Customer profile definitions | `src/lib/profiles/` |
-| Domain normalization and rules | `src/lib/normalization/`, `src/lib/validation/`, `src/lib/validateRows.ts` |
+| Profile definitions | `src/lib/profiles/` |
+| Domain normalization and validation | `src/lib/normalization/`, `src/lib/validation/`, `src/lib/validateRows.ts` |
 | CSV downloads | `src/lib/exportData.ts` |
-| Domain selection and Invoice flow | `src/components/CsvUploader.tsx` |
+| Validation Report generation | `src/lib/validationReport.ts` |
+| Profile selection and Invoice flow | `src/components/CsvUploader.tsx` |
 | Customer flow | `src/components/data-preflight/CustomerWorkspace.tsx` |
+| Shared mapping dialog | `src/components/data-preflight/ProfileMappingPanel.tsx` |
+| Validation details and report download | `src/components/data-preflight/ValidationContextPanel.tsx` |
 | Shared page shell and UI sections | `src/components/data-preflight/` |
 
-Invoice and Customer still have separate workspace components. We will extract shared behavior after the two flows reveal what is genuinely common.
+Invoice and Customer still have separate workspace components and review implementations. Shared behavior is extracted incrementally; a complete generic workspace has not been implemented.
+
+Both upload flows ignore outdated asynchronous reads after replacement, reset, profile changes, or workspace unmounting.
 
 ## Data handling and repeatability
 
-The current file-processing path reads, parses, maps, normalizes, validates, and exports selected files in the browser. The example Invoice file is fetched as a public static asset. The current path has no DataPreflight endpoint for uploading source files. Review any future analytics, logging, storage, integrations, server processing, or AI calls before extending privacy claims.
+The current file-processing path reads, parses, maps, normalizes, validates, and exports selected files in the browser. The Invoice example is fetched as a public static asset.
 
-Hard validation is rule-based. The intended invariant is:
+The current path has no DataPreflight endpoint for uploading source files. Review future analytics, logging, storage, integrations, server processing, and AI calls before extending privacy claims.
+
+Hard validation is rule-based. The repeatability target is:
 
 ```text
-same input + same mapping + same profile version = same result
+same input
++ same worksheet where applicable
++ same mapping
++ same profile version
+= same result
 ```
 
-Profile versions exist in code, but the app does not yet store an applied mapping and profile snapshot alongside each export. Cross-version reproducibility and large-file behavior still need explicit verification.
+The Validation Report records profile ID/version, source filename, selected worksheet where applicable, applied mapping, and result counts.
 
-## Direction
+Fixed M5 runs produced byte-identical row exports, issue reports, and Validation Reports. This is evidence for the tested cases, not a guarantee for every file or future release.
 
-Milestone 5 is in progress. The near-term work is to strengthen the shared profile architecture, traceability, reliable export, and workflow across Invoice and Customer. New data domains, configurable rules, ERP connectors, persistence, and AI assistance are not current capabilities.
+Reports do not contain a complete rule snapshot or cryptographic input fingerprint.
 
-See [ROADMAP.md](ROADMAP.md) for delivery order, [FEEDBACK.md](FEEDBACK.md) for historical professional feedback, and [SESSION_LOG.md](SESSION_LOG.md) for build history.
+## Current development
+
+M5 is internally complete. M6 implementation started on 2026-10-18.
+
+The first local M6 increment includes upload lifecycle guards, shared mapping status, and one mapping panel for Invoice and Customer. Local lint, TypeScript, production build, and focused browser checks passed.
+
+An independent unguided test with a new ERP/data user has not been completed.
+
+See ROADMAP.md for delivery order, PROJECT_STATUS.md for evidence and limits, FEEDBACK.md for historical professional feedback, and SESSION_LOG.md for build history.
