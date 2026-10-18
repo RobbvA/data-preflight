@@ -1,6 +1,9 @@
-import { useMemo, useState, type ReactNode } from "react";
-import { AlertTriangle, CheckCircle2, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 
+import {
+  ReviewStatusControls,
+  ReviewStatusSummary,
+} from "@/components/data-preflight/ReviewStatusControls";
 import { DataSetPreview } from "@/components/data-preflight/DataSetPreview";
 import type { InvoicePreviewItem } from "@/components/data-preflight/types";
 
@@ -94,11 +97,11 @@ export function InvoiceReviewSection({
     }
 
     return {
-      title: "Import-ready",
+      title: "Ready invoices",
       description:
         "Rows that passed the current mapping and validation checks.",
       items: cleanInvoiceItems,
-      emptyMessage: "No import-ready invoices yet.",
+      emptyMessage: "No invoices passed the current checks.",
       isOpen: isCleanOpen,
       onToggle: onToggleCleanOpen,
       tone: "neutral" as const,
@@ -122,11 +125,11 @@ export function InvoiceReviewSection({
     warningInvoiceItems.length +
     cleanInvoiceItems.length;
 
-  const reviewStatus = getReviewStatus({
-    blockedCount: blockedInvoiceItems.length,
-    warningCount: warningInvoiceItems.length,
-    cleanCount: cleanInvoiceItems.length,
-  });
+  const reviewCounts = {
+    blocked: blockedInvoiceItems.length,
+    needsReview: warningInvoiceItems.length,
+    ready: cleanInvoiceItems.length,
+  };
 
   return (
     <section
@@ -143,45 +146,21 @@ export function InvoiceReviewSection({
             Invoice results
           </h2>
 
-          <StatusPill tone={reviewStatus.tone}>
-            {reviewStatus.label}
-          </StatusPill>
+          <ReviewStatusSummary counts={reviewCounts} />
         </div>
       </div>
 
       {totalReviewItems > 0 ? (
         <>
-          <div className="mt-3 grid gap-2 rounded-2xl border border-white/10 bg-[var(--surface-deep)] p-2 sm:grid-cols-3">
-            <ReviewTabButton
-              label="Blocked"
-              description="Fix first"
-              count={blockedInvoiceItems.length}
-              active={visibleActiveTab === "blocked"}
-              tone="danger"
-              icon={<AlertTriangle className="h-4 w-4" />}
-              onClick={() => selectTab("blocked")}
-            />
-
-            <ReviewTabButton
-              label="Needs Review"
-              description="Check before export"
-              count={warningInvoiceItems.length}
-              active={visibleActiveTab === "warning"}
-              tone="warning"
-              icon={<Search className="h-4 w-4" />}
-              onClick={() => selectTab("warning")}
-            />
-
-            <ReviewTabButton
-              label="Ready"
-              description="No issues found"
-              count={cleanInvoiceItems.length}
-              active={visibleActiveTab === "ready"}
-              tone="success"
-              icon={<CheckCircle2 className="h-4 w-4" />}
-              onClick={() => selectTab("ready")}
-            />
-          </div>
+          <ReviewStatusControls
+            counts={reviewCounts}
+            activeCategory={
+              visibleActiveTab === "warning" ? "review" : visibleActiveTab
+            }
+            onCategoryChange={(category) =>
+              selectTab(category === "review" ? "warning" : category)
+            }
+          />
 
           <div className="mt-3">
             <DataSetPreview
@@ -212,142 +191,5 @@ export function InvoiceReviewSection({
         </div>
       )}
     </section>
-  );
-}
-
-function getReviewStatus({
-  blockedCount,
-  warningCount,
-  cleanCount,
-}: {
-  blockedCount: number;
-  warningCount: number;
-  cleanCount: number;
-}) {
-  if (blockedCount > 0) {
-    return {
-      label: "Fix blocked first",
-      tone: "danger" as const,
-    };
-  }
-
-  if (warningCount > 0) {
-    return {
-      label: "Review warnings",
-      tone: "warning" as const,
-    };
-  }
-
-  if (cleanCount > 0) {
-    return {
-      label: "Ready for export",
-      tone: "success" as const,
-    };
-  }
-
-  return {
-    label: "Waiting for invoices",
-    tone: "neutral" as const,
-  };
-}
-
-function ReviewTabButton({
-  label,
-  description,
-  count,
-  active,
-  tone,
-  icon,
-  onClick,
-}: {
-  label: string;
-  description: string;
-  count: number;
-  active: boolean;
-  tone: "danger" | "warning" | "success";
-  icon: ReactNode;
-  onClick: () => void;
-}) {
-  const activeToneClasses = {
-    danger:
-      "border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
-    warning:
-      "border-[color:rgba(209,154,106,0.32)] bg-[rgba(209,154,106,0.06)] text-[var(--text-primary)]",
-    success:
-      "border-[color:rgba(120,180,120,0.24)] bg-[rgba(120,180,120,0.045)] text-[var(--text-primary)]",
-  };
-
-  const countToneClasses = {
-    danger: "text-[var(--text-primary)]",
-    warning: "text-[var(--text-primary)]",
-    success: "text-[var(--text-secondary)]",
-  };
-
-  const iconToneClasses = {
-    danger: "text-[var(--brand-accent)]",
-    warning: "text-[var(--brand-accent-soft)]",
-    success: "text-[var(--text-secondary)]",
-  };
-
-  const countSizeClasses = {
-    danger: "text-[1.45rem]",
-    warning: "text-[1.3rem]",
-    success: "text-xl",
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-xl border px-3 py-2 text-left transition ${
-        active
-          ? activeToneClasses[tone]
-          : "border-transparent bg-transparent text-[var(--text-muted)] hover:border-white/10 hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className={iconToneClasses[tone]}>{icon}</span>
-            <p className="text-sm font-semibold leading-none">{label}</p>
-          </div>
-
-          <p className="mt-1.5 text-xs leading-none opacity-75">
-            {description}
-          </p>
-        </div>
-
-        <p
-          className={`font-semibold leading-none tracking-tight ${countToneClasses[tone]} ${countSizeClasses[tone]}`}
-        >
-          {count}
-        </p>
-      </div>
-    </button>
-  );
-}
-
-function StatusPill({
-  tone,
-  children,
-}: {
-  tone: "warning" | "danger" | "success" | "neutral";
-  children: React.ReactNode;
-}) {
-  const toneClasses = {
-    warning:
-      "border-[color:rgba(182,111,58,0.25)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
-    danger:
-      "border-[color:rgba(182,111,58,0.4)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]",
-    success: "border-white/10 bg-white/[0.04] text-[var(--text-primary)]",
-    neutral: "border-white/10 bg-white/[0.04] text-[var(--text-secondary)]",
-  };
-
-  return (
-    <span
-      className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${toneClasses[tone]}`}
-    >
-      {children}
-    </span>
   );
 }

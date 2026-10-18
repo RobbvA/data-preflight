@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AlertTriangle, CheckCircle2, Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import {
+  ReviewStatusControls,
+  ReviewStatusSummary,
+} from "@/components/data-preflight/ReviewStatusControls";
 import {
   getInputAdapter,
   getReadableExcelSheetNames,
@@ -69,18 +73,25 @@ export function CustomerWorkspace({
 
   const [dataSet, setDataSet] = useState<ParsedDataSet | null>(null);
   const [mapping, setMapping] = useState<CustomerMapping>(emptyMapping);
+
   const [pendingExcelSheets, setPendingExcelSheets] = useState<{
     file: File;
     names: string[];
   } | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const [activeReviewTab, setActiveReviewTab] =
     useState<CustomerReviewTab | null>(null);
+
   const [isMappingOpen, setIsMappingOpen] = useState(false);
+
   const [selectedCustomerRowIndex, setSelectedCustomerRowIndex] =
     useState<number | null>(null);
+
   const [isReviewListOpen, setIsReviewListOpen] = useState(true);
+
   const [reviewSortMode, setReviewSortMode] =
     useState<ReviewSortMode>("priority");
 
@@ -101,6 +112,7 @@ export function CustomerWorkspace({
     () => getMappingStatus(customerValidationProfile, mapping),
     [mapping],
   );
+
   const requiredUnmapped = missingRequiredFields.map((field) => field.label);
 
   const mappedRows = useMemo(
@@ -153,6 +165,7 @@ export function CustomerWorkspace({
 
   const defaultReviewTab: CustomerReviewTab =
     blockedCount > 0 ? "blocked" : reviewCount > 0 ? "review" : "ready";
+
   const visibleReviewTab = activeReviewTab ?? defaultReviewTab;
 
   const visibleRows = reviewRows.filter(({ issues }) => {
@@ -172,6 +185,7 @@ export function CustomerWorkspace({
 
   visibleRows.sort((a, b) => {
     if (reviewSortMode === "row") return a.rowIndex - b.rowIndex;
+
     if (reviewSortMode === "issues") {
       return b.issues.length - a.issues.length;
     }
@@ -179,12 +193,11 @@ export function CustomerWorkspace({
     return getPriority(b.issues) - getPriority(a.issues);
   });
 
-  const reviewStatus =
-    blockedCount > 0
-      ? { label: "Fix blocked first", tone: "danger" as const }
-      : reviewCount > 0
-        ? { label: "Review warnings", tone: "warning" as const }
-        : { label: "Ready for export", tone: "success" as const };
+  const reviewCounts = {
+    blocked: blockedCount,
+    needsReview: reviewCount,
+    ready: readyCount,
+  };
 
   const categoryTitle =
     visibleReviewTab === "blocked"
@@ -229,6 +242,7 @@ export function CustomerWorkspace({
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
         const sheetNames = await getReadableExcelSheetNames(file);
+
         if (requestId !== loadRequestId.current) return;
 
         if (sheetNames.length > 1) {
@@ -238,6 +252,7 @@ export function CustomerWorkspace({
       }
 
       const parsed = await adapter.parse(file, selectedSheetName);
+
       if (requestId !== loadRequestId.current) return;
 
       if (parsed.rows.length === 0 || parsed.headers.length === 0) {
@@ -254,6 +269,7 @@ export function CustomerWorkspace({
       }
 
       const suggestedMapping = suggestCustomerMapping(parsed.headers);
+
       const { mappingReady: suggestedMappingReady } = getMappingStatus(
         customerValidationProfile,
         suggestedMapping,
@@ -285,6 +301,7 @@ export function CustomerWorkspace({
 
   function handleExcelSheetSelect(sheetName: string) {
     if (!pendingExcelSheets) return;
+
     void loadFile(pendingExcelSheets.file, sheetName);
   }
 
@@ -442,43 +459,16 @@ export function CustomerWorkspace({
                     <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
                       Customer results
                     </h2>
-                    <CustomerStatusPill tone={reviewStatus.tone}>
-                      {reviewStatus.label}
-                    </CustomerStatusPill>
+
+                    <ReviewStatusSummary counts={reviewCounts} />
                   </div>
                 </div>
 
-                <div className="mt-3 grid gap-2 rounded-2xl border border-white/10 bg-[var(--surface-deep)] p-2 sm:grid-cols-3">
-                  <CustomerReviewTabButton
-                    label="Blocked"
-                    description="Fix first"
-                    count={blockedCount}
-                    active={visibleReviewTab === "blocked"}
-                    tone="danger"
-                    icon={<AlertTriangle className="h-4 w-4" />}
-                    onClick={() => selectReviewTab("blocked")}
-                  />
-
-                  <CustomerReviewTabButton
-                    label="Needs Review"
-                    description="Check before export"
-                    count={reviewCount}
-                    active={visibleReviewTab === "review"}
-                    tone="warning"
-                    icon={<Search className="h-4 w-4" />}
-                    onClick={() => selectReviewTab("review")}
-                  />
-
-                  <CustomerReviewTabButton
-                    label="Ready"
-                    description="No issues found"
-                    count={readyCount}
-                    active={visibleReviewTab === "ready"}
-                    tone="success"
-                    icon={<CheckCircle2 className="h-4 w-4" />}
-                    onClick={() => selectReviewTab("ready")}
-                  />
-                </div>
+                <ReviewStatusControls
+                  counts={reviewCounts}
+                  activeCategory={visibleReviewTab}
+                  onCategoryChange={selectReviewTab}
+                />
 
                 <div className="mt-3 rounded-2xl border border-white/10 bg-[var(--surface-base)] p-2.5">
                   <div className="flex flex-wrap items-start justify-between gap-2.5">
@@ -575,9 +565,11 @@ export function CustomerWorkspace({
                                   <p className="mt-1.5 truncate text-sm font-semibold text-[var(--text-primary)]">
                                     {row.customer_id || "Missing customer ID"}
                                   </p>
+
                                   <p className="truncate text-xs text-[var(--text-secondary)]">
                                     {row.name || "Missing customer name"}
                                   </p>
+
                                   <p className="truncate text-[11px] text-[var(--text-muted)]">
                                     {row.email || "No email"}
                                   </p>
@@ -602,10 +594,12 @@ export function CustomerWorkspace({
                                   label="Country"
                                   value={row.country || "—"}
                                 />
+
                                 <CustomerDataPoint
                                   label="VAT number"
                                   value={row.vat_number || "—"}
                                 />
+
                                 <CustomerDataPoint
                                   label="Customer ID"
                                   value={row.customer_id || "—"}
@@ -629,9 +623,11 @@ export function CustomerWorkspace({
                                         <p className="font-semibold text-[var(--text-primary)]">
                                           {issue.problem}
                                         </p>
+
                                         <p className="mt-1 text-[var(--text-secondary)]">
                                           {issue.why}
                                         </p>
+
                                         <p className="mt-1 text-[var(--text-muted)]">
                                           Fix: {issue.fix}
                                         </p>
@@ -753,99 +749,10 @@ function CustomerDataPoint({
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
         {label}
       </p>
+
       <p className="mt-0.5 truncate text-xs font-medium text-[var(--text-secondary)]">
         {value}
       </p>
     </div>
-  );
-}
-
-function CustomerReviewTabButton({
-  label,
-  description,
-  count,
-  active,
-  tone,
-  icon,
-  onClick,
-}: {
-  label: string;
-  description: string;
-  count: number;
-  active: boolean;
-  tone: "danger" | "warning" | "success";
-  icon: ReactNode;
-  onClick: () => void;
-}) {
-  const activeToneClasses = {
-    danger:
-      "border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
-    warning:
-      "border-[color:rgba(209,154,106,0.32)] bg-[rgba(209,154,106,0.06)] text-[var(--text-primary)]",
-    success:
-      "border-[color:rgba(120,180,120,0.24)] bg-[rgba(120,180,120,0.045)] text-[var(--text-primary)]",
-  };
-
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={`rounded-xl border px-3 py-2 text-left transition ${
-        active
-          ? activeToneClasses[tone]
-          : "border-transparent bg-transparent text-[var(--text-muted)] hover:border-white/10 hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span
-              className={
-                tone === "danger"
-                  ? "text-[var(--brand-accent)]"
-                  : "text-[var(--text-secondary)]"
-              }
-            >
-              {icon}
-            </span>
-            <p className="text-sm font-semibold leading-none">{label}</p>
-          </div>
-
-          <p className="mt-1.5 text-xs leading-none opacity-75">
-            {description}
-          </p>
-        </div>
-
-        <p className="text-xl font-semibold leading-none tracking-tight">
-          {count}
-        </p>
-      </div>
-    </button>
-  );
-}
-
-function CustomerStatusPill({
-  tone,
-  children,
-}: {
-  tone: "warning" | "danger" | "success";
-  children: ReactNode;
-}) {
-  const toneClasses = {
-    warning:
-      "border-[color:rgba(182,111,58,0.25)] bg-[rgba(182,111,58,0.08)] text-[var(--text-primary)]",
-    danger:
-      "border-[color:rgba(182,111,58,0.4)] bg-[rgba(182,111,58,0.1)] text-[var(--text-primary)]",
-    success:
-      "border-white/10 bg-white/[0.04] text-[var(--text-primary)]",
-  };
-
-  return (
-    <span
-      className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${toneClasses[tone]}`}
-    >
-      {children}
-    </span>
   );
 }

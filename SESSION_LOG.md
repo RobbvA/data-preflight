@@ -176,3 +176,32 @@ After applying documentation updates:
 2. Commit the upload-safety and shared-mapping increment.
 3. Push to main.
 4. Confirm push/deployment separately; do not infer success from local checks.
+
+---
+
+# 2026-10-18 — M6.1d: Shared review controls
+
+## Implemented
+
+- Added ReviewStatusControls.tsx with shared category buttons and a shared status summary.
+- Invoice and Customer now use consistent labels, counts, selected states, and visible keyboard focus.
+- Ready is described as "Passed current checks".
+- Changed the Invoice category title from "Import-ready" to "Ready invoices".
+- Preserved domain-specific row presentation, filtering, validation rules, mapping, and upload lifecycle guards.
+
+## Verified locally
+
+- User confirmed category counts, displayed rows, and requested keyboard checks for both profiles.
+- npm run lint: 0 errors; the same 2 existing unused-variable warnings.
+- TypeScript and production build passed.
+
+## Remaining scope
+
+- M6.1 remains in progress; this completes the shared review-controls increment.
+- Detailed row presentation and remaining import-safety wording still need review.
+- No new validation profile was added.
+- Independent new-user testing and deployed verification remain outstanding.
+
+## Delivery status
+
+Prepared for commit after local verification. Commit and push were not yet confirmed when this entry was written.
