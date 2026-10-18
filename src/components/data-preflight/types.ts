@@ -78,16 +78,20 @@ function getIssueCombinationBonus(issues: ValidationIssue[]) {
   const hasCriticalIssue = issues.some(
     (issue) => issue.severity === "critical",
   );
+
   const hasDuplicateRisk = issues.some(
     (issue) => issue.risk === "duplicate_risk",
   );
+
   const hasImportFailure = issues.some(
     (issue) => issue.risk === "import_failure",
   );
+
   const hasFinancialRisk = issues.some(
     (issue) =>
       issue.risk === "financial_reporting" || issue.risk === "tax_risk",
   );
+
   const hasMultipleWarnings =
     issues.filter((issue) => issue.severity === "warning").length >= 2;
 
@@ -135,7 +139,7 @@ function getActionLabel(
   priority: InvoicePriority,
   issues: ValidationIssue[],
 ): string {
-  if (issues.length === 0) return "Safe to import";
+  if (issues.length === 0) return "Passed current checks";
 
   const hasCriticalIssue = issues.some(
     (issue) => issue.severity === "critical",
@@ -156,5 +160,5 @@ function getActionLabel(
   if (priority === "medium") return "Review before import";
   if (priority === "low") return "Quick review";
 
-  return "Safe to import";
+  return "Passed current checks";
 }

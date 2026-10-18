@@ -49,10 +49,14 @@ export function InvoiceReviewSection({
         ? "warning"
         : "ready";
 
-  const [internalTab, setInternalTab] = useState<ReviewTab>(defaultTab);
-  const activeTab = controlledTab ?? internalTab;
+  const [internalTab, setInternalTab] = useState<ReviewTab | null>(null);
+  const activeTab = controlledTab ?? internalTab ?? defaultTab;
 
   function selectTab(tab: ReviewTab) {
+    if (tab === "blocked" && !isBlockedOpen) onToggleBlockedOpen();
+    if (tab === "warning" && !isWarningOpen) onToggleWarningOpen();
+    if (tab === "ready" && !isCleanOpen) onToggleCleanOpen();
+
     if (onTabChange) {
       onTabChange(tab);
     } else {
@@ -60,15 +64,8 @@ export function InvoiceReviewSection({
     }
   }
 
-  const visibleActiveTab =
-    activeTab === "blocked" && blockedInvoiceItems.length === 0
-      ? defaultTab
-      : activeTab === "warning" && warningInvoiceItems.length === 0
-        ? defaultTab
-        : activeTab;
-
   const activeTabConfig = useMemo(() => {
-    if (visibleActiveTab === "blocked") {
+    if (activeTab === "blocked") {
       return {
         title: "Blocked invoices",
         description:
@@ -82,7 +79,7 @@ export function InvoiceReviewSection({
       };
     }
 
-    if (visibleActiveTab === "warning") {
+    if (activeTab === "warning") {
       return {
         title: "Needs review",
         description:
@@ -108,7 +105,7 @@ export function InvoiceReviewSection({
       compact: true,
     };
   }, [
-    visibleActiveTab,
+    activeTab,
     blockedInvoiceItems,
     warningInvoiceItems,
     cleanInvoiceItems,
@@ -154,9 +151,7 @@ export function InvoiceReviewSection({
         <>
           <ReviewStatusControls
             counts={reviewCounts}
-            activeCategory={
-              visibleActiveTab === "warning" ? "review" : visibleActiveTab
-            }
+            activeCategory={activeTab === "warning" ? "review" : activeTab}
             onCategoryChange={(category) =>
               selectTab(category === "review" ? "warning" : category)
             }

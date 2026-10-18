@@ -20,7 +20,6 @@ import {
   downloadErrorCsv,
   getExportSafetyMessage,
 } from "@/lib/exportData";
-
 import {
   createEmptyMapping,
   createMappingSuggestions,
@@ -42,7 +41,6 @@ import {
 } from "@/components/data-preflight/InvoiceReviewSection";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
 import { ValidationContextPanel } from "@/components/data-preflight/ValidationContextPanel";
-
 import {
   createInvoicePreviewItem,
   type InvoicePreviewItem,
@@ -60,9 +58,8 @@ export function CsvUploader() {
 
   const [activeDomain, setActiveDomain] = useState<DataDomain | null>(null);
   const [profilePrompt, setProfilePrompt] = useState(false);
-  const [parsedDataSet, setParsedDataSet] = useState<ParsedDataSet | null>(
-    null,
-  );
+  const [parsedDataSet, setParsedDataSet] =
+    useState<ParsedDataSet | null>(null);
 
   const [pendingExcelSheets, setPendingExcelSheets] = useState<{
     file: File;
@@ -75,20 +72,19 @@ export function CsvUploader() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedPreviewRowIndex, setSelectedPreviewRowIndex] = useState<
-    number | null
-  >(null);
+  const [selectedPreviewRowIndex, setSelectedPreviewRowIndex] =
+    useState<number | null>(null);
 
-  const [isCleanOpen, setIsCleanOpen] = useState(false);
+  const [isCleanOpen, setIsCleanOpen] = useState(true);
   const [isWarningOpen, setIsWarningOpen] = useState(true);
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
 
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
-  const [activeReviewTab, setActiveReviewTab] = useState<ReviewTab>("blocked");
+  const [activeReviewTab, setActiveReviewTab] =
+    useState<ReviewTab | null>(null);
 
   const rows = useMemo(() => parsedDataSet?.rows ?? [], [parsedDataSet]);
   const headers = useMemo(() => parsedDataSet?.headers ?? [], [parsedDataSet]);
-
   const fileName = parsedDataSet?.fileName ?? "";
 
   async function loadSource(
@@ -108,11 +104,11 @@ export function CsvUploader() {
     setPendingExcelSheets(null);
     setIsLoading(true);
     setSelectedPreviewRowIndex(null);
-    setIsCleanOpen(false);
+    setIsCleanOpen(true);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
     setIsFieldMappingOpen(false);
-    setActiveReviewTab("blocked");
+    setActiveReviewTab(null);
 
     try {
       const file = await source;
@@ -158,6 +154,7 @@ export function CsvUploader() {
         nextParsedDataSet.headers,
         nextParsedDataSet.rows,
       );
+
       const { mappingReady: suggestedMappingReady } = getMappingStatus(
         invoiceValidationProfile,
         suggestedMapping,
@@ -174,14 +171,15 @@ export function CsvUploader() {
           ? error.message
           : "Failed to read source file. Please try again.",
       );
+
       setParsedDataSet(null);
       setFieldMapping(createEmptyMapping());
       setSelectedPreviewRowIndex(null);
-      setIsCleanOpen(false);
+      setIsCleanOpen(true);
       setIsWarningOpen(true);
       setIsBlockedOpen(true);
       setIsFieldMappingOpen(false);
-      setActiveReviewTab("blocked");
+      setActiveReviewTab(null);
     } finally {
       if (requestId === loadRequestId.current) {
         setIsLoading(false);
@@ -237,11 +235,11 @@ export function CsvUploader() {
     setError(null);
     setIsLoading(false);
     setSelectedPreviewRowIndex(null);
-    setIsCleanOpen(false);
+    setIsCleanOpen(true);
     setIsWarningOpen(true);
     setIsBlockedOpen(true);
     setIsFieldMappingOpen(false);
-    setActiveReviewTab("blocked");
+    setActiveReviewTab(null);
   }
 
   function updateFieldMapping(
@@ -291,7 +289,11 @@ export function CsvUploader() {
         ? runValidationProfile(invoiceValidationProfile, selectedRows)
         : {
             normalizedRows: [],
-            validationResult: { issues: [], cleanRows: [], errorRows: [] },
+            validationResult: {
+              issues: [],
+              cleanRows: [],
+              errorRows: [],
+            },
           },
     [mappingReady, selectedRows],
   );
@@ -345,7 +347,6 @@ export function CsvUploader() {
   const cleanCount = cleanInvoiceItems.length;
 
   const canExport = mappingReady && validationResult.cleanRows.length > 0;
-
   const hasUploadedRows = rows.length > 0;
   const hasHeaders = headers.length > 0;
 
@@ -460,7 +461,7 @@ export function CsvUploader() {
           {mappingReady && (
             <>
               <InvoiceReviewSection
-                activeTab={activeReviewTab}
+                activeTab={activeReviewTab ?? undefined}
                 onTabChange={setActiveReviewTab}
                 cleanInvoiceItems={cleanInvoiceItems}
                 warningInvoiceItems={warningInvoiceItems}

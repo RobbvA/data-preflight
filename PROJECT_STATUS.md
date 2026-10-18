@@ -18,9 +18,26 @@ Core promise: **Validate data before ERP import.**
 
 M5 was internally completed on 2026-10-11.
 
-M6 implementation started locally on 2026-10-18. The first increment covers upload lifecycle safety, shared mapping guards, and a shared mapping panel.
+M6 implementation started on 2026-10-18.
 
-The changes recorded in this session were checked locally. Commit, push, and deployment confirmation are separate steps; local test results do not establish that the deployed site already contains this increment.
+**M6.1 — Shared workflow foundation is complete within its agreed scope.**
+
+Completed:
+
+- Upload lifecycle guards.
+- Shared mapping readiness.
+- Shared mapping dialog.
+- Shared review controls.
+- Consistent Invoice review selection and empty-category behavior.
+- More precise review and export guidance.
+
+Delivery status:
+
+- `6d96ccd`: upload lifecycle guards and shared mapping; committed and pushed.
+- `e68938b`: shared review controls; committed and pushed.
+- Final review-selection and wording changes: locally applied and verified; commit and push still pending at this documentation checkpoint.
+
+Local verification does not establish that the deployed site contains all changes.
 
 An independent, unguided test with a new ERP/data user remains outstanding.
 
@@ -28,18 +45,21 @@ An independent, unguided test with a new ERP/data user remains outstanding.
 
 ### M6.1a — Upload lifecycle safety
 
-- Both workspaces assign a request ID to each asynchronous file-loading action.
-- Results from outdated actions are ignored.
-- Outdated errors cannot replace the current error state.
-- Outdated finally handlers cannot clear a newer loading state.
-- Reset invalidates earlier actions.
-- Profile changes invalidate pending work.
-- Workspace cleanup invalidates pending actions on unmount.
-- Customer reset explicitly clears loading.
+Both workspaces now:
+
+- Assign a request ID to each asynchronous file-loading action.
+- Ignore results from outdated actions.
+- Ignore outdated errors.
+- Prevent outdated finally handlers from clearing a newer loading state.
+- Invalidate earlier actions on reset.
+- Invalidate pending work on profile changes.
+- Invalidate pending actions during workspace cleanup.
+
+Customer reset also explicitly clears loading.
 
 This prevents outdated asynchronous completions from restoring old data or changing a newer flow.
 
-It does not cancel work already being performed by the parser.
+It does not cancel parser work already in progress.
 
 ### M6.1b — Shared mapping readiness
 
@@ -68,7 +88,7 @@ Both profiles now use the same mapping dialog with:
 - A live mapping-status summary.
 - Invoice automatic-suggestion explanations.
 - Customer ambiguous-header hints.
-- Explicit labels and field-level accessibility attributes.
+- Associated labels and field-level accessibility attributes.
 - Native modal keyboard behavior.
 - Escape dismissal.
 - Focus restoration after manual opening.
@@ -77,7 +97,55 @@ Both profiles now use the same mapping dialog with:
 
 The initial panel appeared on the left. Explicit positioning on the dialog element corrected the alignment; the user confirmed the right-side placement.
 
-Customer now opens the mapping panel automatically when a newly loaded file requires mapping correction, matching the Invoice flow.
+Customer opens the mapping panel automatically when a newly loaded file requires mapping correction, matching the Invoice flow.
+
+### M6.1d — Shared review controls
+
+Added `src/components/data-preflight/ReviewStatusControls.tsx`.
+
+Invoice and Customer now share:
+
+- Blocked, Needs review, and Ready category controls.
+- Category counts.
+- Selected-state styling.
+- Visible keyboard focus.
+- Status-summary presentation.
+- The explanation “Passed current checks” for Ready results.
+
+The controls use buttons with pressed-state semantics rather than incomplete tab semantics.
+
+Invoice category wording changed from “Import-ready” to “Ready invoices”.
+
+Domain-specific row content, normalization, validation, and explanations remain separate.
+
+### M6.1e — Review selection and export guidance
+
+Aligned Invoice review behavior:
+
+- A fresh result initially selects Blocked when blockers exist.
+- Otherwise it selects Needs review when warnings exist.
+- Otherwise it selects Ready.
+- Explicitly selecting an empty category keeps that category selected and shows its empty state.
+- Selecting a collapsed category opens its list.
+- List collapse remains available.
+- Loading another file or resetting clears the previous category choice.
+
+Updated relevant row-status and export guidance:
+
+- Ready means “Passed current checks”.
+- Passing implemented checks is not presented as guaranteed acceptance by a target ERP.
+- Warning-only rows remain exportable and require review.
+- Critical rows remain excluded from the rows-without-blockers export.
+
+This increment changes review behavior and explanatory copy. It does not intentionally change domain normalization, validation rules, or CSV serialization.
+
+### M6.1 scope assessment
+
+The shared foundation is sufficient to begin Vendor.
+
+M6.1 does not require a complete generic workspace rewrite.
+
+Invoice and Customer still retain separate workspace components and domain-specific row presentation. Further extraction should follow concrete reuse needs when adding Vendor and Product.
 
 ## Available profiles and workflow
 
@@ -104,7 +172,7 @@ Available behavior:
 - Blocked, Needs review, and Ready categories.
 - Problem, why, and fix explanations.
 - Export excluding rows with critical issues.
-- Warning rows remain exportable and should be reviewed.
+- Warning-only rows remain exportable and should be reviewed.
 - Validation details and a downloadable Validation Report.
 - Structural CSV errors rejected before validation.
 - Outdated asynchronous reads ignored.
@@ -124,21 +192,22 @@ Vendor, Product, saved mappings, reference data, user-authored rules, and ERP co
 | Domain normalization and validation | `src/lib/normalization/`, `src/lib/validation/`, `src/lib/validateRows.ts` |
 | Recognizable-profile mismatch detection | `src/lib/profileCompatibility.ts` |
 | Deterministic Validation Report | `src/lib/validationReport.ts` |
-| CSV downloads | `src/lib/exportData.ts` |
+| CSV downloads and export guidance | `src/lib/exportData.ts` |
 | Profile selection and Invoice flow | `src/components/CsvUploader.tsx` |
 | Customer flow | `src/components/data-preflight/CustomerWorkspace.tsx` |
 | Shared mapping dialog | `src/components/data-preflight/ProfileMappingPanel.tsx` |
+| Shared review controls | `src/components/data-preflight/ReviewStatusControls.tsx` |
+| Invoice review behavior | `src/components/data-preflight/InvoiceReviewSection.tsx` |
+| Review types and status copy | `src/components/data-preflight/types.ts` |
 | File and worksheet controls | `src/components/data-preflight/UploadSection.tsx` |
 | Shared page shell | `src/components/data-preflight/WorkspaceLayout.tsx` |
 | Visible validation context | `src/components/data-preflight/ValidationContextPanel.tsx` |
-
-Invoice and Customer retain separate workspace components and review implementations.
 
 Invoice profile version: `1.0.2`.
 
 Customer profile version: `1.0.0`.
 
-The M6 mapping/UI work did not intentionally change domain normalization or validation rules.
+The M6.1 work did not intentionally change domain normalization or validation rules.
 
 ## Evidence collected
 
@@ -192,13 +261,15 @@ A mobile walkthrough found the flow usable, with cramped spacing noted.
 
 No independent unguided new-user test was completed. Simon's informal interaction is not treated as reliable self-service UX evidence.
 
-### M6 checks on 2026-10-18
+### M6.1 checks on 2026-10-18
 
 Development-time checks:
 
 - Sixteen focused asynchronous-flow checks passed using mocked parsing and state setters.
-- Shared mapping guards were compared with the previous behavior using generated mapping combinations for the existing profiles.
-- These checks were run in the assistant's development environment; they are not a committed application test suite or browser end-to-end tests.
+- Shared mapping guards were compared with previous behavior using generated mapping combinations for the existing profiles.
+- 135 focused checks exercised extracted Invoice category-selection and list-toggle behavior.
+
+These were development-time checks in the assistant's environment. They are not a committed application test suite or browser end-to-end tests.
 
 User-reported local browser checks:
 
@@ -207,10 +278,15 @@ User-reported local browser checks:
 - Duplicate source-column assignments blocked review/export.
 - Restoring valid mappings restored results.
 - The shared mapping panel worked in both profiles.
-- Escape worked; the user confirmed the remaining requested keyboard/focus checks.
+- Escape worked; the user confirmed the requested keyboard/focus checks.
 - Right-side placement worked after the positioning correction.
+- Shared review controls showed the expected counts and rows.
+- Switching categories opened the relevant list.
+- Selecting an empty category preserved the selection and displayed an empty state.
+- Updated Ready guidance appeared in the reviewed flow.
+- The requested narrow-desktop-viewport checks were reported complete.
 
-Local project checks:
+Final local project checks:
 
 - `npm run lint`: 0 errors, 2 existing warnings.
 - TypeScript passed during the production build.
@@ -221,12 +297,14 @@ Existing warnings:
 - Unused Metadata import in `src/app/layout.tsx`.
 - Unused `_tone` parameter in `src/components/data-preflight/DataSetPreview.tsx`.
 
-The new mapping dialog has not received a separate mobile visual walkthrough or assistive-technology audit.
+The narrow desktop check is not a full real-device mobile review.
+
+No screen-reader audit or fresh deployed M6 Network check was performed.
 
 ## Product boundaries
 
 - Ready means the selected profile's implemented checks passed. It is not a target-ERP acceptance guarantee.
-- Warning rows may remain in the export.
+- Warning-only rows may remain in the export.
 - Mapping suggestions and recognizable-profile detection do not prove semantic correctness.
 - Correcting records happens in the source file, followed by another upload.
 - Users cannot create rules or save mappings yet.
@@ -253,16 +331,21 @@ Every increment should be:
 
 Quality belongs in each implementation step, rather than being postponed to a final redesign.
 
+Product decisions should support this promise:
+
+“DataPreflight should be the tool you run before ERP data is allowed to go anywhere important.”
+
 ## Next work
 
-1. Continue M6.1 with shared review controls and consistent status behavior.
-2. Preserve domain-specific row presentation, normalization, and rules.
-3. Resolve overly strong import-safety wording when editing the relevant review components.
-4. Add the limited Vendor profile after the shared foundation is sufficient.
-5. Add local reusable mappings.
-6. Run the first independent usage test after Vendor and mapping reuse, if a suitable tester is available.
-7. Add the limited Product profile and bounded reference-data check.
-8. Complete cross-profile, privacy, responsive, and outreach-readiness checks.
+1. Commit and push the final M6.1 review-selection, wording, and documentation changes.
+2. Begin M6.2 by specifying Vendor fields, normalization, rules, and expected fixture outcomes.
+3. Implement the limited Vendor profile using the existing execution contract and shared UI.
+4. Add local reusable mappings.
+5. Run the first independent usage test after Vendor and mapping reuse, if a suitable tester is available.
+6. Add the limited Product profile and bounded reference-data check.
+7. Complete cross-profile, privacy, responsive, and outreach-readiness checks.
+
+Do not add a complete copied workspace for Vendor without first assessing which existing behavior can be reused.
 
 Keep DataPreflight as the working product name. Renaming is not a prerequisite for implementation; do not interpret this as legal clearance.
 
@@ -274,4 +357,6 @@ Keep DataPreflight as the working product name. Renaming is not a prerequisite f
 - FEEDBACK.md: historical external feedback and labeled product interpretation.
 - SESSION_LOG.md: dated history and handoff.
 
-Update documentation at coherent session checkpoints. Run lint/build at a completed implementation checkpoint or when a change warrants it, rather than after every minor edit.
+Update documentation at coherent session checkpoints.
+
+Run lint/build at a completed implementation checkpoint or when a change warrants it, rather than after every minor edit.

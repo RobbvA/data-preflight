@@ -69,7 +69,7 @@ Historical implementation details remain in SESSION_LOG.md.
 
 ## Milestone 6 — Professional ERP validation platform
 
-Status: In progress. Implementation started locally on 2026-10-18.
+Status: In progress. Implementation started on 2026-10-18.
 
 ### Goal
 
@@ -94,17 +94,31 @@ Problem → Design → Implementation → Edge cases → UX → Testing → Poli
 
 An increment must be effective, reliable, understandable, visually polished, and consistent.
 
-Essential accessibility belongs in the implementation: keyboard operation, visible focus, labels, and understandable error feedback.
+Essential accessibility belongs in the implementation:
+
+- Keyboard operation.
+- Visible focus.
+- Associated labels.
+- Understandable error feedback.
+- Recoverable interaction.
 
 Performance becomes blocking when it prevents the intended workflow. Larger-file optimization remains conditional on evidence.
 
 ### 6.1 Shared workflow foundation
 
-Status: In progress.
+Status: Complete within the agreed foundation scope on 2026-10-18.
+
+Delivery:
+
+- Upload lifecycle and shared mapping committed and pushed as `6d96ccd`.
+- Shared review controls committed and pushed as `e68938b`.
+- Final review-selection and wording changes verified locally; final commit/push pending at this checkpoint.
+
+This is sufficient foundation to begin Vendor. It is not a complete generic workspace rewrite.
 
 #### 6.1a Upload lifecycle safety
 
-Status: Complete locally.
+Status: Complete.
 
 Delivered:
 
@@ -130,7 +144,7 @@ This invalidates outdated state updates; it does not cancel parser work.
 
 #### 6.1b Shared mapping readiness
 
-Status: Complete locally.
+Status: Complete.
 
 Delivered:
 
@@ -149,12 +163,12 @@ Acceptance:
 
 Evidence:
 
-- Generated mapping combinations were compared with the previous guard behavior.
+- Generated mapping combinations were compared with previous guard behavior.
 - User-reported local checks passed for both profiles.
 
 #### 6.1c Shared mapping interface
 
-Status: Complete locally.
+Status: Complete.
 
 Delivered:
 
@@ -176,29 +190,91 @@ Acceptance:
 
 Evidence:
 
-- User confirmed the local requested browser checks, including Escape.
+- User confirmed the requested local browser checks, including Escape.
 - Screenshots showed duplicate feedback and blocked downstream review.
 - User confirmed corrected right-side placement.
-- Lint: 0 errors, 2 existing warnings.
+
+A later narrow-desktop-viewport check was reported complete. Full real-device mobile and screen-reader checks remain part of wider M6 verification.
+
+#### 6.1d Shared review controls
+
+Status: Complete; committed and pushed as `e68938b`.
+
+Delivered:
+
+- Shared ReviewStatusControls component.
+- Consistent category labels, counts, selected states, and focus styling.
+- Shared status-summary presentation.
+- Button pressed-state semantics.
+- “Passed current checks” explanation for Ready.
+- “Ready invoices” category wording.
+
+Acceptance:
+
+- Invoice and Customer use the shared controls.
+- Category counts and displayed rows agree.
+- Keyboard focus is visible.
+- Domain-specific row presentation and validation remain intact.
+
+Evidence:
+
+- User confirmed local category and keyboard checks.
+- Lint, TypeScript, and production build passed.
+
+#### 6.1e Review selection and export guidance
+
+Status: Complete locally; final commit/push pending.
+
+Delivered:
+
+- Invoice initially selects Blocked, then Needs review, then Ready according to available results.
+- A user's explicit selection of an empty category remains selected.
+- Empty categories display their empty state.
+- Selecting a collapsed category opens its list.
+- Manual list collapse continues to work.
+- Loading or resetting clears the previous Invoice category choice.
+- Relevant Ready and export guidance describes implemented checks without promising target-ERP acceptance.
+
+Acceptance:
+
+- Initial review selection follows issue priority.
+- Explicit empty-category selection is not silently replaced.
+- Category selection opens the relevant list.
+- Collapse remains available.
+- Warning-only rows remain exportable.
+- Critical rows remain excluded.
+- Domain rules and CSV serialization are not intentionally changed.
+
+Evidence:
+
+- 135 focused development-time checks exercised extracted Invoice selection and list-toggle behavior.
+- User confirmed the requested browser checks.
+- Final lint: 0 errors, 2 existing warnings.
 - TypeScript and production build passed.
 
-A separate mobile visual walkthrough of the new panel remains pending.
+Development-time checks are not a committed application test suite or browser end-to-end coverage.
 
-#### Remaining 6.1 work
+#### M6.1 exit assessment
 
-- Share review controls and align their behavior.
-- Preserve profile-specific row content and business rules.
-- Align relevant status and import-safety wording.
-- Extract only the shared foundation needed for expansion.
-- Avoid copying a complete workspace for Vendor.
+Complete:
 
-Stop condition:
+- Shared upload guards.
+- Shared mapping readiness.
+- Shared mapping interaction.
+- Shared review controls.
+- Reviewed category-selection behavior.
+- More precise relevant status/export wording.
+- Local browser and build checkpoint.
 
-If a refactor becomes broader than the concrete expansion requires, reduce it to the necessary shared components and behavior.
+The next profile can now be added against this foundation.
+
+Keep domain-specific row content and business rules separate where that improves clarity.
+
+If further extraction becomes broader than the concrete expansion requires, reduce it to the necessary shared components and behavior.
 
 ### 6.2 Vendor/Supplier profile
 
-Status: Planned.
+Status: Next implementation step.
 
 User-facing domain: Vendor / Supplier master data.
 
@@ -215,13 +291,15 @@ Initial fields:
 Build order:
 
 1. Define fields, aliases, and profile version 1.0.0.
-2. Reuse suitable normalization helpers.
-3. Treat identifiers as text.
-4. Check duplicate IDs after trimming, case-insensitively.
-5. Add required-field checks.
-6. Add optional format warnings.
-7. Connect shared mapping, review, reports, and export.
-8. Add examples and explicit acceptance fixtures.
+2. Specify expected mapping, normalized values, issues, classifications, and export rows before implementation.
+3. Reuse suitable normalization helpers.
+4. Treat identifiers as text.
+5. Check duplicate IDs after trimming, case-insensitively.
+6. Add required-field checks.
+7. Add optional format warnings.
+8. Connect shared mapping, review, reports, and export.
+9. Add examples and explicit acceptance fixtures.
+10. Review recovery, keyboard operation, visual consistency, and relevant regressions.
 
 Acceptance:
 
@@ -232,6 +310,8 @@ Acceptance:
 - Warning-only rows remain exportable.
 - CSV and reordered XLSX cases match expected results.
 - Reports contain the same validation context as existing profiles.
+- Mapping errors remain recoverable without unnecessary re-upload.
+- Existing Invoice and Customer flows continue to work.
 
 Out of scope:
 
@@ -299,12 +379,14 @@ Initial fields:
 Build order:
 
 1. Define fields, aliases, and version 1.0.0.
-2. Preserve Product ID as text.
-3. Normalize descriptions conservatively.
-4. Trim units and compare case-insensitively where relevant.
-5. Add required-field and duplicate-ID rules.
-6. Connect shared mapping, saved mappings, review, reports, and export.
-7. Add examples and acceptance fixtures.
+2. Specify expected fixture outcomes.
+3. Preserve Product ID as text.
+4. Normalize descriptions conservatively.
+5. Trim units and compare case-insensitively where relevant.
+6. Add required-field and duplicate-ID rules.
+7. Connect shared mapping, saved mappings, review, reports, and export.
+8. Add examples and acceptance fixtures.
+9. Review recovery, keyboard operation, and visual consistency.
 
 Acceptance:
 
@@ -361,6 +443,7 @@ Acceptance:
 - `kg` and ` KG ` match `KG`.
 - An unlisted unit is blocked while the list is active.
 - No check is claimed when the list is absent.
+- Replacing or removing the list updates validation and report context.
 - Identical source, worksheet, mapping, profile version, reference-check version, and effective reference values produce repeatable results.
 
 Out of scope:
@@ -387,6 +470,7 @@ Acceptance:
 - Warning inclusion is understandable.
 - Review, export, and report wording do not conflict.
 - The workflow remains readable and usable on smaller screens.
+- New controls follow the existing visual language.
 
 Out of scope:
 
@@ -440,7 +524,16 @@ Acceptance:
 
 A single successful test does not prove demand or willingness to pay.
 
-After technical M6 completion and resolution of core usability blockers, run a small outreach round focused on real recurring tasks, remaining manual work, reuse, missing rules, and intent to use the tool again.
+After technical M6 completion and resolution of core usability blockers, run a small outreach round focused on:
+
+- Real recurring tasks.
+- Remaining manual work.
+- Mapping reuse.
+- Missing rules.
+- Current alternatives.
+- Intent to use the tool again.
+
+Treat proposed pain points as hypotheses until supported by direct user evidence.
 
 ### 6.9 Verification and closeout
 
@@ -498,8 +591,8 @@ AI output must remain distinguishable from deterministic rule results and respec
 
 ## Next build step
 
-Continue M6.1 with shared review controls and consistent status behavior.
+Finish the final M6.1 commit and push.
 
-Use the locally verified upload guards, mapping status helper, and mapping panel as the baseline.
+Then begin M6.2 with Vendor field definitions and explicit acceptance fixtures.
 
-Preserve domain-specific rules and row presentation. No Vendor code until the shared foundation is sufficient.
+Use the shared upload, mapping, and review foundation. Preserve domain-specific rules and row presentation, and extract additional shared behavior only where the new profile requires it.
