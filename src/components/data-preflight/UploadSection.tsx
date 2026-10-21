@@ -23,6 +23,12 @@ type UploadSectionProps = {
 const ACCEPTED_SOURCE_TYPES =
   ".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
+const PROFILE_CHOICES: { domain: DataDomain; label: string }[] = [
+  { domain: "invoice", label: "Invoice data" },
+  { domain: "customer", label: "Customer master data" },
+  { domain: "vendor", label: "Vendor master data" },
+];
+
 const EXAMPLE_FILES = [
   { label: "Clean", href: "/demo-data/clean-invoices.csv" },
   { label: "Messy", href: "/demo-data/messy-export.csv" },
@@ -83,7 +89,6 @@ export function UploadSection({
                 className="sr-only"
               />
             </label>
-
             <button
               type="button"
               onClick={onReset}
@@ -138,7 +143,7 @@ export function UploadSection({
             role="status"
             className="mt-3 text-sm font-medium text-[var(--brand-accent-soft)]"
           >
-            Choose Invoice data or Customer master data first.
+            Choose a validation profile first.
           </p>
         )}
       </div>
@@ -151,14 +156,11 @@ export function UploadSection({
           <h3 className="text-base font-semibold text-[var(--text-primary)]">
             Choose a worksheet
           </h3>
-
           <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
             {pendingExcelSheets.fileName} contains multiple sheets with data.
-            Select the sheet with the{" "}
-            {domain === "customer" ? "customer" : "invoice"} rows before field
-            mapping and validation.
+            Select the sheet with the {domain} rows before field mapping and
+            validation.
           </p>
-
           <div className="mt-3 flex flex-wrap gap-2">
             {pendingExcelSheets.names.map((sheetName) => (
               <button
@@ -172,7 +174,6 @@ export function UploadSection({
               </button>
             ))}
           </div>
-
           <button
             type="button"
             onClick={onReset}
@@ -210,7 +211,6 @@ export function UploadSection({
         <h3 className="text-base font-semibold text-[var(--text-primary)]">
           Use your own {domain ? `${domain} ` : ""}file
         </h3>
-
         <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
           CSV, XLSX, or XLS {domain ? `${domain} ` : ""}exports are supported.
         </p>
@@ -262,7 +262,6 @@ export function UploadSection({
           <summary className="cursor-pointer hover:text-[var(--text-primary)]">
             Download example CSV files
           </summary>
-
           <div className="mt-3 flex flex-wrap gap-2">
             {EXAMPLE_FILES.map((file) => (
               <a
@@ -305,20 +304,20 @@ function ProfileSelector({
       aria-label="Validation profile"
       className="flex flex-wrap gap-2"
     >
-      {(["invoice", "customer"] as const).map((choice) => (
+      {PROFILE_CHOICES.map((choice) => (
         <button
-          key={choice}
+          key={choice.domain}
           type="button"
-          aria-pressed={domain === choice}
+          aria-pressed={domain === choice.domain}
           disabled={disabled}
-          onClick={() => onDomainChange(choice)}
+          onClick={() => onDomainChange(choice.domain)}
           className={`cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
-            domain === choice
+            domain === choice.domain
               ? "border-[color:rgba(209,154,106,0.45)] bg-[rgba(209,154,106,0.07)] text-[var(--text-primary)]"
               : "border-white/10 bg-[var(--surface-deep)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           }`}
         >
-          {choice === "customer" ? "Customer master data" : "Invoice data"}
+          {choice.label}
         </button>
       ))}
     </div>

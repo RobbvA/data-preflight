@@ -10,7 +10,17 @@ const toneClasses = {
     "border-[color:rgba(120,180,120,0.3)] bg-[rgba(120,180,120,0.07)] text-[#a8c9a8]",
 };
 
-const examples = {
+type PreviewExample = {
+  label: string;
+  counts: [number, number, number];
+  issues: {
+    reference: string;
+    problem: string;
+    status: string;
+  }[];
+};
+
+const examples: Record<DataDomain, PreviewExample> = {
   invoice: {
     label: "Invoice example",
     counts: [2, 1, 3],
@@ -40,6 +50,22 @@ const examples = {
         reference: "Row 4",
         problem: "Customer ID is missing",
         status: "Blocked",
+      },
+    ],
+  },
+  vendor: {
+    label: "Vendor example",
+    counts: [3, 1, 2],
+    issues: [
+      {
+        reference: "V-004",
+        problem: "Vendor ID appears more than once",
+        status: "Blocked",
+      },
+      {
+        reference: "003",
+        problem: "Email address has an invalid format",
+        status: "Review",
       },
     ],
   },
@@ -83,7 +109,6 @@ export function HomeProductPreview({ domain }: { domain: DataDomain }) {
             Review workspace
           </h2>
         </div>
-
         <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] text-[var(--text-secondary)]">
           Preview
         </span>
@@ -114,7 +139,6 @@ export function HomeProductPreview({ domain }: { domain: DataDomain }) {
               Priority first
             </span>
           </div>
-
           <div className="divide-y divide-white/10">
             {example.issues.map((issue) => (
               <div

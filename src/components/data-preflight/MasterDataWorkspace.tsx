@@ -13,7 +13,10 @@ import {
   type ParsedRow,
 } from "@/lib/parseCsv";
 import { downloadCsv } from "@/lib/exportData";
-import { getProfileMappingCandidates } from "@/lib/dataProfile";
+import {
+  getProfileMappingCandidates,
+  suggestProfileMapping,
+} from "@/lib/dataProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
 import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
@@ -26,54 +29,62 @@ import {
   type DataDomain,
 } from "@/components/data-preflight/WorkspaceLayout";
 import {
-  customerFieldKeys,
-  suggestCustomerMapping,
-  type CustomerMapping,
-} from "@/lib/profiles/customerProfile";
-import {
-  customerValidationProfile,
-  type CustomerIssue,
-} from "@/lib/validation/customerValidation";
-import {
-  mapRowsToProfile,
-  runValidationProfile,
-} from "@/lib/validation/validationProfile";
+  masterDataWorkspaceConfigs,
+  type MasterDataDomain,
+  type MasterDataIssue,
+  type MasterDataWorkspaceConfig,
+} from "@/lib/profiles/masterDataWorkspaceConfig";
+import { mapRowsToProfile } from "@/lib/validation/validationProfile";
 
-type CustomerReviewTab = "blocked" | "review" | "ready";
+type MasterDataReviewTab = "blocked" | "review" | "ready";
 type ReviewSortMode = "priority" | "row" | "issues";
+type MasterDataMapping = Record<string, string>;
 
-const EXAMPLE_CSV = [
-  "Customer Number,Customer Name,Email,Country Code,VAT Number",
-  "C-1001,Acme BV,finance@acme.nl,NL,NL123456789B01",
-  "C-1002,North Trading,wrong-email,DE,DE123456789",
-  "C-1002,North Trading Berlin,accounts@north.example,DE,DE123456789",
-  ",Missing Identifier,contact@example.com,NL,",
-  "C-1003,Green Supply,hello@green.example,NL,",
-].join("\n");
-
-function emptyMapping(): CustomerMapping {
+function emptyMapping(config: MasterDataWorkspaceConfig): MasterDataMapping {
   return Object.fromEntries(
-    customerFieldKeys.map((key) => [key, ""]),
-  ) as CustomerMapping;
+    config.profile.fields.map(({ key }) => [key, ""]),
+  );
 }
 
-export function CustomerWorkspace({
+export function MasterDataWorkspace({
+  domain,
   onDomainChange,
 }: {
+  domain: MasterDataDomain;
+  onDomainChange: (domain: DataDomain) => void;
+}) {
+  return (
+    <MasterDataWorkspaceContent
+      key={domain}
+      domain={domain}
+      config={masterDataWorkspaceConfigs[domain]}
+      onDomainChange={onDomainChange}
+    />
+  );
+}
+
+function MasterDataWorkspaceContent({
+  domain,
+  config,
+  onDomainChange,
+}: {
+  domain: MasterDataDomain;
+  config: MasterDataWorkspaceConfig;
   onDomainChange: (domain: DataDomain) => void;
 }) {
   const loadRequestId = useRef(0);
+  const profile = config.profile;
 
   useEffect(() => {
     return () => {
-      // Ignore any pending read when this workspace unmounts.
       loadRequestId.current += 1;
     };
   }, []);
 
   const [dataSet, setDataSet] = useState<ParsedDataSet | null>(null);
-  const [mapping, setMapping] = useState<CustomerMapping>(emptyMapping);
-
+  const [mapping, setMapping] = useState<MasterDataMapping>(() =>
+    emptyMapping(config),
+  );
   const [pendingExcelSheets, setPendingExcelSheets] = useState<{
     file: File;
     names: string[];
@@ -81,58 +92,44 @@ export function CustomerWorkspace({
 
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const [activeReviewTab, setActiveReviewTab] =
-    useState<CustomerReviewTab | null>(null);
-
+    useState<MasterDataReviewTab | null>(null);
   const [isMappingOpen, setIsMappingOpen] = useState(false);
-
-  const [selectedCustomerRowIndex, setSelectedCustomerRowIndex] =
-    useState<number | null>(null);
-
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [isReviewListOpen, setIsReviewListOpen] = useState(true);
-
   const [reviewSortMode, setReviewSortMode] =
     useState<ReviewSortMode>("priority");
 
   const rows = useMemo(() => dataSet?.rows ?? [], [dataSet]);
   const headers = dataSet?.headers ?? [];
-
-  const mappingCandidates = getProfileMappingCandidates(
-    customerValidationProfile,
-    headers,
-  );
+  const mappingCandidates = getProfileMappingCandidates(profile, headers);
 
   const {
     missingRequiredFields,
-    hasDuplicateMappings: hasDuplicateMapping,
+    hasDuplicateMappings,
     mappingReady,
     mappedCount,
   } = useMemo(
-    () => getMappingStatus(customerValidationProfile, mapping),
-    [mapping],
+    () => getMappingStatus(profile, mapping),
+    [profile, mapping],
   );
 
   const requiredUnmapped = missingRequiredFields.map((field) => field.label);
 
   const mappedRows = useMemo(
-    () =>
-      mappingReady
-        ? mapRowsToProfile(rows, mapping, customerValidationProfile)
-        : [],
-    [rows, mapping, mappingReady],
+    () => mappingReady ? mapRowsToProfile(rows, mapping, profile) : [],
+    [rows, mapping, profile, mappingReady],
   );
 
   const { normalizedRows, validationResult } = useMemo(
-    () => runValidationProfile(customerValidationProfile, mappedRows),
-    [mappedRows],
+    () => config.runValidation(mappedRows),
+    [config, mappedRows],
   );
 
-  const canExport =
-    mappingReady && validationResult.cleanRows.length > 0;
+  const canExport = mappingReady && validationResult.cleanRows.length > 0;
 
   const issuesByRow = useMemo(() => {
-    const grouped = new Map<number, CustomerIssue[]>();
+    const grouped = new Map<number, MasterDataIssue[]>();
 
     for (const issue of validationResult.issues) {
       grouped.set(issue.rowIndex, [
@@ -145,16 +142,11 @@ export function CustomerWorkspace({
   }, [validationResult.issues]);
 
   const blockedCount = validationResult.errorRows.length;
-
   const reviewCount = normalizedRows.filter((_, index) => {
     const issues = issuesByRow.get(index + 1) ?? [];
-
-    return (
-      issues.length > 0 &&
-      issues.every((issue) => issue.severity === "warning")
-    );
+    return issues.length > 0 &&
+      issues.every((issue) => issue.severity === "warning");
   }).length;
-
   const readyCount = normalizedRows.length - blockedCount - reviewCount;
 
   const reviewRows = normalizedRows.map((row, index) => ({
@@ -163,33 +155,24 @@ export function CustomerWorkspace({
     issues: issuesByRow.get(index + 1) ?? [],
   }));
 
-  const defaultReviewTab: CustomerReviewTab =
+  const defaultReviewTab: MasterDataReviewTab =
     blockedCount > 0 ? "blocked" : reviewCount > 0 ? "review" : "ready";
-
   const visibleReviewTab = activeReviewTab ?? defaultReviewTab;
 
   const visibleRows = reviewRows.filter(({ issues }) => {
     if (visibleReviewTab === "blocked") {
       return issues.some((issue) => issue.severity === "critical");
     }
-
     if (visibleReviewTab === "review") {
-      return (
-        issues.length > 0 &&
-        issues.every((issue) => issue.severity === "warning")
-      );
+      return issues.length > 0 &&
+        issues.every((issue) => issue.severity === "warning");
     }
-
     return issues.length === 0;
   });
 
   visibleRows.sort((a, b) => {
     if (reviewSortMode === "row") return a.rowIndex - b.rowIndex;
-
-    if (reviewSortMode === "issues") {
-      return b.issues.length - a.issues.length;
-    }
-
+    if (reviewSortMode === "issues") return b.issues.length - a.issues.length;
     return getPriority(b.issues) - getPriority(a.issues);
   });
 
@@ -201,10 +184,10 @@ export function CustomerWorkspace({
 
   const categoryTitle =
     visibleReviewTab === "blocked"
-      ? "Blocked customers"
+      ? config.labels.blocked
       : visibleReviewTab === "review"
         ? "Needs review"
-        : "Ready customers";
+        : config.labels.ready;
 
   const categoryDescription =
     visibleReviewTab === "blocked"
@@ -213,9 +196,9 @@ export function CustomerWorkspace({
         ? "Rows that can export, but should be checked before import."
         : "Rows that passed the current profile checks.";
 
-  function selectReviewTab(tab: CustomerReviewTab) {
+  function selectReviewTab(tab: MasterDataReviewTab) {
     setActiveReviewTab(tab);
-    setSelectedCustomerRowIndex(null);
+    setSelectedRowIndex(null);
     setIsReviewListOpen(true);
   }
 
@@ -224,25 +207,23 @@ export function CustomerWorkspace({
 
     setError(null);
     setDataSet(null);
-    setMapping(emptyMapping());
+    setMapping(emptyMapping(config));
     setPendingExcelSheets(null);
     setActiveReviewTab(null);
     setIsMappingOpen(false);
-    setSelectedCustomerRowIndex(null);
+    setSelectedRowIndex(null);
     setIsReviewListOpen(true);
     setReviewSortMode("priority");
     setIsLoading(true);
 
     try {
       const adapter = getInputAdapter(file);
-
       if (!adapter) {
         throw new Error("Choose a CSV, XLSX, or XLS file.");
       }
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
         const sheetNames = await getReadableExcelSheetNames(file);
-
         if (requestId !== loadRequestId.current) return;
 
         if (sheetNames.length > 1) {
@@ -252,62 +233,46 @@ export function CustomerWorkspace({
       }
 
       const parsed = await adapter.parse(file, selectedSheetName);
-
       if (requestId !== loadRequestId.current) return;
 
       if (parsed.rows.length === 0 || parsed.headers.length === 0) {
         throw new Error("The file has no readable rows and headers.");
       }
 
-      const mismatchMessage = getProfileMismatchMessage(
-        parsed.headers,
-        "customer",
-      );
+      const mismatchMessage = getProfileMismatchMessage(parsed.headers, domain);
+      if (mismatchMessage) throw new Error(mismatchMessage);
 
-      if (mismatchMessage) {
-        throw new Error(mismatchMessage);
-      }
-
-      const suggestedMapping = suggestCustomerMapping(parsed.headers);
-
-      const { mappingReady: suggestedMappingReady } = getMappingStatus(
-        customerValidationProfile,
-        suggestedMapping,
-      );
+      const suggestedMapping = suggestProfileMapping(profile, parsed.headers);
+      const { mappingReady: suggestedMappingReady } =
+        getMappingStatus(profile, suggestedMapping);
 
       setDataSet(parsed);
       setMapping(suggestedMapping);
       setIsMappingOpen(!suggestedMappingReady);
     } catch (caught) {
       if (requestId !== loadRequestId.current) return;
-
       setError(
         caught instanceof Error ? caught.message : "Could not read the file.",
       );
     } finally {
-      if (requestId === loadRequestId.current) {
-        setIsLoading(false);
-      }
+      if (requestId === loadRequestId.current) setIsLoading(false);
     }
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-
     if (file) void loadFile(file);
-
     event.target.value = "";
   }
 
   function handleExcelSheetSelect(sheetName: string) {
     if (!pendingExcelSheets) return;
-
     void loadFile(pendingExcelSheets.file, sheetName);
   }
 
   function loadExample() {
     void loadFile(
-      new File([EXAMPLE_CSV], "customer-example.csv", {
+      new File([config.example.csv], config.example.fileName, {
         type: "text/csv",
       }),
     );
@@ -317,19 +282,18 @@ export function CustomerWorkspace({
     loadRequestId.current += 1;
     setPendingExcelSheets(null);
     setDataSet(null);
-    setMapping(emptyMapping());
+    setMapping(emptyMapping(config));
     setError(null);
     setIsLoading(false);
     setActiveReviewTab(null);
     setIsMappingOpen(false);
-    setSelectedCustomerRowIndex(null);
+    setSelectedRowIndex(null);
     setIsReviewListOpen(true);
     setReviewSortMode("priority");
   }
 
   function changeDomain(nextDomain: DataDomain) {
-    if (nextDomain === "customer") return;
-
+    if (nextDomain === domain) return;
     resetFlow();
     onDomainChange(nextDomain);
   }
@@ -344,18 +308,17 @@ export function CustomerWorkspace({
       why_it_matters: issue.why,
       suggested_fix: issue.fix,
     }));
-
-    downloadCsv("customer-issues.csv", report);
+    downloadCsv(config.exports.issues, report);
   }
 
   return (
     <WorkspaceLayout>
       {!dataSet ? (
         <LandingWorkspace
-          domain="customer"
+          domain={domain}
           upload={
             <UploadSection
-              domain="customer"
+              domain={domain}
               onDomainChange={changeDomain}
               fileName=""
               isLoading={isLoading}
@@ -379,11 +342,11 @@ export function CustomerWorkspace({
       ) : (
         <>
           <ActiveWorkspaceHeader
-            domain="customer"
+            domain={domain}
             description="Validate the mapping, inspect records that need attention, then export."
             upload={
               <UploadSection
-                domain="customer"
+                domain={domain}
                 onDomainChange={changeDomain}
                 fileName={dataSet.fileName}
                 isLoading={isLoading}
@@ -397,7 +360,7 @@ export function CustomerWorkspace({
           />
 
           <section
-            id="customer-mapping"
+            id={`${domain}-mapping`}
             aria-label="Field mapping"
             className={`rounded-2xl border bg-[var(--surface-base)] ${
               mappingReady
@@ -410,25 +373,21 @@ export function CustomerWorkspace({
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 1 · Field mapping
                 </p>
-
                 <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
-                  {mappedCount}/{customerValidationProfile.fields.length} fields
-                  mapped
+                  {mappedCount}/{profile.fields.length} fields mapped
                 </h2>
-
                 <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
                   {requiredUnmapped.length > 0
                     ? `Choose a column for: ${requiredUnmapped.join(", ")}.${
-                        hasDuplicateMapping
+                        hasDuplicateMappings
                           ? " Resolve duplicate assignments too."
                           : ""
                       }`
-                    : hasDuplicateMapping
+                    : hasDuplicateMappings
                       ? "One source column is assigned to multiple fields."
                       : "Required fields ready. Change a column if needed."}
                 </p>
               </div>
-
               <button
                 type="button"
                 aria-haspopup="dialog"
@@ -447,19 +406,17 @@ export function CustomerWorkspace({
           {mappingReady && (
             <>
               <section
-                id="customer-review"
+                id={`${domain}-review`}
                 className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
               >
                 <div className="border-b border-white/10 pb-3">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
                     Step 2 · Review
                   </p>
-
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
-                      Customer results
+                      {config.labels.results}
                     </h2>
-
                     <ReviewStatusSummary counts={reviewCounts} />
                   </div>
                 </div>
@@ -477,13 +434,11 @@ export function CustomerWorkspace({
                         <h3 className="text-sm font-semibold text-[var(--text-primary)]">
                           {categoryTitle}
                         </h3>
-
                         <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--text-primary)]">
                           {visibleRows.length} row
                           {visibleRows.length === 1 ? "" : "s"}
                         </span>
                       </div>
-
                       <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--text-muted)]">
                         {categoryDescription}
                       </p>
@@ -492,12 +447,10 @@ export function CustomerWorkspace({
                     <div className="flex flex-wrap items-center gap-2">
                       {isReviewListOpen && visibleRows.length > 1 && (
                         <select
-                          aria-label="Sort customers"
+                          aria-label={config.labels.sort}
                           value={reviewSortMode}
                           onChange={(event) =>
-                            setReviewSortMode(
-                              event.target.value as ReviewSortMode,
-                            )
+                            setReviewSortMode(event.target.value as ReviewSortMode)
                           }
                           className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)]"
                         >
@@ -506,7 +459,6 @@ export function CustomerWorkspace({
                           <option value="issues">Sort: issues</option>
                         </select>
                       )}
-
                       <button
                         type="button"
                         onClick={() => setIsReviewListOpen((open) => !open)}
@@ -517,21 +469,18 @@ export function CustomerWorkspace({
                     </div>
                   </div>
 
-                  {isReviewListOpen &&
-                    (visibleRows.length === 0 ? (
+                  {isReviewListOpen && (
+                    visibleRows.length === 0 ? (
                       <p className="mt-3 rounded-xl border border-white/10 bg-[var(--surface-raised)] p-3 text-sm text-[var(--text-muted)]">
                         No rows in this category.
                       </p>
                     ) : (
                       <div className="mt-2.5 max-h-[620px] space-y-1.5 overflow-y-auto pr-1">
                         {visibleRows.map(({ row, rowIndex, issues }) => {
-                          const isSelected =
-                            selectedCustomerRowIndex === rowIndex;
-
+                          const isSelected = selectedRowIndex === rowIndex;
                           const criticalCount = issues.filter(
                             (issue) => issue.severity === "critical",
                           ).length;
-
                           const mainIssue = issues[0];
 
                           return (
@@ -549,11 +498,9 @@ export function CustomerWorkspace({
                                           ? "Needs review"
                                           : "Ready"}
                                     </span>
-
                                     <span className="rounded-full bg-[var(--surface-deep)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)]">
                                       Row {rowIndex}
                                     </span>
-
                                     {issues.length > 0 && (
                                       <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-[var(--text-secondary)]">
                                         {issues.length} issue
@@ -561,17 +508,14 @@ export function CustomerWorkspace({
                                       </span>
                                     )}
                                   </div>
-
                                   <p className="mt-1.5 truncate text-sm font-semibold text-[var(--text-primary)]">
-                                    {row.customer_id || "Missing customer ID"}
+                                    {row[config.preview.idField] || config.labels.missingId}
                                   </p>
-
                                   <p className="truncate text-xs text-[var(--text-secondary)]">
-                                    {row.name || "Missing customer name"}
+                                    {row[config.preview.nameField] || config.labels.missingName}
                                   </p>
-
                                   <p className="truncate text-[11px] text-[var(--text-muted)]">
-                                    {row.email || "No email"}
+                                    {row[config.preview.emailField] || "No email"}
                                   </p>
                                 </div>
 
@@ -579,9 +523,7 @@ export function CustomerWorkspace({
                                   type="button"
                                   aria-expanded={isSelected}
                                   onClick={() =>
-                                    setSelectedCustomerRowIndex(
-                                      isSelected ? null : rowIndex,
-                                    )
+                                    setSelectedRowIndex(isSelected ? null : rowIndex)
                                   }
                                   className="self-start rounded-full border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:text-[var(--text-primary)]"
                                 >
@@ -590,20 +532,13 @@ export function CustomerWorkspace({
                               </div>
 
                               <div className="mt-1.5 grid gap-1 md:grid-cols-3">
-                                <CustomerDataPoint
-                                  label="Country"
-                                  value={row.country || "—"}
-                                />
-
-                                <CustomerDataPoint
-                                  label="VAT number"
-                                  value={row.vat_number || "—"}
-                                />
-
-                                <CustomerDataPoint
-                                  label="Customer ID"
-                                  value={row.customer_id || "—"}
-                                />
+                                {config.preview.details.map((detail) => (
+                                  <MasterDataPoint
+                                    key={detail.field}
+                                    label={detail.label}
+                                    value={row[detail.field] || "—"}
+                                  />
+                                ))}
                               </div>
 
                               {mainIssue && (
@@ -623,11 +558,9 @@ export function CustomerWorkspace({
                                         <p className="font-semibold text-[var(--text-primary)]">
                                           {issue.problem}
                                         </p>
-
                                         <p className="mt-1 text-[var(--text-secondary)]">
                                           {issue.why}
                                         </p>
-
                                         <p className="mt-1 text-[var(--text-muted)]">
                                           Fix: {issue.fix}
                                         </p>
@@ -644,29 +577,28 @@ export function CustomerWorkspace({
                           );
                         })}
                       </div>
-                    ))}
+                    )
+                  )}
                 </div>
               </section>
 
               <section
-                id="customer-export"
+                id={`${domain}-export`}
                 className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 3 · Export
                 </p>
-
                 <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
                   Export reviewed data
                 </h2>
-
                 <p className="mt-2 text-sm text-[var(--text-secondary)]">
                   Rows with critical issues are excluded. Check warnings before
                   using the export, and confirm your target ERP requirements.
                 </p>
 
                 <ValidationContextPanel
-                  profile={customerValidationProfile}
+                  profile={profile}
                   fileName={dataSet.fileName}
                   sheetName={dataSet.metadata?.sheetName}
                   mapping={mapping}
@@ -683,16 +615,12 @@ export function CustomerWorkspace({
                     type="button"
                     disabled={!canExport}
                     onClick={() =>
-                      downloadCsv(
-                        "customer-rows-without-blockers.csv",
-                        validationResult.cleanRows,
-                      )
+                      downloadCsv(config.exports.rows, validationResult.cleanRows)
                     }
                     className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
                   >
                     Export rows without blockers
                   </button>
-
                   <button
                     type="button"
                     disabled={validationResult.issues.length === 0}
@@ -717,13 +645,13 @@ export function CustomerWorkspace({
 
       {dataSet && isMappingOpen && (
         <ProfileMappingPanel
-          profile={customerValidationProfile}
+          profile={profile}
           headers={headers}
           mapping={mapping}
           candidates={mappingCandidates}
           onUpdateMapping={(field, header) => {
             setMapping((current) => ({ ...current, [field]: header }));
-            setSelectedCustomerRowIndex(null);
+            setSelectedRowIndex(null);
           }}
           onClose={() => setIsMappingOpen(false)}
         />
@@ -732,24 +660,17 @@ export function CustomerWorkspace({
   );
 }
 
-function getPriority(issues: CustomerIssue[]): number {
+function getPriority(issues: MasterDataIssue[]): number {
   if (issues.some((issue) => issue.severity === "critical")) return 2;
   return issues.length > 0 ? 1 : 0;
 }
 
-function CustomerDataPoint({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function MasterDataPoint({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-[var(--surface-deep)] px-2 py-1.5">
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
         {label}
       </p>
-
       <p className="mt-0.5 truncate text-xs font-medium text-[var(--text-secondary)]">
         {value}
       </p>

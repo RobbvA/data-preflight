@@ -1,4 +1,8 @@
-type DataDomain = "invoice" | "customer";
+import { getProfileMappingCandidates } from "@/lib/dataProfile";
+import { customerProfile } from "@/lib/profiles/customerProfile";
+import { vendorProfile } from "@/lib/profiles/vendorProfile";
+
+type DataDomain = "invoice" | "customer" | "vendor";
 
 function normalizeHeader(header: string) {
   return header
@@ -67,23 +71,45 @@ export function getProfileMismatchMessage(
   domain: DataDomain,
 ): string | null {
   const sourceHeaders = new Set(headers.map(normalizeHeader));
-  const hasCustomerId = [...CUSTOMER_IDENTIFIERS].some((header) =>
-    sourceHeaders.has(header),
+
+  const customerCandidates = getProfileMappingCandidates(
+    customerProfile,
+    headers,
   );
+
+  const vendorCandidates = getProfileMappingCandidates(
+    vendorProfile,
+    headers,
+  );
+
+  const hasCustomerId =
+    customerCandidates.customer_id.length > 0 ||
+    [...CUSTOMER_IDENTIFIERS].some((header) =>
+      sourceHeaders.has(header),
+    );
+
+  const hasVendorId = vendorCandidates.vendor_id.length > 0;
+
   const hasInvoiceId = [...INVOICE_IDENTIFIERS].some((header) =>
     sourceHeaders.has(header),
   );
+
   const hasInvoiceAmount = [...INVOICE_AMOUNT_HEADERS].some((header) =>
     sourceHeaders.has(header),
   );
 
   if (
     domain === "invoice" &&
-    hasCustomerId &&
     !hasInvoiceId &&
     !hasInvoiceAmount
   ) {
-    return "This file looks like customer master data. Choose the Customer master data profile or check the source file.";
+    if (hasCustomerId && !hasVendorId) {
+      return "This file looks like customer master data. Choose the Customer master data profile or check the source file.";
+    }
+
+    if (hasVendorId && !hasCustomerId) {
+      return "This file looks like vendor master data. Choose the Vendor master data profile or check the source file.";
+    }
   }
 
   if (
@@ -93,6 +119,31 @@ export function getProfileMismatchMessage(
     !hasCustomerId
   ) {
     return "This file looks like invoice data. Choose the Invoice data profile or check the source file.";
+  }
+
+  if (
+    domain === "vendor" &&
+    hasInvoiceId &&
+    hasInvoiceAmount &&
+    !hasVendorId
+  ) {
+    return "This file looks like invoice data. Choose the Invoice data profile or check the source file.";
+  }
+
+  if (
+    domain === "customer" &&
+    hasVendorId &&
+    !hasCustomerId
+  ) {
+    return "This file looks like vendor master data. Choose the Vendor master data profile or check the source file.";
+  }
+
+  if (
+    domain === "vendor" &&
+    hasCustomerId &&
+    !hasVendorId
+  ) {
+    return "This file looks like customer master data. Choose the Customer master data profile or check the source file.";
   }
 
   return null;

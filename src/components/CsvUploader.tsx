@@ -26,9 +26,8 @@ import {
   createSuggestedMapping,
 } from "@/lib/fieldMapping";
 import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
-
 import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
-import { CustomerWorkspace } from "@/components/data-preflight/CustomerWorkspace";
+import { MasterDataWorkspace } from "@/components/data-preflight/MasterDataWorkspace";
 import {
   ActiveWorkspaceHeader,
   LandingWorkspace,
@@ -51,37 +50,28 @@ export function CsvUploader() {
 
   useEffect(() => {
     return () => {
-      // Ignore any pending read when this workspace unmounts.
       loadRequestId.current += 1;
     };
   }, []);
 
   const [activeDomain, setActiveDomain] = useState<DataDomain | null>(null);
   const [profilePrompt, setProfilePrompt] = useState(false);
-  const [parsedDataSet, setParsedDataSet] =
-    useState<ParsedDataSet | null>(null);
-
+  const [parsedDataSet, setParsedDataSet] = useState<ParsedDataSet | null>(null);
   const [pendingExcelSheets, setPendingExcelSheets] = useState<{
     file: File;
     names: string[];
   } | null>(null);
-
   const [fieldMapping, setFieldMapping] =
     useState<FieldMapping>(createEmptyMapping());
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [selectedPreviewRowIndex, setSelectedPreviewRowIndex] =
     useState<number | null>(null);
-
   const [isCleanOpen, setIsCleanOpen] = useState(true);
   const [isWarningOpen, setIsWarningOpen] = useState(true);
   const [isBlockedOpen, setIsBlockedOpen] = useState(true);
-
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
-  const [activeReviewTab, setActiveReviewTab] =
-    useState<ReviewTab | null>(null);
+  const [activeReviewTab, setActiveReviewTab] = useState<ReviewTab | null>(null);
 
   const rows = useMemo(() => parsedDataSet?.rows ?? [], [parsedDataSet]);
   const headers = useMemo(() => parsedDataSet?.headers ?? [], [parsedDataSet]);
@@ -115,10 +105,7 @@ export function CsvUploader() {
       if (requestId !== loadRequestId.current) return;
 
       const adapter = getInputAdapter(file);
-
-      if (!adapter) {
-        throw new Error("Unsupported file type.");
-      }
+      if (!adapter) throw new Error("Unsupported file type.");
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
         const sheetNames = await getReadableExcelSheetNames(file);
@@ -136,7 +123,6 @@ export function CsvUploader() {
       if (nextParsedDataSet.rows.length === 0) {
         throw new Error("Source file is empty.");
       }
-
       if (nextParsedDataSet.headers.length === 0) {
         throw new Error("Source file has no headers.");
       }
@@ -145,33 +131,26 @@ export function CsvUploader() {
         nextParsedDataSet.headers,
         "invoice",
       );
-
-      if (mismatchMessage) {
-        throw new Error(mismatchMessage);
-      }
+      if (mismatchMessage) throw new Error(mismatchMessage);
 
       const suggestedMapping = createSuggestedMapping(
         nextParsedDataSet.headers,
         nextParsedDataSet.rows,
       );
-
-      const { mappingReady: suggestedMappingReady } = getMappingStatus(
-        invoiceValidationProfile,
-        suggestedMapping,
-      );
+      const { mappingReady: suggestedMappingReady } =
+        getMappingStatus(invoiceValidationProfile, suggestedMapping);
 
       setParsedDataSet(nextParsedDataSet);
       setFieldMapping(suggestedMapping);
       setIsFieldMappingOpen(!suggestedMappingReady);
-    } catch (error) {
+    } catch (caught) {
       if (requestId !== loadRequestId.current) return;
 
       setError(
-        error instanceof Error
-          ? error.message
+        caught instanceof Error
+          ? caught.message
           : "Failed to read source file. Please try again.",
       );
-
       setParsedDataSet(null);
       setFieldMapping(createEmptyMapping());
       setSelectedPreviewRowIndex(null);
@@ -181,9 +160,7 @@ export function CsvUploader() {
       setIsFieldMappingOpen(false);
       setActiveReviewTab(null);
     } finally {
-      if (requestId === loadRequestId.current) {
-        setIsLoading(false);
-      }
+      if (requestId === loadRequestId.current) setIsLoading(false);
     }
   }
 
@@ -219,7 +196,6 @@ export function CsvUploader() {
             "The example file could not be opened. Please try again.",
           );
         }
-
         return new File([await response.blob()], "messy-export.csv", {
           type: "text/csv",
         });
@@ -246,23 +222,23 @@ export function CsvUploader() {
     targetField: keyof FieldMapping,
     sourceField: string,
   ) {
-    setFieldMapping((currentMapping) => ({
-      ...currentMapping,
+    setFieldMapping((current) => ({
+      ...current,
       [targetField]: sourceField,
     }));
-
     setSelectedPreviewRowIndex(null);
   }
 
   function toggleSelectedPreviewInvoice(rowIndex: number) {
-    setSelectedPreviewRowIndex((currentRowIndex) =>
-      currentRowIndex === rowIndex ? null : rowIndex,
+    setSelectedPreviewRowIndex((current) =>
+      current === rowIndex ? null : rowIndex,
     );
   }
 
-  const mappingSuggestions = useMemo<MappingSuggestion[]>(() => {
-    return createMappingSuggestions(headers, rows);
-  }, [headers, rows]);
+  const mappingSuggestions = useMemo<MappingSuggestion[]>(
+    () => createMappingSuggestions(headers, rows),
+    [headers, rows],
+  );
 
   const {
     missingRequiredFields,
@@ -276,44 +252,42 @@ export function CsvUploader() {
   );
 
   const selectedRows = useMemo(
-    () =>
-      mappingReady
-        ? mapRowsToProfile(rows, fieldMapping, invoiceValidationProfile)
-        : [],
+    () => mappingReady
+      ? mapRowsToProfile(rows, fieldMapping, invoiceValidationProfile)
+      : [],
     [rows, fieldMapping, mappingReady],
   );
 
   const { normalizedRows, validationResult } = useMemo(
-    () =>
-      mappingReady
-        ? runValidationProfile(invoiceValidationProfile, selectedRows)
-        : {
-            normalizedRows: [],
-            validationResult: {
-              issues: [],
-              cleanRows: [],
-              errorRows: [],
-            },
+    () => mappingReady
+      ? runValidationProfile(invoiceValidationProfile, selectedRows)
+      : {
+          normalizedRows: [],
+          validationResult: {
+            issues: [],
+            cleanRows: [],
+            errorRows: [],
           },
+        },
     [mappingReady, selectedRows],
   );
 
-  const issuesByRow = useMemo(() => {
-    return validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
-      (accumulator, issue) => {
-        accumulator[issue.rowIndex] = [
-          ...(accumulator[issue.rowIndex] ?? []),
+  const issuesByRow = useMemo(
+    () => validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
+      (grouped, issue) => {
+        grouped[issue.rowIndex] = [
+          ...(grouped[issue.rowIndex] ?? []),
           issue,
         ];
-
-        return accumulator;
+        return grouped;
       },
       {},
-    );
-  }, [validationResult.issues]);
+    ),
+    [validationResult.issues],
+  );
 
-  const invoiceItems = useMemo<InvoicePreviewItem[]>(() => {
-    return normalizedRows
+  const invoiceItems = useMemo<InvoicePreviewItem[]>(
+    () => normalizedRows
       .map((row, index) =>
         createInvoicePreviewItem({
           rowIndex: index + 1,
@@ -321,31 +295,31 @@ export function CsvUploader() {
           issues: issuesByRow[index + 1] ?? [],
         }),
       )
-      .sort((a, b) => b.priorityScore - a.priorityScore);
-  }, [normalizedRows, issuesByRow]);
+      .sort((a, b) => b.priorityScore - a.priorityScore),
+    [normalizedRows, issuesByRow],
+  );
 
-  const blockedInvoiceItems = useMemo(() => {
-    return invoiceItems.filter((item) =>
+  const blockedInvoiceItems = useMemo(
+    () => invoiceItems.filter((item) =>
       item.issues.some((issue) => issue.severity === "critical"),
-    );
-  }, [invoiceItems]);
-
-  const warningInvoiceItems = useMemo(() => {
-    return invoiceItems.filter(
-      (item) =>
-        item.issues.length > 0 &&
-        item.issues.every((issue) => issue.severity === "warning"),
-    );
-  }, [invoiceItems]);
-
-  const cleanInvoiceItems = useMemo(() => {
-    return invoiceItems.filter((item) => item.issues.length === 0);
-  }, [invoiceItems]);
+    ),
+    [invoiceItems],
+  );
+  const warningInvoiceItems = useMemo(
+    () => invoiceItems.filter((item) =>
+      item.issues.length > 0 &&
+      item.issues.every((issue) => issue.severity === "warning"),
+    ),
+    [invoiceItems],
+  );
+  const cleanInvoiceItems = useMemo(
+    () => invoiceItems.filter((item) => item.issues.length === 0),
+    [invoiceItems],
+  );
 
   const blockedCount = blockedInvoiceItems.length;
   const warningCount = warningInvoiceItems.length;
   const cleanCount = cleanInvoiceItems.length;
-
   const canExport = mappingReady && validationResult.cleanRows.length > 0;
   const hasUploadedRows = rows.length > 0;
   const hasHeaders = headers.length > 0;
@@ -353,13 +327,17 @@ export function CsvUploader() {
   function changeDomain(nextDomain: DataDomain) {
     setProfilePrompt(false);
     if (nextDomain === activeDomain) return;
-
     resetFlow();
     setActiveDomain(nextDomain);
   }
 
-  if (activeDomain === "customer") {
-    return <CustomerWorkspace onDomainChange={changeDomain} />;
+  if (activeDomain === "customer" || activeDomain === "vendor") {
+    return (
+      <MasterDataWorkspace
+        domain={activeDomain}
+        onDomainChange={changeDomain}
+      />
+    );
   }
 
   return (
@@ -427,11 +405,9 @@ export function CsvUploader() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 1 · Field mapping
                 </p>
-
                 <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
                   {mappedCount}/{mappingSuggestions.length} fields mapped
                 </h2>
-
                 <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
                   {hasIncompleteMapping
                     ? `Choose a column for: ${missingRequiredFields
@@ -442,7 +418,6 @@ export function CsvUploader() {
                       : "Required fields ready. Change a column if needed."}
                 </p>
               </div>
-
               <button
                 type="button"
                 aria-haspopup="dialog"
@@ -473,12 +448,8 @@ export function CsvUploader() {
                 onSelectInvoice={toggleSelectedPreviewInvoice}
                 onViewInvoiceDetails={toggleSelectedPreviewInvoice}
                 onToggleCleanOpen={() => setIsCleanOpen((current) => !current)}
-                onToggleWarningOpen={() =>
-                  setIsWarningOpen((current) => !current)
-                }
-                onToggleBlockedOpen={() =>
-                  setIsBlockedOpen((current) => !current)
-                }
+                onToggleWarningOpen={() => setIsWarningOpen((current) => !current)}
+                onToggleBlockedOpen={() => setIsBlockedOpen((current) => !current)}
               />
 
               <section
@@ -488,11 +459,9 @@ export function CsvUploader() {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                   Step 3 · Export
                 </p>
-
                 <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
                   Export reviewed data
                 </h2>
-
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
                   {getExportSafetyMessage({
                     hasIncompleteMapping,
@@ -519,24 +488,17 @@ export function CsvUploader() {
                   <button
                     type="button"
                     onClick={() =>
-                      downloadCsv(
-                        "clean-invoices.csv",
-                        validationResult.cleanRows,
-                      )
+                      downloadCsv("clean-invoices.csv", validationResult.cleanRows)
                     }
                     disabled={!canExport}
                     className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
                   >
                     Export rows without blockers
                   </button>
-
                   <button
                     type="button"
                     onClick={() =>
-                      downloadErrorCsv(
-                        "invoice-errors.csv",
-                        validationResult.issues,
-                      )
+                      downloadErrorCsv("invoice-errors.csv", validationResult.issues)
                     }
                     disabled={validationResult.issues.length === 0}
                     className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
