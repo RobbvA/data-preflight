@@ -74,6 +74,12 @@ export function getInputAdapter(file: File): InputAdapter | null {
 }
 
 export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
+  if (file.size === 0) {
+    throw new Error(
+      "This file is empty. Upload a file containing column headers and data.",
+    );
+  }
+
   return new Promise((resolve, reject) => {
     Papa.parse<ParsedRow>(file, {
       header: true,
