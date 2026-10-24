@@ -36,27 +36,22 @@ export function LandingWorkspace({
   upload: ReactNode;
 }) {
   return (
-    <section className="w-full py-5 sm:py-8 lg:flex lg:min-h-[calc(100svh-9rem)] lg:flex-col lg:justify-center lg:py-10">
+    <section className="w-full py-1">
       <div className="max-w-4xl">
         <h1 className="text-4xl font-semibold leading-tight tracking-tight text-[var(--text-primary)] sm:text-5xl xl:text-6xl">
           DataPreflight
         </h1>
+
         <p className="mt-2 text-base font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)] sm:text-lg xl:text-xl">
           ERP data validation
         </p>
-        <h2 className="mt-7 text-xl font-semibold leading-snug tracking-tight text-[var(--text-primary)] sm:text-2xl">
-          Validate data before ERP import.
-        </h2>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--text-secondary)] sm:text-base">
-          See what needs attention, why it matters, and which records passed
-          the current checks.
-        </p>
       </div>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-stretch lg:gap-7">
+      <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-stretch lg:gap-7">
         <div className="order-2 lg:order-1">
           <HomeProductPreview domain={domain} />
         </div>
+
         <div className="order-1 lg:order-2">{upload}</div>
       </div>
     </section>
@@ -78,13 +73,16 @@ export function ActiveWorkspaceHeader({
         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--brand-accent)]">
           {workspaceTitles[domain]}
         </p>
+
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-5xl">
           DataPreflight
         </h1>
+
         <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
           {description}
         </p>
       </div>
+
       {upload}
     </section>
   );
@@ -92,14 +90,16 @@ export function ActiveWorkspaceHeader({
 
 function ProductFooter() {
   return (
-    <footer className="border-t border-white/10 py-6">
+    <footer className="border-t border-white/10 py-3">
       <div className="flex flex-col gap-3 text-xs text-[var(--text-muted)] md:flex-row md:items-center md:justify-between">
         <div>
           <p className="font-medium text-[var(--text-secondary)]">
             © 2026 DataPreflight. All rights reserved.
           </p>
+
           <p className="mt-1">Trusted business data before import.</p>
         </div>
+
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span>Privacy-first processing</span>
           <span className="hidden text-white/20 sm:inline">•</span>
