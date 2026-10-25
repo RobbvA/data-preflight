@@ -18,8 +18,8 @@ const categories = [
     description: "Fix first",
     icon: AlertTriangle,
     activeClass:
-      "border-[color:rgba(182,111,58,0.5)] bg-[rgba(182,111,58,0.1)]",
-    iconClass: "text-[var(--brand-accent-soft)]",
+      "border-[color:rgba(180,90,80,0.35)] bg-[rgba(180,90,80,0.07)]",
+    iconClass: "text-[#c9958d]",
   },
   {
     key: "review",
@@ -28,8 +28,8 @@ const categories = [
     description: "Check before export",
     icon: Search,
     activeClass:
-      "border-[color:rgba(209,154,106,0.4)] bg-[rgba(209,154,106,0.08)]",
-    iconClass: "text-[var(--brand-accent-soft)]",
+      "border-[color:rgba(195,170,80,0.35)] bg-[rgba(195,170,80,0.07)]",
+    iconClass: "text-[#c9b77e]",
   },
   {
     key: "ready",
