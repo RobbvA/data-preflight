@@ -12,6 +12,8 @@ import {
   type ParsedDataSet,
   type ParsedRow,
 } from "@/lib/parseCsv";
+import type { UnitReference } from "@/lib/unitReference";
+import { UnitReferenceControls } from "@/components/data-preflight/UnitReferenceControls";
 import { downloadCsv } from "@/lib/exportData";
 import {
   getProfileMappingCandidates,
@@ -19,6 +21,7 @@ import {
 } from "@/lib/dataProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
+import { ExportSummary } from "@/components/data-preflight/ExportSummary";
 import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
 import { ValidationContextPanel } from "@/components/data-preflight/ValidationContextPanel";
@@ -81,6 +84,9 @@ function MasterDataWorkspaceContent({
     };
   }, []);
 
+  const [unitReference, setUnitReference] = useState<UnitReference | null>(null);
+  const [isReferenceLoading, setIsReferenceLoading] = useState(false);
+
   const [dataSet, setDataSet] = useState<ParsedDataSet | null>(null);
   const [mapping, setMapping] = useState<MasterDataMapping>(() =>
     emptyMapping(config),
@@ -122,11 +128,11 @@ function MasterDataWorkspaceContent({
   );
 
   const { normalizedRows, validationResult } = useMemo(
-    () => config.runValidation(mappedRows),
-    [config, mappedRows],
+    () => config.runValidation(mappedRows, unitReference),
+    [config, mappedRows, unitReference],
   );
 
-  const canExport = mappingReady && validationResult.cleanRows.length > 0;
+  const canExport = mappingReady && !isReferenceLoading && validationResult.cleanRows.length > 0;
 
   const issuesByRow = useMemo(() => {
     const grouped = new Map<number, MasterDataIssue[]>();
@@ -207,6 +213,8 @@ function MasterDataWorkspaceContent({
 
     setError(null);
     setDataSet(null);
+    setUnitReference(null);
+    setIsReferenceLoading(false);
     setMapping(emptyMapping(config));
     setPendingExcelSheets(null);
     setActiveReviewTab(null);
@@ -282,6 +290,8 @@ function MasterDataWorkspaceContent({
     loadRequestId.current += 1;
     setPendingExcelSheets(null);
     setDataSet(null);
+    setUnitReference(null);
+    setIsReferenceLoading(false);
     setMapping(emptyMapping(config));
     setError(null);
     setIsLoading(false);
@@ -343,7 +353,7 @@ function MasterDataWorkspaceContent({
         <>
           <ActiveWorkspaceHeader
             domain={domain}
-            description="Validate the mapping, inspect records that need attention, then export."
+            description={config.guidance ?? "Validate the mapping, inspect records that need attention, then export."}
             upload={
               <UploadSection
                 domain={domain}
@@ -403,14 +413,26 @@ function MasterDataWorkspaceContent({
             </div>
           </section>
 
-          {mappingReady && (
+          {domain === "product" && (
+            <UnitReferenceControls
+              reference={unitReference}
+              onChange={(reference) => {
+                setUnitReference(reference);
+                setActiveReviewTab(null);
+                setSelectedRowIndex(null);
+              }}
+              onLoading={setIsReferenceLoading}
+            />
+          )}
+
+          {mappingReady && !isReferenceLoading && (
             <>
               <section
                 id={`${domain}-review`}
                 className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
               >
                 <div className="border-b border-white/10 pb-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
                     Step 2 · Review
                   </p>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -515,7 +537,7 @@ function MasterDataWorkspaceContent({
                                     {row[config.preview.nameField] || config.labels.missingName}
                                   </p>
                                   <p className="truncate text-[11px] text-[var(--text-muted)]">
-                                    {row[config.preview.emailField] || "No email"}
+                                    {row[config.preview.secondaryField] || config.preview.secondaryFallback}
                                   </p>
                                 </div>
 
@@ -592,13 +614,15 @@ function MasterDataWorkspaceContent({
                 <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
                   Export reviewed data
                 </h2>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                  Rows with critical issues are excluded. Check warnings before
-                  using the export, and confirm your target ERP requirements.
-                </p>
+                <ExportSummary
+                  exportCount={validationResult.cleanRows.length}
+                  warningCount={reviewCount}
+                  blockedCount={blockedCount}
+                />
 
                 <ValidationContextPanel
                   profile={profile}
+                  unitReference={unitReference}
                   fileName={dataSet.fileName}
                   sheetName={dataSet.metadata?.sheetName}
                   mapping={mapping}
@@ -630,13 +654,6 @@ function MasterDataWorkspaceContent({
                     Download issue report
                   </button>
                 </div>
-
-                {!canExport && (
-                  <p className="mt-3 text-xs text-[var(--text-muted)]">
-                    No rows without blockers are available. Fix the source file
-                    and validate it again.
-                  </p>
-                )}
               </section>
             </>
           )}

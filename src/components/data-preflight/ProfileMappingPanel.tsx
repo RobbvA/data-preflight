@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef } from "react";
 import type { DataProfile } from "@/lib/dataProfile";
 import { getMappingStatus } from "@/lib/mappingStatus";
+import { SavedMappingControls } from "@/components/data-preflight/SavedMappingControls";
 
 type MappingHint<TField extends string> = {
   targetField: TField;
@@ -165,6 +166,17 @@ export function ProfileMappingPanel<TField extends string>({
       </div>
 
       <div className="space-y-4 p-5 sm:p-6">
+        <SavedMappingControls
+          profile={profile}
+          headers={headers}
+          mapping={mapping}
+          onApply={(savedMapping) => {
+            for (const { key } of profile.fields) {
+              onUpdateMapping(key, savedMapping[key]);
+            }
+          }}
+        />
+
         {profile.fields.map((field, index) => {
           const selectedHeader = mapping[field.key];
           const missing = field.required && !selectedHeader;

@@ -1,6 +1,6 @@
 # DataPreflight Roadmap
 
-Last reviewed: 2026-10-18
+Last reviewed: 2026-10-25
 
 ## Milestones 1–4 — MVP foundation
 
@@ -69,7 +69,7 @@ Historical implementation details remain in SESSION_LOG.md.
 
 ## Milestone 6 — Professional ERP validation platform
 
-Status: In progress. Implementation started on 2026-10-18.
+Status: Internally complete on 2026-10-25. Implementation started on 2026-10-18. Commit/push and deployment confirmation remain separate delivery steps.
 
 ### Goal
 
@@ -112,9 +112,9 @@ Delivery:
 
 - Upload lifecycle and shared mapping committed and pushed as `6d96ccd`.
 - Shared review controls committed and pushed as `e68938b`.
-- Final review-selection and wording changes verified locally; final commit/push pending at this checkpoint.
+- Review-selection and wording changes are present in the repository; the old pending-commit checkpoint is superseded.
 
-This is sufficient foundation to begin Vendor. It is not a complete generic workspace rewrite.
+Vendor now uses the shared foundation through MasterDataWorkspace. Invoice retains its own workspace.
 
 #### 6.1a Upload lifecycle safety
 
@@ -223,7 +223,7 @@ Evidence:
 
 #### 6.1e Review selection and export guidance
 
-Status: Complete locally; final commit/push pending.
+Status: Complete; present in the repository.
 
 Delivered:
 
@@ -274,7 +274,11 @@ If further extraction becomes broader than the concrete expansion requires, redu
 
 ### 6.2 Vendor/Supplier profile
 
-Status: Next implementation step.
+Status: Complete on 2026-10-25; Vendor CSV export and reordered multi-sheet XLSX acceptance checked.
+
+Vendor rules and regression tests were added in `641ad84`; shared master-data integration followed in `ca099a7`. Profile picker and landing refinements are in `4effc2e`. Customer and Vendor use MasterDataWorkspace with masterDataWorkspaceConfig.
+
+Closeout evidence: user-local Vendor CSV export, user-local multi-sheet XLSX results, and preparation-browser mapping recovery, exact 007/008 exports and worksheet report context.
 
 User-facing domain: Vendor / Supplier master data.
 
@@ -319,7 +323,7 @@ IBAN, bank verification, VIES, payment terms, fiscal validation, and ERP-specifi
 
 ### 6.3 Locally reusable mappings
 
-Status: Planned.
+Status: Implemented and user-accepted on 2026-10-25.
 
 Goal: reduce repeated mapping work.
 
@@ -366,7 +370,7 @@ Accounts, cloud sync, sharing, mapping import/export, and silent automatic appli
 
 ### 6.4 Product/Material profile
 
-Status: Planned.
+Status: Implemented and delivered on 2026-10-25; user confirmed completion.
 
 Initial fields:
 
@@ -403,7 +407,7 @@ Prices, inventory, batches, serial numbers, BOMs, unit conversion, fuzzy matchin
 
 ### 6.5 Limited local reference-data check
 
-Status: Planned.
+Status: Complete; user confirmed local reference-list acceptance with screenshots on 2026-10-25.
 
 Scope:
 
@@ -452,7 +456,9 @@ Multiple reference lists, cross-domain joins, database lookups, API checks, and 
 
 ### 6.6 Cross-profile consistency and export clarity
 
-Status: Planned; quality work also happens during every earlier step.
+Status: Complete; user confirmed local export summary and Vendor CSV contents with screenshots.
+
+Delivered: shared export counts, included-warning and excluded-blocker guidance, explicit Ready boundary, and consistent Step 2 labels. Checked actual downloads and all-blocked CSV guards across all four profiles, plus keyboard focus and mobile overflow. No new profiles or broad redesign in this increment.
 
 - Align labels, controls, typography, spacing, and status meaning.
 - Show how many rows will export, including warning-only rows.
@@ -500,7 +506,7 @@ Status: Not completed.
 
 First target moment:
 
-After Vendor and local mapping reuse, without waiting for all remaining scope.
+Deferred by the user during the current build phase. Revisit after the planned profile expansion; no new outreach round is required now.
 
 Ask a new ERP/data user to:
 
@@ -537,7 +543,7 @@ Treat proposed pain points as hypotheses until supported by direct user evidence
 
 ### 6.9 Verification and closeout
 
-Status: Planned.
+Status: Complete on 2026-10-25. Preparation and user-local evidence reviewed; the final user-local suite passes all 39 tests after restoring the missing Excel regression file. Local lint/build passed with two known lint warnings.
 
 At relevant checkpoints:
 
@@ -589,10 +595,19 @@ Possible uses:
 
 AI output must remain distinguishable from deterministic rule results and respect the data-handling model.
 
+## Current reliability and UX increment — 2026-10-25
+
+- Reproduce and fix Excel header collisions before expanding profiles.
+- Reserve normalized source names and avoid collisions with generated suffixes.
+- Cover repeated headers, existing suffixes, normalization collisions, fallback names, and unchanged unique headers with real in-memory XLSX regressions.
+- Open the profile picker as an overlay without shifting the card content.
+- Refresh documentation to match the repository.
+- Changes prepared in a separate checkout are not deployed until the user applies, commits, and pushes them.
+
 ## Next build step
 
-Finish the final M6.1 commit and push.
+M6 technical implementation and internal acceptance are complete. Apply final documentation, review the local diff, commit/push and confirm deployment separately.
 
-Then begin M6.2 with Vendor field definitions and explicit acceptance fixtures.
+Plan the next bounded increment before implementation. Further profiles are candidates for later expansion; they were not added to the agreed four-profile M6 scope. The older M7 AI section is a future option, not an instruction to begin AI now.
 
-Use the shared upload, mapping, and review foundation. Preserve domain-specific rules and row presentation, and extract additional shared behavior only where the new profile requires it.
+Independent unguided usage testing, outreach and naming remain deferred by explicit decision. They are not marked complete or treated as evidence of demand. Preserve the current design and architecture.

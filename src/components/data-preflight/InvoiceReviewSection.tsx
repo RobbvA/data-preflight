@@ -134,7 +134,7 @@ export function InvoiceReviewSection({
       className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
     >
       <div className="border-b border-white/10 pb-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--brand-accent)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
           Step 2 · Review
         </p>
 

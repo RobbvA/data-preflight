@@ -896,3 +896,47 @@ Keep IDs as text and preserve leading zeros present in the parsed source.
 Do not add bank verification, fiscal validation, ERP-specific supplier structures, or another unrelated feature.
 
 The first independent usage test remains targeted after Vendor and local mapping reuse.
+
+---
+
+# 2026-10-25 — M6 implementation and closeout preparation
+
+This entry supersedes the old next-session instructions above; those remain as historical checkpoints.
+
+Delivered and accepted locally by the user:
+
+- Collision-safe Excel headers plus five regression cases.
+- Overlay profile picker.
+- Local named mappings: save/apply/replace/delete, profile version review and safe storage failures.
+- Product/Material as the fourth profile, using the shared master-data workspace.
+- Optional in-memory unit reference CSV with guarded async replacement/removal and report context.
+- Shared export counts and Ready/warning/blocker guidance across all four profiles.
+
+Evidence:
+
+- All 39 automated tests pass at closeout preparation.
+- Production build including TypeScript passes; lint has only the existing Metadata and _tone warnings.
+- Focused browser checks cover all four examples, exact exports/counts, all-blocked guards, mapping recovery, saved mapping persistence, profile-switch cancellation, keyboard focus and mobile overflow.
+- Unit-reference checks cover invalid replacement, cancellation, racing completions, removal/reset, explicit not-run reports and active reference context. No outgoing HTTP requests were observed during the tested local reference actions.
+- Product and Vendor reordered multi-sheet Excel fixtures were checked in the preparation browser.
+- User screenshots confirm the KG-only Product outcome (6 blocked / 1 ready) and Vendor summary/export (3 exported, including 1 warning-only record).
+
+Final user-local Vendor workbook and one bundled npm test/lint/build run remain pending before final M6 signoff. No commit or push was performed by the assistant; deployment is not inferred from local success.
+
+Independent unguided ERP-user testing and outreach remain deferred, not completed. Naming is not blocking. Additional profiles remain a later planning decision; do not automatically start AI work merely because the older M7 placeholder mentions it.
+
+Next: finish the local closeout checks, deliver final status documentation, review the diff, then provide explicit add/commit/push commands when closing the session.
+
+
+## 2026-10-25 — Final M6 technical signoff
+
+This closeout supersedes the pending items in the immediately preceding preparation entry.
+
+- User supplied Vendor multi-sheet XLSX screenshots: 1 blocked, 1 needs review, 1 ready; export summary states 2 included and 1 blocked excluded.
+- User-local lint completed with zero errors and the two known Metadata/_tone warnings; production build including TypeScript passed.
+- The first user-local test run counted 34 tests. Five Excel-header regressions were missing from that copy, so the parser and full test file were delivered again.
+- The uploaded final terminal output explicitly confirms 39 tests passed, zero failed, including all five Excel-header regressions.
+- Final documentation marks M6 internally complete. Independent unguided testing, outreach and naming remain deferred.
+- The assistant did not commit or push. The user still needs to apply final documentation, review the diff, commit/push, and verify deployment separately.
+
+Next session: verify the delivered state if necessary, then plan one bounded follow-up increment. Additional profiles are a candidate; do not automatically start the older AI placeholder or reopen naming/outreach during closeout.

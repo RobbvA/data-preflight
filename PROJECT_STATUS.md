@@ -1,362 +1,145 @@
 # DataPreflight Project Status
 
-Last reviewed: 2026-10-18
+Last reviewed: 2026-10-25
 
-## Product
+## Product and milestone
 
 DataPreflight is a browser-based quality gate for business data before ERP import.
 
-A user explicitly chooses a validation profile, uploads a file, checks field mapping, reviews deterministic results, and exports rows without critical issues.
+[Live app](https://data-preflight.vercel.app/) · [Roadmap](ROADMAP.md) · [Product vision](PRODUCT_VISION.md)
 
-Core promise: **Validate data before ERP import.**
+M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. Commit, push and deployment confirmation remain separate delivery steps.
 
-[Live app](https://data-preflight.vercel.app/) · [Product vision](PRODUCT_VISION.md) · [Roadmap](ROADMAP.md)
+- M6.1: shared workflow foundation complete.
+- M6.2: Vendor complete; CSV export and reordered multi-sheet XLSX accepted through preparation checks and user-local walkthrough/screenshots.
+- M6.3: local reusable mappings implemented and accepted by the user.
+- M6.4: Product/Material implemented and delivered; user confirmed completion.
+- M6.5: limited Product unit reference check complete; user confirmed acceptance with screenshots showing 6 blocked / 1 ready using the KG-only list.
+- M6.6: shared export summary and Step 2 consistency accepted by the user; screenshots confirm counts and the Vendor export.
+- M6.9: technical verification complete; the user-local suite passes all 39 tests, lint has zero errors/two known warnings, and the production build passed.
+- Independent usage testing and outreach are deferred during the current build phase.
 
-## Current milestone
+Repository baseline for this session: `4effc2e` (profile picker and landing layout). Vendor rules were delivered in `641ad84`; shared master-data integration in `ca099a7`. Earlier statements that Vendor was unimplemented or M6.1 still awaited a commit are superseded.
 
-**Milestone 6 — Professional ERP validation platform: in progress**
-
-M5 was internally completed on 2026-10-11.
-
-M6 implementation started on 2026-10-18.
-
-**M6.1 — Shared workflow foundation is complete within its agreed scope.**
-
-Completed:
-
-- Upload lifecycle guards.
-- Shared mapping readiness.
-- Shared mapping dialog.
-- Shared review controls.
-- Consistent Invoice review selection and empty-category behavior.
-- More precise review and export guidance.
-
-Delivery status:
-
-- `6d96ccd`: upload lifecycle guards and shared mapping; committed and pushed.
-- `e68938b`: shared review controls; committed and pushed.
-- Final review-selection and wording changes: locally applied and verified; commit and push still pending at this documentation checkpoint.
-
-Local verification does not establish that the deployed site contains all changes.
-
-An independent, unguided test with a new ERP/data user remains outstanding.
-
-## Completed in M6 so far
-
-### M6.1a — Upload lifecycle safety
-
-Both workspaces now:
-
-- Assign a request ID to each asynchronous file-loading action.
-- Ignore results from outdated actions.
-- Ignore outdated errors.
-- Prevent outdated finally handlers from clearing a newer loading state.
-- Invalidate earlier actions on reset.
-- Invalidate pending work on profile changes.
-- Invalidate pending actions during workspace cleanup.
-
-Customer reset also explicitly clears loading.
-
-This prevents outdated asynchronous completions from restoring old data or changing a newer flow.
-
-It does not cancel parser work already in progress.
-
-### M6.1b — Shared mapping readiness
-
-Added `src/lib/mappingStatus.ts`.
-
-Both workspaces use it to determine:
-
-- Missing required fields.
-- Duplicate source-column assignments.
-- Number of mapped fields.
-- Whether validation can proceed.
-
-The helper does not replace mapping suggestion algorithms or domain validation rules.
-
-Invoice retains its header/sample-based suggestions. Customer retains its header-based suggestions.
-
-### M6.1c — Shared mapping interface
-
-Added `src/components/data-preflight/ProfileMappingPanel.tsx`.
-
-Both profiles now use the same mapping dialog with:
-
-- Required and optional field labels.
-- Clear missing-mapping feedback.
-- Duplicate feedback on affected fields.
-- A live mapping-status summary.
-- Invoice automatic-suggestion explanations.
-- Customer ambiguous-header hints.
-- Associated labels and field-level accessibility attributes.
-- Native modal keyboard behavior.
-- Escape dismissal.
-- Focus restoration after manual opening.
-- Background scroll locking.
-- Responsive width.
-
-The initial panel appeared on the left. Explicit positioning on the dialog element corrected the alignment; the user confirmed the right-side placement.
-
-Customer opens the mapping panel automatically when a newly loaded file requires mapping correction, matching the Invoice flow.
-
-### M6.1d — Shared review controls
-
-Added `src/components/data-preflight/ReviewStatusControls.tsx`.
-
-Invoice and Customer now share:
-
-- Blocked, Needs review, and Ready category controls.
-- Category counts.
-- Selected-state styling.
-- Visible keyboard focus.
-- Status-summary presentation.
-- The explanation “Passed current checks” for Ready results.
-
-The controls use buttons with pressed-state semantics rather than incomplete tab semantics.
-
-Invoice category wording changed from “Import-ready” to “Ready invoices”.
-
-Domain-specific row content, normalization, validation, and explanations remain separate.
-
-### M6.1e — Review selection and export guidance
-
-Aligned Invoice review behavior:
-
-- A fresh result initially selects Blocked when blockers exist.
-- Otherwise it selects Needs review when warnings exist.
-- Otherwise it selects Ready.
-- Explicitly selecting an empty category keeps that category selected and shows its empty state.
-- Selecting a collapsed category opens its list.
-- List collapse remains available.
-- Loading another file or resetting clears the previous category choice.
-
-Updated relevant row-status and export guidance:
-
-- Ready means “Passed current checks”.
-- Passing implemented checks is not presented as guaranteed acceptance by a target ERP.
-- Warning-only rows remain exportable and require review.
-- Critical rows remain excluded from the rows-without-blockers export.
-
-This increment changes review behavior and explanatory copy. It does not intentionally change domain normalization, validation rules, or CSV serialization.
-
-### M6.1 scope assessment
-
-The shared foundation is sufficient to begin Vendor.
-
-M6.1 does not require a complete generic workspace rewrite.
-
-Invoice and Customer still retain separate workspace components and domain-specific row presentation. Further extraction should follow concrete reuse needs when adding Vendor and Product.
-
-## Available profiles and workflow
-
-Available profiles:
-
-- Invoice data.
-- Customer master data.
-
-Both are defined and versioned in code.
-
-Current workflow:
+## Implemented workflow
 
 Profile → Upload → Worksheet where applicable → Mapping → Normalize/Validate → Review → Export.
 
-Available behavior:
+Available profiles:
 
-- Explicit profile selection before uploading or loading an example.
-- Browser-side CSV, XLSX, and XLS parsing.
-- Worksheet selection when several populated Excel worksheets exist.
-- Suggested and manually adjustable field mapping.
-- Shared guards against missing required mappings and duplicate assignments.
-- Conservative recognizable-profile mismatch detection.
-- Deterministic normalization and validation.
-- Blocked, Needs review, and Ready categories.
-- Problem, why, and fix explanations.
-- Export excluding rows with critical issues.
-- Warning-only rows remain exportable and should be reviewed.
-- Validation details and a downloadable Validation Report.
-- Structural CSV errors rejected before validation.
-- Outdated asynchronous reads ignored.
+| Profile | Version | Scope |
+| --- | --- | --- |
+| Invoice | 1.0.2 | Invoice references, amounts, dates, and related rules |
+| Customer | 1.0.0 | Required ID/name, duplicates, optional email/country warnings |
+| Vendor | 1.0.0 | Required ID/name, case-insensitive duplicate IDs, optional email/country warnings |
+| Product / Material | 1.0.0 | Required ID/description/base unit, case-insensitive duplicate IDs; optional allowed-unit list |
 
-Vendor, Product, saved mappings, reference data, user-authored rules, and ERP connectors are not implemented yet.
+Identifiers remain text when supplied as text by the source. VAT is not fiscally validated in master-data profiles.
 
-## Current implementation
+Implemented capabilities include CSV/XLSX/XLS input, explicit populated-worksheet selection, mapping suggestions and correction, required/duplicate mapping guards, deterministic validation, issue explanations, row/issue exports, and Validation Reports with profile/version, source, worksheet, mapping, and counts.
+
+Outdated asynchronous upload results are ignored after replacement, reset, profile switching, or unmounting. Profile switching during an active workflow requires confirmation.
+
+## Architecture
 
 | Responsibility | Location |
 | --- | --- |
-| Input adapters, worksheet handling, ParsedDataSet | `src/lib/parseCsv.ts` |
-| Shared field definitions and basic mapping candidates | `src/lib/dataProfile.ts` |
-| Invoice mapping suggestions | `src/lib/fieldMapping.ts` |
-| Shared mapping readiness | `src/lib/mappingStatus.ts` |
-| Shared profile execution contract | `src/lib/validation/validationProfile.ts` |
-| Profile definitions | `src/lib/profiles/` |
-| Domain normalization and validation | `src/lib/normalization/`, `src/lib/validation/`, `src/lib/validateRows.ts` |
-| Recognizable-profile mismatch detection | `src/lib/profileCompatibility.ts` |
-| Deterministic Validation Report | `src/lib/validationReport.ts` |
-| CSV downloads and export guidance | `src/lib/exportData.ts` |
+| Input adapters and Excel headers | `src/lib/parseCsv.ts` |
 | Profile selection and Invoice flow | `src/components/CsvUploader.tsx` |
-| Customer flow | `src/components/data-preflight/CustomerWorkspace.tsx` |
-| Shared mapping dialog | `src/components/data-preflight/ProfileMappingPanel.tsx` |
-| Shared review controls | `src/components/data-preflight/ReviewStatusControls.tsx` |
-| Invoice review behavior | `src/components/data-preflight/InvoiceReviewSection.tsx` |
-| Review types and status copy | `src/components/data-preflight/types.ts` |
-| File and worksheet controls | `src/components/data-preflight/UploadSection.tsx` |
-| Shared page shell | `src/components/data-preflight/WorkspaceLayout.tsx` |
-| Visible validation context | `src/components/data-preflight/ValidationContextPanel.tsx` |
+| Shared Customer/Vendor workspace | `src/components/data-preflight/MasterDataWorkspace.tsx` |
+| Master-data configuration | `src/lib/profiles/masterDataWorkspaceConfig.ts` |
+| Reusable profile picker | `src/components/data-preflight/ProfilePicker.tsx` |
+| Picker choices | `src/lib/profiles/profilePickerConfig.ts` |
+| Shared mapping readiness | `src/lib/mappingStatus.ts` |
+| Mapping interface | `src/components/data-preflight/ProfileMappingPanel.tsx` |
+| Review controls | `src/components/data-preflight/ReviewStatusControls.tsx` |
+| Profile execution | `src/lib/validation/validationProfile.ts` |
+| Reports and exports | `src/lib/validationReport.ts`, `src/lib/exportData.ts` |
 
-Invoice profile version: `1.0.2`.
+Invoice retains its own workspace. No broad generic-workspace rewrite is required.
 
-Customer profile version: `1.0.0`.
+## Parser and picker increment
 
-The M6.1 work did not intentionally change domain normalization or validation rules.
+Prepared in a separate checkout and subsequently applied by the user. The user confirmed that the overlay works. Commit, push, and deployment remain separate steps.
 
-## Evidence collected
+### Excel header collisions
 
-### M5 reliability baseline
+The old parser reproduced silent cell overwrites for headers such as `ID`, `ID`, `ID 2`.
 
-- Repeated identical Invoice CSV runs produced byte-identical row exports, issue reports, and Validation Reports.
-- Repeated identical Customer CSV runs produced byte-identical row exports, issue reports, and Validation Reports.
-- Reordered Invoice and Customer XLSX fixtures produced the expected 3 blocked / 1 needs review / 2 ready classifications.
-- A multi-sheet Invoice workbook exposed incorrect automatic sheet selection. Explicit worksheet selection resolved the tested case.
-- Repeated runs using the same workbook and worksheet produced byte-identical Validation Reports.
-- A recognizable Invoice worksheet under Customer was rejected.
-- A malformed-quotes CSV was rejected before validation.
-- Six-row Invoice and Customer CSV fixtures were checked against explicit mapping, normalized values, issues, classifications, and exported rows.
-- An empty-first-sheet Invoice workbook produced the expected 1 blocked / 1 needs review / 1 ready from its populated worksheet.
-- The selected worksheet appeared in the Validation Report.
+The fix reserves all normalized source names before assigning suffixes to duplicates. That case becomes `ID`, `ID 3`, `ID 2`, preserving all cells and the existing named column. Normalized unique headers retain their previous behavior.
 
-### Value-level corrections during M5
+Five real in-memory XLSX regression cases cover source suffix collisions, repeated names, normalization collisions, blank-header fallbacks, and unique headers. Four fail against the original parser; all five pass after the fix.
 
-The Invoice fixture exposed:
+### Profile picker overlay
 
-- Incorrect automatic mapping from Invoice Number to an unrelated Source note column.
-- Rejection of a valid US-style grouped amount.
-- An internal duplicate-detection key appearing in the row export.
+The expanded picker is positioned over the remaining content instead of increasing the card height. Search, bounded scrolling, selection, Escape/outside dismissal, and the active-workflow confirmation are retained.
 
-Header matching and numeric sample detection were corrected. Tested European and US grouped values normalize consistently. The internal key was excluded from the row export.
+## Verification evidence and limits
 
-Invoice version advanced to `1.0.2` after the normalization behavior changed.
+The independent review supplied on 2026-10-24 reported 18 passing tests, lint with two warnings, and a successful production build for `4effc2e`.
 
-The final Invoice fixture exported exactly INV-V101, INV-V102, and INV-V105, including the warning-only row.
+That review exercised all three example flows, Invoice explanations, Vendor duplicate handling and mapping recovery, empty Customer review selection, and guarded profile switching. It did not fully inspect all downloaded exports or perform a security, mobile, or large-file audit.
 
-The Customer fixture exported exactly C-401, C-403, and C-405. Its normalized name, email, country, and VAT values matched expectations; the warning-only row remained exportable.
+The current checkout has 39 passing automated tests: the previous 18, five Excel header regressions, six saved-mapping tests, six Product tests and four unit-reference tests. Existing tests include mapping guards, export boundaries/serialization, Vendor normalization/classification/repeatability, and report context.
 
-### M5 responsiveness observations
+The current checkout also passes the production build including TypeScript. Lint reports zero errors and the two existing warnings. Focused production-browser checks at 1440px and 390px confirm unchanged Step 2 position when the picker opens, no horizontal overflow, Vendor selection/example loading, switch cancellation, and Escape dismissal. These checks are not full end-to-end coverage of all profiles or downloads.
 
-Manual Invoice checks covered:
+Known lint warnings concern unused `Metadata` in `src/app/layout.tsx` and `_tone` in `DataSetPreview.tsx`.
 
-- CSV: 100, 1,000, and 5,000 rows.
-- XLSX: 1,000 and 5,000 rows.
-
-No noticeable delay was reported.
-
-Parse time, validation time, memory use, and a supported maximum were not measured. These observations are not a performance guarantee.
-
-### M5 privacy and usability checks
-
-On 2026-10-11, Chrome Network showed no outgoing requests during the tested deployed Invoice upload and downloads.
-
-Source review found browser-side processing and Blob downloads in that flow. This evidence covers the tested path and must not be generalized to future integrations.
-
-A mobile walkthrough found the flow usable, with cramped spacing noted.
-
-No independent unguided new-user test was completed. Simon's informal interaction is not treated as reliable self-service UX evidence.
-
-### M6.1 checks on 2026-10-18
-
-Development-time checks:
-
-- Sixteen focused asynchronous-flow checks passed using mocked parsing and state setters.
-- Shared mapping guards were compared with previous behavior using generated mapping combinations for the existing profiles.
-- 135 focused checks exercised extracted Invoice category-selection and list-toggle behavior.
-
-These were development-time checks in the assistant's environment. They are not a committed application test suite or browser end-to-end tests.
-
-User-reported local browser checks:
-
-- Invoice and Customer example loading, reset, and profile switching worked.
-- Missing required mappings blocked review/export.
-- Duplicate source-column assignments blocked review/export.
-- Restoring valid mappings restored results.
-- The shared mapping panel worked in both profiles.
-- Escape worked; the user confirmed the requested keyboard/focus checks.
-- Right-side placement worked after the positioning correction.
-- Shared review controls showed the expected counts and rows.
-- Switching categories opened the relevant list.
-- Selecting an empty category preserved the selection and displayed an empty state.
-- Updated Ready guidance appeared in the reviewed flow.
-- The requested narrow-desktop-viewport checks were reported complete.
-
-Final local project checks:
-
-- `npm run lint`: 0 errors, 2 existing warnings.
-- TypeScript passed during the production build.
-- `npm run build`: passed.
-
-Existing warnings:
-
-- Unused Metadata import in `src/app/layout.tsx`.
-- Unused `_tone` parameter in `src/components/data-preflight/DataSetPreview.tsx`.
-
-The narrow desktop check is not a full real-device mobile review.
-
-No screen-reader audit or fresh deployed M6 Network check was performed.
+Historical M5 evidence includes repeatable downloads for fixed Invoice/Customer fixtures, worksheet selection, value-level validation, and a deployed Invoice Network check finding no upload/download requests. These are targeted historical observations, not a fresh privacy audit or universal guarantee.
 
 ## Product boundaries
 
-- Ready means the selected profile's implemented checks passed. It is not a target-ERP acceptance guarantee.
-- Warning-only rows may remain in the export.
-- Mapping suggestions and recognizable-profile detection do not prove semantic correctness.
-- Correcting records happens in the source file, followed by another upload.
-- Users cannot create rules or save mappings yet.
-- Reports record profile/version, source filename, worksheet where applicable, mapping, and counts.
-- Reports do not include a cryptographic input fingerprint or complete rule snapshot.
-- No measured maximum file size or row count has been established.
-- The historical deployed privacy check is not a fresh deployed M6 verification.
-- No independent evidence of self-service usability or willingness to pay has been established in this milestone.
-
-## Quality standard
-
-Each increment follows:
-
-Problem → Design → Implementation → Edge cases → UX → Testing → Polish → Done.
-
-Every increment should be:
-
-- Effective for the intended task.
-- Reliable under normal and relevant abnormal input.
-- Clear about errors and recovery.
-- Consistent with the rest of the product.
-- Visually polished and readable.
-- Usable with essential keyboard and focus support.
-
-Quality belongs in each implementation step, rather than being postponed to a final redesign.
-
-Product decisions should support this promise:
-
-“DataPreflight should be the tool you run before ERP data is allowed to go anywhere important.”
+- Ready means implemented checks passed; it does not guarantee target-ERP acceptance.
+- Warning-only rows remain exportable and require review; blocked rows are excluded.
+- Mapping suggestions cannot prove semantic correctness.
+- Corrections happen in the source file followed by re-upload.
+- Selected files are processed in the browser; future integrations must be assessed separately.
+- User-authored rules and ERP connectors are not implemented.
+- Saved mappings retain column names/assignments and profile context in localStorage, never source rows.
+- Unit references stay in memory; replacing the source, resetting, switching profile or reloading clears them.
+- Reports do not contain a complete rule snapshot or cryptographic input fingerprint.
+- No measured maximum file size or row count is established.
+- Independent self-service usability and willingness to pay remain unproven.
 
 ## Next work
 
-1. Commit and push the final M6.1 review-selection, wording, and documentation changes.
-2. Begin M6.2 by specifying Vendor fields, normalization, rules, and expected fixture outcomes.
-3. Implement the limited Vendor profile using the existing execution contract and shared UI.
-4. Add local reusable mappings.
-5. Run the first independent usage test after Vendor and mapping reuse, if a suitable tester is available.
-6. Add the limited Product profile and bounded reference-data check.
-7. Complete cross-profile, privacy, responsive, and outreach-readiness checks.
+1. Apply this final documentation update and review the local git diff.
+2. Commit and push the completed M6 increment.
+3. Confirm deployment separately after the push; local success does not establish deployed success.
+4. Plan the next bounded increment. Additional profiles are candidates, not silently included in M6.
+5. Independent usage testing, outreach and naming remain consciously deferred, not completed.
 
-Do not add a complete copied workspace for Vendor without first assessing which existing behavior can be reused.
+Preserve the black/orange/off-white design and current architecture. Do not automatically begin AI work from the older M7 placeholder. Run bundled checks at meaningful checkpoints rather than after every minor edit.
 
-Keep DataPreflight as the working product name. Renaming is not a prerequisite for implementation; do not interpret this as legal clearance.
+## M6.3–M6.5 implementation checkpoint
 
-## Documentation
+Saved mappings are available inside the shared mapping panel for all four profiles. They can be saved, explicitly applied, replaced and deleted. Missing columns clear the affected assignments; required/duplicate guards remain in force. Corrupt or unavailable storage cannot block manual mapping. No source rows are persisted.
 
-- README.md: capabilities, setup, and code map.
-- PRODUCT_VISION.md: product thesis and boundaries.
-- ROADMAP.md: agreed delivery order and acceptance criteria.
-- FEEDBACK.md: historical external feedback and labeled product interpretation.
-- SESSION_LOG.md: dated history and handoff.
+Product uses the shared master-data workspace. Its example has 7 rows: 5 blocked, 0 needs review, 2 ready; exports contain exactly IDs 001 and 005. Product identifiers retain leading zeros. Base units are trimmed without conversion.
 
-Update documentation at coherent session checkpoints.
+The optional reference CSV requires exactly one unit_code column and usable values. Codes are normalized for membership comparison only. Unknown populated units block; missing units retain the existing required-field issue. No list means the reference check is explicitly not run. Reference checks have independent version 1.0.0 recorded alongside profile 1.0.0.
 
-Run lint/build at a completed implementation checkpoint or when a change warrants it, rather than after every minor edit.
+Reference uploads have request-ID guards. Replacement clears the old list before reading; invalid uploads cannot silently leave it active. Results and exports are withheld during reference reading. Reports include active/absent status, check version, filename, unique count and every effective code. Mapping reuse does not persist reference lists.
+
+Production-browser checks cover Product example/export contents, own reordered multi-sheet XLSX, saved mappings and mapping recovery, plus existing Invoice/Customer/Vendor examples. Reference checks cover active/absent reports, exact export changes, invalid replacement, removal, cancellation and outdated upload completion, reset and mobile overflow. No outgoing HTTP requests or browser errors occurred during the tested local reference actions. The user subsequently confirmed the reference increment using local screenshots. This documentation does not claim deployment or independent usability validation.
+
+## M6.6 consistency checkpoint
+
+A shared ExportSummary shows the exact number of rows to export, the number of warning-only rows included, and the number of blocked rows excluded. Ready is explicitly limited to implemented checks, without promising target-ERP acceptance. Step 2 labels now use the same typography as Steps 1 and 3 in both workspace implementations.
+
+The production build including TypeScript passes; lint has only the two previously known warnings. Production-browser checks across all four profiles compare the visible export counts with actual downloaded row counts, verify that category filtering does not change the export scope, and verify disabled export for all-blocked CSVs. Mapping-dialog Escape/focus restoration and 390px mobile overflow checks pass for each profile. These are targeted checks, not a full accessibility audit. No domain validation or export serialization rules changed in this increment.
+
+The complete 39-test suite was run again at the final closeout checkpoint.
+
+Additional profiles remain possible after M6; the current agreed four-profile scope is retained. Outreach remains deferred.
+
+## M6.9 closeout checkpoint
+
+On 2026-10-25 the complete automated suite passes: 39 tests, zero failures. The latest production build and TypeScript check pass; lint retains only the two known warnings. No production source change followed the successful build except whitespace cleanup.
+
+A separate reordered Vendor XLSX fixture contains Notes and Suppliers worksheets. The preparation-browser check selects Suppliers, verifies 1 blocked / 1 needs review / 1 ready, verifies missing-ID mapping blocks downstream export, restores mapping, exports exactly IDs 007 and 008, excludes 009, and confirms Suppliers plus vendor/version context in the report.
+
+The user has accepted M6.3–M6.6 locally and supplied Vendor XLSX screenshots showing 1 blocked / 1 needs review / 1 ready and 2 rows for export. Their first final suite ran only 34 tests because the five Excel-header regressions were missing. The parser and regression file were delivered again; the subsequent user-local output explicitly confirms all 39 tests passing, including the five Excel-header cases. Lint and build passed in the preceding local bundled run; no further local lint/build repetition was requested. The identical final parser had also passed the preparation checkout build.
+
+M6 is now technically signed off internally. Commit, push and deployment confirmation remain outstanding at this documentation checkpoint. No independent-user test is reclassified as completed. Naming and outreach remain deferred by explicit decision. The Node MODULE_TYPELESS_PACKAGE_JSON warning and the two existing lint warnings are nonblocking follow-up work; module-system configuration was not changed merely to suppress warnings.

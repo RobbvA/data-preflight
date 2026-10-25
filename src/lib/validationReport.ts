@@ -1,9 +1,11 @@
+import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import type { ParsedRow } from "@/lib/parseCsv";
 
 type ValidationReportInput<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
   sheetName?: string;
+  unitReference?: UnitReference | null;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -19,6 +21,7 @@ export function buildValidationReportRows<TField extends string>({
   sheetName,
   mapping,
   counts,
+  unitReference,
 }: ValidationReportInput<TField>): ParsedRow[] {
   const row = (section: string, field: string, value: string): ParsedRow => ({
     Section: section,
@@ -47,5 +50,14 @@ export function buildValidationReportRows<TField extends string>({
     row("Result", "Needs review", String(counts.needsReview)),
     row("Result", "Ready", String(counts.ready)),
     ...mappingRows,
+    ...(profile.id === "product" ? [
+      row("Unit reference", "Reference check", unitReference ? "Run" : "Not run"),
+      row("Unit reference", "Reference-check version", UNIT_REFERENCE_VERSION),
+      ...(unitReference ? [
+        row("Unit reference", "Reference filename", unitReference.fileName),
+        row("Unit reference", "Unique unit count", String(unitReference.allowedUnits.length)),
+        ...unitReference.allowedUnits.map((unit) => row("Unit reference", "Allowed unit", unit)),
+      ] : []),
+    ] : []),
   ];
 }

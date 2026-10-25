@@ -259,17 +259,25 @@ function createRowsFromSheet(sheetRows: unknown[][]): ParsedRow[] {
 }
 
 function createUniqueHeaders(headers: string[]) {
-  const seenHeaders = new Map<string, number>();
+  const normalizedHeaders = headers.map(normalizeHeader);
+  // Reserve source names before generating suffixes so later columns keep theirs.
+  const reservedHeaders = new Set(normalizedHeaders);
+  const usedHeaders = new Set<string>();
+  const nextSuffix = new Map<string, number>();
 
-  return headers.map((header) => {
-    const normalizedHeader = normalizeHeader(header);
-    const count = seenHeaders.get(normalizedHeader) ?? 0;
+  return normalizedHeaders.map((header) => {
+    let uniqueHeader = header;
+    let suffix = nextSuffix.get(header) ?? 2;
 
-    seenHeaders.set(normalizedHeader, count + 1);
+    if (usedHeaders.has(uniqueHeader)) {
+      do {
+        uniqueHeader = `${header} ${suffix++}`;
+      } while (reservedHeaders.has(uniqueHeader) || usedHeaders.has(uniqueHeader));
+      nextSuffix.set(header, suffix);
+    }
 
-    if (count === 0) return normalizedHeader;
-
-    return `${normalizedHeader} ${count + 1}`;
+    usedHeaders.add(uniqueHeader);
+    return uniqueHeader;
   });
 }
 

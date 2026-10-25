@@ -2,7 +2,9 @@ import { getProfileMappingCandidates } from "@/lib/dataProfile";
 import { customerProfile } from "@/lib/profiles/customerProfile";
 import { vendorProfile } from "@/lib/profiles/vendorProfile";
 
-type DataDomain = "invoice" | "customer" | "vendor";
+import { productProfile } from "@/lib/profiles/productProfile";
+
+type DataDomain = "invoice" | "customer" | "vendor" | "product";
 
 function normalizeHeader(header: string) {
   return header
@@ -97,6 +99,25 @@ export function getProfileMismatchMessage(
   const hasInvoiceAmount = [...INVOICE_AMOUNT_HEADERS].some((header) =>
     sourceHeaders.has(header),
   );
+
+  const hasProductId = getProfileMappingCandidates(productProfile, headers).product_id.length > 0;
+
+  if (domain === "product" && !hasProductId) {
+    if (hasInvoiceId && hasInvoiceAmount) {
+      return "This file looks like invoice data. Choose the Invoice data profile or check the source file.";
+    }
+    if (hasCustomerId && !hasVendorId) {
+      return "This file looks like customer master data. Choose the Customer master data profile or check the source file.";
+    }
+    if (hasVendorId && !hasCustomerId) {
+      return "This file looks like vendor master data. Choose the Vendor master data profile or check the source file.";
+    }
+  }
+
+  if (domain !== "product" && hasProductId && !hasCustomerId && !hasVendorId
+    && !hasInvoiceId && !hasInvoiceAmount) {
+    return "This file looks like product / material data. Choose the Product / Material profile or check the source file.";
+  }
 
   if (
     domain === "invoice" &&

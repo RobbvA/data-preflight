@@ -100,7 +100,7 @@ export function ProfilePicker({
   return (
     <div
       ref={rootRef}
-      className="min-w-0 w-full"
+      className="relative min-w-0 w-full"
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) close();
       }}
@@ -146,7 +146,7 @@ export function ProfilePicker({
         <section
           id={panelId}
           aria-label="Available validation profiles"
-          className="mt-2 overflow-hidden rounded-xl border border-white/15 bg-[var(--surface-raised)] shadow-xl shadow-black/20"
+          className="absolute inset-x-0 top-full z-50 mt-2 max-h-[min(26rem,60dvh)] overflow-y-auto overscroll-contain rounded-xl border border-white/15 bg-[var(--surface-raised)] shadow-xl shadow-black/40"
         >
           {pendingProfile ? (
             <div role="group" aria-labelledby={confirmationId} className="p-4">

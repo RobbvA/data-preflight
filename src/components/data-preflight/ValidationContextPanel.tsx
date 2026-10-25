@@ -1,5 +1,6 @@
 "use client";
 
+import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import { downloadCsv } from "@/lib/exportData";
 import { buildValidationReportRows } from "@/lib/validationReport";
 
@@ -7,6 +8,7 @@ type ValidationContextPanelProps<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
   sheetName?: string;
+  unitReference?: UnitReference | null;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -22,6 +24,7 @@ export function ValidationContextPanel<TField extends string>({
   sheetName,
   mapping,
   counts,
+  unitReference,
 }: ValidationContextPanelProps<TField>) {
   const appliedMapping: Record<string, string> = Object.fromEntries(
     (Object.entries(mapping) as Array<[string, string]>).sort(
@@ -38,6 +41,7 @@ export function ValidationContextPanel<TField extends string>({
         sheetName,
         mapping,
         counts,
+        unitReference,
       }),
     );
   }
@@ -83,6 +87,15 @@ export function ValidationContextPanel<TField extends string>({
               {counts.needsReview} need review · {counts.ready} ready
             </dd>
           </div>
+
+          {profile.id === "product" && (
+            <div className="min-w-0 sm:col-span-2">
+              <dt className="text-[var(--text-muted)]">Base-unit reference check · v{UNIT_REFERENCE_VERSION}</dt>
+              <dd className="mt-1 break-words text-[var(--text-primary)]">
+                {unitReference ? `Run · ${unitReference.fileName} · ${unitReference.allowedUnits.length} unique units: ${unitReference.allowedUnits.join(", ")}` : "Not run — no allowed-unit list active."}
+              </dd>
+            </div>
+          )}
 
           <div className="sm:col-span-2">
             <dt className="font-medium text-[var(--text-secondary)]">

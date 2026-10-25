@@ -18,7 +18,6 @@ import {
 import {
   downloadCsv,
   downloadErrorCsv,
-  getExportSafetyMessage,
 } from "@/lib/exportData";
 import {
   createEmptyMapping,
@@ -26,6 +25,7 @@ import {
   createSuggestedMapping,
 } from "@/lib/fieldMapping";
 import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
+import { ExportSummary } from "@/components/data-preflight/ExportSummary";
 import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
 import { MasterDataWorkspace } from "@/components/data-preflight/MasterDataWorkspace";
 import {
@@ -331,7 +331,7 @@ export function CsvUploader() {
     setActiveDomain(nextDomain);
   }
 
-  if (activeDomain === "customer" || activeDomain === "vendor") {
+  if (activeDomain !== null && activeDomain !== "invoice") {
     return (
       <MasterDataWorkspace
         domain={activeDomain}
@@ -462,14 +462,11 @@ export function CsvUploader() {
                 <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
                   Export reviewed data
                 </h2>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">
-                  {getExportSafetyMessage({
-                    hasIncompleteMapping,
-                    hasDuplicateMappings,
-                    cleanRowCount: validationResult.cleanRows.length,
-                    issues: validationResult.issues,
-                  })}
-                </p>
+                <ExportSummary
+                  exportCount={validationResult.cleanRows.length}
+                  warningCount={warningCount}
+                  blockedCount={blockedCount}
+                />
 
                 <ValidationContextPanel
                   profile={invoiceValidationProfile}

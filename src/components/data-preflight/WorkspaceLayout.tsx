@@ -8,6 +8,7 @@ const workspaceTitles: Record<DataDomain, string> = {
   invoice: "Invoice validation workspace",
   customer: "Customer master data workspace",
   vendor: "Vendor master data workspace",
+  product: "Product / Material workspace",
 };
 
 export function WorkspaceLayout({ children }: { children: ReactNode }) {

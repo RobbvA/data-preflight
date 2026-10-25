@@ -69,6 +69,14 @@ const examples: Record<DataDomain, PreviewExample> = {
       },
     ],
   },
+  product: {
+    label: "Product example",
+    counts: [5, 0, 2],
+    issues: [
+      { reference: "P-004", problem: "Product ID appears more than once", status: "Blocked" },
+      { reference: "003", problem: "Base unit is missing", status: "Blocked" },
+    ],
+  },
 };
 
 export function HomeProductPreview({ domain }: { domain: DataDomain }) {

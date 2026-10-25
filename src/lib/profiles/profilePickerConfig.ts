@@ -1,4 +1,4 @@
-import { FileText, UsersRound, Truck, type LucideIcon } from "lucide-react";
+import { FileText, UsersRound, Truck, Package, type LucideIcon } from "lucide-react";
 import type { DataDomain } from "@/components/data-preflight/WorkspaceLayout";
 
 export type ProfilePickerOption = {
@@ -30,6 +30,13 @@ export const profilePickerConfig = {
     description: "Check supplier IDs, duplicates, names and contact details.",
     keywords: "supplier creditor leverancier leveranciers crediteur",
     icon: Truck,
+  },
+  product: {
+    domain: "product",
+    name: "Product / Material",
+    description: "Check product IDs, duplicates, descriptions and required base units.",
+    keywords: "item article sku unit uom artikel materiaal product eenheid",
+    icon: Package,
   },
 } satisfies Record<DataDomain, ProfilePickerOption>;
 
