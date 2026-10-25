@@ -380,13 +380,13 @@ function MasterDataWorkspaceContent({
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 1 · Field mapping
-                </p>
-                <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
-                  {mappedCount}/{profile.fields.length} fields mapped
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
+                <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
+                  {mappedCount}/{profile.fields.length} fields mapped
+                </p>
+                <p className={mappingReady ? "mt-1 text-xs leading-5 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
                   {requiredUnmapped.length > 0
                     ? `Choose a column for: ${requiredUnmapped.join(", ")}.${
                         hasDuplicateMappings
@@ -411,19 +411,18 @@ function MasterDataWorkspaceContent({
                 {mappingReady ? "Edit mapping" : "Complete mapping"}
               </button>
             </div>
+            {domain === "product" && (
+              <UnitReferenceControls
+                reference={unitReference}
+                onChange={(reference) => {
+                  setUnitReference(reference);
+                  setActiveReviewTab(null);
+                  setSelectedRowIndex(null);
+                }}
+                onLoading={setIsReferenceLoading}
+              />
+            )}
           </section>
-
-          {domain === "product" && (
-            <UnitReferenceControls
-              reference={unitReference}
-              onChange={(reference) => {
-                setUnitReference(reference);
-                setActiveReviewTab(null);
-                setSelectedRowIndex(null);
-              }}
-              onLoading={setIsReferenceLoading}
-            />
-          )}
 
           {mappingReady && !isReferenceLoading && (
             <>
@@ -432,13 +431,13 @@ function MasterDataWorkspaceContent({
                 className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
               >
                 <div className="border-b border-white/10 pb-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                  <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                     Step 2 · Review
-                  </p>
+                  </h2>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
+                    <p className="text-base font-medium text-[var(--text-secondary)]">
                       {config.labels.results}
-                    </h2>
+                    </p>
                     <ReviewStatusSummary counts={reviewCounts} />
                   </div>
                 </div>
@@ -530,10 +529,10 @@ function MasterDataWorkspaceContent({
                                       </span>
                                     )}
                                   </div>
-                                  <p className="mt-1.5 truncate text-sm font-semibold text-[var(--text-primary)]">
+                                  <p className="mt-1.5 break-words text-base font-semibold text-[var(--text-primary)]">
                                     {row[config.preview.idField] || config.labels.missingId}
                                   </p>
-                                  <p className="truncate text-xs text-[var(--text-secondary)]">
+                                  <p className="truncate text-sm text-[var(--text-secondary)]">
                                     {row[config.preview.nameField] || config.labels.missingName}
                                   </p>
                                   <p className="truncate text-[11px] text-[var(--text-muted)]">
@@ -564,7 +563,7 @@ function MasterDataWorkspaceContent({
                               </div>
 
                               {mainIssue && (
-                                <div className="mt-1 rounded-lg border border-[color:rgba(182,111,58,0.3)] bg-[rgba(182,111,58,0.08)] px-2 py-1 text-xs font-semibold text-[var(--text-primary)]">
+                                <div className="mt-1 rounded-lg border border-[color:rgba(182,111,58,0.3)] bg-[rgba(182,111,58,0.08)] px-2 py-1.5 text-sm font-medium leading-6 text-[var(--text-primary)]">
                                   {mainIssue.problem}
                                 </div>
                               )}
@@ -608,11 +607,8 @@ function MasterDataWorkspaceContent({
                 id={`${domain}-export`}
                 className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 3 · Export
-                </p>
-                <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
-                  Export reviewed data
                 </h2>
                 <ExportSummary
                   exportCount={validationResult.cleanRows.length}

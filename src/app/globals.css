@@ -2,13 +2,13 @@
 
 :root {
   --background: #0a0907;
-  --foreground: #f1ece4;
+  --foreground: #e5dac8;
 
   --surface-deep: #0a0907;
   --surface-base: #11100d;
   --surface-raised: #191611;
 
-  --text-primary: #f1ece4;
+  --text-primary: #e5dac8;
   --text-secondary: #c9c0b5;
   --text-muted: #8f867a;
 
@@ -60,7 +60,7 @@ select {
 
 ::selection {
   background: rgba(182, 111, 58, 0.28);
-  color: #f8f2e9;
+  color: var(--text-primary);
 }
 
 ::-webkit-scrollbar {

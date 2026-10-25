@@ -402,13 +402,13 @@ export function CsvUploader() {
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 1 · Field mapping
-                </p>
-                <h2 className="mt-1 text-base font-semibold text-[var(--text-primary)]">
-                  {mappedCount}/{mappingSuggestions.length} fields mapped
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
+                <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
+                  {mappedCount}/{mappingSuggestions.length} fields mapped
+                </p>
+                <p className={mappingReady ? "mt-1 text-xs leading-5 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
                   {hasIncompleteMapping
                     ? `Choose a column for: ${missingRequiredFields
                         .map((field) => field.label)
@@ -456,11 +456,8 @@ export function CsvUploader() {
                 id="invoice-export"
                 className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 3 · Export
-                </p>
-                <h2 className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
-                  Export reviewed data
                 </h2>
                 <ExportSummary
                   exportCount={validationResult.cleanRows.length}

@@ -940,3 +940,28 @@ This closeout supersedes the pending items in the immediately preceding preparat
 - The assistant did not commit or push. The user still needs to apply final documentation, review the diff, commit/push, and verify deployment separately.
 
 Next session: verify the delivered state if necessary, then plan one bounded follow-up increment. Additional profiles are a candidate; do not automatically start the older AI placeholder or reopen naming/outreach during closeout.
+
+
+---
+
+# 2026-10-25 — M7 UX checkpoint and session closeout
+
+## Accepted increment
+
+The user requested and accepted incremental changes to the existing layout: larger consistent Step 1 Field mapping / Step 2 Review / Step 3 Export headings, quieter supporting mapping text, more readable record identification/main problems and export counts, an optional collapsed allowed-unit control within Product mapping, and warmer off-white text (#e5dac8) with the original copper/orange (#b66f3a) step labels. Product and Customer screenshots show the local appearance and original result counts. This does not establish a full mobile/accessibility or download audit.
+
+The earlier active-header redesign was rejected and reverted. A later red/yellow status and shared review-card package also misunderstood the requested direction. The user explicitly requested restoring the immediately preceding accepted state, ending the build session and committing/pushing the accepted work.
+
+## Recovery
+
+Restored globals.css and MasterDataWorkspace.tsx byte-for-byte from the warm-colors package, DataSetPreview.tsx from the accepted step-heading package, and ReviewStatusControls.tsx from a91935f. Removed the rejected ReviewRecordCard.tsx, reviewPresentation.ts and review-presentation.test.mjs. No accepted unit-control, step-heading, record-readability or warm-color change is intentionally undone. The original workflow header remains unchanged.
+
+The accepted test suite contains 39 tests. The temporary 42-test result was for the rejected review-card package and must not be reported as the retained suite. Domain validation, parsing, mapping storage and export calculations were not intentionally changed in the accepted UI increment.
+
+## Delivery and evidence
+
+A recovery ZIP restores only four affected source files and updates ROADMAP.md, PROJECT_STATUS.md, README.md and this appended log. Three exact newly added files must be removed locally. The user's existing locally modified PRODUCT_VISION.md is deliberately not overwritten by the recovery ZIP. Review its diff before staging as part of session closeout.
+
+Final preparation checks for the restored accepted state: 39 tests passed, 0 failed; lint has 0 errors and the two known Metadata/_tone warnings; production build including TypeScript passed. A browser in the preparation environment could not reach the local build server; new browser/390px tests are not claimed. User-local recovery confirmation, commit/push and deployment verification are pending; no assistant commit or push was performed.
+
+M7 is not complete. Price List, its exact decimal/Excel contract implementation, further user-directed UX work and final cross-profile verification remain open. Independent testing and outreach remain deferred; AI/naming are not next-session work.

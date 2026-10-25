@@ -134,14 +134,14 @@ export function InvoiceReviewSection({
       className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
     >
       <div className="border-b border-white/10 pb-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+        <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
           Step 2 · Review
-        </p>
+        </h2>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
-          <h2 className="text-[1.35rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
+          <p className="text-base font-medium text-[var(--text-secondary)]">
             Invoice results
-          </h2>
+          </p>
 
           <ReviewStatusSummary counts={reviewCounts} />
         </div>

@@ -7,10 +7,10 @@ type ExportSummaryProps = {
 export function ExportSummary({ exportCount, warningCount, blockedCount }: ExportSummaryProps) {
   return (
     <div aria-label="Export summary" className="mt-3 space-y-2 text-sm leading-6 text-[var(--text-secondary)]">
-      <p className="font-medium text-[var(--text-primary)]">
+      <p className="text-base font-semibold leading-7 text-[var(--text-primary)]">
         {exportCount} {exportCount === 1 ? "row" : "rows"} will export · {warningCount} with warnings · {blockedCount} blocked {blockedCount === 1 ? "row" : "rows"} excluded
       </p>
-      <p>
+      <p className="text-xs leading-5">
         {exportCount === 0
           ? "No rows without blockers are available. Correct the source file and validate it again."
           : warningCount > 0

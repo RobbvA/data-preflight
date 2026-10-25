@@ -108,7 +108,11 @@ Reports do not contain a complete rule snapshot or cryptographic input fingerpri
 
 ## Current development
 
-M5 and M6 are internally complete. M6 technical signoff: 2026-10-25; deployment after the final commit/push must be confirmed separately.
+M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Price List Validation & Professional UX is in progress.
+
+The accepted first UX increment enlarges the three workspace step headings, makes supporting text subordinate, moves the optional Product allowed-unit check inside mapping as a collapsed control with visible status/errors, improves existing result/export readability and uses warmer off-white text. The original layout and copper/orange step color are retained. The later shared review-card/status-color redesign was rejected and reverted.
+
+Price List is planned and not available yet; AI is outside M7. Current user-local commit/push and deployment verification remain separate pending steps.
 
 Four profiles are implemented with mapping, review, reports and export; Vendor CSV and multi-sheet XLSX checks are complete. The landing page includes a searchable profile picker and guarded profile switching.
 

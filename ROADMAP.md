@@ -583,17 +583,25 @@ If scope must shrink, defer the reference-data experiment first and explicitly r
 - In-app source editing.
 - Large-file optimization without an observed need.
 
-## Milestone 7 — AI assistance
+## Milestone 7 — Price List Validation & Professional UX
 
-Status: Future.
+Status: In progress. Initial UX changes accepted locally on 2026-10-25; session closed before Price List implementation. M7 is not complete.
 
-Possible uses:
+Agreed scope:
+- One Price List / Item Prices profile (price-list v1.0.0): product, price list, currency, unit and strict decimal price.
+- Explicit point/comma notation, exact price strings, complete composite-key duplicates, reports and export; narrow Excel handling must prevent display rounding.
+- UX improvements across the existing four profiles, retaining Step 1 → Step 2 → Step 3, the current brand/layout and local processing.
+- No AI, additional inventory/order profiles, accounts, cloud storage, ERP connectors or broad workspace rebuild. Independent usage tests and outreach remain deferred and are not M7 completion requirements.
 
-- Mapping proposals.
-- Explanations.
-- Suggested fixes.
+Accepted first UX increment:
+- Larger consistent copper/orange Step 1/2/3 card headings; supporting text is subordinate.
+- Product allowed-unit controls are a collapsed optional part of the mapping card, with visible status and errors.
+- More readable existing record identifiers/main problems and export counts.
+- Warmer off-white #e5dac8; step headings use the original accent #b66f3a.
 
-AI output must remain distinguishable from deterministic rule results and respect the data-handling model.
+The subsequent shared review-card redesign and red/yellow status-color package were rejected. Restore the exact preceding accepted state; do not include those additions or describe them as delivered. The earlier active-header redesign was also rejected and reverted.
+
+Remaining work: user-directed UX refinements, the full Price List contract/implementation, Excel precision protection, relevant regressions, desktop/mobile/keyboard verification and final milestone documentation/deployment checks. The complete handover in the build conversation remains the detailed scope and acceptance reference.
 
 ## Current reliability and UX increment — 2026-10-25
 
@@ -606,8 +614,6 @@ AI output must remain distinguishable from deterministic rule results and respec
 
 ## Next build step
 
-M6 technical implementation and internal acceptance are complete. Apply final documentation, review the local diff, commit/push and confirm deployment separately.
+Finish this session by applying the recovery/closeout package, removing the three rejected review-card additions, checking the final local diff and committing/pushing the accepted UX increment. User-local commit/push and deployed verification are separate and not inferred from preparation checks.
 
-Plan the next bounded increment before implementation. Further profiles are candidates for later expansion; they were not added to the agreed four-profile M6 scope. The older M7 AI section is a future option, not an instruction to begin AI now.
-
-Independent unguided usage testing, outreach and naming remain deferred by explicit decision. They are not marked complete or treated as evidence of demand. Preserve the current design and architecture.
+The next session resumes M7 from the accepted step-heading/unit-control/warm-color state. Follow the user's concrete UX directions before further layout changes. Price List is planned, not implemented; the Excel price-precision risk remains unresolved. Do not reopen AI, naming, outreach or add profiles beyond the one agreed Price List profile.

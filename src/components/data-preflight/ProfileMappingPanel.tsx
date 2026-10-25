@@ -104,7 +104,7 @@ export function ProfileMappingPanel<TField extends string>({
       <div className="sticky top-0 z-10 border-b border-white/10 bg-[var(--surface-base)] p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent-soft)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent)]">
               Step 1 · Field mapping
             </p>
 

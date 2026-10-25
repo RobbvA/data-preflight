@@ -172,12 +172,12 @@ export function DataSetPreview({
                         </div>
 
                         <div className="mt-1.5">
-                          <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                          <p className="break-words text-base font-semibold text-[var(--text-primary)]">
                             {item.row.invoice_number ||
                               "Missing invoice number"}
                           </p>
 
-                          <p className="truncate text-xs text-[var(--text-secondary)]">
+                          <p className="truncate text-sm text-[var(--text-secondary)]">
                             {item.row.company || "Missing company"}
                           </p>
 
@@ -316,7 +316,7 @@ function MainIssueInline({
 
   return (
     <div
-      className={`mt-1 rounded-lg border px-2 py-1 text-xs ${
+      className={`mt-1 rounded-lg border px-2 py-1.5 text-sm leading-6 ${
         isCritical
           ? "border-[color:rgba(182,111,58,0.32)] bg-[rgba(182,111,58,0.11)]"
           : "border-[color:rgba(182,111,58,0.2)] bg-[rgba(182,111,58,0.07)]"
