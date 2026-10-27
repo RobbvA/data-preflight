@@ -965,3 +965,16 @@ A recovery ZIP restores only four affected source files and updates ROADMAP.md, 
 Final preparation checks for the restored accepted state: 39 tests passed, 0 failed; lint has 0 errors and the two known Metadata/_tone warnings; production build including TypeScript passed. A browser in the preparation environment could not reach the local build server; new browser/390px tests are not claimed. User-local recovery confirmation, commit/push and deployment verification are pending; no assistant commit or push was performed.
 
 M7 is not complete. Price List, its exact decimal/Excel contract implementation, further user-directed UX work and final cross-profile verification remain open. Independent testing and outreach remain deferred; AI/naming are not next-session work.
+
+
+# 2026-10-26 — M7 six-profile plan and session continuity
+
+Rob explicitly requested six profiles at M7 completion, a detailed milestone plan, one concrete goal per build session, a saved resume point around user-requested side quests and a comprehensive final test of the whole app. This supersedes the previous five-profile scope. The sixth profile is planned as limited Stock Balances / Voorraadstanden, not Warehouse/Location or order lines.
+
+Verified remote main: 130ccaff2f7464da353895b395b9bb16b2b626e8. Commit 790f648 retained the accepted first UX increment; 130ccaf separately accepted only the narrow tab-color accents after the broad review-card redesign was reverted. Vercel reports deployment success. The prior closeout's pending push statements are historical; no new full live-workflow/mobile test was performed for this plan.
+
+Prepared docs/M7_PLAN.md and docs/M7_PROGRESS.md plus updates to ROADMAP, PROJECT_STATUS, PRODUCT_VISION and README. Historical session entries remain intact. Plan phases: contracts/baseline; representative Product UX; consistent existing flows; strict numeric/Excel foundation followed by complete Price then complete Stock; whole-app verification/fixes/documentation/deployment. New stock contract is one non-negative snapshot per product/warehouse with a unit attribute, zero Ready, and all duplicate product/warehouse rows blocked including unit conflicts. Exact stock fixture: 7 Blocked / 0 Needs review / 3 Ready, three exports. Existing Price contract and 8/1/2 fixture remain intact.
+
+Research signals are mapped to concrete start/review/recovery/export criteria. General references, annotated correction files, rule grouping, ERP connectors and other research ideas remain a post-M7 backlog. Four official source pages were reviewed selectively for the plan; the full review survey was not repeated and willingness to pay remains unproven.
+
+No application code changed and no new test/lint/build execution is claimed for this documentation-only package. The historical preserved checkpoint remains 39 passing tests, zero lint errors/two known warnings and successful build/TypeScript. New plan application/confirmation and commit/push are pending separately. Package: datapreflight-m7-masterplan-six-profiles.zip, seven Markdown files. Next content step: M7.2a focused Product hierarchy for incomplete/complete mapping on desktop and 390px, based on accepted UI.

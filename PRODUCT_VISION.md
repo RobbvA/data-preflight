@@ -1,6 +1,6 @@
 # DataPreflight Product Vision
 
-Last reviewed: 2026-10-18
+Last reviewed: 2026-10-26
 
 ## Purpose
 
@@ -28,13 +28,13 @@ The problem is not simply whether a spreadsheet opens. Inconsistent columns, mis
 
 ## Current product
 
-Invoice and Customer are working, selectable profiles defined and versioned in code.
+Invoice, Customer, Vendor and Product / Material are working, selectable profiles defined and versioned in code. M7 targets six profiles by adding Price List / Item Prices and limited Stock Balances; neither new profile is implemented yet.
 
 A user explicitly chooses a profile before uploading a CSV, XLSX, or XLS file.
 
 The browser suggests mappings. Correct automatic mappings do not require an extra confirmation step. Missing or duplicate mappings block validation until resolved.
 
-Both profiles use one mapping panel with consistent field feedback and keyboard behavior.
+All four profiles use one mapping panel with consistent field feedback and keyboard behavior.
 
 Mapped values are normalized and checked by deterministic rules. Results appear as Blocked, Needs review, and Ready.
 
@@ -42,7 +42,7 @@ Users can export rows without critical issues, download issue reports, and downl
 
 Source corrections happen in the original file, followed by another upload.
 
-Vendor, Product, saved mappings, reference checks, custom rules, projects, and ERP connectors are not available yet.
+Saved mappings are available locally in browser localStorage, with names, profile/version, source column names and assignments, never source rows. Product has one optional in-memory allowed-unit reference CSV; it is cleared on source replacement, reset, profile switch or reload. Custom rules, projects and ERP connectors are not available.
 
 ## Quality standard
 
@@ -77,9 +77,9 @@ Suggestions must remain visible and adjustable. Ambiguous required mappings need
 
 The selected mapping is part of validation context because changing a mapping can change the result.
 
-Invoice retains a richer header/sample-based suggestion algorithm. Customer uses header-based suggestions.
+Invoice retains a richer header/sample-based suggestion algorithm. Customer, Vendor and Product use header-based suggestions.
 
-Both share the same readiness checks and mapping interface.
+The four profiles share readiness checks and the mapping interface. Ambiguous suggestions cannot establish semantic correctness.
 
 ### Versioned validation profiles
 
@@ -89,7 +89,7 @@ A change to normalization or validation behavior must advance the relevant profi
 
 Keep domain logic independent while extracting proven common workflow behavior.
 
-The current separate workspaces are being improved incrementally. Avoid a large speculative framework or four copied mini-apps.
+Customer, Vendor and Product share a configured workspace. Invoice may retain its own. Extend only what concrete Price/Stock or UX behavior requires; avoid a broad generic-workspace rebuild.
 
 ### Local processing
 
@@ -101,7 +101,7 @@ Privacy wording must match actual deployed behavior. Analytics, logging, storage
 
 Browser-side processing is valuable, but not unique by itself.
 
-Future saved mappings should store configuration only, with clear browser/device scope.
+Saved mappings store configuration only, with explicit browser/device/site scope. Clearing site data removes them; localhost and production have separate storage. Decimal notation and reference lists are not silently persisted in saved mappings.
 
 ### Determinism and traceability
 
@@ -109,7 +109,7 @@ Current repeatability target:
 
 same input + same worksheet where applicable + same mapping + same profile version = same result.
 
-A reference-data feature must additionally account for its effective reference values and check version.
+Product reference runs additionally account for effective reference values and check version. The planned Price/Stock profiles add explicit numeric notation to their run context.
 
 Hard validation must remain inspectable and independent of changing AI responses.
 
@@ -120,6 +120,9 @@ Validation Reports record:
 - Selected worksheet where applicable.
 - Applied mapping.
 - Result counts.
+- Product reference context when applicable.
+
+Price/Stock notation will be added when those profiles are implemented; it is not present yet.
 
 The current report is not a complete rule snapshot, cryptographic input fingerprint, or full audit record of every value and issue.
 
@@ -156,27 +159,30 @@ The working opportunity is a clear, independently usable ERP validation tool wit
 
 Historical interviews remain in FEEDBACK.md. Do not present assistant interpretation or internet research as new interview evidence.
 
-## M6 direction
+## M7 direction
 
-1. Strengthen shared behavior and interaction.
-2. Add a limited Vendor profile.
-3. Add local reusable mappings.
-4. Test independent usage.
-5. Add a deliberately limited Product profile.
-6. Add one local unit-code reference check.
-7. Complete consistency and outreach-readiness checks.
+[Detailed execution plan](docs/M7_PLAN.md) · [Current progress and resume point](docs/M7_PROGRESS.md)
+
+1. Retain accepted step hierarchy, compact Product unit control, readable result/export text, warm off-white and subtle status tab accents.
+2. Demonstrate a focused Product workspace direction for incomplete and complete mapping at desktop and 390px, then implement the accepted differences.
+3. Apply the accepted hierarchy and recovery consistently across the existing four profiles.
+4. Add strict decimal/Excel handling and a complete bounded Price List profile.
+5. Add a complete bounded Stock Balances snapshot profile; no inventory transactions, valuation, batch/serial logic or automatic unit conversion.
+6. Verify the entire six-profile app, exact downloads, context, mobile/keyboard behavior and deployed release.
+
+Recognizable ERP tasks, low setup effort, understandable business rules, clear recovery and transparent exports form the product hypothesis. Local processing, mapping and saved mappings are valuable but not exclusive differentiators. Research signals do not establish demand, current competitor defects or willingness to pay.
+
+Preserve one concrete subgoal per session and the exact resume point around requested side quests. New ideas remain a backlog unless explicitly brought into scope. Passing acceptance does not automatically trigger another polish cycle.
 
 Keep DataPreflight as the working name. Renaming is not a development prerequisite.
 
 ## Validation status
 
-M5 is internally complete.
+M5 and M6 are internally technically complete. The M6 baseline is a91935f. The accepted initial M7 UX and narrow tab accents are pushed through 130ccaf; Vercel reports successful deployment. The four implemented profiles remain the actual current product.
 
-An independent unguided new-user test remains outstanding and must not be treated as a proven result.
+The historical retained suite has 39 passing tests, two known lint warnings and a successful production build. These checks are not fresh results for the planning update. M7 final six-profile verification is still to be performed and documented.
 
-M6 started locally on 2026-10-18 with upload lifecycle safety, shared mapping readiness, and the shared mapping panel.
-
-This local implementation and internal verification do not establish deployed M6 availability, market adoption, or willingness to pay.
+An independent unguided user test and willingness to pay remain unproven. After M7, conduct focused outreach using one audience, a concrete profile and representative source file, building on earlier professional feedback. Learn whether users understand the workflow, repair source data, would return, and value it enough to pay. Outreach is not a blocking technical M7 exit requirement.
 
 ## Boundaries
 

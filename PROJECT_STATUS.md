@@ -1,6 +1,6 @@
 # DataPreflight Project Status
 
-Last reviewed: 2026-10-25
+Last reviewed: 2026-10-26
 
 ## Product and milestone
 
@@ -8,7 +8,7 @@ DataPreflight is a browser-based quality gate for business data before ERP impor
 
 [Live app](https://data-preflight.vercel.app/) · [Roadmap](ROADMAP.md) · [Product vision](PRODUCT_VISION.md)
 
-M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Price List Validation & Professional UX has started with a limited accepted UX increment; Price List is not implemented. User-local commit/push and deployment of the current changes are pending.
+M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Professional UX, Price List & Stock Balances is in progress. On 2026-10-26 Rob explicitly expanded the target from five to six profiles. Price List and Stock Balances are planned, not implemented. The accepted first UX increment and later tab accents are committed/pushed through 130ccaf; Vercel reports successful deployment. The new planning package is prepared, not yet confirmed applied or pushed.
 
 - M6.1: shared workflow foundation complete.
 - M6.2: Vendor complete; CSV export and reordered multi-sheet XLSX accepted through preparation checks and user-local walkthrough/screenshots.
@@ -19,7 +19,7 @@ M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Pric
 - M6.9: technical verification complete; the user-local suite passes all 39 tests, lint has zero errors/two known warnings, and the production build passed.
 - Independent usage testing and outreach are deferred during the current build phase.
 
-Repository baseline for this session: `a91935f` (completed M6). The earlier `4effc2e` profile-picker checkpoint is historical. Vendor rules were delivered in `641ad84`; shared master-data integration in `ca099a7`. Earlier statements that Vendor was unimplemented or M6.1 still awaited a commit are superseded.
+Current verified remote main: `130ccaf` (2026-10-26), following the accepted UX checkpoint `790f648`. Completed M6 baseline: `a91935f`. The earlier `4effc2e` profile-picker checkpoint is historical. Vendor rules were delivered in `641ad84`; shared master-data integration in `ca099a7`. Earlier statements that Vendor was unimplemented or M6.1 still awaited a commit are superseded.
 
 ## Implemented workflow
 
@@ -46,7 +46,7 @@ Outdated asynchronous upload results are ignored after replacement, reset, profi
 | --- | --- |
 | Input adapters and Excel headers | `src/lib/parseCsv.ts` |
 | Profile selection and Invoice flow | `src/components/CsvUploader.tsx` |
-| Shared Customer/Vendor workspace | `src/components/data-preflight/MasterDataWorkspace.tsx` |
+| Shared Customer/Vendor/Product workspace | `src/components/data-preflight/MasterDataWorkspace.tsx` |
 | Master-data configuration | `src/lib/profiles/masterDataWorkspaceConfig.ts` |
 | Reusable profile picker | `src/components/data-preflight/ProfilePicker.tsx` |
 | Picker choices | `src/lib/profiles/profilePickerConfig.ts` |
@@ -102,26 +102,27 @@ Historical M5 evidence includes repeatable downloads for fixed Invoice/Customer 
 - No measured maximum file size or row count is established.
 - Independent self-service usability and willingness to pay remain unproven.
 
-## Current M7 session checkpoint — 2026-10-25
+## Current M7 checkpoint — 2026-10-26
 
-Accepted locally through user feedback/screenshots:
-- Step 1 Field mapping, Step 2 Review and Step 3 Export are larger consistent card headings across all four profiles, using #b66f3a.
-- Mapping counts and explanatory text have supporting emphasis. Existing record identifiers/problems and export counts are more readable.
-- Optional Product allowed-unit controls are collapsed inside mapping, with absent/active/reading status visible and errors outside the collapsed body.
-- Off-white text uses warmer #e5dac8.
+Accepted and pushed:
+- Larger consistent copper Step 1/2/3 headings, warmer off-white text, clearer existing record identifiers/problems and export counts.
+- Optional Product allowed-unit controls collapsed inside mapping with visible status/errors.
+- Subtle red/yellow/green review-tab accents; this later narrow change was accepted separately from the rejected broad review-card redesign.
 
-Rejected and reverted in preparation: the larger active-header redesign and the latest shared review-card/red-yellow status package. The final intended state is the previously accepted existing-layout version. ReviewRecordCard.tsx, reviewPresentation.ts and review-presentation.test.mjs must not be committed. This restores the 39-test suite; the temporary 42-test result belongs to the rejected package.
+Commit 790f648 contains the accepted first UX increment. Commit 130ccaf contains the four tab-color string changes. Current main was checked on 2026-10-26; Vercel reports success for 130ccaf. This is deployment evidence, not a fresh complete live workflow/mobile test. The old rollback and commit/push requests are complete for that accepted checkpoint.
 
-The user supplied screenshots and accepted the prior hierarchy improvement. Fresh browser verification of the rollback and all-profile interactions, mobile/keyboard coverage and the production deployment are not claimed. The final preparation checks are recorded in the session closeout; user-local application/confirmation and commit/push remain separate.
+The broad header and shared review-card redesigns remain rejected/reverted. Their temporary 42-test result is not the retained suite. The retained historical checkpoint is 39 passing tests, zero lint errors/two known warnings, and a successful TypeScript/production build. No new app tests were run for this planning-only change.
+
+M7 now targets six profiles: the existing four, Price List and limited Stock Balances. [M7_PLAN.md](docs/M7_PLAN.md) defines contracts, work packages, the whole-app final test and completion criteria. [M7_PROGRESS.md](docs/M7_PROGRESS.md) is the session and side-quest resume record. This plan packet remains prepared until user-local application is confirmed.
 
 ## Next work
 
-1. Apply the recovery package and remove the three rejected additions; refresh Product to confirm the accepted previous view.
-2. Review the final local diff, retain the user's existing local PRODUCT_VISION.md changes, and commit/push the accepted UX checkpoint.
-3. Verify remote/deployment separately after user-provided push confirmation.
-4. Stop this build session. Resume user-directed M7 UX work and the agreed Price List profile next session. Do not restart the rejected redesign or add AI/outreach.
+1. Apply/review the seven-file documentation package without overwriting local document edits; record local confirmation separately.
+2. M7.2a: present a focused Product workspace direction at desktop and 390px for incomplete and complete mapping, starting from accepted UI.
+3. Implement accepted differences, extend consistent UX across the existing profiles, then complete Price List followed by Stock Balances.
+4. Run the comprehensive six-profile final verification, update documentation, commit/push and independently check deployment and live behavior.
 
-The M6 sections below retain historical evidence and pending-at-the-time statements. This checkpoint describes the current session, not completion of M7.
+Do not repeat the completed rollback or reapply rejected designs. Do not automatically add research-backlog features. The M6 sections below retain historical evidence and pending-at-the-time statements; this checkpoint supersedes those as current status.
 
 ## M6.3–M6.5 implementation checkpoint
 

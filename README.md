@@ -21,7 +21,7 @@ Saved mappings work locally per profile. Product supports an optional reference 
 
 ## Workflow
 
-1. Explicitly choose Invoice, Customer, Vendor, or Product / Material through the searchable profile picker. Neither is selected by default.
+1. Explicitly choose Invoice, Customer, Vendor, or Product / Material through the searchable profile picker. No profile is selected by default.
 2. Upload a CSV, XLSX, or XLS file, or load the matching example.
 3. Choose a worksheet if the Excel workbook contains multiple populated worksheets.
 4. Review suggested field mapping. Resolve missing required fields and duplicate source-column assignments.
@@ -73,7 +73,7 @@ Use focused browser checks during smaller implementation steps. Do not repeat fu
 | CSV downloads | `src/lib/exportData.ts` |
 | Validation Report generation | `src/lib/validationReport.ts` |
 | Profile selection and Invoice flow | `src/components/CsvUploader.tsx` |
-| Shared Customer/Vendor flow | `src/components/data-preflight/MasterDataWorkspace.tsx` |
+| Shared Customer/Vendor/Product flow | `src/components/data-preflight/MasterDataWorkspace.tsx` |
 | Master-data workspace configuration | `src/lib/profiles/masterDataWorkspaceConfig.ts` |
 | Profile picker and choices | `src/components/data-preflight/ProfilePicker.tsx`, `src/lib/profiles/profilePickerConfig.ts` |
 | Shared mapping dialog | `src/components/data-preflight/ProfileMappingPanel.tsx` |
@@ -108,17 +108,17 @@ Reports do not contain a complete rule snapshot or cryptographic input fingerpri
 
 ## Current development
 
-M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Price List Validation & Professional UX is in progress.
+M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Professional UX, Price List & Stock Balances is in progress. Rob explicitly expanded the milestone to six profiles on 2026-10-26.
 
-The accepted first UX increment enlarges the three workspace step headings, makes supporting text subordinate, moves the optional Product allowed-unit check inside mapping as a collapsed control with visible status/errors, improves existing result/export readability and uses warmer off-white text. The original layout and copper/orange step color are retained. The later shared review-card/status-color redesign was rejected and reverted.
+The accepted first UX increment enlarges the three workspace step headings, makes supporting text subordinate, moves the optional Product allowed-unit check inside mapping as a collapsed control with visible status/errors, improves existing result/export readability and uses warmer off-white text. The original layout and copper/orange step color are retained. The broad shared review-card redesign was rejected and reverted; the later narrow red/yellow/green tab-accent change was accepted separately.
 
-Price List is planned and not available yet; AI is outside M7. Current user-local commit/push and deployment verification remain separate pending steps.
+The accepted UX is pushed through 130ccaf; Vercel reports deployment success. This is not a fresh full live-workflow test. Price List and Stock Balances are planned and not available yet; the current app still has four profiles. M7 adds strict numeric handling, explicit notation and bounded composite-key checks. AI remains outside M7. See the [detailed plan](docs/M7_PLAN.md) and [session progress](docs/M7_PROGRESS.md); the new planning package is not treated as locally applied or pushed until confirmed.
 
 Four profiles are implemented with mapping, review, reports and export; Vendor CSV and multi-sheet XLSX checks are complete. The landing page includes a searchable profile picker and guarded profile switching.
 
 The current parser fix reserves normalized Excel source headers before generating unique suffixes, preventing duplicate headers from silently overwriting cells. Existing unique normalized headers retain their names. The picker opens over the content without changing card height.
 
-Outreach is deferred during the current build phase. See the project status for verification evidence, limitations and delivery status.
+Outreach is deferred until after M7 and will focus on one audience and one concrete profile. See the project status for verification evidence, limitations and delivery status.
 
 Saved mappings store only names, profile/version, source column names and field assignments in this browser's localStorage. They do not store file rows; clearing site data removes them. Applying a mapping is explicit and retains mapping guards. Profile-version changes require review.
 

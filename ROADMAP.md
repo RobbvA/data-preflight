@@ -1,6 +1,6 @@
 # DataPreflight Roadmap
 
-Last reviewed: 2026-10-25
+Last reviewed: 2026-10-26
 
 ## Milestones 1–4 — MVP foundation
 
@@ -583,37 +583,38 @@ If scope must shrink, defer the reference-data experiment first and explicitly r
 - In-app source editing.
 - Large-file optimization without an observed need.
 
-## Milestone 7 — Price List Validation & Professional UX
+## Milestone 7 — Professional UX, Price List & Stock Balances
 
-Status: In progress. Initial UX changes accepted locally on 2026-10-25; session closed before Price List implementation. M7 is not complete.
+Status: In progress. On 2026-10-26 Rob explicitly expanded M7 from five to six profiles. The previous five-profile target is superseded; no additional profile beyond these six is authorized by this plan.
 
-Agreed scope:
-- One Price List / Item Prices profile (price-list v1.0.0): product, price list, currency, unit and strict decimal price.
-- Explicit point/comma notation, exact price strings, complete composite-key duplicates, reports and export; narrow Excel handling must prevent display rounding.
-- UX improvements across the existing four profiles, retaining Step 1 → Step 2 → Step 3, the current brand/layout and local processing.
-- No AI, additional inventory/order profiles, accounts, cloud storage, ERP connectors or broad workspace rebuild. Independent usage tests and outreach remain deferred and are not M7 completion requirements.
+Full executable plan and contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current work package, evidence and side-quest resume point: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md).
 
-Accepted first UX increment:
-- Larger consistent copper/orange Step 1/2/3 card headings; supporting text is subordinate.
-- Product allowed-unit controls are a collapsed optional part of the mapping card, with visible status and errors.
-- More readable existing record identifiers/main problems and export counts.
-- Warmer off-white #e5dac8; step headings use the original accent #b66f3a.
+### Retained work
 
-The subsequent shared review-card redesign and red/yellow status-color package were rejected. Restore the exact preceding accepted state; do not include those additions or describe them as delivered. The earlier active-header redesign was also rejected and reverted.
+The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. Remote main is 130ccaf on 2026-10-26; Vercel reports successful deployment. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
 
-Remaining work: user-directed UX refinements, the full Price List contract/implementation, Excel precision protection, relevant regressions, desktop/mobile/keyboard verification and final milestone documentation/deployment checks. The complete handover in the build conversation remains the detailed scope and acceptance reference.
+### Delivery phases
 
-## Current reliability and UX increment — 2026-10-25
+| Phase | Concrete result |
+| --- | --- |
+| M7.1 | Current baseline, six-profile scope, Price/Stock contracts, exact fixtures and progress register |
+| M7.2 | Focused Product workspace direction at desktop/390px, then accepted implementation |
+| M7.3 | Consistent UX and recoverable feedback across the existing four profiles |
+| M7.4 | Strict decimal/Excel foundation, complete Price List, complete Stock Balances, six-profile integration |
+| M7.5 | Comprehensive whole-app verification, fixes, documentation, local confirmation, push and separate live checks |
 
-- Reproduce and fix Excel header collisions before expanding profiles.
-- Reserve normalized source names and avoid collisions with generated suffixes.
-- Cover repeated headers, existing suffixes, normalization collisions, fallback names, and unchanged unique headers with real in-memory XLSX regressions.
-- Open the profile picker as an overlay without shifting the card content.
-- Refresh documentation to match the repository.
-- Changes prepared in a separate checkout are not deployed until the user applies, commits, and pushes them.
+Price List v1.0.0 retains product, price list, currency, unit, strict price notation, complete composite-key duplicates and the exact 8 Blocked / 1 Needs review / 2 Ready example (3 exports).
 
-## Next build step
+Stock Balances v1.0.0 is a bounded non-negative quantity snapshot per product and warehouse with an explicit unit and notation. Zero quantity is valid. Duplicate product/warehouse pairs block, including conflicting units; no automatic summing or conversion. Its fixed fixture is 7 Blocked / 0 Needs review / 3 Ready (3 exports). These are DataPreflight contract choices, not universal ERP rules.
 
-Finish this session by applying the recovery/closeout package, removing the three rejected review-card additions, checking the final local diff and committing/pushing the accepted UX increment. User-local commit/push and deployed verification are separate and not inferred from preparation checks.
+### Execution and finish
 
-The next session resumes M7 from the accepted step-heading/unit-control/warm-color state. Follow the user's concrete UX directions before further layout changes. Price List is planned, not implemented; the Excel price-precision risk remains unresolved. Do not reopen AI, naming, outreach or add profiles beyond the one agreed Price List profile.
+One concrete subgoal per build session. Record the precise resume point before a user-requested side quest. Preserve Step 1 → Step 2 → Step 3 and accepted branding. Reuse the existing workspaces and shared components; no broad speculative framework. Complete one new profile before starting the next.
+
+The final test covers all six profiles, own CSV/XLSX/XLS, worksheets, mapping and saved mappings, decimal/reference lifecycle, statuses, correction/reupload, exact downloads, report context, determinism, stale async state, desktop/390px, keyboard and local-processing observations. Record the tested commit and actual results; environment-blocked tests are not passes.
+
+M7 is complete only when its explicit criteria are met, the app checks pass, documents are accurate, and push/deployment/live behavior are separately verified. No automatic polish expansion after passing acceptance. AI, accounts/payments, cloud storage, ERP connectors, general rules/references, in-app editing, orders and a separate Warehouse/Location profile remain outside M7. Outreach and independent usage testing follow M7 and are not required technical completion gates.
+
+### Next build step
+
+M7.2a: focused Product workspace comparison for incomplete versus complete mapping, on desktop and 390px. The planning documentation packet still needs user-local application/confirmation. Detailed work packages and their completion checks are in the plan; status is maintained only in the progress register.
