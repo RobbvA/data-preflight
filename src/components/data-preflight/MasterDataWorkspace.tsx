@@ -22,6 +22,8 @@ import {
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
 import { ExportSummary } from "@/components/data-preflight/ExportSummary";
+import { ReviewRecord } from "@/components/data-preflight/ReviewRecord";
+import { ProductReviewRecord } from "@/components/data-preflight/ProductReviewRecord";
 import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
 import { UploadSection } from "@/components/data-preflight/UploadSection";
 import { ValidationContextPanel } from "@/components/data-preflight/ValidationContextPanel";
@@ -499,102 +501,30 @@ function MasterDataWorkspaceContent({
                       <div className="mt-2.5 max-h-[620px] space-y-1.5 overflow-y-auto pr-1">
                         {visibleRows.map(({ row, rowIndex, issues }) => {
                           const isSelected = selectedRowIndex === rowIndex;
-                          const criticalCount = issues.filter(
-                            (issue) => issue.severity === "critical",
-                          ).length;
-                          const mainIssue = issues[0];
-
+                          if (domain === "product") {
+                            return (
+                              <ProductReviewRecord
+                                key={rowIndex}
+                                row={row}
+                                rowIndex={rowIndex}
+                                issues={issues}
+                                expanded={isSelected}
+                                onToggle={() => setSelectedRowIndex(isSelected ? null : rowIndex)}
+                              />
+                            );
+                          }
                           return (
-                            <article
+                            <ReviewRecord
                               key={rowIndex}
-                              className="rounded-xl border border-white/10 bg-[var(--surface-raised)] p-2 transition hover:border-[color:rgba(182,111,58,0.35)]"
-                            >
-                              <div className="grid gap-2 xl:grid-cols-[1fr_auto] xl:items-start">
-                                <div className="min-w-0">
-                                  <div className="flex flex-wrap items-center gap-1.5">
-                                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]">
-                                      {criticalCount > 0
-                                        ? "Critical"
-                                        : issues.length > 0
-                                          ? "Needs review"
-                                          : "Ready"}
-                                    </span>
-                                    <span className="rounded-full bg-[var(--surface-deep)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-muted)]">
-                                      Row {rowIndex}
-                                    </span>
-                                    {issues.length > 0 && (
-                                      <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-[var(--text-secondary)]">
-                                        {issues.length} issue
-                                        {issues.length === 1 ? "" : "s"}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="mt-1.5 break-words text-base font-semibold text-[var(--text-primary)]">
-                                    {row[config.preview.idField] || config.labels.missingId}
-                                  </p>
-                                  <p className="truncate text-sm text-[var(--text-secondary)]">
-                                    {row[config.preview.nameField] || config.labels.missingName}
-                                  </p>
-                                  <p className="truncate text-[11px] text-[var(--text-muted)]">
-                                    {row[config.preview.secondaryField] || config.preview.secondaryFallback}
-                                  </p>
-                                </div>
-
-                                <button
-                                  type="button"
-                                  aria-expanded={isSelected}
-                                  onClick={() =>
-                                    setSelectedRowIndex(isSelected ? null : rowIndex)
-                                  }
-                                  className="self-start rounded-full border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:text-[var(--text-primary)]"
-                                >
-                                  {isSelected ? "Hide details" : "Details"}
-                                </button>
-                              </div>
-
-                              <div className="mt-1.5 grid gap-1 md:grid-cols-3">
-                                {config.preview.details.map((detail) => (
-                                  <MasterDataPoint
-                                    key={detail.field}
-                                    label={detail.label}
-                                    value={row[detail.field] || "—"}
-                                  />
-                                ))}
-                              </div>
-
-                              {mainIssue && (
-                                <div className="mt-1 rounded-lg border border-[color:rgba(182,111,58,0.3)] bg-[rgba(182,111,58,0.08)] px-2 py-1.5 text-sm font-medium leading-6 text-[var(--text-primary)]">
-                                  {mainIssue.problem}
-                                </div>
-                              )}
-
-                              {isSelected && (
-                                <div className="mt-3 space-y-2 rounded-lg border border-white/10 bg-[var(--surface-deep)] p-3">
-                                  {issues.length > 0 ? (
-                                    issues.map((issue, index) => (
-                                      <div
-                                        key={`${issue.ruleId}-${issue.field}-${index}`}
-                                        className="rounded-lg border border-white/10 bg-[var(--surface-raised)] p-3 text-xs leading-5"
-                                      >
-                                        <p className="font-semibold text-[var(--text-primary)]">
-                                          {issue.problem}
-                                        </p>
-                                        <p className="mt-1 text-[var(--text-secondary)]">
-                                          {issue.why}
-                                        </p>
-                                        <p className="mt-1 text-[var(--text-muted)]">
-                                          Fix: {issue.fix}
-                                        </p>
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <p className="text-xs text-[var(--text-secondary)]">
-                                      This row passed the current profile checks.
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-                            </article>
+                              title={row[config.preview.idField] || config.labels.missingId}
+                              subtitle={row[config.preview.nameField] || config.labels.missingName}
+                              context={row[config.preview.secondaryField]}
+                              rowIndex={rowIndex}
+                              fields={profile.fields.map(({ key, label }) => ({ label, value: row[key] }))}
+                              issues={issues}
+                              expanded={isSelected}
+                              onToggle={() => setSelectedRowIndex(isSelected ? null : rowIndex)}
+                            />
                           );
                         })}
                       </div>
@@ -676,17 +606,4 @@ function MasterDataWorkspaceContent({
 function getPriority(issues: MasterDataIssue[]): number {
   if (issues.some((issue) => issue.severity === "critical")) return 2;
   return issues.length > 0 ? 1 : 0;
-}
-
-function MasterDataPoint({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-[var(--surface-deep)] px-2 py-1.5">
-      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-muted)]">
-        {label}
-      </p>
-      <p className="mt-0.5 truncate text-xs font-medium text-[var(--text-secondary)]">
-        {value}
-      </p>
-    </div>
-  );
 }

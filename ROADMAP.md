@@ -591,7 +591,7 @@ Full executable plan and contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current 
 
 ### Retained work
 
-The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. Remote main is 130ccaf on 2026-10-26; Vercel reports successful deployment. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
+The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. The 130ccaf application checkpoint had a successful Vercel deployment; planning was subsequently confirmed pushed as 66ab1b5. Compact Product cards were locally accepted on 2026-10-27; M7.3a extends this record presentation only, with local acceptance/push/live still open. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
 
 ### Delivery phases
 
@@ -617,4 +617,4 @@ M7 is complete only when its explicit criteria are met, the app checks pass, doc
 
 ### Next build step
 
-M7.2a: focused Product workspace comparison for incomplete versus complete mapping, on desktop and 390px. The planning documentation packet still needs user-local application/confirmation. Detailed work packages and their completion checks are in the plan; status is maintained only in the progress register.
+M7.3a: locally review compact records in Customer, Vendor and Invoice, using the accepted Product record presentation. The earlier broad workspace hierarchy was withdrawn; keep the existing header/source, mapping and export layout. After acceptance, continue M7.3b feedback/recovery and then M7.4a decimal/Excel handling. Detailed status and exact resume point are maintained in docs/M7_PROGRESS.md.
