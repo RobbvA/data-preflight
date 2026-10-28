@@ -103,6 +103,8 @@ Blokkeer voor de nieuwe numerieke velden formule-, datum-, boolean- en foutcelle
 
 De nieuwe bronroute moet interne spaties in identifiers en getaltekst behouden; trimmen mag, interne whitespace stil samenvouwen of verwijderen niet. Test dit expliciet: de bestaande parser normaliseert ruimer. Geen ongeteste globale parserwijziging.
 
+28 oktober 2026 — bevestigd bestaand Invoice-risico: normalizeNumber("1.234") levert "1234". De nieuwe Price/Stock-primitives gebruiken deze heuristiek niet. De bestaande Invoice-route is hiermee nog niet ambiguïteitsvrij: vóór M7-eindacceptatie een expliciet notatie-/afwijscontract vastleggen en gericht implementeren (M7.5b of eerdere gerichte side quest), inclusief regressie op bestaande bestanden. Dit open punt mag niet verdwijnen achter geslaagde tests voor de nieuwe profielen.
+
 ## 6. Price List / Item Prices v1.0.0
 
 ID: price-list. Eén organisatiecontext, één vlak bestand. Eén prijs per product + prijslijst + valuta + eenheid. Geen staffels, geldigheidsperioden, korting of berekening.

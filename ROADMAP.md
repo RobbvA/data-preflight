@@ -591,7 +591,7 @@ Full executable plan and contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current 
 
 ### Retained work
 
-The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. The 130ccaf application checkpoint had a successful Vercel deployment; planning was subsequently confirmed pushed as 66ab1b5. Compact Product cards were locally accepted on 2026-10-27; M7.3a extends this record presentation only and is locally accepted/pushed as 971b8f9. M7.3b feedback/recovery is prepared; local acceptance/push/live remain separate. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
+The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. The 130ccaf application checkpoint had a successful Vercel deployment; planning was subsequently confirmed pushed as 66ab1b5. Compact Product cards were locally accepted on 2026-10-27; M7.3a extends this record presentation only and is locally accepted/pushed as 971b8f9. M7.3b feedback/recovery is locally accepted/pushed as f8e185b. M7.4a exact numeric primitives are tested in preparation; local acceptance/push/live remain separate. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
 
 ### Delivery phases
 
@@ -617,4 +617,4 @@ M7 is complete only when its explicit criteria are met, the app checks pass, doc
 
 ### Next build step
 
-M7.3b: locally apply/confirm upload cancellation and recoverable input messages. M7.3a compact records were locally accepted/pushed as 971b8f9. The earlier broad workspace hierarchy was withdrawn; keep the existing header/source, mapping and export layout. After M7.3b acceptance, continue M7.4a decimal/Excel handling. The four-profile checkpoint is documented in docs/M7_3B_CHECKPOINT.md. Detailed status and exact resume point are maintained in docs/M7_PROGRESS.md.
+M7.4a: locally apply/confirm exact numeric primitives, then M7.4b Price List domain and its 8/1/2 fixture. The four-profile feedback checkpoint is accepted/pushed as f8e185b. The earlier broad workspace hierarchy remains withdrawn. Preserve accepted presentation and use typed source-cell information at numeric-profile integration. Existing Invoice 1.234 ambiguity remains a documented pre-release issue, distinct from new-profile tests. Details: docs/M7_4A_NUMERIC_INPUT.md and docs/M7_PROGRESS.md.

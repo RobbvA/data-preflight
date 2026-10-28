@@ -73,7 +73,10 @@ export function getInputAdapter(file: File): InputAdapter | null {
   return adapters.find((adapter) => adapter.canParse(file)) ?? null;
 }
 
-export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
+export async function parseCsvFile(
+  file: File,
+  options: { preserveCellText?: boolean } = {},
+): Promise<ParsedDataSet> {
   if (file.size === 0) {
     throw new Error(
       "This file is empty. Upload a file containing column headers and data.",
@@ -85,7 +88,7 @@ export async function parseCsvFile(file: File): Promise<ParsedDataSet> {
       header: true,
       skipEmptyLines: "greedy",
       transformHeader: (header) => normalizeHeader(header),
-      transform: (value) => normalizeCell(value),
+      transform: (value) => options.preserveCellText ? value.trim() : normalizeCell(value),
 
       complete: (result) => {
         const structuralError = result.errors[0];
@@ -258,7 +261,7 @@ function createRowsFromSheet(sheetRows: unknown[][]): ParsedRow[] {
   );
 }
 
-function createUniqueHeaders(headers: string[]) {
+export function createUniqueHeaders(headers: string[]) {
   const normalizedHeaders = headers.map(normalizeHeader);
   // Reserve source names before generating suffixes so later columns keep theirs.
   const reservedHeaders = new Set(normalizedHeaders);

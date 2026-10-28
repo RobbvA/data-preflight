@@ -6,18 +6,19 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 
 "Bouwsessie start nu" betekent: actuele voortgang/code/remote controleren, één concreet subdoel noemen en dat uitvoeren. Geen nieuwe volledige audit of roadmapronde. Bij een side quest eerst hieronder het exacte hervatpunt vastleggen.
 
-## Actueel checkpoint — M7.3b
+## Actueel checkpoint — M7.4a
 
-- M7.2b en M7.3a zijn door Rob lokaal toegepast, beoordeeld en gepusht. Commit 971b8f97c3d68bbcdf751de8228b56c17f9ee85f (28 oktober 2026), `feat: unify compact review records across four profiles`. PowerShell toont schone werkmap en main gelijk aan origin/main; commit ook opgehaald via GitHub. Geen nieuwe live-workflowcontrole geclaimd.
-- Actieve stap: M7.3b — feedback/herstel en vierprofielcheckpoint, voorbereid; lokale acceptatie/push/live van dit pakket apart vaststellen.
-- Gericht gewijzigd: Cancel file tijdens het lezen gebruikt de bestaande reset/request-ID-guard; annulering voorkomt verwerking/toepassing van een later resultaat, zonder te claimen dat onderliggende bestands-I/O fysiek wordt afgebroken. Header-only/lege gegevens geven een concrete herstelactie. Invoice noemt dezelfde ondersteunde bestandsformaten als de overige profielen.
-- Voorbereidingsbewijs: 39 tests geslaagd; lint 0 fouten/2 bekende warnings; productiebuild/TypeScript geslaagd; vierprofiel-browsercheckpoint geslaagd zonder browserfouten. Details en beperkingen in docs/M7_3B_CHECKPOINT.md.
-- Bestaande mappingguards, saved-mappingfeedback, worksheetkeuze, profielwisselbevestiging en afgewezen-unitlijstfeedback zijn behouden en gericht gecontroleerd. De geaccepteerde header/bronkaart, records, kleuren en layout zijn de basis.
-- Pakket: datapreflight-m7-3b-feedback-recovery.zip; basis 971b8f9. Zie docs/M7_3B_CHECKPOINT.md voor werkelijk testbewijs en grenzen.
-- Volgende actie: lokaal pakket toepassen en herstelmelding bij een CSV met alleen koppen bekijken; vervolgens M7.3b bevestigen en M7.4a hervatten.
-- M7.4a: maak numerieke interpretatie expliciet, onderzoek het voorbeeld 1.234 in de bestaande normalisatie, test punt/komma/duizendtalscheiding en bescherm numerieke Excelwaarden tegen weergaveafronding. Geen onbewezen aanname dat het gemelde getalvoorbeeld opnieuw is geverifieerd. Price List en Stock Balances nog niet gebouwd.
-- Ready betekent uitsluitend de geïmplementeerde controles; zonder actieve unitlijst wordt alleen aanwezigheid van de basiseenheid gecontroleerd. Brede zesprofiel-eindtest blijft M7.5; daarna zelfstandig eigen bestand door een ERP/data-gebruiker laten verwerken.
-- Geen actieve side quest. Nieuwe zichtbare ontwerpkeuzes vooraf afstemmen; kleine wijzigingen krijgen gerichte controles, brede controles eenmaal op het afgesproken checkpoint.
+- M7.3b is lokaal toegepast, bevestigd en gepusht. Remote main gecontroleerd op f8e185bec9858c3da249c756f5ecf579bc8d80e6, `fix: improve upload cancellation and recovery feedback`. Dit is broncode/pushbewijs; geen nieuwe volledige live-workflowcontrole.
+- Actieve stap: M7.4a — strikte decimaaldecoder, opt-in exacte CSV/XLSX/XLS-invoer en botsingsvrije tuples. Gebouwd/getest in voorbereiding; pakket lokaal toepassen/bevestigen, commit/push apart.
+- Notatie: tekst volgt uitsluitend de expliciet gekozen punt-/kommagammatica. Geen Number/parseFloat, groeperingsreparatie, interne-whitespacewijziging of prijsafronding. Tekstschaal blijft behouden; negatieve nul verliest uitsluitend het minteken.
+- Excel: nieuwe leesroute bewaart celtype, formule en opmaak. Numerieke cellen gebruiken hun opgeslagen waarde zonder weergaveafronding; exponenten worden uitgeschreven. Formule/datum/boolean/fout/percentage afgewezen voor nieuwe numerieke velden. Onveilige numerieke magnitude vereist exacte tekst. Ongecachete formules blijven als afwijsbare cellen behouden.
+- De vier bestaande profielen gebruiken deze route nog niet. Price List/Stock sluiten in M7.4b/c/d/e aan op sourceCells; die metadata mag bij mapping niet verloren gaan. Notatiegate, UI/rapport en veldspecifieke probleem/hersteltekst volgen bij integratie.
+- Bewijs: bestaande 39 + 15 nieuwe tests geslaagd; gerichte ESLint 0 fouten/warnings; TypeScript geslaagd; geen extra volledige build/browserronde bij deze ongebruikte numerieke primitives. Details en API-contract: docs/M7_4A_NUMERIC_INPUT.md.
+- Pakket: datapreflight-m7-4a-exact-numeric-input.zip; basis f8e185b. Aan de interface verandert in dit pakket niets.
+- OPEN VÓÓR M7-EINDACCEPTATIE: bestaande Invoice-normalisatie bevestigt 1.234 → 1234. Die is in dit pakket bewust niet stil gewijzigd. Bij M7.5b (of eerder als gerichte side quest) expliciet notatie-/afwijscontract kiezen en implementeren, met regressie voor bestaande Invoice-bestanden; geen claim dat Invoice nu al exact of ambiguïteitsvrij is.
+- Exacte volgende actie: technische bestanden lokaal toepassen en bevestigen; daarna M7.4b Price List-domein met exacte 8 Blocked / 1 Needs review / 2 Ready-fixture en 3 exportrijen. Geen nieuwe UI-keuzes zonder gerichte afstemming.
+- Daarna volledige Price-workflow, pas daarna Stock. M7.5 blijft de zesprofiel-eindtest; na M7 zelfstandig eigen bestand door een ERP/data-gebruiker laten verwerken.
+- Geen actieve side quest.
 
 ## Werkpakketten
 
@@ -29,8 +30,8 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 | M7.2a | Gericht Product-voorstel desktop/390px | Beoordeeld; brede richting ingetrokken, alleen records behouden |
 | M7.2b | Compacte Product-recordkaarten, bestaande werkruimte behouden | Lokaal geaccepteerd en gepusht in 971b8f9; livecontrole apart |
 | M7.3a | Compacte recordpresentatie consequent over bestaande vier | Lokaal geaccepteerd en gepusht in 971b8f9; livecontrole apart |
-| M7.3b | Feedback/herstel en vierprofielcheckpoint | Voorbereid; lokaal toepassen/bevestigen open |
-| M7.4a | Strikte decimalen en gerichte Excelbescherming | Niet gestart |
+| M7.3b | Feedback/herstel en vierprofielcheckpoint | Lokaal bevestigd en gepusht als f8e185b; livecontrole apart |
+| M7.4a | Strikte decimalen en gerichte Excelbescherming | Technische basis gebouwd/getest; lokaal toepassen/bevestigen open |
 | M7.4b | Price List-domein en exacte 8/1/2-fixture | Niet gestart |
 | M7.4c | Price List volledige workflow | Niet gestart |
 | M7.4d | Stock-domein en exacte 7/0/3-fixture | Niet gestart |
