@@ -1,6 +1,6 @@
 # DataPreflight Product Vision
 
-Last reviewed: 2026-10-26
+Last reviewed: 2026-10-28
 
 ## Purpose
 
@@ -28,13 +28,13 @@ The problem is not simply whether a spreadsheet opens. Inconsistent columns, mis
 
 ## Current product
 
-Invoice, Customer, Vendor and Product / Material are working, selectable profiles defined and versioned in code. M7 targets six profiles by adding Price List / Item Prices and limited Stock Balances; neither new profile is implemented yet.
+The M7.4c preparation build has five selectable profiles: Invoice, Customer, Vendor, Product / Material and Price List / Item Prices. Price List is tested end-to-end; local acceptance/push/live of this increment remain open. M7 targets six profiles; limited Stock Balances is still planned.
 
 A user explicitly chooses a profile before uploading a CSV, XLSX, or XLS file.
 
 The browser suggests mappings. Correct automatic mappings do not require an extra confirmation step. Missing or duplicate mappings block validation until resolved.
 
-All four profiles use one mapping panel with consistent field feedback and keyboard behavior.
+All five profiles use one mapping panel with consistent field feedback and keyboard behavior.
 
 Mapped values are normalized and checked by deterministic rules. Results appear as Blocked, Needs review, and Ready.
 
@@ -79,7 +79,7 @@ The selected mapping is part of validation context because changing a mapping ca
 
 Invoice retains a richer header/sample-based suggestion algorithm. Customer, Vendor and Product use header-based suggestions.
 
-The four profiles share readiness checks and the mapping interface. Ambiguous suggestions cannot establish semantic correctness.
+The five profiles share readiness checks and the mapping interface. Ambiguous suggestions cannot establish semantic correctness.
 
 ### Versioned validation profiles
 
@@ -89,7 +89,7 @@ A change to normalization or validation behavior must advance the relevant profi
 
 Keep domain logic independent while extracting proven common workflow behavior.
 
-Customer, Vendor and Product share a configured workspace. Invoice may retain its own. Extend only what concrete Price/Stock or UX behavior requires; avoid a broad generic-workspace rebuild.
+Customer, Vendor, Product and Price List share the configured workspace; Price List uses an explicit source-cell/notation context. Invoice may retain its own. Extend only what concrete Price/Stock or UX behavior requires; avoid a broad generic-workspace rebuild.
 
 ### Local processing
 
@@ -109,7 +109,7 @@ Current repeatability target:
 
 same input + same worksheet where applicable + same mapping + same profile version = same result.
 
-Product reference runs additionally account for effective reference values and check version. The planned Price/Stock profiles add explicit numeric notation to their run context.
+Product reference runs additionally account for effective reference values and check version. Price List includes explicit price notation and source-cell rules in its run/report context; Stock will add its quantity context separately.
 
 Hard validation must remain inspectable and independent of changing AI responses.
 
@@ -122,7 +122,7 @@ Validation Reports record:
 - Result counts.
 - Product reference context when applicable.
 
-Price/Stock notation will be added when those profiles are implemented; it is not present yet.
+Price List requires explicit notation per own source, preserves it during remapping, clears it on replacement/reset/switch and never persists it in saved mappings. Stock quantity notation remains planned.
 
 The current report is not a complete rule snapshot, cryptographic input fingerprint, or full audit record of every value and issue.
 
@@ -178,9 +178,9 @@ Keep DataPreflight as the working name. Renaming is not a development prerequisi
 
 ## Validation status
 
-M5 and M6 are internally technically complete. The M6 baseline is a91935f. The accepted initial M7 UX and narrow tab accents are pushed through 130ccaf; Vercel reports successful deployment. The four implemented profiles remain the actual current product.
+M5 and M6 are internally technically complete. The M6 baseline is a91935f. The accepted initial M7 UX and narrow tab accents are pushed through 130ccaf; Vercel reports successful deployment. Five profiles are implemented in the M7.4c preparation build; the latest confirmed pushed domain commit is b7e495b. Live availability of the fifth profile is not claimed before deployment.
 
-The historical retained suite has 39 passing tests, two known lint warnings and a successful production build. These checks are not fresh results for the planning update. M7 final six-profile verification is still to be performed and documented.
+The M7.4c preparation suite has 69 passing tests, zero lint errors/two known warnings and a successful production build. Focused production-browser checks cover Price notation lifecycle, exact downloads, own CSV/XLS/XLSX, desktop/390px and regression smoke across the other four profiles. M7 final six-profile verification is still to be performed and documented.
 
 An independent unguided user test and willingness to pay remain unproven. After M7, conduct focused outreach using one audience, a concrete profile and representative source file, building on earlier professional feedback. Learn whether users understand the workflow, repair source data, would return, and value it enough to pay. Outreach is not a blocking technical M7 exit requirement.
 

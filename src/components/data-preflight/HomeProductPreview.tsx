@@ -21,6 +21,13 @@ type PreviewExample = {
 };
 
 const examples: Record<DataDomain, PreviewExample> = {
+  "price-list": {
+    label: "Price list example", counts: [8, 1, 2],
+    issues: [
+      { reference: "007 · RETAIL · EUR · EA", problem: "Price combination appears more than once", status: "Blocked" },
+      { reference: "002 · RETAIL · EUR · EA", problem: "Unit price is zero", status: "Review" },
+    ],
+  },
   invoice: {
     label: "Invoice example",
     counts: [2, 1, 3],

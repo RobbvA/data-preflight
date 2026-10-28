@@ -14,25 +14,27 @@ DataPreflight is a browser-based quality gate for structured business data. Choo
 | Customer master data | Required customer ID and name, duplicate customer IDs, email format, and country-code format. |
 | Vendor master data | Required vendor ID and name, case-insensitive duplicate IDs, email format, and country-code format. VAT is not fiscally validated. |
 | Product / Material | Required ID, description and base unit; case-insensitive duplicate IDs; optional local allowed-unit CSV. |
+| Price List / Item Prices | Required product/list/currency/unit/price, explicit exact notation, zero-price review, negative-price blockers and duplicate combinations. |
 
-All four profiles are defined and versioned in code. Users can select a profile, but cannot create or edit validation rules in the app.
+The prepared M7.4c build provides five profiles, defined and versioned in code. Users can select a profile, but cannot create or edit validation rules in the app.
 
 Saved mappings work locally per profile. Product supports an optional reference CSV with one `unit_code` column. Effective codes are trimmed, compared case-insensitively, deduplicated and sorted. Unknown units block while the list is active; no unit conversion is performed.
 
 ## Workflow
 
-1. Explicitly choose Invoice, Customer, Vendor, or Product / Material through the searchable profile picker. No profile is selected by default.
+1. Explicitly choose Invoice, Customer, Vendor, Product / Material, or Price List / Item Prices through the searchable profile picker. No profile is selected by default.
 2. Upload a CSV, XLSX, or XLS file, or load the matching example.
 3. Choose a worksheet if the Excel workbook contains multiple populated worksheets.
 4. Review suggested field mapping. Resolve missing required fields and duplicate source-column assignments.
-5. DataPreflight normalizes the mapped values and runs the selected profile's deterministic checks.
-6. Switch between Blocked, Needs review, and Ready to inspect results and suggested fixes.
-7. Correct the source file and upload it again if needed.
-8. Export rows without critical issues, download the issue report, and download the Validation Report.
+5. For Price List, choose decimal point or comma for each own file. The example visibly presets point; remapping preserves the current choice. Excel numeric prices use stored values without display rounding.
+6. DataPreflight normalizes the mapped values and runs the selected profile's deterministic checks.
+7. Switch between Blocked, Needs review, and Ready to inspect results and suggested fixes.
+8. Correct the source file and upload it again if needed.
+9. Export rows without critical issues, download the issue report, and download the Validation Report.
 
 The workspaces show Mapping → Review → Export as visible steps. They use the same field mapping panel and shared mapping guards.
 
-The mapping panel provides required/optional labels, duplicate-assignment feedback, keyboard navigation, Escape dismissal, and focus restoration after manual opening. Invoice retains its header/sample-based mapping suggestions; Customer, Vendor, and Product retain header-based suggestions.
+The mapping panel provides required/optional labels, duplicate-assignment feedback, keyboard navigation, Escape dismissal, and focus restoration after manual opening. Invoice retains its header/sample-based mapping suggestions; Customer, Vendor, Product and Price List retain header-based suggestions.
 
 The homepage preview is illustrative. Actual results come from a loaded file.
 
@@ -112,9 +114,9 @@ M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Prof
 
 The accepted first UX increment enlarges the three workspace step headings, makes supporting text subordinate, moves the optional Product allowed-unit check inside mapping as a collapsed control with visible status/errors, improves existing result/export readability and uses warmer off-white text. The original layout and copper/orange step color are retained. The broad shared review-card redesign was rejected and reverted; the later narrow red/yellow/green tab-accent change was accepted separately.
 
-The accepted UX is pushed through 130ccaf; Vercel reports deployment success. This is not a fresh full live-workflow test. Price List and Stock Balances are planned and not available yet; the current app still has four profiles. M7 adds strict numeric handling, explicit notation and bounded composite-key checks. AI remains outside M7. See the [detailed plan](docs/M7_PLAN.md) and [session progress](docs/M7_PROGRESS.md); the new planning package is not treated as locally applied or pushed until confirmed.
+The latest confirmed domain checkpoint is b7e495b. M7.4c adds the complete fifth-profile Price List workflow in preparation; local acceptance/push/live remain separate. Stock Balances remains planned. Price List uses strict numeric handling, explicit notation and bounded composite-key checks. AI remains outside M7. See the [detailed plan](docs/M7_PLAN.md), [Price workflow evidence](docs/M7_4C_PRICE_LIST_WORKFLOW.md) and [session progress](docs/M7_PROGRESS.md).
 
-Four profiles are implemented with mapping, review, reports and export; Vendor CSV and multi-sheet XLSX checks are complete. The landing page includes a searchable profile picker and guarded profile switching.
+Five profiles are implemented in the preparation build with mapping, review, reports and export; Vendor CSV and multi-sheet XLSX checks are complete. The landing page includes a searchable profile picker and guarded profile switching.
 
 The current parser fix reserves normalized Excel source headers before generating unique suffixes, preventing duplicate headers from silently overwriting cells. Existing unique normalized headers retain their names. The picker opens over the content without changing card height.
 
@@ -127,3 +129,5 @@ Unit reference lists stay in memory and clear on source replacement, reset, prof
 An independent unguided test with a new ERP/data user has not been completed.
 
 See ROADMAP.md for delivery order, PROJECT_STATUS.md for evidence and limits, FEEDBACK.md for historical professional feedback, and SESSION_LOG.md for build history.
+
+Price List checks currency-code shape, not ERP code existence, tiers, validity periods or discounts. Text prices preserve exact decimal scale; formulas/dates/booleans/errors/percentages are rejected as prices. Existing Invoice interpretation of ambiguous 1.234 remains a documented pre-release issue; the new price route does not change Invoice silently.

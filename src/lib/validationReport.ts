@@ -1,11 +1,15 @@
+import type { DecimalNotation } from "@/lib/strictDecimal";
 import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import type { ParsedRow } from "@/lib/parseCsv";
+
+export type PriceValidationContext = { priceNotation: DecimalNotation };
 
 type ValidationReportInput<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
   sheetName?: string;
   unitReference?: UnitReference | null;
+  priceContext?: PriceValidationContext;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -22,7 +26,11 @@ export function buildValidationReportRows<TField extends string>({
   mapping,
   counts,
   unitReference,
+  priceContext,
 }: ValidationReportInput<TField>): ParsedRow[] {
+  if (profile.id === "price-list" && (!priceContext || !["point", "comma"].includes(priceContext.priceNotation))) {
+    throw new Error("Price notation is required for a Price List validation report.");
+  }
   const row = (section: string, field: string, value: string): ParsedRow => ({
     Section: section,
     "DataPreflight field / metric": field,
@@ -50,6 +58,12 @@ export function buildValidationReportRows<TField extends string>({
     row("Result", "Needs review", String(counts.needsReview)),
     row("Result", "Ready", String(counts.ready)),
     ...mappingRows,
+    ...(profile.id === "price-list" && priceContext ? [
+      row("Price context", "Price notation", priceContext.priceNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"),
+      row("Price context", "Text price rules", "Chosen decimal notation only; no grouping, symbols or scientific text. Export uses a point and preserves text scale."),
+      row("Price context", "Excel numeric values", "Stored numeric values without display rounding. Formula, date, boolean, error and percentage cells are rejected for prices."),
+      row("Price context", "Checks not performed", "Product, price-list, currency and unit existence in ERP; tiers, validity periods, discounts and target-ERP acceptance."),
+    ] : []),
     ...(profile.id === "product" ? [
       row("Unit reference", "Reference check", unitReference ? "Run" : "Not run"),
       row("Unit reference", "Reference-check version", UNIT_REFERENCE_VERSION),

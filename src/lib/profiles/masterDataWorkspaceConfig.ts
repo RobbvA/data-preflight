@@ -1,3 +1,4 @@
+import { priceListProfile } from "@/lib/profiles/priceListProfile";
 import type { UnitReference } from "@/lib/unitReference";
 import { productValidationProfile, runProductValidation } from "@/lib/validation/productValidation";
 import type { DataProfile } from "@/lib/dataProfile";
@@ -229,4 +230,22 @@ export const masterDataWorkspaceConfigs: Record<
   customer: customerWorkspaceConfig,
   vendor: vendorWorkspaceConfig,
   product: productWorkspaceConfig,
+};
+
+export type PriceListWorkspaceConfig = Omit<MasterDataWorkspaceConfig, "runValidation"> & { kind: "price-list" };
+
+export const priceListWorkspaceConfig: PriceListWorkspaceConfig = {
+  kind: "price-list",
+  profile: priceListProfile,
+  guidance: "Check mapping and price notation, then review prices. Product, price-list, currency and unit existence in your ERP is not checked.",
+  labels: {
+    results: "Price list results", blocked: "Blocked prices", ready: "Ready prices", sort: "Sort prices",
+    missingId: "Missing product ID", missingName: "Missing price list",
+  },
+  preview: {
+    idField: "product_id", nameField: "price_list_id", secondaryField: "unit_price", secondaryFallback: "Missing price",
+    details: priceListProfile.fields.map(({ key, label }) => ({ field: key, label })),
+  },
+  example: { fileName: "price-list-example.csv", csv: "Product ID,Price List,Currency,Unit,Unit Price\n001,RETAIL,EUR,EA,12.50\n001,WHOLESALE,EUR,EA,10.00\n002,RETAIL,EUR,EA,0\n003,RETAIL,EUR,KG,-1.00\n004,RETAIL,EUR,EA,twelve\n,RETAIL,EUR,EA,5.00\n005,RETAIL,EURO,EA,5.00\n006,RETAIL,EUR,,5.00\n007,RETAIL,EUR,EA,9.95\n007,retail,eur,ea,10.95\n008,,EUR,EA,5.00\n" },
+  exports: { rows: "price-list-rows-without-blockers.csv", issues: "price-list-issues.csv" },
 };

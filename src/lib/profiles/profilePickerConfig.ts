@@ -1,4 +1,4 @@
-import { FileText, UsersRound, Truck, Package, type LucideIcon } from "lucide-react";
+import { FileText, UsersRound, Truck, Package, Tags, type LucideIcon } from "lucide-react";
 import type { DataDomain } from "@/components/data-preflight/WorkspaceLayout";
 
 export type ProfilePickerOption = {
@@ -37,6 +37,13 @@ export const profilePickerConfig = {
     description: "Check product IDs, duplicates, descriptions and required base units.",
     keywords: "item article sku unit uom artikel materiaal product eenheid",
     icon: Package,
+  },
+  "price-list": {
+    domain: "price-list",
+    name: "Price List / Item Prices",
+    description: "Check item prices, currency, units and duplicate price-list entries.",
+    keywords: "price pricing prices list item prijs prijzen prijslijst eenheidsprijs",
+    icon: Tags,
   },
 } satisfies Record<DataDomain, ProfilePickerOption>;
 

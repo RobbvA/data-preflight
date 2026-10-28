@@ -12,6 +12,12 @@ import {
   type ParsedDataSet,
   type ParsedRow,
 } from "@/lib/parseCsv";
+import { getExactReadableExcelSheetNames, parseExactSourceFile, type ExactParsedDataSet } from "@/lib/exactDataInput";
+import type { DecimalNotation } from "@/lib/strictDecimal";
+import type { PriceListMapping } from "@/lib/profiles/priceListProfile";
+import { runPriceListSourceValidation } from "@/lib/validation/priceListValidation";
+import { PriceNotationControls } from "@/components/data-preflight/PriceNotationControls";
+import { PriceListReviewRecord } from "@/components/data-preflight/PriceListReviewRecord";
 import type { UnitReference } from "@/lib/unitReference";
 import { UnitReferenceControls } from "@/components/data-preflight/UnitReferenceControls";
 import { downloadCsv } from "@/lib/exportData";
@@ -35,6 +41,8 @@ import {
 } from "@/components/data-preflight/WorkspaceLayout";
 import {
   masterDataWorkspaceConfigs,
+  priceListWorkspaceConfig,
+  type PriceListWorkspaceConfig,
   type MasterDataDomain,
   type MasterDataIssue,
   type MasterDataWorkspaceConfig,
@@ -45,7 +53,7 @@ type MasterDataReviewTab = "blocked" | "review" | "ready";
 type ReviewSortMode = "priority" | "row" | "issues";
 type MasterDataMapping = Record<string, string>;
 
-function emptyMapping(config: MasterDataWorkspaceConfig): MasterDataMapping {
+function emptyMapping(config: Pick<MasterDataWorkspaceConfig, "profile">): MasterDataMapping {
   return Object.fromEntries(
     config.profile.fields.map(({ key }) => [key, ""]),
   );
@@ -55,14 +63,14 @@ export function MasterDataWorkspace({
   domain,
   onDomainChange,
 }: {
-  domain: MasterDataDomain;
+  domain: MasterDataDomain | "price-list";
   onDomainChange: (domain: DataDomain) => void;
 }) {
   return (
     <MasterDataWorkspaceContent
       key={domain}
       domain={domain}
-      config={masterDataWorkspaceConfigs[domain]}
+      config={domain === "price-list" ? priceListWorkspaceConfig : masterDataWorkspaceConfigs[domain]}
       onDomainChange={onDomainChange}
     />
   );
@@ -73,8 +81,8 @@ function MasterDataWorkspaceContent({
   config,
   onDomainChange,
 }: {
-  domain: MasterDataDomain;
-  config: MasterDataWorkspaceConfig;
+  domain: MasterDataDomain | "price-list";
+  config: MasterDataWorkspaceConfig | PriceListWorkspaceConfig;
   onDomainChange: (domain: DataDomain) => void;
 }) {
   const loadRequestId = useRef(0);
@@ -89,7 +97,8 @@ function MasterDataWorkspaceContent({
   const [unitReference, setUnitReference] = useState<UnitReference | null>(null);
   const [isReferenceLoading, setIsReferenceLoading] = useState(false);
 
-  const [dataSet, setDataSet] = useState<ParsedDataSet | null>(null);
+  const [dataSet, setDataSet] = useState<ParsedDataSet | ExactParsedDataSet | null>(null);
+  const [priceNotation, setPriceNotation] = useState<DecimalNotation | null>(null);
   const [mapping, setMapping] = useState<MasterDataMapping>(() =>
     emptyMapping(config),
   );
@@ -129,12 +138,16 @@ function MasterDataWorkspaceContent({
     [rows, mapping, profile, mappingReady],
   );
 
-  const { normalizedRows, validationResult } = useMemo(
-    () => config.runValidation(mappedRows, unitReference),
-    [config, mappedRows, unitReference],
-  );
-
-  const canExport = mappingReady && !isReferenceLoading && validationResult.cleanRows.length > 0;
+  const validationRun = useMemo(() => {
+    if ("runValidation" in config) return { ...config.runValidation(mappedRows, unitReference), available: true };
+    if (!dataSet || !("sourceCells" in dataSet)) {
+      return { available: false, normalizedRows: [], validationResult: { issues: [], cleanRows: [], errorRows: [] } };
+    }
+    return runPriceListSourceValidation(dataSet, mapping as PriceListMapping, priceNotation);
+  }, [config, mappedRows, unitReference, dataSet, mapping, priceNotation]);
+  const { normalizedRows, validationResult } = validationRun;
+  const resultsReady = mappingReady && !isReferenceLoading && validationRun.available;
+  const canExport = resultsReady && validationResult.cleanRows.length > 0;
 
   const issuesByRow = useMemo(() => {
     const grouped = new Map<number, MasterDataIssue[]>();
@@ -210,11 +223,12 @@ function MasterDataWorkspaceContent({
     setIsReviewListOpen(true);
   }
 
-  async function loadFile(file: File, selectedSheetName?: string) {
+  async function loadFile(file: File, selectedSheetName?: string, exampleNotation: DecimalNotation | null = null) {
     const requestId = ++loadRequestId.current;
 
     setError(null);
     setDataSet(null);
+    setPriceNotation(null);
     setUnitReference(null);
     setIsReferenceLoading(false);
     setMapping(emptyMapping(config));
@@ -233,7 +247,7 @@ function MasterDataWorkspaceContent({
       }
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
-        const sheetNames = await getReadableExcelSheetNames(file);
+        const sheetNames = await (domain === "price-list" ? getExactReadableExcelSheetNames(file) : getReadableExcelSheetNames(file));
         if (requestId !== loadRequestId.current) return;
 
         if (sheetNames.length > 1) {
@@ -242,7 +256,7 @@ function MasterDataWorkspaceContent({
         }
       }
 
-      const parsed = await adapter.parse(file, selectedSheetName);
+      const parsed = await (domain === "price-list" ? parseExactSourceFile(file, selectedSheetName) : adapter.parse(file, selectedSheetName));
       if (requestId !== loadRequestId.current) return;
 
       if (parsed.rows.length === 0 || parsed.headers.length === 0) {
@@ -257,6 +271,7 @@ function MasterDataWorkspaceContent({
         getMappingStatus(profile, suggestedMapping);
 
       setDataSet(parsed);
+      if (domain === "price-list") setPriceNotation(exampleNotation);
       setMapping(suggestedMapping);
       setIsMappingOpen(!suggestedMappingReady);
     } catch (caught) {
@@ -285,6 +300,8 @@ function MasterDataWorkspaceContent({
       new File([config.example.csv], config.example.fileName, {
         type: "text/csv",
       }),
+      undefined,
+      domain === "price-list" ? "point" : null,
     );
   }
 
@@ -292,6 +309,7 @@ function MasterDataWorkspaceContent({
     loadRequestId.current += 1;
     setPendingExcelSheets(null);
     setDataSet(null);
+    setPriceNotation(null);
     setUnitReference(null);
     setIsReferenceLoading(false);
     setMapping(emptyMapping(config));
@@ -413,6 +431,13 @@ function MasterDataWorkspaceContent({
                 {mappingReady ? "Edit mapping" : "Complete mapping"}
               </button>
             </div>
+            {domain === "price-list" && (
+              <PriceNotationControls value={priceNotation} onChange={(value) => {
+                setPriceNotation(value);
+                setActiveReviewTab(null);
+                setSelectedRowIndex(null);
+              }} />
+            )}
             {domain === "product" && (
               <UnitReferenceControls
                 reference={unitReference}
@@ -426,7 +451,7 @@ function MasterDataWorkspaceContent({
             )}
           </section>
 
-          {mappingReady && !isReferenceLoading && (
+          {resultsReady && (
             <>
               <section
                 id={`${domain}-review`}
@@ -501,6 +526,9 @@ function MasterDataWorkspaceContent({
                       <div className="mt-2.5 max-h-[620px] space-y-1.5 overflow-y-auto pr-1">
                         {visibleRows.map(({ row, rowIndex, issues }) => {
                           const isSelected = selectedRowIndex === rowIndex;
+                          if (domain === "price-list") {
+                            return <PriceListReviewRecord key={rowIndex} row={row} rowIndex={rowIndex} issues={issues} expanded={isSelected} onToggle={() => setSelectedRowIndex(isSelected ? null : rowIndex)} />;
+                          }
                           if (domain === "product") {
                             return (
                               <ProductReviewRecord
@@ -549,6 +577,7 @@ function MasterDataWorkspaceContent({
                 <ValidationContextPanel
                   profile={profile}
                   unitReference={unitReference}
+                  priceContext={domain === "price-list" && priceNotation ? { priceNotation } : undefined}
                   fileName={dataSet.fileName}
                   sheetName={dataSet.metadata?.sheetName}
                   mapping={mapping}

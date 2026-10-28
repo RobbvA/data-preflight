@@ -2,13 +2,14 @@
 
 import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import { downloadCsv } from "@/lib/exportData";
-import { buildValidationReportRows } from "@/lib/validationReport";
+import { buildValidationReportRows, type PriceValidationContext } from "@/lib/validationReport";
 
 type ValidationContextPanelProps<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
   sheetName?: string;
   unitReference?: UnitReference | null;
+  priceContext?: PriceValidationContext;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -25,6 +26,7 @@ export function ValidationContextPanel<TField extends string>({
   mapping,
   counts,
   unitReference,
+  priceContext,
 }: ValidationContextPanelProps<TField>) {
   const appliedMapping: Record<string, string> = Object.fromEntries(
     (Object.entries(mapping) as Array<[string, string]>).sort(
@@ -42,6 +44,7 @@ export function ValidationContextPanel<TField extends string>({
         mapping,
         counts,
         unitReference,
+        priceContext,
       }),
     );
   }
@@ -88,6 +91,13 @@ export function ValidationContextPanel<TField extends string>({
             </dd>
           </div>
 
+          {profile.id === "price-list" && priceContext && (
+            <div className="sm:col-span-2">
+              <dt className="text-[var(--text-muted)]">Price notation</dt>
+              <dd className="mt-1 text-[var(--text-primary)]">{priceContext.priceNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"}</dd>
+              <p className="mt-2 leading-5 text-[var(--text-secondary)]">Text uses the chosen notation; Excel numbers use stored values without display rounding. ERP code existence, tiers, validity periods and discounts are not checked.</p>
+            </div>
+          )}
           {profile.id === "product" && (
             <div className="min-w-0 sm:col-span-2">
               <dt className="text-[var(--text-muted)]">Base-unit reference check · v{UNIT_REFERENCE_VERSION}</dt>
