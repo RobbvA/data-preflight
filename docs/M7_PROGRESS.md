@@ -6,19 +6,19 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 
 "Bouwsessie start nu" betekent: actuele voortgang/code/remote controleren, één concreet subdoel noemen en dat uitvoeren. Geen nieuwe volledige audit of roadmapronde. Bij een side quest eerst hieronder het exacte hervatpunt vastleggen.
 
-## Actueel checkpoint — M7.4a
+## Actueel checkpoint — M7.4b
 
-- M7.3b is lokaal toegepast, bevestigd en gepusht. Remote main gecontroleerd op f8e185bec9858c3da249c756f5ecf579bc8d80e6, `fix: improve upload cancellation and recovery feedback`. Dit is broncode/pushbewijs; geen nieuwe volledige live-workflowcontrole.
-- Actieve stap: M7.4a — strikte decimaaldecoder, opt-in exacte CSV/XLSX/XLS-invoer en botsingsvrije tuples. Gebouwd/getest in voorbereiding; pakket lokaal toepassen/bevestigen, commit/push apart.
-- Notatie: tekst volgt uitsluitend de expliciet gekozen punt-/kommagammatica. Geen Number/parseFloat, groeperingsreparatie, interne-whitespacewijziging of prijsafronding. Tekstschaal blijft behouden; negatieve nul verliest uitsluitend het minteken.
-- Excel: nieuwe leesroute bewaart celtype, formule en opmaak. Numerieke cellen gebruiken hun opgeslagen waarde zonder weergaveafronding; exponenten worden uitgeschreven. Formule/datum/boolean/fout/percentage afgewezen voor nieuwe numerieke velden. Onveilige numerieke magnitude vereist exacte tekst. Ongecachete formules blijven als afwijsbare cellen behouden.
-- De vier bestaande profielen gebruiken deze route nog niet. Price List/Stock sluiten in M7.4b/c/d/e aan op sourceCells; die metadata mag bij mapping niet verloren gaan. Notatiegate, UI/rapport en veldspecifieke probleem/hersteltekst volgen bij integratie.
-- Bewijs: bestaande 39 + 15 nieuwe tests geslaagd; gerichte ESLint 0 fouten/warnings; TypeScript geslaagd; geen extra volledige build/browserronde bij deze ongebruikte numerieke primitives. Details en API-contract: docs/M7_4A_NUMERIC_INPUT.md.
-- Pakket: datapreflight-m7-4a-exact-numeric-input.zip; basis f8e185b. Aan de interface verandert in dit pakket niets.
-- OPEN VÓÓR M7-EINDACCEPTATIE: bestaande Invoice-normalisatie bevestigt 1.234 → 1234. Die is in dit pakket bewust niet stil gewijzigd. Bij M7.5b (of eerder als gerichte side quest) expliciet notatie-/afwijscontract kiezen en implementeren, met regressie voor bestaande Invoice-bestanden; geen claim dat Invoice nu al exact of ambiguïteitsvrij is.
-- Exacte volgende actie: technische bestanden lokaal toepassen en bevestigen; daarna M7.4b Price List-domein met exacte 8 Blocked / 1 Needs review / 2 Ready-fixture en 3 exportrijen. Geen nieuwe UI-keuzes zonder gerichte afstemming.
-- Daarna volledige Price-workflow, pas daarna Stock. M7.5 blijft de zesprofiel-eindtest; na M7 zelfstandig eigen bestand door een ERP/data-gebruiker laten verwerken.
-- Geen actieve side quest.
+- M7.4a lokaal toegepast/bevestigd/gepusht. Remote main gecontroleerd op e09cb8e61c743e6be0cb6c04322d56be14800995, `feat: add exact decimal parsing and Excel source-cell handling`. Dit is broncode/pushbewijs; geen nieuwe live-workflowcontrole.
+- Actieve stap: M7.4b — Price List / Item Prices v1.0.0 domein en elf-rijenfixture, gebouwd/getest in voorbereiding. Lokaal toepassen/bevestigen en commit/push van dit pakket nog open.
+- Nieuw: priceListProfile met vereiste velden/aliases; expliciete context-runner runPriceListValidation; source-runner runPriceListSourceValidation bewaart numerieke celmetadata en blokkeert ongeldige mapping/ontbrekende notatie of sourceCells.
+- Regels: alle velden verplicht; currency drie ASCII-letters uppercase zonder bestaancheck; gekozen strikte notatie; negatief Blocked; nul inclusief negatieve nul Needs review en exporteerbaar tenzij een ander issue blokkeert; alle complete/currency-geldige tupleduplicaten Blocked, ook als een prijs ongeldig is. Geen samenvoegen of identifierreparatie.
+- Exact fixturebewijs: 11 rijen, 8 Blocked, 1 Needs review, 2 Ready; cleanRows exact bronrijen 1/2/3 met prijzen 12.50, 10.00 en 0. Geen interne sleutel in exportdata. Werkelijke browserdownload volgt M7.4c.
+- Bewijs: 64 tests geslaagd (54 bestaande + 10 Price List), gerichte ESLint 0 fouten/warnings en TypeScript geslaagd. Geen browser/buildronde voor deze nog niet via UI gebruikte domeinmodule. Details: docs/M7_4B_PRICE_LIST_DOMAIN.md.
+- Pakket: datapreflight-m7-4b-price-list-domain.zip; basis e09cb8e. Picker en bestaande vier profielen nog ongewijzigd. Voorbeeldbestand staat voorbereid in public/demo-data/price-list-example.csv.
+- Exacte volgende actie: pakket lokaal toepassen en bevestigen. Daarna M7.4c: Price List zichtbaar aansluiten met dezelfde recordpresentatie; verplichte zichtbare notatiekeuze voor eigen bestand, zichtbaar voorbeeldpreset, reset/remap/saved-mapping-lifecycle, rapportcontext en echte downloads.
+- Nieuwe zichtbare ontwerpkeuzes gericht afstemmen; geen redesign van geaccepteerde onderdelen. Price List volledig afronden vóór Stock.
+- OPEN vóór M7-eindacceptatie: oude Invoice-normalisatie interpreteert 1.234 als 1234. Expliciet notatie-/afwijscontract kiezen en gericht corrigeren in M7.5b of eerdere afgebakende side quest. Nieuwe Price-tests bewijzen geen correctie van die bestaande route.
+- Geen actieve side quest. Zesprofiel-eindtest blijft M7.5; daarna een ERP/data-gebruiker zelfstandig een eigen bestand laten verwerken.
 
 ## Werkpakketten
 
@@ -31,8 +31,8 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 | M7.2b | Compacte Product-recordkaarten, bestaande werkruimte behouden | Lokaal geaccepteerd en gepusht in 971b8f9; livecontrole apart |
 | M7.3a | Compacte recordpresentatie consequent over bestaande vier | Lokaal geaccepteerd en gepusht in 971b8f9; livecontrole apart |
 | M7.3b | Feedback/herstel en vierprofielcheckpoint | Lokaal bevestigd en gepusht als f8e185b; livecontrole apart |
-| M7.4a | Strikte decimalen en gerichte Excelbescherming | Technische basis gebouwd/getest; lokaal toepassen/bevestigen open |
-| M7.4b | Price List-domein en exacte 8/1/2-fixture | Niet gestart |
+| M7.4a | Strikte decimalen en gerichte Excelbescherming | Lokaal bevestigd/gepusht als e09cb8e; UI-integratie volgt per profiel |
+| M7.4b | Price List-domein en exacte 8/1/2-fixture | Gebouwd/getest in voorbereiding; lokaal toepassen/bevestigen open |
 | M7.4c | Price List volledige workflow | Niet gestart |
 | M7.4d | Stock-domein en exacte 7/0/3-fixture | Niet gestart |
 | M7.4e | Stock volledige workflow | Niet gestart |

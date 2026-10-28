@@ -8,7 +8,7 @@ DataPreflight is a browser-based quality gate for business data before ERP impor
 
 [Live app](https://data-preflight.vercel.app/) · [Roadmap](ROADMAP.md) · [Product vision](PRODUCT_VISION.md)
 
-M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Professional UX, Price List & Stock Balances is in progress. On 2026-10-26 Rob explicitly expanded the target from five to six profiles. Price List and Stock Balances are planned, not implemented. The accepted first UX increment and later tab accents are committed/pushed through 130ccaf; Vercel reports successful deployment. The planning package was applied and pushed as 66ab1b5. M7.2b compact Product record cards were locally applied and accepted by Rob. M7.3a extends only that presentation to Customer, Vendor and Invoice and was locally accepted/pushed as 971b8f9 on 2026-10-28. M7.3b upload cancellation/recovery is locally accepted/pushed as f8e185b. M7.4a exact decimal/source-cell primitives are prepared/tested, not integrated into visible profiles yet; local application/push remain open. Existing Invoice interpretation of ambiguous 1.234 remains an explicit pre-release issue. Header/source card, mapping, review controls and export retain their accepted layout. The broader workspace hierarchy remains withdrawn.
+M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Professional UX, Price List & Stock Balances is in progress. On 2026-10-26 Rob explicitly expanded the target from five to six profiles. Price List domain is prepared/tested; its visible workflow and Stock Balances are not implemented yet. The accepted first UX increment and later tab accents are committed/pushed through 130ccaf; Vercel reports successful deployment. The planning package was applied and pushed as 66ab1b5. M7.2b compact Product record cards were locally applied and accepted by Rob. M7.3a extends only that presentation to Customer, Vendor and Invoice and was locally accepted/pushed as 971b8f9 on 2026-10-28. M7.3b upload cancellation/recovery is locally accepted/pushed as f8e185b. M7.4a exact numeric primitives are locally confirmed/pushed as e09cb8e. M7.4b Price List domain is prepared/tested, with exact 8/1/2 results and 3 export-data rows; it is not integrated into the picker/UI yet. Its local application/push remain open. Existing Invoice interpretation of ambiguous 1.234 remains an explicit pre-release issue. Header/source card, mapping, review controls and export retain their accepted layout. The broader workspace hierarchy remains withdrawn.
 
 - M6.1: shared workflow foundation complete.
 - M6.2: Vendor complete; CSV export and reordered multi-sheet XLSX accepted through preparation checks and user-local walkthrough/screenshots.
@@ -19,7 +19,7 @@ M5 and M6 are internally complete. M6 technical signoff: 2026-10-25. M7 — Prof
 - M6.9: technical verification complete; the user-local suite passes all 39 tests, lint has zero errors/two known warnings, and the production build passed.
 - Independent usage testing and outreach are deferred during the current build phase.
 
-Latest confirmed application checkpoint: `f8e185b` (2026-10-28); compact records: `971b8f9`; planning checkpoint: `66ab1b5`; earlier UX baseline: `130ccaf` (2026-10-26), following the accepted UX checkpoint `790f648`. Completed M6 baseline: `a91935f`. The earlier `4effc2e` profile-picker checkpoint is historical. Vendor rules were delivered in `641ad84`; shared master-data integration in `ca099a7`. Earlier statements that Vendor was unimplemented or M6.1 still awaited a commit are superseded.
+Latest confirmed technical checkpoint: `e09cb8e` (2026-10-28); feedback/recovery: `f8e185b`; compact records: `971b8f9`; planning checkpoint: `66ab1b5`; earlier UX baseline: `130ccaf` (2026-10-26), following the accepted UX checkpoint `790f648`. Completed M6 baseline: `a91935f`. The earlier `4effc2e` profile-picker checkpoint is historical. Vendor rules were delivered in `641ad84`; shared master-data integration in `ca099a7`. Earlier statements that Vendor was unimplemented or M6.1 still awaited a commit are superseded.
 
 ## Implemented workflow
 
@@ -117,8 +117,8 @@ M7 now targets six profiles: the existing four, Price List and limited Stock Bal
 
 ## Next work
 
-1. Locally apply/confirm M7.4a technical primitives; record source cells and error contracts from docs/M7_4A_NUMERIC_INPUT.md.
-2. M7.4b: Price List domain and exact 8/1/2 fixture, then its complete workflow before Stock.
+1. Locally apply/confirm M7.4b Price List domain; evidence and boundaries: docs/M7_4B_PRICE_LIST_DOMAIN.md.
+2. M7.4c: complete Price List workflow, notation lifecycle, report context and real downloads before Stock.
 3. Resolve the confirmed legacy Invoice 1.234 ambiguity with an explicit contract before M7 acceptance; the new route does not silently change Invoice.
 4. Comprehensive six-profile final verification, documentation, commit/push and deployment/live checks.
 
