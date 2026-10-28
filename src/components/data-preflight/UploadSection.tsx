@@ -232,12 +232,18 @@ export function UploadSection({
       )}
 
       {isLoading && (
-        <p
-          role="status"
-          className="mt-3 text-xs text-[var(--brand-accent-soft)]"
-        >
-          Preparing {domain} review...
-        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <p role="status" className="text-xs text-[var(--brand-accent-soft)]">
+            Preparing {domain} review...
+          </p>
+          <button
+            type="button"
+            onClick={onReset}
+            className="min-h-11 rounded-lg border border-white/15 px-3 py-2 text-sm font-medium text-[var(--text-secondary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]"
+          >
+            Cancel file
+          </button>
+        </div>
       )}
 
       {domain === "invoice" && (

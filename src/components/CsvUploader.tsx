@@ -105,7 +105,7 @@ export function CsvUploader() {
       if (requestId !== loadRequestId.current) return;
 
       const adapter = getInputAdapter(file);
-      if (!adapter) throw new Error("Unsupported file type.");
+      if (!adapter) throw new Error("Choose a CSV, XLSX, or XLS file.");
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
         const sheetNames = await getReadableExcelSheetNames(file);
@@ -121,10 +121,10 @@ export function CsvUploader() {
       if (requestId !== loadRequestId.current) return;
 
       if (nextParsedDataSet.rows.length === 0) {
-        throw new Error("Source file is empty.");
+        throw new Error("No data rows were found. Add rows below the column headers and upload the file again.");
       }
       if (nextParsedDataSet.headers.length === 0) {
-        throw new Error("Source file has no headers.");
+        throw new Error("No column headers were found. Add a header row and upload the file again.");
       }
 
       const mismatchMessage = getProfileMismatchMessage(

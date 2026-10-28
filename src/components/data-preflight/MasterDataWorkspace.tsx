@@ -246,7 +246,7 @@ function MasterDataWorkspaceContent({
       if (requestId !== loadRequestId.current) return;
 
       if (parsed.rows.length === 0 || parsed.headers.length === 0) {
-        throw new Error("The file has no readable rows and headers.");
+        throw new Error("No data rows or column headers were found. Include a header row and data below it, then upload the file again.");
       }
 
       const mismatchMessage = getProfileMismatchMessage(parsed.headers, domain);

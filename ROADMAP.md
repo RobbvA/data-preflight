@@ -591,7 +591,7 @@ Full executable plan and contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current 
 
 ### Retained work
 
-The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. The 130ccaf application checkpoint had a successful Vercel deployment; planning was subsequently confirmed pushed as 66ab1b5. Compact Product cards were locally accepted on 2026-10-27; M7.3a extends this record presentation only, with local acceptance/push/live still open. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
+The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. The 130ccaf application checkpoint had a successful Vercel deployment; planning was subsequently confirmed pushed as 66ab1b5. Compact Product cards were locally accepted on 2026-10-27; M7.3a extends this record presentation only and is locally accepted/pushed as 971b8f9. M7.3b feedback/recovery is prepared; local acceptance/push/live remain separate. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
 
 ### Delivery phases
 
@@ -617,4 +617,4 @@ M7 is complete only when its explicit criteria are met, the app checks pass, doc
 
 ### Next build step
 
-M7.3a: locally review compact records in Customer, Vendor and Invoice, using the accepted Product record presentation. The earlier broad workspace hierarchy was withdrawn; keep the existing header/source, mapping and export layout. After acceptance, continue M7.3b feedback/recovery and then M7.4a decimal/Excel handling. Detailed status and exact resume point are maintained in docs/M7_PROGRESS.md.
+M7.3b: locally apply/confirm upload cancellation and recoverable input messages. M7.3a compact records were locally accepted/pushed as 971b8f9. The earlier broad workspace hierarchy was withdrawn; keep the existing header/source, mapping and export layout. After M7.3b acceptance, continue M7.4a decimal/Excel handling. The four-profile checkpoint is documented in docs/M7_3B_CHECKPOINT.md. Detailed status and exact resume point are maintained in docs/M7_PROGRESS.md.
