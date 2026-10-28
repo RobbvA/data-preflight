@@ -1,0 +1,11 @@
+Product ID,Warehouse,Unit,Quantity
+001,WH-A,EA,10
+001,WH-B,EA,5.50
+002,WH-A,KG,0
+003,WH-A,EA,-1
+004,WH-A,EA,ten
+,WH-A,EA,5
+005,,EA,5
+006,WH-A,,5
+007,WH-A,EA,2
+007,wh-a,ea,3
