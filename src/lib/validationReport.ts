@@ -3,6 +3,7 @@ import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference"
 import type { ParsedRow } from "@/lib/parseCsv";
 
 export type PriceValidationContext = { priceNotation: DecimalNotation };
+export type StockValidationContext = { quantityNotation: DecimalNotation };
 
 type ValidationReportInput<TField extends string> = {
   profile: { id: string; name: string; version: string };
@@ -10,6 +11,7 @@ type ValidationReportInput<TField extends string> = {
   sheetName?: string;
   unitReference?: UnitReference | null;
   priceContext?: PriceValidationContext;
+  stockContext?: StockValidationContext;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -27,9 +29,13 @@ export function buildValidationReportRows<TField extends string>({
   counts,
   unitReference,
   priceContext,
+  stockContext,
 }: ValidationReportInput<TField>): ParsedRow[] {
   if (profile.id === "price-list" && (!priceContext || !["point", "comma"].includes(priceContext.priceNotation))) {
     throw new Error("Price notation is required for a Price List validation report.");
+  }
+  if (profile.id === "stock-balances" && (!stockContext || !["point", "comma"].includes(stockContext.quantityNotation))) {
+    throw new Error("Quantity notation is required for a Stock Balances validation report.");
   }
   const row = (section: string, field: string, value: string): ParsedRow => ({
     Section: section,
@@ -63,6 +69,15 @@ export function buildValidationReportRows<TField extends string>({
       row("Price context", "Text price rules", "Chosen decimal notation only; no grouping, symbols or scientific text. Export uses a point and preserves text scale."),
       row("Price context", "Excel numeric values", "Stored numeric values without display rounding. Formula, date, boolean, error and percentage cells are rejected for prices."),
       row("Price context", "Checks not performed", "Product, price-list, currency and unit existence in ERP; tiers, validity periods, discounts and target-ERP acceptance."),
+    ] : []),
+    ...(profile.id === "stock-balances" && stockContext ? [
+      row("Stock context", "Quantity notation", stockContext.quantityNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"),
+      row("Stock context", "Stock interpretation", "One absolute on-hand balance per product and warehouse for one organization/snapshot per file; not movements or deltas."),
+      row("Stock context", "Duplicate scope", "Product and warehouse, regardless of unit. Duplicate balances block; quantities are not summed and units are not converted."),
+      row("Stock context", "Zero quantity", "Zero is a valid stock balance and does not generate a warning."),
+      row("Stock context", "Text quantity rules", "Chosen decimal notation only; no grouping, symbols or scientific text. Export uses a point and preserves text scale."),
+      row("Stock context", "Excel numeric values", "Stored numeric values without display rounding. Formula, date, boolean, error and percentage cells are rejected for quantities."),
+      row("Stock context", "Checks not performed", "Product, warehouse and unit existence in ERP; organization/snapshot date, actual stock, comparison with previous files, valuation, batches/serials and target-ERP acceptance."),
     ] : []),
     ...(profile.id === "product" ? [
       row("Unit reference", "Reference check", unitReference ? "Run" : "Not run"),

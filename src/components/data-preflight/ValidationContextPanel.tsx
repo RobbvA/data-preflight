@@ -2,7 +2,7 @@
 
 import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import { downloadCsv } from "@/lib/exportData";
-import { buildValidationReportRows, type PriceValidationContext } from "@/lib/validationReport";
+import { buildValidationReportRows, type PriceValidationContext, type StockValidationContext } from "@/lib/validationReport";
 
 type ValidationContextPanelProps<TField extends string> = {
   profile: { id: string; name: string; version: string };
@@ -10,6 +10,7 @@ type ValidationContextPanelProps<TField extends string> = {
   sheetName?: string;
   unitReference?: UnitReference | null;
   priceContext?: PriceValidationContext;
+  stockContext?: StockValidationContext;
   mapping: Readonly<Record<TField, string>>;
   counts: {
     total: number;
@@ -27,6 +28,7 @@ export function ValidationContextPanel<TField extends string>({
   counts,
   unitReference,
   priceContext,
+  stockContext,
 }: ValidationContextPanelProps<TField>) {
   const appliedMapping: Record<string, string> = Object.fromEntries(
     (Object.entries(mapping) as Array<[string, string]>).sort(
@@ -45,6 +47,7 @@ export function ValidationContextPanel<TField extends string>({
         counts,
         unitReference,
         priceContext,
+        stockContext,
       }),
     );
   }
@@ -96,6 +99,13 @@ export function ValidationContextPanel<TField extends string>({
               <dt className="text-[var(--text-muted)]">Price notation</dt>
               <dd className="mt-1 text-[var(--text-primary)]">{priceContext.priceNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"}</dd>
               <p className="mt-2 leading-5 text-[var(--text-secondary)]">Text uses the chosen notation; Excel numbers use stored values without display rounding. ERP code existence, tiers, validity periods and discounts are not checked.</p>
+            </div>
+          )}
+          {profile.id === "stock-balances" && stockContext && (
+            <div className="sm:col-span-2">
+              <dt className="text-[var(--text-muted)]">Quantity notation</dt>
+              <dd className="mt-1 text-[var(--text-primary)]">{stockContext.quantityNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"}</dd>
+              <p className="mt-2 leading-5 text-[var(--text-secondary)]">One absolute balance per product and warehouse in one snapshot. Zero stock is valid. No stock movements, unit conversion or comparison with previous files. Snapshot date, ERP code existence and actual stock are not verified.</p>
             </div>
           )}
           {profile.id === "product" && (

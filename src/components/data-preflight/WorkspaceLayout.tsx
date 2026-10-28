@@ -2,11 +2,12 @@ import type { ReactNode } from "react";
 import { HomeProductPreview } from "@/components/data-preflight/HomeProductPreview";
 import type { MasterDataDomain } from "@/lib/profiles/masterDataWorkspaceConfig";
 
-export type DataDomain = "invoice" | MasterDataDomain | "price-list";
+export type DataDomain = "invoice" | MasterDataDomain | "price-list" | "stock-balances";
 
 const workspaceTitles: Record<DataDomain, string> = {
   invoice: "Invoice validation workspace",
   "price-list": "Price List / Item Prices workspace",
+  "stock-balances": "Stock Balances workspace",
   customer: "Customer master data workspace",
   vendor: "Vendor master data workspace",
   product: "Product / Material workspace",

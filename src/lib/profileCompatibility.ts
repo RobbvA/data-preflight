@@ -2,10 +2,11 @@ import { getProfileMappingCandidates } from "@/lib/dataProfile";
 import { customerProfile } from "@/lib/profiles/customerProfile";
 import { vendorProfile } from "@/lib/profiles/vendorProfile";
 
+import { stockBalancesProfile } from "@/lib/profiles/stockBalancesProfile";
 import { priceListProfile } from "@/lib/profiles/priceListProfile";
 import { productProfile } from "@/lib/profiles/productProfile";
 
-type DataDomain = "invoice" | "customer" | "vendor" | "product" | "price-list";
+type DataDomain = "invoice" | "customer" | "vendor" | "product" | "price-list" | "stock-balances";
 
 function normalizeHeader(header: string) {
   return header
@@ -106,14 +107,22 @@ export function getProfileMismatchMessage(
   const priceCandidates = getProfileMappingCandidates(priceListProfile, headers);
   const hasPriceFields = priceCandidates.price_list_id.length > 0 || priceCandidates.unit_price.length > 0;
   const hasPriceSignature = hasProductId && priceCandidates.price_list_id.length > 0 && priceCandidates.unit_price.length > 0;
+  const stockCandidates = getProfileMappingCandidates(stockBalancesProfile, headers);
+  const hasStockFields = stockCandidates.warehouse_id.length > 0 || stockCandidates.quantity.length > 0;
+  const hasStockSignature = hasProductId && stockCandidates.warehouse_id.length > 0 && stockCandidates.quantity.length > 0;
+  const hasProductSignature = hasProductId && productCandidates.description.length > 0 && productCandidates.base_unit.length > 0;
+  if (hasStockSignature && hasPriceSignature) return null;
+  if (hasStockSignature && !hasCustomerId && !hasVendorId && !hasInvoiceId && !hasInvoiceAmount) {
+    return domain === "stock-balances" ? null : "This file looks like stock balances. Choose the Stock Balances / On-hand Inventory profile or check the source file.";
+  }
   if (hasPriceSignature && !hasCustomerId && !hasVendorId && !hasInvoiceId && !hasInvoiceAmount) {
     return domain === "price-list" ? null : "This file looks like price list data. Choose the Price List / Item Prices profile or check the source file.";
   }
-  if (domain === "price-list" && hasProductId && !hasPriceFields && productCandidates.description.length > 0 && productCandidates.base_unit.length > 0) {
+  if ((domain === "price-list" || domain === "stock-balances") && hasProductSignature && !hasPriceFields && !hasStockFields) {
     return "This file looks like product / material data. Choose the Product / Material profile or check the source file.";
   }
 
-  if ((domain === "product" || domain === "price-list") && !hasProductId) {
+  if ((domain === "product" || domain === "price-list" || domain === "stock-balances") && !hasProductId) {
     if (hasInvoiceId && hasInvoiceAmount) {
       return "This file looks like invoice data. Choose the Invoice data profile or check the source file.";
     }
@@ -125,7 +134,7 @@ export function getProfileMismatchMessage(
     }
   }
 
-  if (domain !== "product" && domain !== "price-list" && !hasPriceSignature && hasProductId && !hasCustomerId && !hasVendorId
+  if (domain !== "product" && domain !== "price-list" && domain !== "stock-balances" && !hasPriceFields && !hasStockFields && hasProductSignature && !hasCustomerId && !hasVendorId
     && !hasInvoiceId && !hasInvoiceAmount) {
     return "This file looks like product / material data. Choose the Product / Material profile or check the source file.";
   }

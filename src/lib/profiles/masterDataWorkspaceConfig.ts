@@ -1,3 +1,4 @@
+import { stockBalancesProfile } from "@/lib/profiles/stockBalancesProfile";
 import { priceListProfile } from "@/lib/profiles/priceListProfile";
 import type { UnitReference } from "@/lib/unitReference";
 import { productValidationProfile, runProductValidation } from "@/lib/validation/productValidation";
@@ -248,4 +249,23 @@ export const priceListWorkspaceConfig: PriceListWorkspaceConfig = {
   },
   example: { fileName: "price-list-example.csv", csv: "Product ID,Price List,Currency,Unit,Unit Price\n001,RETAIL,EUR,EA,12.50\n001,WHOLESALE,EUR,EA,10.00\n002,RETAIL,EUR,EA,0\n003,RETAIL,EUR,KG,-1.00\n004,RETAIL,EUR,EA,twelve\n,RETAIL,EUR,EA,5.00\n005,RETAIL,EURO,EA,5.00\n006,RETAIL,EUR,,5.00\n007,RETAIL,EUR,EA,9.95\n007,retail,eur,ea,10.95\n008,,EUR,EA,5.00\n" },
   exports: { rows: "price-list-rows-without-blockers.csv", issues: "price-list-issues.csv" },
+};
+
+
+export type StockBalancesWorkspaceConfig = Omit<MasterDataWorkspaceConfig, "runValidation"> & { kind: "stock-balances" };
+
+export const stockBalancesWorkspaceConfig: StockBalancesWorkspaceConfig = {
+  kind: "stock-balances",
+  profile: stockBalancesProfile,
+  guidance: "Check one absolute stock balance per product and warehouse. This is one snapshot, not stock movements. Units are not converted; the snapshot date and ERP code existence are not checked.",
+  labels: {
+    results: "Stock balance results", blocked: "Blocked stock balances", ready: "Ready stock balances", sort: "Sort stock balances",
+    missingId: "Missing product ID", missingName: "Missing warehouse",
+  },
+  preview: {
+    idField: "product_id", nameField: "warehouse_id", secondaryField: "quantity", secondaryFallback: "Missing quantity",
+    details: stockBalancesProfile.fields.map(({ key, label }) => ({ field: key, label })),
+  },
+  example: { fileName: "stock-balances-example.csv", csv: "Product ID,Warehouse,Unit,Quantity\n001,WH-A,EA,10\n001,WH-B,EA,5.50\n002,WH-A,KG,0\n003,WH-A,EA,-1\n004,WH-A,EA,ten\n,WH-A,EA,5\n005,,EA,5\n006,WH-A,,5\n007,WH-A,EA,2\n007,wh-a,ea,3\n" },
+  exports: { rows: "stock-balances-rows-without-blockers.csv", issues: "stock-balances-issues.csv" },
 };

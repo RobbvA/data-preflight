@@ -1,4 +1,4 @@
-import { FileText, UsersRound, Truck, Package, Tags, type LucideIcon } from "lucide-react";
+import { FileText, UsersRound, Truck, Package, Tags, Warehouse, type LucideIcon } from "lucide-react";
 import type { DataDomain } from "@/components/data-preflight/WorkspaceLayout";
 
 export type ProfilePickerOption = {
@@ -44,6 +44,13 @@ export const profilePickerConfig = {
     description: "Check item prices, currency, units and duplicate price-list entries.",
     keywords: "price pricing prices list item prijs prijzen prijslijst eenheidsprijs",
     icon: Tags,
+  },
+  "stock-balances": {
+    domain: "stock-balances",
+    name: "Stock Balances / On-hand Inventory",
+    description: "Check one absolute stock balance per product and warehouse.",
+    keywords: "stock balances inventory warehouse quantity on hand voorraad voorraadstanden magazijn aantal",
+    icon: Warehouse,
   },
 } satisfies Record<DataDomain, ProfilePickerOption>;
 

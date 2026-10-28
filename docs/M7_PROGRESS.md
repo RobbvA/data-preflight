@@ -6,19 +6,18 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 
 "Bouwsessie start nu" betekent: actuele voortgang/code/remote controleren, één concreet subdoel noemen en dat uitvoeren. Geen nieuwe volledige audit of roadmapronde. Bij een side quest eerst hieronder het exacte hervatpunt vastleggen.
 
-## Actueel checkpoint — M7.4d
+## Actueel checkpoint — M7.4e
 
-- M7.4c Price List-workflow lokaal toegepast/beoordeeld/gepusht. Remote main gecontroleerd op 29844484605246b4ffe5d108a3b0b8cecb20e6cf, `feat: integrate price list workflow with explicit notation and reports`. Geen nieuwe live-workflowcontrole geclaimd.
-- Actieve stap: M7.4d — Stock Balances / On-hand Inventory v1.0.0 domein gebouwd/getest in voorbereiding. Lokale toepassing/bevestiging en commit/push van dit pakket nog open.
-- Snapshotcontract: één absolute voorraad per product/magazijn, geen mutaties/delta/waardering/batches/serienummers/conversie. Alle vier velden verplicht. IDs/warehouse/unit alleen trim; expliciete quantityNotation en getypeerde quantityCells verplicht. Location is geen warehouse-alias.
-- Nul en negatieve nul zijn Ready zonder waarschuwing; negatieve niet-nulhoeveelheden vallen buiten dit profiel. Alle complete product-magazijncombinaties met meerdere rijen blokkeren, ook bij gelijke, ontbrekende of ongeldige hoeveelheden/eenheden. EA/BOX geeft daarnaast stock-unit-conflict op alle betrokken rijen. Geen optellen of converteren.
-- Exacte fixture: 10 rijen, 7 Blocked / 0 Needs review / 3 Ready; exportdata exact rijen 1/2/3 met hoeveelheden 10, 5.50 en 0. Geen interne key in output.
-- Bewijs: 80 tests geslaagd (69 bestaande + 11 Stock), gerichte ESLint 0 fouten/warnings, TypeScript en diff --check geslaagd. Echte XLS/XLSX broncel-/mappingintegratie via de exacte adapter getest. Geen nieuwe browser/buildronde voor een nog niet gebruikte domeinmodule.
-- Pakket: datapreflight-m7-4d-stock-balances-domain.zip; basis 2984448. Picker toont nog vijf profielen. Voorbeeldbestand is voorbereid in public/demo-data/stock-balances-example.csv. Details: docs/M7_4D_STOCK_BALANCES_DOMAIN.md.
-- Exacte volgende actie: technische bestanden lokaal toepassen/bevestigen; daarna M7.4e Stock aansluiten als zesde profiel met bestaande layout/records, verplichte quantity notation, contextlifecycle, snapshotgrenzen, rapporten en echte downloads. Signatureherkenning Product/Price/Stock hoort bij die integratie.
-- Vervolgens M7.4f zesprofielintegratie en M7.5 gehele-app-test; geen extra profielen of nieuwe polishronde buiten concrete bevindingen.
-- OPEN vóór M7-eindacceptatie: bestaande Invoice-normalisatie 1.234→1234. Afzonderlijk expliciet notatie-/afwijscontract en regressie nodig in M7.5b of een eerdere gerichte side quest. Nieuwe Price/Stock-tests lossen dat niet stilzwijgend op.
-- Geen actieve side quest. Nieuwe UI-keuzes alleen gericht en binnen de goedgekeurde presentatie.
+- M7.4d lokaal toegepast/bevestigd/gepusht. Remote main gecontroleerd op faed293328be6534fd98e2dc8896e800a330e753, `feat: add stock balance validation rules and fixtures`. Geen nieuwe live-workflowcontrole geclaimd.
+- Actieve stap: M7.4e — Stock Balances als zesde profiel volledig aangesloten, gebouwd/getest in voorbereiding. Lokale toepassing/beoordeling, commit/push en live van dit pakket nog open.
+- Bestaande workspace/bronkaart/recordstijl behouden. Quantity notation bij Step 1 is verplicht voor iedere eigen bron; voorbeeld krijgt zichtbaar point. Exacte adapter en getypeerde quantityCells blijven bij de gemapte hoeveelheid. Report vereist eigen stockContext met quantityNotation en snapshotgrenzen.
+- Snapshot: absolute voorraad per product/magazijn, geen mutatie/conversie/optellen. Nulvoorraad Ready zonder waarschuwing; duplicaten en EA/BOX-eenheidsconflicten blokkeren. Organisatie/snapshotdatum/ERP-codebestaan/echte voorraad worden niet geverifieerd.
+- Bewijs: 86 tests geslaagd; lint 0 fouten/2 bekende warnings; productiebuild/TypeScript geslaagd. Productiebrowser: zes pickeropties, exact 7/0/3 en drie echte exportrijen, zeven issuerijen, nul Ready/lege review, punt-kommawissel, eigen CSV/XLS/XLSX/worksheets, broncelprecisie, conflicts/mapping/saved mappings, reset/switch/late Excel, desktop/390px/toetsenbord en bestaande vijf voorbeelden. Geen browserfouten of onverwachte netwerkrequests.
+- Price- en quantity-notatie/referencecontext blijven profielspecifiek. Nieuwe eigen bron vraagt opnieuw keuze, zelfs bij dezelfde bestandsnaam. Saved mappings bewaren uitsluitend kolommen en kunnen de keuze niet omzeilen. Profielherkenning gebruikt sterke Stock/Price-signatures vóór Product; alleen Product ID bepaalt geen domein.
+- Pakket: datapreflight-m7-4e-stock-balances-workflow.zip; basis faed293. Details/grenzen: docs/M7_4E_STOCK_BALANCES_WORKFLOW.md. Geen fysieke telefoon, volledige zesprofiel-eindtest of livecontrole geclaimd.
+- Exacte volgende actie: lokaal Stock Balances → Try example: 7 Blocked / 0 Needs review / 3 Ready; export met drie rijen inclusief nul; eigen voorbeeldbestand vraagt opnieuw point. Na bevestiging checkpoint vastleggen en M7.4f zesprofielintegratie uitvoeren; daarna M7.5 gehele-app-test. Geen nieuwe profielen/polish zonder concrete bevinding.
+- OPEN vóór M7-eindacceptatie: bestaande Invoice-normalisatie 1.234→1234. Expliciet notatie-/afwijscontract en gerichte correctie/regressies nodig in M7.5b of eerdere side quest. Nieuwe Price/Stock-route corrigeert die bestaande heuristiek niet stilzwijgend.
+- Geen actieve side quest. Na M7 gericht zelfstandig ERP/data-gebruikersonderzoek met eigen bestand.
 
 ## Werkpakketten
 
@@ -34,8 +33,8 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 | M7.4a | Strikte decimalen en gerichte Excelbescherming | Lokaal bevestigd/gepusht als e09cb8e; UI-integratie volgt per profiel |
 | M7.4b | Price List-domein en exacte 8/1/2-fixture | Lokaal bevestigd/gepusht als b7e495b |
 | M7.4c | Price List volledige workflow | Lokaal bevestigd/gepusht als 2984448; livecontrole apart |
-| M7.4d | Stock-domein en exacte 7/0/3-fixture | Gebouwd/getest in voorbereiding; lokaal toepassen/bevestigen open |
-| M7.4e | Stock volledige workflow | Niet gestart |
+| M7.4d | Stock-domein en exacte 7/0/3-fixture | Lokaal bevestigd/gepusht als faed293 |
+| M7.4e | Stock volledige workflow | Gebouwd/getest in voorbereiding; lokaal beoordelen/push/live open |
 | M7.4f | Zesprofielintegratie | Niet gestart |
 | M7.5a | Uitgebreide hele-app-test met testlog | Niet gestart |
 | M7.5b | Bevindingen herstellen/gericht hertesten | Niet gestart |

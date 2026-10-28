@@ -14,6 +14,10 @@ import {
 } from "@/lib/parseCsv";
 import { getExactReadableExcelSheetNames, parseExactSourceFile, type ExactParsedDataSet } from "@/lib/exactDataInput";
 import type { DecimalNotation } from "@/lib/strictDecimal";
+import type { StockBalancesMapping } from "@/lib/profiles/stockBalancesProfile";
+import { runStockBalancesSourceValidation } from "@/lib/validation/stockBalancesValidation";
+import { QuantityNotationControls } from "@/components/data-preflight/QuantityNotationControls";
+import { StockBalancesReviewRecord } from "@/components/data-preflight/StockBalancesReviewRecord";
 import type { PriceListMapping } from "@/lib/profiles/priceListProfile";
 import { runPriceListSourceValidation } from "@/lib/validation/priceListValidation";
 import { PriceNotationControls } from "@/components/data-preflight/PriceNotationControls";
@@ -42,6 +46,8 @@ import {
 import {
   masterDataWorkspaceConfigs,
   priceListWorkspaceConfig,
+  stockBalancesWorkspaceConfig,
+  type StockBalancesWorkspaceConfig,
   type PriceListWorkspaceConfig,
   type MasterDataDomain,
   type MasterDataIssue,
@@ -63,14 +69,14 @@ export function MasterDataWorkspace({
   domain,
   onDomainChange,
 }: {
-  domain: MasterDataDomain | "price-list";
+  domain: MasterDataDomain | "price-list" | "stock-balances";
   onDomainChange: (domain: DataDomain) => void;
 }) {
   return (
     <MasterDataWorkspaceContent
       key={domain}
       domain={domain}
-      config={domain === "price-list" ? priceListWorkspaceConfig : masterDataWorkspaceConfigs[domain]}
+      config={domain === "price-list" ? priceListWorkspaceConfig : domain === "stock-balances" ? stockBalancesWorkspaceConfig : masterDataWorkspaceConfigs[domain]}
       onDomainChange={onDomainChange}
     />
   );
@@ -81,12 +87,13 @@ function MasterDataWorkspaceContent({
   config,
   onDomainChange,
 }: {
-  domain: MasterDataDomain | "price-list";
-  config: MasterDataWorkspaceConfig | PriceListWorkspaceConfig;
+  domain: MasterDataDomain | "price-list" | "stock-balances";
+  config: MasterDataWorkspaceConfig | PriceListWorkspaceConfig | StockBalancesWorkspaceConfig;
   onDomainChange: (domain: DataDomain) => void;
 }) {
   const loadRequestId = useRef(0);
   const profile = config.profile;
+  const isNumeric = domain === "price-list" || domain === "stock-balances";
 
   useEffect(() => {
     return () => {
@@ -99,6 +106,7 @@ function MasterDataWorkspaceContent({
 
   const [dataSet, setDataSet] = useState<ParsedDataSet | ExactParsedDataSet | null>(null);
   const [priceNotation, setPriceNotation] = useState<DecimalNotation | null>(null);
+  const [quantityNotation, setQuantityNotation] = useState<DecimalNotation | null>(null);
   const [mapping, setMapping] = useState<MasterDataMapping>(() =>
     emptyMapping(config),
   );
@@ -143,8 +151,10 @@ function MasterDataWorkspaceContent({
     if (!dataSet || !("sourceCells" in dataSet)) {
       return { available: false, normalizedRows: [], validationResult: { issues: [], cleanRows: [], errorRows: [] } };
     }
-    return runPriceListSourceValidation(dataSet, mapping as PriceListMapping, priceNotation);
-  }, [config, mappedRows, unitReference, dataSet, mapping, priceNotation]);
+    return config.kind === "stock-balances"
+      ? runStockBalancesSourceValidation(dataSet, mapping as StockBalancesMapping, quantityNotation)
+      : runPriceListSourceValidation(dataSet, mapping as PriceListMapping, priceNotation);
+  }, [config, mappedRows, unitReference, dataSet, mapping, priceNotation, quantityNotation]);
   const { normalizedRows, validationResult } = validationRun;
   const resultsReady = mappingReady && !isReferenceLoading && validationRun.available;
   const canExport = resultsReady && validationResult.cleanRows.length > 0;
@@ -229,6 +239,7 @@ function MasterDataWorkspaceContent({
     setError(null);
     setDataSet(null);
     setPriceNotation(null);
+    setQuantityNotation(null);
     setUnitReference(null);
     setIsReferenceLoading(false);
     setMapping(emptyMapping(config));
@@ -247,7 +258,7 @@ function MasterDataWorkspaceContent({
       }
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
-        const sheetNames = await (domain === "price-list" ? getExactReadableExcelSheetNames(file) : getReadableExcelSheetNames(file));
+        const sheetNames = await (isNumeric ? getExactReadableExcelSheetNames(file) : getReadableExcelSheetNames(file));
         if (requestId !== loadRequestId.current) return;
 
         if (sheetNames.length > 1) {
@@ -256,7 +267,7 @@ function MasterDataWorkspaceContent({
         }
       }
 
-      const parsed = await (domain === "price-list" ? parseExactSourceFile(file, selectedSheetName) : adapter.parse(file, selectedSheetName));
+      const parsed = await (isNumeric ? parseExactSourceFile(file, selectedSheetName) : adapter.parse(file, selectedSheetName));
       if (requestId !== loadRequestId.current) return;
 
       if (parsed.rows.length === 0 || parsed.headers.length === 0) {
@@ -272,6 +283,7 @@ function MasterDataWorkspaceContent({
 
       setDataSet(parsed);
       if (domain === "price-list") setPriceNotation(exampleNotation);
+      if (domain === "stock-balances") setQuantityNotation(exampleNotation);
       setMapping(suggestedMapping);
       setIsMappingOpen(!suggestedMappingReady);
     } catch (caught) {
@@ -301,7 +313,7 @@ function MasterDataWorkspaceContent({
         type: "text/csv",
       }),
       undefined,
-      domain === "price-list" ? "point" : null,
+      isNumeric ? "point" : null,
     );
   }
 
@@ -310,6 +322,7 @@ function MasterDataWorkspaceContent({
     setPendingExcelSheets(null);
     setDataSet(null);
     setPriceNotation(null);
+    setQuantityNotation(null);
     setUnitReference(null);
     setIsReferenceLoading(false);
     setMapping(emptyMapping(config));
@@ -438,6 +451,13 @@ function MasterDataWorkspaceContent({
                 setSelectedRowIndex(null);
               }} />
             )}
+            {domain === "stock-balances" && (
+              <QuantityNotationControls value={quantityNotation} onChange={(value) => {
+                setQuantityNotation(value);
+                setActiveReviewTab(null);
+                setSelectedRowIndex(null);
+              }} />
+            )}
             {domain === "product" && (
               <UnitReferenceControls
                 reference={unitReference}
@@ -526,6 +546,9 @@ function MasterDataWorkspaceContent({
                       <div className="mt-2.5 max-h-[620px] space-y-1.5 overflow-y-auto pr-1">
                         {visibleRows.map(({ row, rowIndex, issues }) => {
                           const isSelected = selectedRowIndex === rowIndex;
+                          if (domain === "stock-balances") {
+                            return <StockBalancesReviewRecord key={rowIndex} row={row} rowIndex={rowIndex} issues={issues} expanded={isSelected} onToggle={() => setSelectedRowIndex(isSelected ? null : rowIndex)} />;
+                          }
                           if (domain === "price-list") {
                             return <PriceListReviewRecord key={rowIndex} row={row} rowIndex={rowIndex} issues={issues} expanded={isSelected} onToggle={() => setSelectedRowIndex(isSelected ? null : rowIndex)} />;
                           }
@@ -578,6 +601,7 @@ function MasterDataWorkspaceContent({
                   profile={profile}
                   unitReference={unitReference}
                   priceContext={domain === "price-list" && priceNotation ? { priceNotation } : undefined}
+                  stockContext={domain === "stock-balances" && quantityNotation ? { quantityNotation } : undefined}
                   fileName={dataSet.fileName}
                   sheetName={dataSet.metadata?.sheetName}
                   mapping={mapping}
