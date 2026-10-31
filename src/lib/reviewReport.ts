@@ -83,7 +83,7 @@ export function buildReviewReport<TField extends string>(input: ReviewReportInpu
       problem: issue.problem, why_it_matters: issue.why, suggested_fix: issue.fix,
       row_status: rows[index].status, export_decision: rows[index].export_decision };
   });
-  const summary = Object.entries({ "Profile": input.profile.name, "Profile version": input.profile.version, "Source file": input.fileName,
+  const summary = Object.entries({ "Profile": input.profile.name, "Profile version": input.profile.version, ...(input.templateContext ? { "ERP template": input.templateContext.id, "Template version": input.templateContext.version } : {}), "Source file": input.fileName,
     ...(input.sheetName ? { Worksheet: input.sheetName } : {}), ...(organization.trim() ? { Organization: organization.trim() } : {}),
     "Total rows": String(total), Blocked: String(counts.blocked), "Needs review": String(counts.needsReview), Ready: String(counts.ready),
     "Rows included in data export": String(total - counts.blocked), "Issue count": String(issueRows.length),

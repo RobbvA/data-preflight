@@ -38,9 +38,9 @@ export function ReviewRecord({ title, subtitle, context, rowIndex, fields, issue
       </div>
 
       {mainIssue ? (
-        <div className="mt-1">
-          <p className="break-words text-base font-semibold leading-6 text-[var(--text-primary)]">{mainIssue.problem}</p>
-          <p className="mt-0.5 break-words text-base leading-6 text-[var(--text-primary)]"><span className="font-semibold">Fix:</span> {mainIssue.fix}</p>
+        <div className="mt-2">
+          <p className="break-words text-base font-semibold leading-6 text-[var(--text-primary)]">Problem: {mainIssue.problem}</p>
+          <p className="mt-1 break-words text-base leading-6 text-[var(--text-primary)]"><span className="font-semibold">Fix:</span> {mainIssue.fix}</p>
         </div>
       ) : (
         <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">{context ? context + " · " : ""}Passed current checks</p>
@@ -66,9 +66,9 @@ export function ReviewRecord({ title, subtitle, context, rowIndex, fields, issue
           <div className="mt-2 space-y-2">
             {issues.map((issue, index) => (
               <div key={issue.problem + "-" + index} className="break-words text-base leading-6">
-                {issue !== mainIssue && <p className="font-semibold text-[var(--text-primary)]">{issue.problem}</p>}
-                <p className="text-[var(--text-secondary)]"><span className="font-semibold">Why:</span> {issue.why}</p>
+                {issue !== mainIssue && <p className="font-semibold text-[var(--text-primary)]">Problem: {issue.problem}</p>}
                 {issue !== mainIssue && <p className="mt-1 text-[var(--text-secondary)]"><span className="font-semibold">Fix:</span> {issue.fix}</p>}
+                <p className="mt-1 text-[var(--text-secondary)]"><span className="font-semibold">Why:</span> {issue.why}</p>
               </div>
             ))}
           </div>

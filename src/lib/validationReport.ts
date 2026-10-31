@@ -1,3 +1,4 @@
+import { ODOO_CUSTOMER_TEMPLATE, type ErpTemplateContext } from "@/lib/erpTemplates";
 import type { DecimalNotation } from "@/lib/strictDecimal";
 import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import type { ParsedRow } from "@/lib/parseCsv";
@@ -10,6 +11,7 @@ export type ValidationReportInput<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
   sheetName?: string;
+  templateContext?: ErpTemplateContext;
   unitReference?: UnitReference | null;
   invoiceContext?: InvoiceValidationContext;
   priceContext?: PriceValidationContext;
@@ -33,6 +35,7 @@ export function buildValidationReportRows<TField extends string>({
   invoiceContext,
   priceContext,
   stockContext,
+  templateContext,
 }: ValidationReportInput<TField>): ParsedRow[] {
   if (profile.id === "invoice" && (!invoiceContext || !["point", "comma"].includes(invoiceContext.invoiceNotation))) {
     throw new Error("Invoice notation is required for an Invoice validation report.");
@@ -43,6 +46,7 @@ export function buildValidationReportRows<TField extends string>({
   if (profile.id === "stock-balances" && (!stockContext || !["point", "comma"].includes(stockContext.quantityNotation))) {
     throw new Error("Quantity notation is required for a Stock Balances validation report.");
   }
+  if (templateContext && (profile.id !== "customer" || templateContext.id !== ODOO_CUSTOMER_TEMPLATE.id || templateContext.version !== ODOO_CUSTOMER_TEMPLATE.version)) throw new Error("The ERP template does not match this validation run.");
   const row = (section: string, field: string, value: string): ParsedRow => ({
     Section: section,
     "DataPreflight field / metric": field,
@@ -70,6 +74,15 @@ export function buildValidationReportRows<TField extends string>({
     row("Result", "Needs review", String(counts.needsReview)),
     row("Result", "Ready", String(counts.ready)),
     ...mappingRows,
+    ...(templateContext ? [
+      row("ERP template", "Template", ODOO_CUSTOMER_TEMPLATE.label),
+      row("ERP template", "Template ID", templateContext.id),
+      row("ERP template", "Template version", templateContext.version),
+      row("ERP template", "Checks and transformation", ODOO_CUSTOMER_TEMPLATE.checks),
+      row("ERP template", "Export headers", ODOO_CUSTOMER_TEMPLATE.headers.join(", ")),
+      row("ERP template", "Compatibility boundary", ODOO_CUSTOMER_TEMPLATE.boundary),
+      row("ERP template", "Update semantics", "Matching External IDs may update existing contacts; empty exported optional fields may clear existing values. Reference is not an External ID. No target-database duplicate check."),
+    ] : []),
     ...(profile.id === "invoice" && invoiceContext ? [
       row("Invoice context", "Amount and VAT notation", invoiceContext.invoiceNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"),
       row("Invoice context", "Text amount and VAT rules", "Chosen decimal notation only; no thousands separators, symbols or scientific text. Export uses a point and preserves text scale."),

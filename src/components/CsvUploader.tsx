@@ -411,9 +411,9 @@ export function CsvUploader() {
                 <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
                   {mappedCount}/{mappingSuggestions.length} fields mapped
                 </p>
-                <p className={mappingReady ? "mt-1 break-words text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 break-words text-sm leading-6 text-[var(--brand-accent-soft)]"}>
+                {!mappingReady && (<p className={mappingReady ? "mt-1 break-words text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 break-words text-sm leading-6 text-[var(--brand-accent-soft)]"}>
                   {mappingGuidance}
-                </p>
+                </p>)}
               </div>
               <button
                 type="button"

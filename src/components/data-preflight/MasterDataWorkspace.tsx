@@ -1,4 +1,5 @@
 "use client";
+import { ODOO_CUSTOMER_TEMPLATE, applyOdooCustomerTemplate, type ErpTemplateId } from "@/lib/erpTemplates";
 
 import { ReviewFilterControls } from "@/components/data-preflight/ReviewFilterControls";
 import { EMPTY_REVIEW_FILTERS, filterReviewRows, type ReviewFilters } from "@/lib/reviewFilters";
@@ -9,7 +10,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   ReviewStatusControls,
-  ReviewStatusSummary,
 } from "@/components/data-preflight/ReviewStatusControls";
 import {
   getInputAdapter,
@@ -97,6 +97,9 @@ function MasterDataWorkspaceContent({
 }) {
   const loadRequestId = useRef(0);
   const profile = config.profile;
+  const [templateId, setTemplateId] = useState<ErpTemplateId>("generic");
+  const templateContext = useMemo(() => templateId === ODOO_CUSTOMER_TEMPLATE.id && domain === "customer" ? { id: ODOO_CUSTOMER_TEMPLATE.id, version: ODOO_CUSTOMER_TEMPLATE.version } : undefined, [templateId, domain]);
+  const [sourceVersion, setSourceVersion] = useState(0);
   const isNumeric = domain === "price-list" || domain === "stock-balances";
 
   useEffect(() => {
@@ -149,14 +152,17 @@ function MasterDataWorkspaceContent({
   );
 
   const validationRun = useMemo(() => {
-    if ("runValidation" in config) return { ...config.runValidation(mappedRows, unitReference), available: true };
+    if ("runValidation" in config) {
+      const run = config.runValidation(mappedRows, unitReference);
+      return { ...run, validationResult: domain === "customer" && templateId === ODOO_CUSTOMER_TEMPLATE.id ? applyOdooCustomerTemplate(run.normalizedRows, run.validationResult) : run.validationResult, available: true };
+    }
     if (!dataSet || !("sourceCells" in dataSet)) {
       return { available: false, normalizedRows: [], validationResult: { issues: [], cleanRows: [], errorRows: [] } };
     }
     return config.kind === "stock-balances"
       ? runStockBalancesSourceValidation(dataSet, mapping as StockBalancesMapping, quantityNotation)
       : runPriceListSourceValidation(dataSet, mapping as PriceListMapping, priceNotation);
-  }, [config, mappedRows, unitReference, dataSet, mapping, priceNotation, quantityNotation]);
+  }, [config, mappedRows, unitReference, dataSet, mapping, priceNotation, quantityNotation, domain, templateId]);
   const { normalizedRows, validationResult } = validationRun;
   const mappingGuidance = describeMappingReadiness(missingRequiredFields.map((field) => field.label), duplicateMappedHeaders);
   const resultsReady = mappingReady && !isReferenceLoading && validationRun.available;
@@ -241,6 +247,8 @@ function MasterDataWorkspaceContent({
 
     setError(null);
     setDataSet(null);
+    setSourceVersion(value => value + 1);
+    setTemplateId("generic");
     setPriceNotation(null);
     setQuantityNotation(null);
     setUnitReference(null);
@@ -324,6 +332,8 @@ function MasterDataWorkspaceContent({
     loadRequestId.current += 1;
     setPendingExcelSheets(null);
     setDataSet(null);
+    setSourceVersion(value => value + 1);
+    setTemplateId("generic");
     setPriceNotation(null);
     setQuantityNotation(null);
     setUnitReference(null);
@@ -347,12 +357,13 @@ function MasterDataWorkspaceContent({
   const reportInput = useMemo(() => ({
     profile, fileName: dataSet?.fileName ?? "", sheetName: dataSet?.metadata?.sheetName,
     mapping, unitReference,
+    templateContext,
     priceContext: domain === "price-list" && priceNotation ? { priceNotation } : undefined,
     stockContext: domain === "stock-balances" && quantityNotation ? { quantityNotation } : undefined,
     counts: { total: normalizedRows.length, blocked: blockedCount, needsReview: reviewCount, ready: readyCount },
     sourceRows: dataSet?.rows ?? [], displayRows: isNumeric ? (dataSet as ExactParsedDataSet | null)?.formattedRows : undefined,
     normalizedRows, issues: validationResult.issues,
-  }), [profile, dataSet, mapping, unitReference, domain, priceNotation, quantityNotation, normalizedRows, blockedCount, reviewCount, readyCount, isNumeric, validationResult.issues]);
+  }), [profile, dataSet, mapping, unitReference, domain, priceNotation, quantityNotation, normalizedRows, blockedCount, reviewCount, readyCount, isNumeric, validationResult.issues, templateContext]);
 
   return (
     <WorkspaceLayout>
@@ -422,9 +433,9 @@ function MasterDataWorkspaceContent({
                 <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
                   {mappedCount}/{profile.fields.length} fields mapped
                 </p>
-                <p className={mappingReady ? "mt-1 break-words text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 break-words text-sm leading-6 text-[var(--brand-accent-soft)]"}>
+                {!mappingReady && (<p className={mappingReady ? "mt-1 break-words text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 break-words text-sm leading-6 text-[var(--brand-accent-soft)]"}>
                   {mappingGuidance}
-                </p>
+                </p>)}
               </div>
               <button
                 type="button"
@@ -439,6 +450,17 @@ function MasterDataWorkspaceContent({
                 {mappingReady ? "Edit mapping" : "Complete mapping"}
               </button>
             </div>
+            {domain === "customer" && <div className="mt-4 flex flex-wrap items-end gap-2">
+              <label className="block text-sm font-medium text-[var(--text-primary)]">Import template
+                <select aria-label="Import template" value={templateId} onChange={event => { setTemplateId(event.target.value as ErpTemplateId); setActiveReviewTab(null); setSelectedRowIndex(null); setReviewFilters({ ...EMPTY_REVIEW_FILTERS }); }}
+                  className="mt-2 block min-h-11 max-w-full rounded-xl border border-white/15 bg-[var(--surface-deep)] px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-[var(--brand-accent-soft)]">
+                  <option value="generic">Generic customer</option>
+                  <option value={ODOO_CUSTOMER_TEMPLATE.id}>{ODOO_CUSTOMER_TEMPLATE.label}</option>
+                </select>
+              </label>
+              <div className="flex min-h-11 items-center"><HelpPopover title="Import template">Generic customer keeps the current export. Odoo 19 creates company contacts with External ID, Name, Is a Company, Email, Country/External ID, Tax ID and Reference. Customer ID becomes datapreflight_customer.customer_&lt;Customer ID&gt;; the original ID is also exported as Reference. {ODOO_CUSTOMER_TEMPLATE.boundary}</HelpPopover></div>
+              {templateContext && <p role="status" className="basis-full text-sm text-[var(--text-secondary)]">Odoo 19 company contacts · CSV / Excel · Trial import pending</p>}
+            </div>}
             {domain === "price-list" && (
               <PriceNotationControls value={priceNotation} onChange={(value) => {
                 setPriceNotation(value);
@@ -477,12 +499,7 @@ function MasterDataWorkspaceContent({
                   <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                     Step 2 · Review
                   </h2><HelpPopover title="Review results">Blocked rows are excluded from data export. Needs review rows can export with warnings. Ready means the implemented checks passed; it is not an ERP acceptance guarantee.</HelpPopover></div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <p className="text-base font-medium text-[var(--text-secondary)]">
-                      {config.labels.results}
-                    </p>
-                    <ReviewStatusSummary counts={reviewCounts} />
-                  </div>
+
                 </div>
 
                 <ReviewStatusControls
@@ -528,7 +545,7 @@ function MasterDataWorkspaceContent({
                         <button type="button" onClick={() => setReviewFilters({ ...EMPTY_REVIEW_FILTERS })} className="mt-2 block min-h-11 underline">Clear review filters</button>
                       </p>
                     ) : (
-                      <div className="mt-2.5 max-h-[620px] space-y-1.5 overflow-y-auto pr-1">
+                      <div className="mt-2.5 max-h-[620px] space-y-2 overflow-y-auto pr-1">
                         {visibleRows.map(({ row, rowIndex, issues }) => {
                           const isSelected = selectedRowIndex === rowIndex;
                           if (domain === "stock-balances") {
@@ -599,7 +616,7 @@ function MasterDataWorkspaceContent({
                   }}
                 />
 
-                <ExportPanel fileName={config.exports.rows} rows={validationResult.cleanRows} disabled={!canExport} input={reportInput} issueFileName={config.exports.issues} />
+                <ExportPanel key={`${sourceVersion}:${templateId}:${JSON.stringify(mapping)}`} template={templateContext} fileName={templateContext ? "odoo-19-company-contacts.csv" : config.exports.rows} rows={validationResult.cleanRows} disabled={!canExport} input={reportInput} issueFileName={config.exports.issues} />
               </section>
             </>
           )}

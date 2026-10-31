@@ -89,3 +89,8 @@ R00-plan en R01/R02 zijn bevestigd/gepusht als 2e5c65b; R03 als efc917c. R07a + 
 31 oktober 2026 — R05b lokaal geaccepteerd. R05c dezelfde leesbare recordtekst via gedeelde component over zes profielen voorbereid; tijdelijke opt-in verwijderd. Gerichte checks geslaagd; apply/push/live open.
 
 31 oktober 2026 — Nieuwe sessie: fbe5790 en 148 uitgangsbestanden geverifieerd. Aangeleverde feedback binnen M7 verwerkt. R05d labels/contrast, mappingvervolgstappen en actuele hulp voorbereid; gerichte UI/exportchecks geslaagd. Lokale acceptatie/push open; daarna R06.
+
+
+31 oktober 2026 — R05d/R06 en de gerichte rustige-presentatiepakketten zijn door Rob lokaal voltooid verklaard; laatste refinement plaatst Problem/Fix/Why op alle kaarten. Eerdere push door Rob gemeld, actuele remote-SHA in deze ronde niet opnieuw vastgesteld. Geen automatische correcties: Rob vindt dit te foutgevoelig.
+
+31 oktober 2026 — R08-contract en R09a eerste ERP-template voorbereid: Odoo 19 company contacts als optionele overlay op Customer. Exact-voorbeeld niet beschikbaar; Rob heeft Odoo goedgekeurd en staat verdere onderbouwde templates toe. ID-transformatie, gebundelde landenreferentie, blockers, CSV/XLSX en rapportcontext aangesloten. 142 tests, gerichte lint en productiebuild geslaagd. Zie M7_R08_ODOO_CONTRACT.md. Lokale toepassing/push/live/proefimport nog open. R09 custom rules/verdere referenties blijven open; geen M7-eindacceptatie. Hervatten na lokale beoordeling: resterend R09, daarna R10/R07b volgens plan.

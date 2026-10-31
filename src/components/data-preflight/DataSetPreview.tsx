@@ -132,7 +132,7 @@ export function DataSetPreview({
               compact ? "max-h-[420px]" : "max-h-[620px]"
             }`}
           >
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {sortedItems.map((item) => {
                 const isSelected = selectedRowIndex === item.rowIndex;
                 return (

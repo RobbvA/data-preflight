@@ -1,6 +1,6 @@
 "use client";
 
-import { WorkflowProgress, type WorkflowStage } from "@/components/data-preflight/WorkflowProgress";
+import type { WorkflowStage } from "@/components/data-preflight/WorkflowProgress";
 import { WorkflowHelpProvider, WorkflowGuideButton } from "@/components/data-preflight/WorkflowHelp";
 import type { ReactNode } from "react";
 import { HomeProductPreview } from "@/components/data-preflight/HomeProductPreview";
@@ -54,8 +54,6 @@ export function LandingWorkspace({
         </p>
       </div>
 
-      <div className="mt-5"><WorkflowProgress stage="upload" /></div>
-
       <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-stretch lg:gap-7">
         <div className="order-2 lg:order-1">
           <HomeProductPreview domain={domain} />
@@ -69,7 +67,6 @@ export function LandingWorkspace({
 
 export function ActiveWorkspaceHeader({
   domain,
-  stage = "mapping",
   upload,
 }: {
   domain: DataDomain;
@@ -94,7 +91,6 @@ export function ActiveWorkspaceHeader({
 
       {upload}
     </section>
-    <WorkflowProgress stage={stage} />
     </>
   );
 }
