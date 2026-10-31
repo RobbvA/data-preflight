@@ -1,3 +1,5 @@
+> 2026-10-31 R03 preparation: CSV (semicolon/comma), Excel XLSX, tab-separated TXT/TSV and JSON data exports are implemented across six profiles. All writers preserve the same exportable rows and exact text values; 121 tests and real browser download checks pass. Local acceptance/push/live of R03 remain open. See [export contract/research](docs/M7_R03_EXPORT_FORMATS.md). R01/R02 is accepted/pushed as 2e5c65b. Review XLSX/PDF and multi-file ZIP remain planned.
+
 > 2026-10-31 preparation update: Invoice v1.1.0 requires explicit decimal notation, preserves stored financial values and uses exact comparisons. Invoice/Price/Stock share square notation choices. 101 tests pass; local application/push/live of this package remain open. See [R01/R02 evidence](docs/M7_R01_INVOICE_NUMBERS.md) and [expanded M7 plan](docs/M7_REMAINING_PLAN.md), including planned file tabs and joint ZIP export. These future batch/export features are not implemented yet.
 
 # DataPreflight

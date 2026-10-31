@@ -1,8 +1,6 @@
+import { createExportDataSet, serializeDataExport, type DataExportOptions } from "@/lib/dataExport";
 import type { ParsedRow } from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
-
-const CSV_DELIMITER = ";";
-const UTF8_BOM = "\uFEFF";
 
 export type ExportBlockerSummary = {
   type: ValidationIssue["type"];
@@ -13,27 +11,15 @@ export type ExportBlockerSummary = {
   label: string;
 };
 
+export function downloadDataExport(filename: string, rows: readonly ParsedRow[], options: DataExportOptions) {
+  const file = serializeDataExport(createExportDataSet(rows), options);
+  if (!file) return;
+  const stem = filename.replace(/\.(?:csv|xlsx|txt|tsv|json)$/i, "");
+  downloadFile(`${stem}.${file.extension}`, file.content, file.mimeType);
+}
+
 export function downloadCsv(filename: string, rows: ParsedRow[]) {
-  if (rows.length === 0) return;
-
-  const headers = getStableHeaders(rows).filter(
-    (header) => header !== "normalized_invoice_key",
-  );
-
-  const csvRows = [
-    headers.map(escapeCsvValue).join(CSV_DELIMITER),
-    ...rows.map((row) =>
-      headers
-        .map((header) => escapeCsvValue(row[header] ?? ""))
-        .join(CSV_DELIMITER),
-    ),
-  ];
-
-  downloadFile(
-    filename,
-    `${UTF8_BOM}${csvRows.join("\n")}`,
-    "text/csv;charset=utf-8",
-  );
+  downloadDataExport(filename, rows, { format: "csv", csvDelimiter: ";" });
 }
 
 export function downloadErrorCsv(
@@ -55,31 +41,13 @@ export function downloadErrorCsv(
     "export_decision",
   ];
 
-  const csvRows = [
-    headers.map(escapeCsvValue).join(CSV_DELIMITER),
-    ...issues.map((issue) =>
-      [
-        issue.rowIndex,
-        issue.field,
-        issue.severity,
-        issue.risk,
-        issue.category,
-        issue.type,
-        issue.problem,
-        issue.why,
-        issue.fix,
-        getIssueExportDecision(issue),
-      ]
-        .map((value) => escapeCsvValue(String(value)))
-        .join(CSV_DELIMITER),
-    ),
-  ];
-
-  downloadFile(
-    filename,
-    `${UTF8_BOM}${csvRows.join("\n")}`,
-    "text/csv;charset=utf-8",
-  );
+  const blockedRows = new Set(issues.filter((issue) => issue.severity === "critical").map((issue) => issue.rowIndex));
+  const rows = issues.map((issue) => Object.fromEntries(headers.map((header, index) => [header, String([
+    issue.rowIndex, issue.field, issue.severity, issue.risk, issue.category, issue.type,
+    issue.problem, issue.why, issue.fix,
+    blockedRows.has(issue.rowIndex) ? "excluded_from_clean_export" : "included_with_review_warning",
+  ][index])])));
+  downloadCsv(filename, rows);
 }
 
 export function getExportBlockerSummaries(
@@ -157,31 +125,9 @@ export function getExportSafetyMessage({
   return "These rows passed the current profile checks. This does not guarantee acceptance by your target ERP.";
 }
 
-function getIssueExportDecision(issue: ValidationIssue) {
-  if (issue.severity === "critical") {
-    return "excluded_from_clean_export";
-  }
-
-  return "included_with_review_warning";
-}
-
-function getStableHeaders(rows: ParsedRow[]) {
-  return Array.from(
-    rows.reduce<Set<string>>((headers, row) => {
-      Object.keys(row).forEach((header) => headers.add(header));
-      return headers;
-    }, new Set<string>()),
-  );
-}
-
-function escapeCsvValue(value: string) {
-  const escaped = value.replaceAll('"', '""');
-  return `"${escaped}"`;
-}
-
 function downloadFile(
   filename: string,
-  content: string,
+  content: string | ArrayBuffer,
   type: string,
 ) {
   const blob = new Blob([content], { type });

@@ -31,6 +31,7 @@ import {
 } from "@/lib/dataProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
+import { DataExportControls } from "@/components/data-preflight/DataExportControls";
 import { ExportSummary } from "@/components/data-preflight/ExportSummary";
 import { ReviewRecord } from "@/components/data-preflight/ReviewRecord";
 import { ProductReviewRecord } from "@/components/data-preflight/ProductReviewRecord";
@@ -342,6 +343,7 @@ function MasterDataWorkspaceContent({
   }
 
   function exportIssues() {
+    const blockedRows = new Set(validationResult.issues.filter((issue) => issue.severity === "critical").map((issue) => issue.rowIndex));
     const report: ParsedRow[] = validationResult.issues.map((issue) => ({
       row: String(issue.rowIndex),
       field: issue.field,
@@ -350,6 +352,7 @@ function MasterDataWorkspaceContent({
       problem: issue.problem,
       why_it_matters: issue.why,
       suggested_fix: issue.fix,
+      export_decision: blockedRows.has(issue.rowIndex) ? "excluded_from_clean_export" : "included_with_review_warning",
     }));
     downloadCsv(config.exports.issues, report);
   }
@@ -613,26 +616,8 @@ function MasterDataWorkspaceContent({
                   }}
                 />
 
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    disabled={!canExport}
-                    onClick={() =>
-                      downloadCsv(config.exports.rows, validationResult.cleanRows)
-                    }
-                    className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    Export rows without blockers
-                  </button>
-                  <button
-                    type="button"
-                    disabled={validationResult.issues.length === 0}
-                    onClick={exportIssues}
-                    className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    Download issue report
-                  </button>
-                </div>
+                <DataExportControls fileName={config.exports.rows} rows={validationResult.cleanRows}
+                  disabled={!canExport} hasIssues={validationResult.issues.length > 0} onExportIssues={exportIssues} />
               </section>
             </>
           )}

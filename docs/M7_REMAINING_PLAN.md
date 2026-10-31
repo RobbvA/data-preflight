@@ -1,6 +1,6 @@
 # M7 — Uitgebreid uitvoeringsplan voor het resterende werk
 
-Versie 3.1 · 31 oktober 2026 · eigenaar Rob · status: gepland, niet geïmplementeerd.
+Versie 3.2 · 31 oktober 2026 · eigenaar Rob · status: gepland, niet geïmplementeerd.
 
 Dit is de leidende aanvulling op M7_PLAN.md. Rob heeft de eerder buiten M7 geplaatste productverbeteringen expliciet naar M7 verplaatst. Bij strijd met oude uitsluitingen, volgorde of afsluitcriteria geldt dit document. Bestaande Price/Stock-contracten en geaccepteerde vormgeving blijven behouden. M7_PROGRESS.md bevat uitsluitend de actuele uitvoering en het hervatpunt.
 
@@ -33,7 +33,7 @@ De oude M7.1–M7.4e blijven historische stappen. Onderstaande R-ID's zijn de re
 | R00 | Baseline en plan toepassen | — | Actuele code/pushstatus, docs v3 en exact hervatpunt |
 | R01 | Invoice exact getalcontract | R00 | Versiegewijzigd profiel, regressies, precieze bronroute |
 | R02 | Checkboxbediening getalnotatie | R01 | Expliciete keuze zonder dropdown voor Invoice/Price/Stock |
-| R03 | Eén exportbasis, CSV en XLSX | R01–R02 | Beide echte bestanden met dezelfde toegestane rijen |
+| R03 | Eén exportbasis, gangbare bestandsformaten | R01–R02 | CSV (; of ,), XLSX, TXT/TSV-tab en JSON met dezelfde toegestane rijen |
 | R04 | Zesprofielintegratie, M7.4f | R03 | Contextisolatie en ketenbewijs voor alle zes |
 | R05 | Leesbaarheid en onboarding | R04 | Eén beoordeeld voorstel, daarna consistente uitrol |
 | R06 | Review zoeken/filteren/sorteren | R05 | Bruikbare grote lijsten zonder exportscopewijziging |
@@ -81,15 +81,15 @@ Interne toestand is unset/point/comma. Eigen nieuwe bron start unset, ook met de
 
 Acceptatie: muis/toetsenbord/mobiel, geen bypass door saved mappings, late uploads of exporthandlers; rapport volgt de actieve keuze.
 
-## 6. R03 — Exportcontract voor CSV en XLSX
+## 6. R03 — Exportcontract voor CSV, XLSX, TXT, TSV en JSON
 
-Architectuur: één getypeerde exportdataset uit de actuele validatierun. CSV- en XLSX-writers gebruiken dezelfde kolommen/rijen/volgorde. Exportknoppen vragen geen alternatieve validatie aan. Reviewfilters veranderen nooit de data-export; toon dit en toon inclusie/exclusieaantallen bij de actie.
+Architectuur: één getypeerde exportdataset uit de actuele validatierun. Alle writers gebruiken dezelfde kolommen/rijen/volgorde. Op 31 oktober heeft Rob expliciet om de relevante gangbare exportkeuzes gevraagd; CSV heeft een puntkomma-/kommakeuze, TXT en TSV zijn tabgescheiden en JSON is een array van records met stringwaarden voor scripts/integraties. XML volgt alleen bij een concreet ERP-schema; PDF blijft een reviewrapport onder R07. Exportknoppen vragen geen alternatieve validatie aan. Reviewfilters veranderen nooit de data-export; toon dit en toon inclusie/exclusieaantallen bij de actie.
 
-- CSV: behoud het huidige expliciete UTF-8/BOM/semicoloncontract voor generieke profielen; vaste headerorde en correcte quoting voor quotes/newlines/separators. Genormaliseerde decimalen gebruiken punt. ERP-template mag alleen met gedocumenteerd eigen contract afwijken.
+- CSV: behoud UTF-8/BOM en puntkomma als standaard; bied ook een expliciete kommakeuze. Voor TXT/TSV dezelfde quoting met tabs. JSON bevat geen BOM en behoudt waarden als strings; vaste headerorde en correcte quoting voor quotes/newlines/separators. Genormaliseerde decimalen gebruiken punt. ERP-template mag alleen met gedocumenteerd eigen contract afwijken.
 - XLSX: één sheet met schone data; identifiers en exacte decimalen als tekstcellen om voorloopnullen, schaal en lange precisie te behouden. Datums als expliciete ISO-tekst. Geen formules of automatische typegok. Geen automatische Number-conversie voor een mooiere weergave. Een later ERP-template dat numerieke cellen vereist moet eigen bewezen verliesvrije grenzen hebben en anders blokkeren.
 - Uitleg: CSV bewaart tekstwaarden, maar Excel kan bij direct openen typen raden. XLSX is de voorspelbare tekstbehoudende uitvoer. Geen Excel-auto-open-garantie voor CSV geven.
 - Bestaande issue- en validation-CSV's blijven beschikbaar. Reviewrapporten hebben een eigen actie; geen schone data in PDF als importbestand presenteren.
-- Spreadsheet-formuleachtige tekst (`=`, `+`, `-`, `@`, tabs) opnemen in exporttests. XLSX schrijft uitdrukkelijk tekst, nooit formule. Voor CSV een vastgelegde veilige behandeling kiezen vóór oplevering: importwaarden niet stil wijzigen met apostrofs of formules. Risicovolle tekst moet zichtbaar behandeld worden; als ongewijzigde CSV niet veilig kan worden aangeboden, die download blokkeren met herstelactie en XLSX aanbieden. Geldige negatieve decimaalwaarden zijn geen formuletekst. Test ook rapportcellen.
+- Spreadsheet-formuleachtige tekst (`=`, `+`, `-`, `@`, tabs) opnemen in exporttests. XLSX schrijft uitdrukkelijk tekst, nooit formule. Voor CSV/TXT/TSV geldt vanaf R03: formuleachtige tekst blokkeert deze download met een zichtbare herstelactie naar XLSX/JSON; normale negatieve decimaalwaarden blijven toegestaan. Deze regel is ook op CSV-rapporten van toepassing, met passende herstelmelding. Geen stille neutralisatie. Algemeen: importwaarden niet stil wijzigen met apostrofs of formules. Risicovolle tekst moet zichtbaar behandeld worden; als ongewijzigde CSV niet veilig kan worden aangeboden, die download blokkeren met herstelactie en XLSX aanbieden. Geldige negatieve decimaalwaarden zijn geen formuletekst. Test ook rapportcellen.
 
 Acceptatie: echte bestanden downloaden en onafhankelijk teruglezen; `000123`, lange IDs, `12.5000`, nul, Unicode, multiline, lege optionele velden, all-blocked en warning-only. Geen interne keys in data. Templateheaders en schrijvers hebben expliciete tests.
 
@@ -209,3 +209,5 @@ M7 klaar wanneer alle R-pakketten hun acceptatiecriteria hebben, kritieke bevind
 - Open productbesluiten vóór bijbehorend pakket: checkboxvoorstel beoordelen (R02), ERP/object/versie kiezen uit bewezen contract (R08), gratis/betaalde grenzen/prijs/contactbestemming afspreken (R11). Deze blokkeren R01 niet.
 
 - Rob, 30 oktober: multi-file expliciet binnen M7, met bestandstabs en gezamenlijke ZIP-export. Uitgewerkt op 31 oktober als R11a/R11b, vóór de eindtest. Geen multi-file-implementatie in het R01/R02-pakket.
+
+- Rob, 31 oktober: na R01/R02 meer relevante gangbare exportkeuzes onderzoeken en toepassen. R03 uitgebreid naar CSV met scheidingstekenkeuze, XLSX, tabgescheiden TXT/TSV en JSON voor integratiegebruik. Onderbouwing en bewijs: M7_R03_EXPORT_FORMATS.md. Geen generiek ERP-XML of import-PDF.

@@ -1018,3 +1018,12 @@ Remote main opnieuw gecontroleerd op 3fe3b2d. Vorig planpakket is door Rob nog n
 Invoice v1.1.0: expliciete notatie, exacte financiële broncellen en exacte VAT-vergelijkingen; geformatteerde niet-financiële Excelvelden behouden. Nieuwe vierkante keuzebediening hergebruikt voor Invoice/Price/Stock, geen dropdown of verborgen standaard bij eigen bron. Profielversie gewijzigd; bestaande saved mapping-versiereview blijft actief. Planfout over optionele VAT gecorrigeerd: VAT blijft vereist.
 
 101 tests geslaagd (15 nieuwe); lint nul fouten en twee bestaande warnings; productiebuild/TS en gerichte browserketen met werkelijke downloads, lifecycle, XLS/XLSX, keyboard/1440/390 en zes voorbeelden geslaagd. Geen volledige eindtest of nieuwe liveacceptatie geclaimd. Gebruiker moet pakket nog lokaal toepassen/beoordelen; commit/push daarna. Volgende doel R03 CSV/XLSX-export. Geen outreach of remote writes uitgevoerd.
+
+
+## 31 oktober 2026 — R03 gangbare exportkeuzes onderzocht en gebouwd
+
+R01/R02 lokaal afgerond; checkboxuitstraling door Rob geaccepteerd. Remote 2e5c65b onafhankelijk bevestigd. Rob vraagt meer formaten op basis van ERP-gebruik. Officiële AFAS/NetSuite/Odoo/Microsoft-documentatie onderbouwt CSV/XLSX en tabgescheiden tekst; JSON toegevoegd voor scripts/integraties, niet als generiek ERP-API-schema. Geen marktaandeel of betalingsvraag geclaimd. XML volgt een concreet templatecontract, PDF rapportwerk R07.
+
+Gebouwd: gedeelde dataset/writers, CSV met puntkomma/komma, XLSX-tekstcellen, TXT/TSV, JSON-stringwaarden en gedeelde exportbediening over alle zes. Formuleachtige tekst blokkeert delimited downloads zonder bronmutatie, met XLSX/JSON als alternatieven. Excel-limieten expliciet. Issuerapportbesluit volgt hele rij.
+
+121 tests geslaagd (20 nieuwe), lint zonder nieuwe warnings, build/TS en werkelijke downloads over zes profielen/zes varianten plus eigen precisie- en recoverycases geslaagd. Visueel 1440/390px gecontroleerd. Geen fysieke telefoon, rechtstreekse ERP-proefimport, volledige R12 of nieuwe liveacceptatie geclaimd. Pakket nog lokaal toepassen/beoordelen; daarna commit/push en R04/R05. Geen remote writes of outreach uitgevoerd.

@@ -1,6 +1,6 @@
 # M7 — Professional UX, Price List & Stock Balances
 
-Planversie: 3.1 · 31 oktober 2026 · eigenaar: Rob.
+Planversie: 3.2 · 31 oktober 2026 · eigenaar: Rob.
 
 **Actuele resterende scope, volgorde en acceptatiecriteria:** [M7_REMAINING_PLAN.md](M7_REMAINING_PLAN.md). Rob heeft de productuitbreidingen op 29 oktober expliciet binnen M7 geplaatst. Inclusief Robs aanvulling van 30 oktober: multi-file (maximaal vijf), bestandstabs en gezamenlijke ZIP-export. Die aanvulling vervangt strijdige uitsluitingen, de oude afsluitvolgorde en het eerdere besluit om praktijktests pas na M7 te doen. De onderstaande versie-2-contracten en historie blijven als basis behouden; ze zijn geen actuele takenlijst.
 

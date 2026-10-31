@@ -587,14 +587,14 @@ If scope must shrink, defer the reference-data experiment first and explicitly r
 
 Status: in progress. Scope explicitly expanded by Rob on 29 October 2026. The former exclusions of one ERP template, bounded local references/custom rules, richer review/reporting and an independent usage test are superseded.
 
-Authoritative remaining plan: [docs/M7_REMAINING_PLAN.md](docs/M7_REMAINING_PLAN.md), v3.1, including multi-file with tabs and joint ZIP export. Original domain contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current checkpoint: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md).
+Authoritative remaining plan: [docs/M7_REMAINING_PLAN.md](docs/M7_REMAINING_PLAN.md), v3.2, including multi-file with tabs and joint ZIP export. Original domain contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current checkpoint: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md).
 
 Remote main verified on 29 October as 3fe3b2d: full Stock Balances workflow pushed. Historical preparation evidence: 86 passing tests, lint with two known warnings, production build and focused browser checks. No new full live acceptance claimed.
 
 Remaining sequence:
 
 1. Baseline/docs; exact Invoice notation and financial comparisons; explicit checkbox-style notation choice.
-2. Shared CSV/XLSX export, followed by six-profile integration (M7.4f).
+2. Shared CSV (semicolon/comma), XLSX, TXT/TSV and JSON export, followed by six-profile integration (M7.4f).
 3. Approved readability improvements, onboarding and searchable/filterable/sortable review.
 4. Consistent CSV/XLSX/PDF review reporting and bounded report branding.
 5. Specify and build one evidence-based ERP template with local reference checks and limited custom rules.
@@ -606,4 +606,4 @@ Keep six generic profiles, accepted styling/layout, exact Price 8/1/2 and Stock 
 
 Commercial preparation does not silently include payment/account infrastructure. Live connectors, cloud collaboration, arbitrary rules/scripts, in-app cell editing and additional generic profiles remain outside scope. Open ERP/object and pricing/limit decisions are recorded before their implementation, not fabricated.
 
-R01/R02 are built/tested in preparation on 31 October: Invoice v1.1.0 exact financial source contract and shared square notation choices; 101 tests pass, lint retains only two known warnings, build/browser checks pass. Local application/push/live of this package remain open. Next build goal after confirmation: R03 CSV/XLSX export. Final completion follows v3 criteria, not the old smaller M7 checklist. Local confirmation, push, deployment and live function checks remain separate evidence stages.
+R01/R02 are locally accepted/pushed as 2e5c65b. R03 is built/tested in preparation: five data formats, explicit CSV separator, one stable dataset and precise text preservation; 121 tests, lint/build and real cross-profile downloads pass. Local application/push/live of R03 remain open. Next goal after confirmation: R04 six-profile integration and R05 readability. Final completion follows v3 criteria, not the old smaller M7 checklist. Local confirmation, push, deployment and live function checks remain separate evidence stages.

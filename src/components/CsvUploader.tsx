@@ -14,7 +14,6 @@ import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfil
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
 import {
-  downloadCsv,
   downloadErrorCsv,
 } from "@/lib/exportData";
 import {
@@ -23,6 +22,7 @@ import {
   createSuggestedMapping,
 } from "@/lib/fieldMapping";
 import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
+import { DataExportControls } from "@/components/data-preflight/DataExportControls";
 import { ExportSummary } from "@/components/data-preflight/ExportSummary";
 import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
 import { MasterDataWorkspace } from "@/components/data-preflight/MasterDataWorkspace";
@@ -476,28 +476,9 @@ export function CsvUploader() {
                   }}
                 />
 
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      downloadCsv("clean-invoices.csv", validationResult.cleanRows)
-                    }
-                    disabled={!canExport}
-                    className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    Export rows without blockers
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      downloadErrorCsv("invoice-errors.csv", validationResult.issues)
-                    }
-                    disabled={validationResult.issues.length === 0}
-                    className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    Download issue report
-                  </button>
-                </div>
+                <DataExportControls fileName="clean-invoices.csv" rows={validationResult.cleanRows}
+                  disabled={!canExport} hasIssues={validationResult.issues.length > 0}
+                  onExportIssues={() => downloadErrorCsv("invoice-errors.csv", validationResult.issues)} />
               </section>
             </>
           )}

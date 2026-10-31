@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import { downloadCsv } from "@/lib/exportData";
 import { buildValidationReportRows, type InvoiceValidationContext, type PriceValidationContext, type StockValidationContext } from "@/lib/validationReport";
@@ -32,6 +34,7 @@ export function ValidationContextPanel<TField extends string>({
   priceContext,
   stockContext,
 }: ValidationContextPanelProps<TField>) {
+  const [reportError, setReportError] = useState<string | null>(null);
   const appliedMapping: Record<string, string> = Object.fromEntries(
     (Object.entries(mapping) as Array<[string, string]>).sort(
       ([first], [second]) => first.localeCompare(second),
@@ -39,6 +42,8 @@ export function ValidationContextPanel<TField extends string>({
   );
 
   function downloadReport() {
+    setReportError(null);
+    try {
     downloadCsv(
       "validation-report.csv",
       buildValidationReportRows({
@@ -53,6 +58,11 @@ export function ValidationContextPanel<TField extends string>({
         stockContext,
       }),
     );
+    } catch (caught) {
+      setReportError(caught instanceof Error && caught.message.includes("spreadsheet formula")
+        ? "This CSV report contains formula-like text in a filename or column. Rename the source file or affected headers and validate it again before downloading the report."
+        : caught instanceof Error ? caught.message : "The validation report could not be created. Try again.");
+    }
   }
 
   return (
@@ -153,6 +163,7 @@ export function ValidationContextPanel<TField extends string>({
         >
           Download validation report CSV
         </button>
+        {reportError && <p role="alert" className="mt-2 text-sm leading-6 text-[var(--brand-accent-soft)]">{reportError}</p>}
       </details>
     </section>
   );
