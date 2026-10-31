@@ -32,15 +32,15 @@ export function ReviewRecord({ title, subtitle, context, rowIndex, fields, issue
           <h4 className="break-all text-base font-semibold text-[var(--text-primary)]">{title}</h4>
           {subtitle && <p className="break-words text-sm text-[var(--text-secondary)]">{subtitle}</p>}
         </div>
-        <p className="text-xs leading-5 text-[var(--text-secondary)]">
+        <p className="text-sm leading-5 text-[var(--text-secondary)]">
           Row {rowIndex} · {issues.length ? issues.length + (issues.length === 1 ? " issue" : " issues") : "Ready"}
         </p>
       </div>
 
       {mainIssue ? (
         <div className="mt-1">
-          <p className="text-sm font-semibold leading-5 text-[var(--text-primary)]">{mainIssue.problem}</p>
-          <p className="mt-0.5 text-sm leading-5 text-[var(--text-secondary)]"><span className="font-semibold">Fix:</span> {mainIssue.fix}</p>
+          <p className="break-words text-base font-semibold leading-6 text-[var(--text-primary)]">{mainIssue.problem}</p>
+          <p className="mt-0.5 break-words text-base leading-6 text-[var(--text-primary)]"><span className="font-semibold">Fix:</span> {mainIssue.fix}</p>
         </div>
       ) : (
         <p className="mt-1 text-sm leading-5 text-[var(--text-secondary)]">{context ? context + " · " : ""}Passed current checks</p>
@@ -56,7 +56,7 @@ export function ReviewRecord({ title, subtitle, context, rowIndex, fields, issue
         <dl className="grid gap-2 sm:grid-cols-3">
           {fields.map(({ label, value }) => (
             <div key={label} className="min-w-0 rounded-lg bg-[var(--surface-deep)] p-2">
-              <dt className="text-xs text-[var(--text-secondary)]">{label}</dt>
+              <dt className="text-sm text-[var(--text-secondary)]">{label}</dt>
               <dd className="mt-1 break-words text-sm text-[var(--text-primary)]">{value || "—"}</dd>
             </div>
           ))}
@@ -65,7 +65,7 @@ export function ReviewRecord({ title, subtitle, context, rowIndex, fields, issue
         {issues.length ? (
           <div className="mt-2 space-y-2">
             {issues.map((issue, index) => (
-              <div key={issue.problem + "-" + index} className="text-sm leading-5">
+              <div key={issue.problem + "-" + index} className="break-words text-base leading-6">
                 {issue !== mainIssue && <p className="font-semibold text-[var(--text-primary)]">{issue.problem}</p>}
                 <p className="text-[var(--text-secondary)]"><span className="font-semibold">Why:</span> {issue.why}</p>
                 {issue !== mainIssue && <p className="mt-1 text-[var(--text-secondary)]"><span className="font-semibold">Fix:</span> {issue.fix}</p>}

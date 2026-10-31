@@ -2,16 +2,14 @@
 
 Bijgewerkt: 31 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 3.4. Resterende uitvoering: [M7_REMAINING_PLAN.md](M7_REMAINING_PLAN.md).
 
-## Actueel checkpoint — R04 zesprofielintegratie geslaagd in voorbereiding
+## Actueel checkpoint — R05c goedgekeurde recordtekst over zes profielen voorbereid
 
-- Rob heeft R07a + R05a lokaal bevestigd en gepusht. Remote op 31 oktober geverifieerd: `3a40d6047c16b04954a372c46aeb8097b62f7ca3`, `feat: add review report exports and guided workflow help`. Alle 143 remote repositorybestanden bytegetrouw vergeleken met de gecontroleerde checkout; nul afwijkingen vóór de nieuwe test/documentatiebestanden.
-- Op expliciet verzoek alle zes profielen gezamenlijk gecontroleerd. Invoice, Customer, Vendor, Product, Price List en Stock slagen in productie-Chromium: voorbeelden, eigen CSV/XLSX/XLS, worksheetkeuze/cancel, mappingguards en saved recovery, echte data-/issue-/reviewdownloads, bron-/profielisolatie en reset.
-- Alle vijf dataformaten (CSV met beide separators) teruggelezen en exact vergeleken. Issue-CSV/XLSX en volledig review-XLSX/PDF gedownload; workbookaantallen, status/exportbesluiten en profielspecifieke context vergeleken. PDF in deze ronde op geldigheid/pagina's gecontroleerd; eerdere R07a-inhoud/rendercontrole blijft afzonderlijk bewijs.
-- Ook geslaagd: all-ready/lege issues en all-blocked/exportguard per profiel; directe bestandsvervanging tijdens een vertraagde Excel-read; cancel + late completion per profiel; exacte getalprecisie/voorloopnullen/schaal bij Invoice/Price/Stock in XLSX én XLS; actieve/afgekeurde/vervangen Product-eenhedenlijst.
-- Geen applicatiefouten gevonden; geen UI-, validatie- of exportcode aangepast. 134 tests geslaagd, build/TypeScript geslaagd, lint nul fouten/twee bekende warnings. Herbruikbare optionele browserrunner en fixtures toegevoegd; geen nieuwe dependencies in package.json.
-- Bewijs en aantallen: [M7_R04_INTEGRATION.md](M7_R04_INTEGRATION.md). Pakket `datapreflight-m7-r04-integration-checkpoint.zip` bevat alleen test/documentatie. Geen volledige M7-eindtest, fysieke telefoontest of nieuwe liveacceptatie geclaimd.
-- Exact hervatpunt: checkpoint/testbestanden lokaal toepassen en later commit/push. Volgende functionele stap: resterende R05-leesbaarheid (kleine labels, contrast en scanbaarheid op desktop/390px), daarna R06. R05a is geaccepteerd; R05 als geheel nog open. R07b/R08–R14 en multi-file/tabs/gezamenlijke ZIP blijven binnen M7 gepland.
-- Geen nieuwe volledige audit of herhaling van deze groene R04-ronde zonder relevante wijziging/bevinding. Historische regels hieronder zijn geen actuele takenlijst.
+- Laatst geverifieerde remote: R04, `3d6eecdb92da9d596cf6cbdbd1a22bdbb2fc8eec`. R05b Productvoorstel lokaal toegepast en expliciet goedgekeurd door Rob: beter, niet perfect maar vooruitgang. Geen push van R05b geclaimd.
+- R05c past precies die goedgekeurde tekstregels toe op de gedeelde ReviewRecord, dus alle zes profielen. Probleem/herstel 16px/24px, rij-/detailnamen 14px, helderdere hersteltekst. Geen andere layout-/padding-/kleurwijziging. Tijdelijke readableText-opt-in verwijderd; één implementatie voor alle profielen.
+- Productiebuild/TypeScript en lint (nul fouten/twee bekende warnings) geslaagd. Gerichte zesprofiel-browsercontrole op 1440/390px: tekstgroottes, Details-toetsenbord, geen horizontale overflow en werkelijke exportrijaantallen behouden. Productcontrast is onder R05b gemeten op 12.61:1 hoofd-/hersteltekst en 9.70:1 rijlabel op dezelfde gedeelde kaartkleuren. Geen volledige functionele suite opnieuw uitgevoerd; R04 blijft recent bewijs.
+- Pakket `datapreflight-m7-r05c-readable-records-all-profiles.zip` cumulatief vanaf R04 of R05b. Geen dependencies. Details: [M7_R05C_READABLE_RECORDS.md](M7_R05C_READABLE_RECORDS.md).
+- Exact volgende actie: Rob past uitrol toe; lokale toepassing/commit/push/live van R05c staan open. Daarna resterende R05-labels/contrast rond mapping/review/export gericht afronden, vervolgens R06. Geen nieuw kaartontwerp voorstellen of groene R04 volledig herhalen zonder concrete aanleiding.
+- R05 als geheel is nog niet volledig geaccepteerd. R06–R14 en uitgebreide M7 inclusief multi-file/tabs/gezamenlijke ZIP blijven gepland. Historische checkpointregels hieronder zijn geen actuele takenlijst.
 
 ## Eerst lezen bij een sessiestart
 
@@ -84,3 +82,7 @@ R00-plan en R01/R02 zijn bevestigd/gepusht als 2e5c65b; R03 als efc917c. R07a + 
 31 oktober 2026 — R05a op Robs verzoek naar voren gehaald: exporttabs, contextuele hulp en optionele spotlightgids. Cumulatieve R07a/R05a-oplevering, lokaal/push/live open. Daarna R04 en resterende R05.
 
 31 oktober 2026 — R04 alle zes profielen in één testronde op Robs verzoek. Remote 3a40d60 bytegetrouw vergeleken; 134 tests/build/lint en brede browserketenchecks geslaagd. Geen applicatiefix nodig. Checkpoint/testpakket nog toepassen/push; hervatten resterende R05.
+
+31 oktober 2026 — R04-push bevestigd op 3d6eecd. R05b Product-typografieproef voorbereid na Robs akkoord. Alleen recordtekst/labels, geen layout-/validatie-/exportwijziging. Lokale beoordeling/push open; na akkoord consequent uitrollen en proefvariant verwijderen.
+
+31 oktober 2026 — R05b lokaal geaccepteerd. R05c dezelfde leesbare recordtekst via gedeelde component over zes profielen voorbereid; tijdelijke opt-in verwijderd. Gerichte checks geslaagd; apply/push/live open.

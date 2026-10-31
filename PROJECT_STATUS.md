@@ -1,3 +1,7 @@
+> 31 oktober 2026 — Productvoorstel R05b lokaal goedgekeurd. R05c uitrol van dezelfde recordtekst over zes profielen voorbereid/getest; tijdelijke variant verwijderd. Build/lint en gerichte 1440/390px/keyboard/werkelijke exportrijaantallen geslaagd. Lokale toepassing/push/live van uitrol open; daarna resterende R05-labels/contrast. Zie [checkpoint](docs/M7_PROGRESS.md).
+
+> 31 oktober 2026 — R04 bevestigd/gepusht op 3d6eecd. R05b representatief Product-voorstel voorbereid: probleem/herstel 16px, labels 14px, sterker herstelcontrast. Bestaande kaartindeling behouden; alleen Product opt-in. Build/lint en gerichte desktop/390px/contrast/exportcontrole geslaagd. Lokale beoordeling/push/live open; daarna goedgekeurde regels uitrollen. Zie [checkpoint](docs/M7_PROGRESS.md).
+
 > 31 oktober 2026 — R07a/R05a bevestigd/gepusht als 3a40d60. R04: alle zes profielen gezamenlijk gecontroleerd; voorbeelden en eigen CSV/XLSX/XLS, mappingguards, echte exports en lifecycle geslaagd. Geen applicatiefix nodig. 134 tests, build en lint (twee bekende warnings) groen. Nieuw checkpoint/testpakket nog toepassen/push; geen nieuwe liveacceptatie. Volgende stap: resterende R05. Zie [integratiebewijs](docs/M7_R04_INTEGRATION.md).
 
 > 31 oktober 2026 — R05a voorbereid: rustigere exporttabs, contextuele vraagtekenhulp en optionele spotlightgids. Cumulatief met R07a; lokaal toepassen/beoordelen/push/live nog open. Remote laatst geverifieerd efc917c. Hervatten R04 na bevestiging; R05 is niet volledig afgerond. Zie [checkpoint](docs/M7_PROGRESS.md).

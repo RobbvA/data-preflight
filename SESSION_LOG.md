@@ -1048,3 +1048,15 @@ Rob vindt de rapportfunctie waardevol maar de UI/UX nog onvoldoende. Op explicie
 Rob vraagt alle profielen in één keer te controleren. R07a/R05a-push geverifieerd op 3a40d6047c16b04954a372c46aeb8097b62f7ca3; 143 repositorybestanden komen bytegetrouw overeen met de testcheckout. 134 tests, productiebuild/TypeScript en lint (0 fouten/2 bekende warnings) geslaagd. Browserketen: zes voorbeelden, eigen CSV/XLSX/XLS met herschikte kolommen, expliciete worksheets, missing/duplicate/saved mapping, alle dataformaten en rapporten, counts/exportbesluiten, all-ready/all-blocked, vervanging/cancel/late reads, profielwissel/reset, precisie en Product-referentiegrenzen. Geen applicatiefout gevonden of appcode gewijzigd.
 
 Een optionele Playwright-runner met openbare fixtures en bewijsdocument toegevoegd. Tijdens ontwikkeling van de runner zijn de verwachte samengestelde Price/Stock-recordidentiteiten gecorrigeerd en automatische smooth-scroll tijdens downloadacties uitgeschakeld om een browseractie-timeout te voorkomen; betrokken checks daarna geslaagd. Geen defect in de applicatie of stil overgeslagen check. Zie docs/M7_R04_INTEGRATION.md voor bewijsgrenzen. Test/checkpointpakket nog lokaal toepassen/push; hervatten resterende R05. Geen nieuwe volledige audit, liveacceptatie of volledige M7-afsluiting.
+
+## 31 oktober 2026 — R05b Product-leesbaarheid
+
+Remote R04 geverifieerd op 3d6eecd. Rob stemt in met één representatief voorstel. Alleen Product-recordkaarten krijgen 16px probleem/hersteltekst en 14px rij-/detailnamen, hersteltekst naar bestaande primary-kleur. Padding, achtergrond, indeling en Details blijven gelijk. Tijdelijke readableText-opt-in in gedeelde component voorkomt ongevraagde uitrol naar andere profielen.
+
+Build/TypeScript en lint (0 fouten/2 bekende warnings) geslaagd. Gerichte browsercontrole 1440/390, werkelijke tekstkleur/achtergrond en fontmetingen, toetsenbord-Details, exacte twee Product-exportrijen en behoud van Invoice-typografie. Geen nieuwe domeintests of brede herhaling voor deze visuele wijziging. Lokale toepassing/acceptatie/push/live open. Na akkoord uitrollen en tijdelijke proefvariant verwijderen; resterende R05-labels/contrast daarna gericht beoordelen.
+
+## 31 oktober 2026 — R05c goedgekeurde tekststijl consequent uitrollen
+
+Rob: ziet er beter uit, niet perfect maar vooruitgang, akkoord en voltooid. Dat is lokale acceptatie van R05b en akkoord voor de aangekondigde uitrol. Gedeelde ReviewRecord krijgt de goedgekeurde 16px probleem/hersteltekst, 14px rij-/detailnamen en helderdere hersteltekst standaard. Tijdelijke readableText-property en Product-opt-in verwijderd. Geen nieuwe ontwerpkeuzes of validatie-/exportwijzigingen.
+
+Build/TypeScript en lint (0 fouten/2 bestaande warnings) geslaagd. Gerichte zesprofiel-browsercheck op 1440/390: werkelijke tekstgroottes, Details per toetsenbord, geen horizontale overflow en daadwerkelijke exportaantallen behouden. R04 functionele suite niet herhaald. Cumulatief R04/R05b-toepasbaar pakket; lokale toepassing/push/live van R05c open. Daarna resterende R05-labels/contrast, dan R06.

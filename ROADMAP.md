@@ -611,3 +611,7 @@ R01/R02 is accepted/pushed as 2e5c65b; R03 as efc917c. R07a is built/tested in p
 31 oktober 2026 — Gerichte R05a op Robs verzoek vervroegd: exporttabs, vraagtekenhulp en optionele gids met spotlight. Cumulatief R07a/R05a-pakket voorbereid; lokale beoordeling/push/live open. Daarna R04 en resterende R05; geen verdere scopewijziging.
 
 31 oktober 2026 — R07a/R05a remote bevestigd op 3a40d60. R04 technisch geslaagd over zes profielen, alle inputtypen en werkelijke exports, guards en lifecycle. Geen applicatiefouten gevonden; alleen herbruikbare browserrunner en bewijs/checkpoint toegevoegd. Nieuwe test/docs lokaal toepassen/push open. Hervatten resterende R05, daarna R06. R12–R14 blijven later nodig voor de uitgebreide M7.
+
+31 oktober 2026 — R04 bevestigd/gepusht als 3d6eecd. R05b gerichte Product-kaartproef voorbereid op Robs akkoord; lokale visuele beoordeling open. Alleen leesbaarheid binnen huidige stijl. Na goedkeuring consistent over zes profielen en tijdelijke opt-in opruimen; R05 nog niet afgerond.
+
+31 oktober 2026 — R05b Productvoorstel lokaal geaccepteerd; R05c dezelfde tekstregels over alle zes profielen voorbereid met één gedeelde implementatie. Lokale toepassing/push/live open. R05 nog niet volledig afgerond: resterende ondersteunende labels/contrast gericht nalopen, daarna R06.
