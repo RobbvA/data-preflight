@@ -1060,3 +1060,19 @@ Build/TypeScript en lint (0 fouten/2 bekende warnings) geslaagd. Gerichte browse
 Rob: ziet er beter uit, niet perfect maar vooruitgang, akkoord en voltooid. Dat is lokale acceptatie van R05b en akkoord voor de aangekondigde uitrol. Gedeelde ReviewRecord krijgt de goedgekeurde 16px probleem/hersteltekst, 14px rij-/detailnamen en helderdere hersteltekst standaard. Tijdelijke readableText-property en Product-opt-in verwijderd. Geen nieuwe ontwerpkeuzes of validatie-/exportwijzigingen.
 
 Build/TypeScript en lint (0 fouten/2 bestaande warnings) geslaagd. Gerichte zesprofiel-browsercheck op 1440/390: werkelijke tekstgroottes, Details per toetsenbord, geen horizontale overflow en daadwerkelijke exportaantallen behouden. R04 functionele suite niet herhaald. Cumulatief R04/R05b-toepasbaar pakket; lokale toepassing/push/live van R05c open. Daarna resterende R05-labels/contrast, dan R06.
+
+## 31 oktober 2026 — Nieuwe sessie, R05d duidelijke workflow en labels
+
+Remote fbe5790 geverifieerd; 148 uitgangsbestanden vergeleken, geen afwijkingen. Lokale HEAD in voorbereidingscheckout blijft historisch en is niet gereset. Windows-werkmap niet rechtstreeks bekeken. R05c is nu remote bevestigd.
+
+Aangeleverde feedback binnen bestaande M7 verwerkt: concrete volgende actie, afzonderlijk bestandsformaat/importcontract, exactheid tot in exports, actuele hulp, gerichte leesbaarheid en efficiënt testbewijs. Robs aangeleverde review meldt drie correcte Invoice-data-exportregels en vier reviewrijbesluiten op de live app; dit is geen eigen nieuwe livecontrole.
+
+R05d verhoogt ondersteunende labels naar 14px, corrigeert lichte tekst op koperen primaire acties, benoemt ontbrekende velden/dubbele bronkolommen en focust de eerste ongeldige mapping. Gids leest actuele bron/mapping/notatie en herstelt focus/scroll. Notatiehulp noemt de juiste hoeveelheden/prijzen/bedragen en kiest niets automatisch. Recordkaarten, writers en validatieregels ongewijzigd. Mobiele mappingkop na visuele controle op volle regel gehouden zodat de actie de kop niet samenperst.
+
+Build/TypeScript en lint (0 fouten/2 bestaande warnings) geslaagd. Gerichte checks over zes profielen voor mappingguards/herstel, focus, contextuele hulp/gids, 14px-labels, koper/zwartcontrast >=4.5, desktop/390 en echte onveranderde data-export. Stock-contrastmeting gericht hervat na wachten op de bestaande CSS-kleurtransitie; geen persistente applicatiefout. Geen brede R04-suite of domeintests opnieuw uitgevoerd. Pakket lokaal toepassen/beoordelen/push open. Na bevestiging R06; geen nieuwe audit of scopewijziging.
+
+## 31 oktober 2026 — R06 gezamenlijke reviewbediening
+
+R05d lokaal bevestigd; push niet opnieuw geclaimd. Op verzoek efficiënter één compleet R06-pakket gebouwd. Gedeelde pure filterfunctie en toolbar: tekstzoekactie over bron en genormaliseerde velden/issues, exacte `row N`, ernst/veld/issuetype met dezelfde-issue-combinatie, huidige categorie of alle statussen, stabiele prioriteit/bronrij/issuecountsortering, zichtbare rij-/issuetelling en reset. Details volgen bronrijidentiteit; filters worden bij nieuwe bron gereset en niet opgeslagen. Statusaantallen, validatie en exportscope blijven volledig.
+
+138 tests geslaagd (4 nieuwe gerichte gevallen), productiebuild/TS, lint 0 fouten/2 bekende warnings. Gerichte zesprofielbrowserchecks op desktop/390 met zoekactie, combinatiefilters, Details na sorteren, reset/bronisolatie en echte exportvergelijking geslaagd. Geen brede R04-herhaling. R06 lokaal toepassen/beoordelen/push/live open. Na bevestiging R08 officieel doelimportcontract, vervolgens R09; volledige uitgebreide M7 behouden.

@@ -118,7 +118,7 @@ export function SavedMappingControls<TField extends string>({
         Saved mappings
       </summary>
 
-      <p className="mt-3 text-xs leading-5 text-[var(--text-secondary)]">
+      <p className="mt-3 text-sm leading-5 text-[var(--text-secondary)]">
         Save column assignments for this profile on this device and browser.
         No file rows are saved. Clearing browser data removes saved mappings.
       </p>
@@ -169,7 +169,7 @@ export function SavedMappingControls<TField extends string>({
           </label>
 
           {selected && prepared && (
-            <div className="space-y-3 text-xs leading-5 text-[var(--text-secondary)]">
+            <div className="space-y-3 text-sm leading-5 text-[var(--text-secondary)]">
               <p>
                 Saved with profile v{selected.profileVersion}. Current profile
                 v{profile.version}.
@@ -267,7 +267,7 @@ export function SavedMappingControls<TField extends string>({
           </button>
 
           {!canSave && (
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-sm text-[var(--text-secondary)]">
               Resolve required fields and duplicate assignments before saving.
             </p>
           )}

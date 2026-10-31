@@ -39,8 +39,8 @@ Op 31 oktober heeft Rob gevraagd ook de bestaande rapportexports direct mee te n
 | R07a | Rapportformats aansluitend op R03 | R03 | Issue-CSV/XLSX, volledig review-XLSX/PDF en actuele runcontext |
 | R04 | Zesprofielintegratie, M7.4f | R03, R07a | Voorbereidingscontrole geslaagd op 3a40d60; zie M7_R04_INTEGRATION.md |
 | R05a | Export-UX en optionele workflowhulp | R07a; expliciet vervroegd | Lokaal bevestigd/gepusht als 3a40d60; livebewijs apart |
-| R05 | Resterende leesbaarheid en onboarding | R04, R05a | Eén beoordeeld voorstel, daarna consistente uitrol |
-| R06 | Review zoeken/filteren/sorteren | R05 | Bruikbare grote lijsten zonder exportscopewijziging |
+| R05 | Resterende leesbaarheid en onboarding | R04, R05a | R05b/c geaccepteerd/gepusht; R05d labels/vervolgstappen/actuele hulp voorbereid, lokale acceptatie open |
+| R06 | Review zoeken/filteren/sorteren | R05 | Voorbereid/getest voor zes profielen; lokale acceptatie/push open; exportscope ongewijzigd |
 | R08 | Eerste ERP-template specificeren | R04; onderzoek kan eerder | Versiegebonden contract met bronverwijzingen en fixtures |
 | R09 | Template, referenties en beperkte custom rules bouwen | R07a, R08 | Uitvoerbare regels, juiste export en duidelijke grenzen |
 | R10 | Reviewbesluiten en herstel | R06, R09 | Waarschuwing accepteren met traceerbare registratie |
@@ -217,3 +217,7 @@ M7 klaar wanneer alle R-pakketten hun acceptatiecriteria hebben, kritieke bevind
 - Rob, 31 oktober: na R01/R02 meer relevante gangbare exportkeuzes onderzoeken en toepassen. R03 uitgebreid naar CSV met scheidingstekenkeuze, XLSX, tabgescheiden TXT/TSV en JSON voor integratiegebruik. Onderbouwing en bewijs: M7_R03_EXPORT_FORMATS.md. Geen generiek ERP-XML of import-PDF.
 
 - Rob, 31 oktober: na R03 ook rapportexports aanpassen; R07a naar voren gehaald. Issues CSV/Excel; volledig reviewrapport Excel/PDF. Bestaande context-CSV behouden. R07b volgt de nog te bouwen template/rules/reviewbesluiten.
+
+31 oktober 2026: aanvullende gebruikersfeedback verwerkt binnen bestaande pakketten. R05d geeft concrete herstelroute en actuele hulp; R08/R09 vereisen een concrete doelimport en voorbeeldbestand naast de exportformaatkeuze; R12 bewaakt exactheid door echte exports terug te lezen; R13 blijft zelfstandig eigen-bestandonderzoek. Test alleen wat een wijziging raakt, met voorbereid/uitgevoerd/lokaal/live als aparte bewijsniveaus. Geen nieuwe blocker of extra werkpakket toegevoegd.
+
+R06-checkpoint 31 oktober: R05d lokaal bevestigd; gezamenlijke reviewbediening voorbereid/getest. Statuskeuze via bestaande kaarten plus Search all statuses. Ernst/veld/issuetype combineren op dezelfde issue; bronrijidentiteit blijft stabiel. Na lokale bevestiging R08/R09. Testbewijs en exacte pushstatus in M7_PROGRESS.md. Geen scopewijziging.

@@ -19,6 +19,7 @@ type DataSetPreviewProps = {
   tone?: "neutral" | "danger" | "warning";
   compact?: boolean;
   embedded?: boolean;
+  ordered?: boolean;
 };
 
 type SortMode = "priority" | "row" | "issues" | "status";
@@ -46,10 +47,12 @@ export function DataSetPreview({
   tone = "neutral",
   compact = false,
   embedded = false,
+  ordered = false,
 }: DataSetPreviewProps) {
   const [sortMode, setSortMode] = useState<SortMode>("priority");
 
   const sortedItems = useMemo(() => {
+    if (ordered) return items;
     return [...items].sort((a, b) => {
       if (sortMode === "priority") return b.priorityScore - a.priorityScore;
       if (sortMode === "issues") return b.issues.length - a.issues.length;
@@ -65,7 +68,7 @@ export function DataSetPreview({
 
       return a.rowIndex - b.rowIndex;
     });
-  }, [items, sortMode]);
+  }, [items, sortMode, ordered]);
 
   return (
     <section
@@ -89,17 +92,17 @@ export function DataSetPreview({
             <CountBadge tone={tone} count={items.length} />
           </div>
 
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--text-muted)]">
+          <p className="mt-1 max-w-2xl text-sm leading-5 text-[var(--text-muted)]">
             {description}
           </p>
         </button>
 
         <div className="flex flex-wrap items-center gap-2">
-          {isOpen && items.length > 1 && (
+          {!ordered && isOpen && items.length > 1 && (
             <select
               value={sortMode}
               onChange={(event) => setSortMode(event.target.value as SortMode)}
-              className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] outline-none transition hover:border-[color:rgba(182,111,58,0.45)] focus:border-[color:rgba(182,111,58,0.6)]"
+              className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] outline-none transition hover:border-[color:rgba(182,111,58,0.45)] focus:border-[color:rgba(182,111,58,0.6)]"
             >
               <option value="priority">Sort: priority</option>
               <option value="status">Sort: status</option>
@@ -111,7 +114,7 @@ export function DataSetPreview({
           <button
             type="button"
             onClick={onToggle}
-            className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-base)] hover:text-[var(--text-primary)]"
+            className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-base)] hover:text-[var(--text-primary)]"
           >
             {isOpen ? "Collapse" : "Expand"}
           </button>
@@ -174,7 +177,7 @@ function CountBadge({
 
   return (
     <span
-      className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${toneClasses[tone]}`}
+      className={`rounded-full px-2.5 py-1 text-sm font-medium ${toneClasses[tone]}`}
     >
       {count} row{count === 1 ? "" : "s"}
     </span>

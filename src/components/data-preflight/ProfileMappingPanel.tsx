@@ -48,7 +48,8 @@ export function ProfileMappingPanel<TField extends string>({
     const previousOverflow = document.body.style.overflow;
 
     dialog.showModal();
-    closeButtonRef.current?.focus();
+    const firstInvalid = dialog.querySelector<HTMLSelectElement>('select[aria-invalid="true"]');
+    (firstInvalid ?? closeButtonRef.current)?.focus();
     document.body.style.overflow = "hidden";
 
     return () => {
@@ -104,7 +105,7 @@ export function ProfileMappingPanel<TField extends string>({
       <div className="sticky top-0 z-10 border-b border-white/10 bg-[var(--surface-base)] p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent)]">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent)]">
               Step 1 · Field mapping
             </p>
 
@@ -134,7 +135,7 @@ export function ProfileMappingPanel<TField extends string>({
           the mapping. Required fields and duplicate assignments must be resolved.
         </p>
 
-        <p className="mt-3 text-xs text-[var(--text-muted)]">
+        <p className="mt-3 text-sm text-[var(--text-muted)]">
           {profile.name} · v{profile.version}
         </p>
 
@@ -150,7 +151,7 @@ export function ProfileMappingPanel<TField extends string>({
 
           <p className="mt-1 text-[var(--text-secondary)]">
             {status.mappingReady
-              ? "Required fields ready. You can return to review."
+              ? "Required columns ready. Close mapping and check any remaining source settings."
               : [
                   status.hasIncompleteMapping
                     ? `${status.missingRequiredFields.length} required field(s) need a column.`
@@ -212,7 +213,7 @@ export function ProfileMappingPanel<TField extends string>({
                   {field.label}
                 </label>
 
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-sm text-[var(--text-muted)]">
                   {field.required ? "Required" : "Optional"}
                 </span>
               </div>
@@ -239,7 +240,7 @@ export function ProfileMappingPanel<TField extends string>({
 
               <p
                 id={feedbackId}
-                className={`mt-2 text-xs leading-5 ${
+                className={`mt-2 text-sm leading-5 ${
                   invalid
                     ? "text-[var(--brand-accent-soft)]"
                     : "text-[var(--text-muted)]"
@@ -255,14 +256,14 @@ export function ProfileMappingPanel<TField extends string>({
               </p>
 
               {!selectedHeader && ambiguousCandidates.length > 1 && (
-                <p className="mt-2 text-xs leading-5 text-[var(--brand-accent-soft)]">
+                <p className="mt-2 text-sm leading-5 text-[var(--brand-accent-soft)]">
                   Multiple possible columns: {ambiguousCandidates.join(", ")}.
                   Choose the correct one.
                 </p>
               )}
 
               {suggestion && (
-                <details className="mt-3 border-t border-white/10 pt-3 text-xs text-[var(--text-secondary)]">
+                <details className="mt-3 border-t border-white/10 pt-3 text-sm text-[var(--text-secondary)]">
                   <summary className="cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]">
                     About the automatic suggestion
                   </summary>
@@ -293,7 +294,7 @@ export function ProfileMappingPanel<TField extends string>({
           onClick={onClose}
           className="min-h-11 w-full rounded-xl bg-[var(--brand-accent)] px-4 py-3 text-sm font-semibold transition hover:bg-[var(--brand-accent-soft)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]"
         >
-          {status.mappingReady ? "Return to review" : "Close mapping"}
+          {status.mappingReady ? "Done mapping" : "Close mapping"}
         </button>
       </div>
     </dialog>

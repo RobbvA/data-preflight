@@ -1,5 +1,7 @@
 "use client";
 
+import { describeMappingReadiness } from "@/lib/mappingGuidance";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -245,8 +247,7 @@ export function CsvUploader() {
 
   const {
     missingRequiredFields,
-    hasIncompleteMapping,
-    hasDuplicateMappings,
+    duplicateMappedHeaders,
     mappingReady,
     mappedCount,
   } = useMemo(
@@ -261,6 +262,7 @@ export function CsvUploader() {
     [parsedDataSet, fieldMapping, invoiceNotation],
   );
   const { normalizedRows, validationResult } = validationRun;
+  const mappingGuidance = describeMappingReadiness(missingRequiredFields.map((field) => field.label), duplicateMappedHeaders);
   const resultsReady = mappingReady && validationRun.available;
 
   const issuesByRow = useMemo(
@@ -393,6 +395,7 @@ export function CsvUploader() {
           <section
             aria-label="Field mapping"
             data-guide="mapping"
+            data-guide-text={mappingGuidance + " Saved mappings reuse columns, not previous results."}
             className={`rounded-2xl border bg-[var(--surface-base)] ${
               mappingReady
                 ? "border-white/10 p-4"
@@ -400,21 +403,15 @@ export function CsvUploader() {
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
+              <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
                 <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 1 · Field mapping
                 </h2><HelpPopover title="Field mapping">Match the source columns to the fields you want to check. Required fields and duplicate assignments must be resolved before validation can run.</HelpPopover></div>
                 <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
                   {mappedCount}/{mappingSuggestions.length} fields mapped
                 </p>
-                <p className={mappingReady ? "mt-1 text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
-                  {hasIncompleteMapping
-                    ? `Choose a column for: ${missingRequiredFields
-                        .map((field) => field.label)
-                        .join(", ")}.${hasDuplicateMappings ? " Resolve duplicate assignments too." : ""}`
-                    : hasDuplicateMappings
-                      ? "One source column is assigned to multiple fields."
-                      : "Required fields ready. Change a column if needed."}
+                <p className={mappingReady ? "mt-1 break-words text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 break-words text-sm leading-6 text-[var(--brand-accent-soft)]"}>
+                  {mappingGuidance}
                 </p>
               </div>
               <button
@@ -424,7 +421,7 @@ export function CsvUploader() {
                 className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   mappingReady
                     ? "border border-white/15 bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--brand-accent)]"
-                    : "bg-[var(--brand-accent)] text-[var(--text-primary)] hover:bg-[var(--brand-accent-soft)]"
+                    : "bg-[var(--brand-accent)] text-black hover:bg-[var(--brand-accent-soft)]"
                 }`}
               >
                 {mappingReady ? "Edit mapping" : "Complete mapping"}
@@ -439,6 +436,7 @@ export function CsvUploader() {
           {resultsReady && (
             <>
               <InvoiceReviewSection
+                sourceRows={parsedDataSet?.rows ?? []}
                 activeTab={activeReviewTab ?? undefined}
                 onTabChange={setActiveReviewTab}
                 cleanInvoiceItems={cleanInvoiceItems}

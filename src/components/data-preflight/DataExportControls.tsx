@@ -50,7 +50,7 @@ export function DataExportControls({ fileName, rows, disabled }: {
       {error && <p role="alert" className="mt-2 text-sm leading-6 text-[var(--brand-accent-soft)]">{error}</p>}
       <div className="mt-4 flex flex-wrap gap-3">
         <button type="button" disabled={disabled || blockedTextExport} onClick={() => download(() => downloadDataExport(fileName, rows, { format, csvDelimiter: delimiter }))}
-          className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35">
+          className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35">
           Export rows without blockers
         </button>
 

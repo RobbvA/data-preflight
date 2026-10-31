@@ -1,3 +1,5 @@
+> 31 oktober 2026 — R05c-push geverifieerd op fbe5790. R05d voorbereid: leesbare labels, beter knopcontrast, concrete mappingvervolgstappen en hulp bij de actuele bron/notatie. Build/lint en gerichte zesprofiel-UI/exportchecks op 1440/390 geslaagd. Geen validatieregels of writers gewijzigd; R04 niet volledig herhaald. Lokale acceptatie/push/live van R05d open; daarna R06. Zie [checkpoint](docs/M7_PROGRESS.md).
+
 > 31 oktober 2026 — R07a/R05a bevestigd/gepusht als 3a40d60. R04: alle zes profielen gezamenlijk gecontroleerd; voorbeelden en eigen CSV/XLSX/XLS, mappingguards, echte exports en lifecycle geslaagd. Geen applicatiefix nodig. 134 tests, build en lint (twee bekende warnings) groen. Nieuw checkpoint/testpakket nog toepassen/push; geen nieuwe liveacceptatie. Volgende stap: resterende R05. Zie [integratiebewijs](docs/M7_R04_INTEGRATION.md).
 
 > 31 oktober 2026 — R05a voorbereid: rustigere exporttabs, contextuele vraagtekenhulp en optionele spotlightgids. Cumulatief met R07a; lokaal toepassen/beoordelen/push/live nog open. Remote laatst geverifieerd efc917c. Hervatten R04 na bevestiging; R05 is niet volledig afgerond. Zie [checkpoint](docs/M7_PROGRESS.md).

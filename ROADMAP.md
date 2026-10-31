@@ -615,3 +615,5 @@ R01/R02 is accepted/pushed as 2e5c65b; R03 as efc917c. R07a is built/tested in p
 31 oktober 2026 — R04 bevestigd/gepusht als 3d6eecd. R05b gerichte Product-kaartproef voorbereid op Robs akkoord; lokale visuele beoordeling open. Alleen leesbaarheid binnen huidige stijl. Na goedkeuring consistent over zes profielen en tijdelijke opt-in opruimen; R05 nog niet afgerond.
 
 31 oktober 2026 — R05b Productvoorstel lokaal geaccepteerd; R05c dezelfde tekstregels over alle zes profielen voorbereid met één gedeelde implementatie. Lokale toepassing/push/live open. R05 nog niet volledig afgerond: resterende ondersteunende labels/contrast gericht nalopen, daarna R06.
+
+31 oktober 2026 — R05c remote bevestigd op fbe5790. R05d gerichte afronding labels/contrast/vervolgstappen/actuele hulp voorbereid. Aangeleverde gerichte Invoice-livecontrole apart geregistreerd; geen nieuwe blocker. Na lokale bevestiging R05 afsluiten en R06 uitvoeren. Bestaand ERP-templatecontract en R07b/R08–R14 inclusief multi-file/tabs/ZIP blijven behouden.

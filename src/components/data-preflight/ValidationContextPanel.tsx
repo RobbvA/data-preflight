@@ -70,7 +70,7 @@ export function ValidationContextPanel<TField extends string>({
       aria-label="Applied validation context"
       className="mt-5 rounded-xl border border-white/10 bg-[var(--surface-deep)] p-4"
     >
-      <details className="text-xs">
+      <details className="text-sm">
         <summary className="cursor-pointer text-sm font-medium text-[var(--text-primary)]">
           Validation details · {profile.name} v{profile.version}
         </summary>
@@ -159,7 +159,7 @@ export function ValidationContextPanel<TField extends string>({
         <button
           type="button"
           onClick={downloadReport}
-          className="mt-4 rounded-lg border border-white/15 bg-[var(--surface-raised)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] transition hover:border-[var(--brand-accent)]"
+          className="mt-4 rounded-lg border border-white/15 bg-[var(--surface-raised)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:border-[var(--brand-accent)]"
         >
           Download validation report CSV
         </button>

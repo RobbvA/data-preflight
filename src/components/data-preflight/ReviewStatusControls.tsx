@@ -49,7 +49,7 @@ export function ReviewStatusControls({
   onCategoryChange,
 }: {
   counts: ReviewCounts;
-  activeCategory: ReviewCategory;
+  activeCategory: ReviewCategory | "all";
   onCategoryChange: (category: ReviewCategory) => void;
 }) {
   return (
@@ -88,7 +88,7 @@ export function ReviewStatusControls({
                   </span>
                 </span>
 
-                <span className="mt-1 block text-xs leading-5 text-[var(--text-muted)]">
+                <span className="mt-1 block text-sm leading-5 text-[var(--text-muted)]">
                   {category.description}
                 </span>
               </span>
@@ -135,7 +135,7 @@ export function ReviewStatusSummary({
 
   return (
     <span
-      className={`rounded-full border px-2.5 py-1 text-xs font-medium text-[var(--text-primary)] ${status.className}`}
+      className={`rounded-full border px-2.5 py-1 text-sm font-medium text-[var(--text-primary)] ${status.className}`}
     >
       {status.label}
     </span>

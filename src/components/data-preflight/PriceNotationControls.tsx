@@ -5,5 +5,5 @@ export function PriceNotationControls({ value, onChange }: {
   value: DecimalNotation | null;
   onChange: (value: DecimalNotation) => void;
 }) {
-  return <DecimalNotationControls label="Price notation" appliesTo="prices" value={value} onChange={onChange} />;
+  return <DecimalNotationControls collapsible label="Price notation" appliesTo="prices" value={value} onChange={onChange} />;
 }

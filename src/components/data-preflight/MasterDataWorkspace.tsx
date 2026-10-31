@@ -1,5 +1,10 @@
 "use client";
 
+import { ReviewFilterControls } from "@/components/data-preflight/ReviewFilterControls";
+import { EMPTY_REVIEW_FILTERS, filterReviewRows, type ReviewFilters } from "@/lib/reviewFilters";
+
+import { describeMappingReadiness } from "@/lib/mappingGuidance";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -56,7 +61,6 @@ import {
 import { mapRowsToProfile } from "@/lib/validation/validationProfile";
 
 type MasterDataReviewTab = "blocked" | "review" | "ready";
-type ReviewSortMode = "priority" | "row" | "issues";
 type MasterDataMapping = Record<string, string>;
 
 function emptyMapping(config: Pick<MasterDataWorkspaceConfig, "profile">): MasterDataMapping {
@@ -122,8 +126,7 @@ function MasterDataWorkspaceContent({
   const [isMappingOpen, setIsMappingOpen] = useState(false);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [isReviewListOpen, setIsReviewListOpen] = useState(true);
-  const [reviewSortMode, setReviewSortMode] =
-    useState<ReviewSortMode>("priority");
+  const [reviewFilters, setReviewFilters] = useState<ReviewFilters>({ ...EMPTY_REVIEW_FILTERS });
 
   const rows = useMemo(() => dataSet?.rows ?? [], [dataSet]);
   const headers = dataSet?.headers ?? [];
@@ -131,7 +134,7 @@ function MasterDataWorkspaceContent({
 
   const {
     missingRequiredFields,
-    hasDuplicateMappings,
+    duplicateMappedHeaders,
     mappingReady,
     mappedCount,
   } = useMemo(
@@ -139,7 +142,6 @@ function MasterDataWorkspaceContent({
     [profile, mapping],
   );
 
-  const requiredUnmapped = missingRequiredFields.map((field) => field.label);
 
   const mappedRows = useMemo(
     () => mappingReady ? mapRowsToProfile(rows, mapping, profile) : [],
@@ -156,6 +158,7 @@ function MasterDataWorkspaceContent({
       : runPriceListSourceValidation(dataSet, mapping as PriceListMapping, priceNotation);
   }, [config, mappedRows, unitReference, dataSet, mapping, priceNotation, quantityNotation]);
   const { normalizedRows, validationResult } = validationRun;
+  const mappingGuidance = describeMappingReadiness(missingRequiredFields.map((field) => field.label), duplicateMappedHeaders);
   const resultsReady = mappingReady && !isReferenceLoading && validationRun.available;
   const canExport = resultsReady && validationResult.cleanRows.length > 0;
 
@@ -184,13 +187,16 @@ function MasterDataWorkspaceContent({
     row,
     rowIndex: index + 1,
     issues: issuesByRow.get(index + 1) ?? [],
+    sourceRow: rows[index],
+    priorityScore: getPriority(issuesByRow.get(index + 1) ?? []),
   }));
 
   const defaultReviewTab: MasterDataReviewTab =
     blockedCount > 0 ? "blocked" : reviewCount > 0 ? "review" : "ready";
   const visibleReviewTab = activeReviewTab ?? defaultReviewTab;
 
-  const visibleRows = reviewRows.filter(({ issues }) => {
+  const categoryRows = reviewRows.filter(({ issues }) => {
+    if (reviewFilters.allStatuses) return true;
     if (visibleReviewTab === "blocked") {
       return issues.some((issue) => issue.severity === "critical");
     }
@@ -201,11 +207,7 @@ function MasterDataWorkspaceContent({
     return issues.length === 0;
   });
 
-  visibleRows.sort((a, b) => {
-    if (reviewSortMode === "row") return a.rowIndex - b.rowIndex;
-    if (reviewSortMode === "issues") return b.issues.length - a.issues.length;
-    return getPriority(b.issues) - getPriority(a.issues);
-  });
+  const visibleRows = filterReviewRows(categoryRows, reviewFilters);
 
   const reviewCounts = {
     blocked: blockedCount,
@@ -214,20 +216,21 @@ function MasterDataWorkspaceContent({
   };
 
   const categoryTitle =
-    visibleReviewTab === "blocked"
+    reviewFilters.allStatuses ? "All records" : visibleReviewTab === "blocked"
       ? config.labels.blocked
       : visibleReviewTab === "review"
         ? "Needs review"
         : config.labels.ready;
 
   const categoryDescription =
-    visibleReviewTab === "blocked"
+    reviewFilters.allStatuses ? "All source rows, including blocked rows and warnings." : visibleReviewTab === "blocked"
       ? "Rows with critical issues are excluded from the export until fixed."
       : visibleReviewTab === "review"
         ? "Rows that can export, but should be checked before import."
         : "Rows that passed the current profile checks.";
 
   function selectReviewTab(tab: MasterDataReviewTab) {
+    setReviewFilters(current => ({ ...current, allStatuses: false }));
     setActiveReviewTab(tab);
     setSelectedRowIndex(null);
     setIsReviewListOpen(true);
@@ -248,7 +251,7 @@ function MasterDataWorkspaceContent({
     setIsMappingOpen(false);
     setSelectedRowIndex(null);
     setIsReviewListOpen(true);
-    setReviewSortMode("priority");
+    setReviewFilters({ ...EMPTY_REVIEW_FILTERS });
     setIsLoading(true);
 
     try {
@@ -332,7 +335,7 @@ function MasterDataWorkspaceContent({
     setIsMappingOpen(false);
     setSelectedRowIndex(null);
     setIsReviewListOpen(true);
-    setReviewSortMode("priority");
+    setReviewFilters({ ...EMPTY_REVIEW_FILTERS });
   }
 
   function changeDomain(nextDomain: DataDomain) {
@@ -403,6 +406,7 @@ function MasterDataWorkspaceContent({
             id={`${domain}-mapping`}
             aria-label="Field mapping"
             data-guide="mapping"
+            data-guide-text={mappingGuidance + " Saved mappings reuse columns, not previous results."}
             className={`rounded-2xl border bg-[var(--surface-base)] ${
               mappingReady
                 ? "border-white/10 p-4"
@@ -410,23 +414,15 @@ function MasterDataWorkspaceContent({
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
+              <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
                 <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 1 · Field mapping
                 </h2><HelpPopover title="Field mapping">Match the source columns to the fields you want to check. Required fields and duplicate assignments must be resolved before validation can run.</HelpPopover></div>
                 <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
                   {mappedCount}/{profile.fields.length} fields mapped
                 </p>
-                <p className={mappingReady ? "mt-1 text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
-                  {requiredUnmapped.length > 0
-                    ? `Choose a column for: ${requiredUnmapped.join(", ")}.${
-                        hasDuplicateMappings
-                          ? " Resolve duplicate assignments too."
-                          : ""
-                      }`
-                    : hasDuplicateMappings
-                      ? "One source column is assigned to multiple fields."
-                      : "Required fields ready. Change a column if needed."}
+                <p className={mappingReady ? "mt-1 break-words text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 break-words text-sm leading-6 text-[var(--brand-accent-soft)]"}>
+                  {mappingGuidance}
                 </p>
               </div>
               <button
@@ -436,7 +432,7 @@ function MasterDataWorkspaceContent({
                 className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
                   mappingReady
                     ? "border border-white/15 bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--brand-accent)]"
-                    : "bg-[var(--brand-accent)] text-[var(--text-primary)] hover:bg-[var(--brand-accent-soft)]"
+                    : "bg-[var(--brand-accent)] text-black hover:bg-[var(--brand-accent-soft)]"
                 }`}
               >
                 {mappingReady ? "Edit mapping" : "Complete mapping"}
@@ -490,10 +486,11 @@ function MasterDataWorkspaceContent({
 
                 <ReviewStatusControls
                   counts={reviewCounts}
-                  activeCategory={visibleReviewTab}
+                  activeCategory={reviewFilters.allStatuses ? "all" : visibleReviewTab}
                   onCategoryChange={selectReviewTab}
                 />
 
+                <ReviewFilterControls rows={reviewRows} value={reviewFilters} onChange={setReviewFilters} visible={visibleRows.length} total={categoryRows.length} issueCount={visibleRows.reduce((sum, item) => sum + item.issues.length, 0)} />
                 <div className="mt-3 rounded-2xl border border-white/10 bg-[var(--surface-base)] p-2.5">
                   <div className="flex flex-wrap items-start justify-between gap-2.5">
                     <div>
@@ -501,35 +498,22 @@ function MasterDataWorkspaceContent({
                         <h3 className="text-sm font-semibold text-[var(--text-primary)]">
                           {categoryTitle}
                         </h3>
-                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--text-primary)]">
+                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-sm font-medium text-[var(--text-primary)]">
                           {visibleRows.length} row
                           {visibleRows.length === 1 ? "" : "s"}
                         </span>
                       </div>
-                      <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--text-muted)]">
+                      <p className="mt-1 max-w-2xl text-sm leading-5 text-[var(--text-muted)]">
                         {categoryDescription}
                       </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      {isReviewListOpen && visibleRows.length > 1 && (
-                        <select
-                          aria-label={config.labels.sort}
-                          value={reviewSortMode}
-                          onChange={(event) =>
-                            setReviewSortMode(event.target.value as ReviewSortMode)
-                          }
-                          className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)]"
-                        >
-                          <option value="priority">Sort: priority</option>
-                          <option value="row">Sort: row</option>
-                          <option value="issues">Sort: issues</option>
-                        </select>
-                      )}
+
                       <button
                         type="button"
                         onClick={() => setIsReviewListOpen((open) => !open)}
-                        className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-[10px] font-medium text-[var(--text-secondary)] transition hover:border-[var(--brand-accent)] hover:text-[var(--text-primary)]"
+                        className="rounded-full border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--brand-accent)] hover:text-[var(--text-primary)]"
                       >
                         {isReviewListOpen ? "Collapse" : "Expand"}
                       </button>
@@ -539,7 +523,8 @@ function MasterDataWorkspaceContent({
                   {isReviewListOpen && (
                     visibleRows.length === 0 ? (
                       <p className="mt-3 rounded-xl border border-white/10 bg-[var(--surface-raised)] p-3 text-sm text-[var(--text-muted)]">
-                        No rows in this category.
+                        No matching rows. Try Search all statuses or reset the filters.
+                        <button type="button" onClick={() => setReviewFilters({ ...EMPTY_REVIEW_FILTERS })} className="mt-2 block min-h-11 underline">Clear review filters</button>
                       </p>
                     ) : (
                       <div className="mt-2.5 max-h-[620px] space-y-1.5 overflow-y-auto pr-1">

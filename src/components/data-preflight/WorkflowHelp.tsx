@@ -13,20 +13,22 @@ const STEPS = [
   { key: "review", title: "Step 2 / Understand the results", text: "Blocked rows cannot enter the data export. Needs review rows can export with warnings. Ready means the current checks passed, not that your ERP will accept the import. Open Details for all issues, correct your source and upload it again." },
   { key: "export", title: "Step 3 / Choose your download", text: "Use Data export for rows without blockers. Use Reports to share issues or the complete review in Excel or PDF. The counts explain what is included; changing the review category never changes the data export." },
 ] as const;
-type GuideStep = typeof STEPS[number] & { element: HTMLElement };
+type GuideStep = Omit<typeof STEPS[number], "text"> & { text: string; element: HTMLElement };
 
 export function WorkflowHelpProvider({ children }: { children: ReactNode }) {
   const [steps, setSteps] = useState<GuideStep[] | null>(null);
   const opener = useRef<HTMLElement | null>(null);
+  const originScroll = useRef({ left: 0, top: 0 });
   const start = useCallback(() => {
+    originScroll.current = { left: window.scrollX, top: window.scrollY };
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const available = STEPS.flatMap((step) => {
       const element = document.querySelector<HTMLElement>(`[data-guide="${step.key}"]`);
-      return element && element.getClientRects().length && !element.closest("[hidden]") ? [{ ...step, element }] : [];
+      return element && element.getClientRects().length && !element.closest("[hidden]") ? [{ ...step, text: element.dataset.guideText || step.text, element }] : [];
     });
     if (available.length) setSteps(available);
   }, []);
-  const close = useCallback(() => { setSteps(null); requestAnimationFrame(() => { if (opener.current?.isConnected) opener.current.focus(); }); }, []);
+  const close = useCallback(() => { setSteps(null); requestAnimationFrame(() => { if (opener.current?.isConnected) opener.current.focus({ preventScroll: true }); window.scrollTo({ ...originScroll.current, behavior: "instant" }); }); }, []);
   return <GuideContext.Provider value={start}>{children}{steps && <GuidedWalkthrough steps={steps} onClose={close} />}</GuideContext.Provider>;
 }
 
@@ -114,9 +116,9 @@ function GuidedWalkthrough({ steps, onClose }: { steps: GuideStep[]; onClose: ()
     <button type="button" tabIndex={-1} aria-label="Close walkthrough backdrop" onClick={onClose} className="absolute inset-0 h-full w-full cursor-default" />
     <div aria-hidden="true" style={{ ...frame, boxShadow: "0 0 0 9999px rgba(0,0,0,.72)" }} className="pointer-events-none fixed rounded-2xl border-2 border-[var(--brand-accent-soft)]" />
     <div ref={card} role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} aria-describedby={`${id}-description`} className="fixed bottom-3 left-3 right-3 max-h-[65vh] overflow-auto rounded-2xl border border-white/15 bg-[#211f1b] p-5 text-[var(--text-primary)] shadow-2xl sm:bottom-6 sm:left-auto sm:right-6 sm:w-[380px]">
-      <div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--brand-accent-soft)]">Quick guide · {index + 1} of {steps.length}</p><button type="button" aria-label="Close walkthrough" onClick={onClose} className="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-white/10"><X size={18} /></button></div>
+      <div className="flex items-center justify-between"><p className="text-sm font-semibold uppercase tracking-[.16em] text-[var(--brand-accent-soft)]">Quick guide · {index + 1} of {steps.length}</p><button type="button" aria-label="Close walkthrough" onClick={onClose} className="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-white/10"><X size={18} /></button></div>
       <h2 ref={title} tabIndex={-1} id={`${id}-title`} className="mt-2 text-lg font-semibold outline-none">{step.title}</h2>
-      <p id={`${id}-description`} className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{step.text}</p>
+      <p id={`${id}-description`} className="mt-3 break-words text-sm leading-6 text-[var(--text-secondary)]">{step.text}</p>
       <div className="mt-5 flex items-center justify-between gap-3"><button type="button" disabled={index === 0} onClick={() => setIndex((value) => value - 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm disabled:opacity-30"><ArrowLeft size={16} />Back</button><button type="button" onClick={() => index === steps.length - 1 ? onClose() : setIndex((value) => value + 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--brand-accent)] px-4 text-sm font-semibold text-black">{index === steps.length - 1 ? "Done" : "Next"}<ArrowRight size={16} /></button></div>
     </div>
   </div>, document.body);

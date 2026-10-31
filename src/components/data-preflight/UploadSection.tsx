@@ -55,7 +55,7 @@ export function UploadSection({
 
   if (hasActiveFile) {
     return (
-      <section data-guide="source" className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-3 shadow-lg shadow-black/10">
+      <section data-guide="source" data-guide-text={`Current source: ${fileName}. This file is already loaded for the selected profile. Continue with field mapping below. Replace starts a fresh validation; Reset clears this source.`} className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-3 shadow-lg shadow-black/10">
         <div style={{ width: "100%", maxWidth: 460 }}>
           <ProfilePicker
             domain={domain}
@@ -67,7 +67,7 @@ export function UploadSection({
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
               Current source
             </p>
 
@@ -79,7 +79,7 @@ export function UploadSection({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <label className="cursor-pointer rounded-lg border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition hover:border-[var(--brand-accent)] hover:text-[var(--text-primary)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
+            <label className="cursor-pointer rounded-lg border border-white/10 bg-[var(--surface-raised)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--brand-accent)] hover:text-[var(--text-primary)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
               Replace
               <input
                 type="file"
@@ -93,7 +93,7 @@ export function UploadSection({
             <button
               type="button"
               onClick={onReset}
-              className="rounded-lg border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+              className="rounded-lg border border-white/10 bg-[var(--surface-deep)] px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
             >
               Reset
             </button>
@@ -103,7 +103,7 @@ export function UploadSection({
         {error && (
           <p
             role="alert"
-            className="mt-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] p-3 text-xs leading-5 text-rose-100"
+            className="mt-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] p-3 text-sm leading-5 text-rose-100"
           >
             {error}
           </p>
@@ -121,7 +121,7 @@ export function UploadSection({
       </p>
 
       <div data-guide="profile" className="mt-5" ref={profileChoicesRef}>
-        <div className="flex items-center gap-2"><h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+        <div className="flex items-center gap-2"><h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
           Step 1 · Validation profile
         </h3><HelpPopover title="Validation profiles">Choose the type of data in your file. Each profile has its own fields and checks. No source rows are uploaded to a server for validation.</HelpPopover></div>
 
@@ -151,7 +151,7 @@ export function UploadSection({
       </div>
 
       <div data-guide="source" className="mt-5 border-t border-white/10 pt-5">
-        <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
           Step 2 · Choose a file
         </h3>
 
@@ -166,7 +166,7 @@ export function UploadSection({
           </button>
 
           {domain ? (
-            <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl bg-[var(--brand-accent)] px-3 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:brightness-110 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
+            <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl bg-[var(--brand-accent)] px-3 py-2.5 text-sm font-semibold text-black transition hover:brightness-110 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--brand-accent-soft)]">
               Upload your file
               <input
                 type="file"
@@ -180,14 +180,14 @@ export function UploadSection({
             <button
               type="button"
               onClick={promptForProfile}
-              className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl bg-[var(--brand-accent)] px-3 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]"
+              className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl bg-[var(--brand-accent)] px-3 py-2.5 text-sm font-semibold text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]"
             >
               Upload your file
             </button>
           )}
         </div>
 
-        <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm leading-5 text-[var(--text-secondary)]">
           CSV, XLSX or XLS. Files are processed locally in your browser.
         </p>
       </div>
@@ -201,7 +201,7 @@ export function UploadSection({
             Choose a worksheet
           </h3>
 
-          <p className="mt-1 break-words text-xs leading-5 text-[var(--text-secondary)]">
+          <p className="mt-1 break-words text-sm leading-5 text-[var(--text-secondary)]">
             {pendingExcelSheets.fileName} contains multiple sheets. Choose the
             sheet to validate.
           </p>
@@ -213,7 +213,7 @@ export function UploadSection({
                 type="button"
                 onClick={() => onSelectExcelSheet(sheetName)}
                 disabled={isLoading}
-                className="min-h-11 rounded-lg border border-[color:rgba(209,154,106,0.5)] bg-[var(--surface-raised)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)] disabled:cursor-wait disabled:opacity-50"
+                className="min-h-11 rounded-lg border border-[color:rgba(209,154,106,0.5)] bg-[var(--surface-raised)] px-3 py-2 text-sm font-semibold text-[var(--text-primary)] transition hover:border-[var(--brand-accent)] disabled:cursor-wait disabled:opacity-50"
               >
                 {sheetName}
               </button>
@@ -223,7 +223,7 @@ export function UploadSection({
           <button
             type="button"
             onClick={onReset}
-            className="mt-3 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            className="mt-3 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           >
             Cancel file
           </button>
@@ -232,7 +232,7 @@ export function UploadSection({
 
       {isLoading && (
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <p role="status" className="text-xs text-[var(--brand-accent-soft)]">
+          <p role="status" className="text-sm text-[var(--brand-accent-soft)]">
             Preparing {domain} review...
           </p>
           <button
@@ -246,7 +246,7 @@ export function UploadSection({
       )}
 
       {domain === "invoice" && (
-        <details className="mt-3 text-xs text-[var(--text-secondary)]">
+        <details className="mt-3 text-sm text-[var(--text-secondary)]">
           <summary className="cursor-pointer hover:text-[var(--text-primary)]">
             Download example CSV files
           </summary>
@@ -269,7 +269,7 @@ export function UploadSection({
       {error && (
         <p
           role="alert"
-          className="mt-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] p-3 text-xs leading-5 text-rose-100"
+          className="mt-3 rounded-xl border border-rose-400/20 bg-rose-400/[0.07] p-3 text-sm leading-5 text-rose-100"
         >
           {error}
         </p>

@@ -2,14 +2,15 @@
 
 Bijgewerkt: 31 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 3.4. Resterende uitvoering: [M7_REMAINING_PLAN.md](M7_REMAINING_PLAN.md).
 
-## Actueel checkpoint — R05c goedgekeurde recordtekst over zes profielen voorbereid
+## Actueel checkpoint — R06 zoeken/filteren/sorteren voorbereid
 
-- Laatst geverifieerde remote: R04, `3d6eecdb92da9d596cf6cbdbd1a22bdbb2fc8eec`. R05b Productvoorstel lokaal toegepast en expliciet goedgekeurd door Rob: beter, niet perfect maar vooruitgang. Geen push van R05b geclaimd.
-- R05c past precies die goedgekeurde tekstregels toe op de gedeelde ReviewRecord, dus alle zes profielen. Probleem/herstel 16px/24px, rij-/detailnamen 14px, helderdere hersteltekst. Geen andere layout-/padding-/kleurwijziging. Tijdelijke readableText-opt-in verwijderd; één implementatie voor alle profielen.
-- Productiebuild/TypeScript en lint (nul fouten/twee bekende warnings) geslaagd. Gerichte zesprofiel-browsercontrole op 1440/390px: tekstgroottes, Details-toetsenbord, geen horizontale overflow en werkelijke exportrijaantallen behouden. Productcontrast is onder R05b gemeten op 12.61:1 hoofd-/hersteltekst en 9.70:1 rijlabel op dezelfde gedeelde kaartkleuren. Geen volledige functionele suite opnieuw uitgevoerd; R04 blijft recent bewijs.
-- Pakket `datapreflight-m7-r05c-readable-records-all-profiles.zip` cumulatief vanaf R04 of R05b. Geen dependencies. Details: [M7_R05C_READABLE_RECORDS.md](M7_R05C_READABLE_RECORDS.md).
-- Exact volgende actie: Rob past uitrol toe; lokale toepassing/commit/push/live van R05c staan open. Daarna resterende R05-labels/contrast rond mapping/review/export gericht afronden, vervolgens R06. Geen nieuw kaartontwerp voorstellen of groene R04 volledig herhalen zonder concrete aanleiding.
-- R05 als geheel is nog niet volledig geaccepteerd. R06–R14 en uitgebreide M7 inclusief multi-file/tabs/gezamenlijke ZIP blijven gepland. Historische checkpointregels hieronder zijn geen actuele takenlijst.
+- R05d door Rob lokaal bevestigd. Laatst onafhankelijk geverifieerde remote blijft fbe5790; geen nieuwe R05d-push of liveacceptatie geclaimd. Rob vraagt efficiënter bouwen: één samenhangend pakket, gerichte controle en documentatie per werkpakket.
+- R06 gebruikt één pure reviewfilterfunctie en gedeelde bediening over alle zes profielen. Zoeken in ID/rij/bronwaarde/genormaliseerde waarde/probleem/reden/herstel, optioneel alle statussen; filters ernst/veld/issuetype combineren op dezelfde issue. Sorteren op prioriteit, bronrij of aantal issues heeft stabiele bronrij-tiebreak. Elke rij verschijnt eenmaal.
+- Oorspronkelijke statusaantallen blijven behouden. Showing X of Y telt rijen binnen huidige status of alle statussen; apart aantal issues in die rijen. Details blijven bij dezelfde bronrij na sorteren. Reset/lege-uitkomstherstel aanwezig. Nieuwe bron/profiel/reset neemt geen oude filters over. Zoek-/filterwaarden worden niet opgeslagen.
+- Validatieregels en data-/rapportexportscope onveranderd: filteren maakt uitsluitend de reviewlijst kleiner, geen bronmutatie of alternatieve validatierun. Data-export bevat nog alle rijen zonder blockers.
+- Bewijs: 138 tests geslaagd (134 bestaand + 4 gerichte filtertests), productiebuild/TypeScript en lint geslaagd (0 fouten/2 bestaande warnings). Gerichte browserchecks alle zes: zoeken, gecombineerde issuefilters, stabiele Details/bronrijnummers, counts/reset/bronisolatie, 1440/390 en daadwerkelijke onveranderde export. Geen volledige R04-herhaling of nieuwe livecontrole.
+- Pakket datapreflight-m7-r06-review-filters.zip vereist het lokaal bevestigde R05d. Geen dependencies. Lokale toepassing/beoordeling, commit/push en live van R06 open. R05d en R06 kunnen na bevestiging samen worden vastgelegd.
+- Exact vervolg na bevestiging: R08 één concrete ERP-template/importbestemming specificeren, met officiële eisen en echt voorbeeldbestand; daarna R09. R07b-contextuitbreiding volgt zodra template/rules/besluiten bestaan. Brede M7 met multi-file/tabs/ZIP, praktijktest en R12–R14 blijft gepland. Geen nieuwe audit of groene suite herhalen zonder relevante wijziging.
 
 ## Eerst lezen bij een sessiestart
 
@@ -86,3 +87,5 @@ R00-plan en R01/R02 zijn bevestigd/gepusht als 2e5c65b; R03 als efc917c. R07a + 
 31 oktober 2026 — R04-push bevestigd op 3d6eecd. R05b Product-typografieproef voorbereid na Robs akkoord. Alleen recordtekst/labels, geen layout-/validatie-/exportwijziging. Lokale beoordeling/push open; na akkoord consequent uitrollen en proefvariant verwijderen.
 
 31 oktober 2026 — R05b lokaal geaccepteerd. R05c dezelfde leesbare recordtekst via gedeelde component over zes profielen voorbereid; tijdelijke opt-in verwijderd. Gerichte checks geslaagd; apply/push/live open.
+
+31 oktober 2026 — Nieuwe sessie: fbe5790 en 148 uitgangsbestanden geverifieerd. Aangeleverde feedback binnen M7 verwerkt. R05d labels/contrast, mappingvervolgstappen en actuele hulp voorbereid; gerichte UI/exportchecks geslaagd. Lokale acceptatie/push open; daarna R06.
