@@ -2,13 +2,14 @@
 
 import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import { downloadCsv } from "@/lib/exportData";
-import { buildValidationReportRows, type PriceValidationContext, type StockValidationContext } from "@/lib/validationReport";
+import { buildValidationReportRows, type InvoiceValidationContext, type PriceValidationContext, type StockValidationContext } from "@/lib/validationReport";
 
 type ValidationContextPanelProps<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
   sheetName?: string;
   unitReference?: UnitReference | null;
+  invoiceContext?: InvoiceValidationContext;
   priceContext?: PriceValidationContext;
   stockContext?: StockValidationContext;
   mapping: Readonly<Record<TField, string>>;
@@ -27,6 +28,7 @@ export function ValidationContextPanel<TField extends string>({
   mapping,
   counts,
   unitReference,
+  invoiceContext,
   priceContext,
   stockContext,
 }: ValidationContextPanelProps<TField>) {
@@ -46,6 +48,7 @@ export function ValidationContextPanel<TField extends string>({
         mapping,
         counts,
         unitReference,
+        invoiceContext,
         priceContext,
         stockContext,
       }),
@@ -94,6 +97,13 @@ export function ValidationContextPanel<TField extends string>({
             </dd>
           </div>
 
+          {profile.id === "invoice" && invoiceContext && (
+            <div className="sm:col-span-2">
+              <dt className="text-[var(--text-muted)]">Amount and VAT notation</dt>
+              <dd className="mt-1 text-[var(--text-primary)]">{invoiceContext.invoiceNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"}</dd>
+              <p className="mt-2 leading-5 text-[var(--text-secondary)]">Amounts and VAT use the chosen text notation; Excel numbers use stored values. Financial comparisons are exact. Tax correctness, live ERP references and target-ERP acceptance are not verified.</p>
+            </div>
+          )}
           {profile.id === "price-list" && priceContext && (
             <div className="sm:col-span-2">
               <dt className="text-[var(--text-muted)]">Price notation</dt>

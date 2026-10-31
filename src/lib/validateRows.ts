@@ -8,7 +8,10 @@ import {
   parseIsoDate,
 } from "@/lib/normalization/normalizeDate";
 import type { NormalizedInvoiceRow } from "@/lib/normalizeInvoice";
-import { parseNormalizedNumber } from "@/lib/normalization/normalizeNumber";
+import type { DecimalResult } from "@/lib/strictDecimal";
+import { compareDecimals, isAboveThirtyPercent } from "@/lib/strictDecimalComparison";
+
+export type InvoiceNumbers = { amount: DecimalResult; vat: DecimalResult };
 import {
   invoiceAllowedStatuses,
   invoiceProfile,
@@ -82,6 +85,7 @@ type ValidationDataSet = {
 };
 
 type InvoiceValidationContext = {
+  numbers: InvoiceNumbers;
   dataSet: ValidationDataSet;
   rows: ParsedRow[];
   row: ParsedRow;
@@ -170,7 +174,8 @@ const invoiceValidationRules: InvoiceValidationRule[] = [
   },
 ];
 
-export function validateRows(rows: NormalizedInvoiceRow[]): ValidationResult {
+export function validateRows(rows: NormalizedInvoiceRow[], numbers: readonly InvoiceNumbers[]): ValidationResult {
+  if (numbers.length !== rows.length || rows.some((_, index) => !numbers[index]?.amount || !numbers[index]?.vat)) throw new Error("Invoice financial source context is required.");
   const normalizedRows = rows;
   const invoiceNumberCounts = countInvoiceNumbers(normalizedRows);
 
@@ -183,6 +188,7 @@ export function validateRows(rows: NormalizedInvoiceRow[]): ValidationResult {
   const issues = rows.flatMap((row, index) => {
     const context: InvoiceValidationContext = {
       dataSet,
+      numbers: numbers[index],
       rows,
       row,
       normalizedRow: normalizedRows[index],
@@ -236,6 +242,7 @@ function validateEmptyRow({
 }
 
 function validateRequiredFields({
+  numbers,
   row,
   normalizedRow,
   rowIndex,
@@ -243,7 +250,9 @@ function validateRequiredFields({
   if (isEmptyRow(row)) return [];
 
   return requiredFields
-    .filter((field) => !normalizedRow[field])
+    .filter((field) => field === "amount" || field === "vat"
+      ? !numbers[field].ok && numbers[field].error === "empty"
+      : !normalizedRow[field])
     .map((field) =>
       createIssue({
         rowIndex,
@@ -281,29 +290,29 @@ function validateEmail({
 }
 
 function validateAmount({
-  normalizedRow,
+  numbers,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const amount = parseNormalizedNumber(normalizedRow.amount);
+  const amount = numbers.amount;
   const issues: ValidationIssue[] = [];
 
-  if (normalizedRow.amount && amount === null) {
+  if (!amount.ok && amount.error !== "empty") {
     issues.push(
       createIssue({
         rowIndex,
         field: "amount",
         type: "number",
         category: "financial",
-        problem: "Amount is not a valid number.",
+        problem: "Amount does not match the numeric source contract.",
         why: "Accounting and reporting systems require numeric invoice amounts for totals, balances, revenue calculations, and reconciliation.",
-        fix: "Remove text, currency symbols, or invalid formatting and use a numeric value.",
+        fix: financialNumberFix(amount),
         severity: "critical",
         risk: "financial_reporting",
       }),
     );
   }
 
-  if (amount !== null && amount <= 0) {
+  if (amount.ok && (amount.isNegative || amount.isZero)) {
     issues.push(
       createIssue({
         rowIndex,
@@ -323,29 +332,29 @@ function validateAmount({
 }
 
 function validateVat({
-  normalizedRow,
+  numbers,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const vat = parseNormalizedNumber(normalizedRow.vat);
+  const vat = numbers.vat;
   const issues: ValidationIssue[] = [];
 
-  if (normalizedRow.vat && vat === null) {
+  if (!vat.ok && vat.error !== "empty") {
     issues.push(
       createIssue({
         rowIndex,
         field: "vat",
         type: "number",
         category: "tax",
-        problem: "VAT is not a valid number.",
+        problem: "VAT does not match the numeric source contract.",
         why: "VAT must be numeric for correct tax calculations, reporting, and import validation.",
-        fix: "Remove text or invalid formatting and use a numeric VAT value.",
+        fix: financialNumberFix(vat),
         severity: "critical",
         risk: "tax_risk",
       }),
     );
   }
 
-  if (vat !== null && vat < 0) {
+  if (vat.ok && vat.isNegative) {
     issues.push(
       createIssue({
         rowIndex,
@@ -365,16 +374,16 @@ function validateVat({
 }
 
 function validateVatConsistency({
-  normalizedRow,
+  numbers,
   rowIndex,
 }: InvoiceValidationContext): ValidationIssue[] {
-  const amount = parseNormalizedNumber(normalizedRow.amount);
-  const vat = parseNormalizedNumber(normalizedRow.vat);
+  const amount = numbers.amount;
+  const vat = numbers.vat;
   const issues: ValidationIssue[] = [];
 
-  if (amount === null || vat === null || amount <= 0) return issues;
+  if (!amount.ok || !vat.ok || amount.isNegative || amount.isZero) return issues;
 
-  if (vat > amount) {
+  if (compareDecimals(vat, amount) > 0) {
     issues.push(
       createIssue({
         rowIndex,
@@ -390,9 +399,7 @@ function validateVatConsistency({
     );
   }
 
-  const vatRate = vat / amount;
-
-  if (vatRate > 0.3) {
+  if (isAboveThirtyPercent(vat, amount)) {
     issues.push(
       createIssue({
         rowIndex,
@@ -647,6 +654,12 @@ function validatePaymentTerms({
       risk: "payment_terms",
     }),
   ];
+}
+
+function financialNumberFix(result: Extract<DecimalResult, { ok: false }>) {
+  if (result.error === "unsupported-cell") return "Replace the Excel formula, date, boolean, error or percentage with a plain numeric or text amount.";
+  if (result.error === "unsafe-number") return "Provide the exact amount as text. Numeric precision already lost in Excel cannot be recovered.";
+  return "Use the selected decimal point or comma. Remove thousands separators, currency symbols and scientific notation from the source.";
 }
 
 function createIssue(issue: ValidationIssue): ValidationIssue {

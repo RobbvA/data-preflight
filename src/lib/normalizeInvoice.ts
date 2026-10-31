@@ -1,7 +1,6 @@
 import type { ParsedRow } from "@/lib/parseCsv";
 import { normalizeCode, normalizeKey } from "@/lib/normalization/normalizeCode";
 import { normalizeDate } from "@/lib/normalization/normalizeDate";
-import { normalizeNumber } from "@/lib/normalization/normalizeNumber";
 
 export type NormalizedInvoiceRow = ParsedRow & {
   invoice_number: string;
@@ -31,8 +30,9 @@ export function normalizeInvoiceRow(row: ParsedRow): NormalizedInvoiceRow {
     invoice_number: normalizeInvoiceNumber(invoiceNumber),
     company: normalizeTextValue(getCellValue(row, "company")),
     email: normalizeEmail(getCellValue(row, "email")),
-    amount: normalizeNumber(getCellValue(row, "amount")),
-    vat: normalizeNumber(getCellValue(row, "vat")),
+    // Financial interpretation is performed by the context-required Invoice runner.
+    amount: getCellValue(row, "amount"),
+    vat: getCellValue(row, "vat"),
     status: normalizeKey(getCellValue(row, "status")),
     country: normalizeCode(getCellValue(row, "country")),
     invoice_date: normalizeDate(getCellValue(row, "invoice_date")),

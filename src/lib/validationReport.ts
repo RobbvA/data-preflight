@@ -2,6 +2,7 @@ import type { DecimalNotation } from "@/lib/strictDecimal";
 import { UNIT_REFERENCE_VERSION, type UnitReference } from "@/lib/unitReference";
 import type { ParsedRow } from "@/lib/parseCsv";
 
+export type InvoiceValidationContext = { invoiceNotation: DecimalNotation };
 export type PriceValidationContext = { priceNotation: DecimalNotation };
 export type StockValidationContext = { quantityNotation: DecimalNotation };
 
@@ -10,6 +11,7 @@ type ValidationReportInput<TField extends string> = {
   fileName: string;
   sheetName?: string;
   unitReference?: UnitReference | null;
+  invoiceContext?: InvoiceValidationContext;
   priceContext?: PriceValidationContext;
   stockContext?: StockValidationContext;
   mapping: Readonly<Record<TField, string>>;
@@ -28,9 +30,13 @@ export function buildValidationReportRows<TField extends string>({
   mapping,
   counts,
   unitReference,
+  invoiceContext,
   priceContext,
   stockContext,
 }: ValidationReportInput<TField>): ParsedRow[] {
+  if (profile.id === "invoice" && (!invoiceContext || !["point", "comma"].includes(invoiceContext.invoiceNotation))) {
+    throw new Error("Invoice notation is required for an Invoice validation report.");
+  }
   if (profile.id === "price-list" && (!priceContext || !["point", "comma"].includes(priceContext.priceNotation))) {
     throw new Error("Price notation is required for a Price List validation report.");
   }
@@ -64,6 +70,13 @@ export function buildValidationReportRows<TField extends string>({
     row("Result", "Needs review", String(counts.needsReview)),
     row("Result", "Ready", String(counts.ready)),
     ...mappingRows,
+    ...(profile.id === "invoice" && invoiceContext ? [
+      row("Invoice context", "Amount and VAT notation", invoiceContext.invoiceNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"),
+      row("Invoice context", "Text amount and VAT rules", "Chosen decimal notation only; no thousands separators, symbols or scientific text. Export uses a point and preserves text scale."),
+      row("Invoice context", "Financial comparisons", "Exact decimal comparisons, including VAT above amount and the 30% threshold; no monetary Number conversion or rounding."),
+      row("Invoice context", "Excel numeric values", "Stored numeric values without display rounding. Formula, date, boolean, error and percentage cells are rejected for amounts and VAT. Other fields retain formatted text."),
+      row("Invoice context", "Checks not performed", "Legal tax correctness, source precision already lost in Excel, live ERP references and target-ERP import acceptance."),
+    ] : []),
     ...(profile.id === "price-list" && priceContext ? [
       row("Price context", "Price notation", priceContext.priceNotation === "point" ? "Decimal point (12.50)" : "Decimal comma (12,50)"),
       row("Price context", "Text price rules", "Chosen decimal notation only; no grouping, symbols or scientific text. Export uses a point and preserves text scale."),

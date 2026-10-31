@@ -1,3 +1,7 @@
+> Update 31 oktober 2026 — R01/R02 gebouwd/getest in voorbereiding: Invoice v1.1.0 met expliciete notatie/exacte financiële vergelijking; gedeelde vierkante notatiekeuze voor Invoice/Price/Stock. 101 tests geslaagd, lint 0 fouten/2 bekende warnings, build/TS en gerichte productiebrowserchecks geslaagd. Lokaal toepassen/push/live nog open. Plan v3.1 bevat ook multi-file/tabs/gezamenlijke ZIP onder R11a/R11b; nog niet gebouwd. Details: [docs/M7_R01_INVOICE_NUMBERS.md](docs/M7_R01_INVOICE_NUMBERS.md). Hervatten: R03 na lokale bevestiging. Deze actuele update gaat vóór strijdige historische status hieronder.
+
+> Update 29 oktober 2026 — M7-scope uitgebreid op expliciet verzoek van Rob. Actuele resterende uitvoering: [docs/M7_REMAINING_PLAN.md](docs/M7_REMAINING_PLAN.md); hervatpunt: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md). Deze update vervangt strijdige oudere scope-/volgordeclaims hieronder. Remote main is gecontroleerd op 3fe3b2d (Stock-workflow gepusht). Volgende bouwdoel: Invoice-getalcontract. Nieuwe review/export/ERP/commerciële functies zijn gepland, niet al gebouwd. Deze planronde verandert geen applicatiecode en draait geen nieuwe tests.
+
 # DataPreflight Project Status
 
 Last reviewed: 2026-10-28

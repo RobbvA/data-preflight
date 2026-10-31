@@ -3,7 +3,7 @@ import { createUniqueHeaders, getInputAdapter, parseCsvFile, type ParsedDataSet,
 import type { DecimalSourceCell } from "@/lib/strictDecimal";
 
 export type SourceCellRow = Record<string, DecimalSourceCell>;
-export type ExactParsedDataSet = ParsedDataSet & { sourceCells: SourceCellRow[] };
+export type ExactParsedDataSet = ParsedDataSet & { sourceCells: SourceCellRow[]; formattedRows?: ParsedRow[] };
 
 // The installed XLSX package exposes SSF differently in Node CJS and browser ESM.
 const numberFormats: { is_date: (format: string) => boolean } =
@@ -51,7 +51,7 @@ export async function getExactReadableExcelSheetNames(file: File): Promise<strin
   return workbook.SheetNames.filter((name) => sheetRows(workbook.Sheets[name]).size > 0);
 }
 
-/** Opt-in input for Price/Stock. Existing profiles keep their adapter behavior. */
+/** Exact financial input for Invoice/Price/Stock; other profiles retain their adapters. */
 export async function parseExactSourceFile(file: File, selectedSheetName?: string): Promise<ExactParsedDataSet> {
   const adapter = getInputAdapter(file);
   if (!adapter) throw new Error("Choose a CSV, XLSX, or XLS file.");
@@ -93,11 +93,18 @@ export async function parseExactSourceFile(file: File, selectedSheetName?: strin
   const sourceCells = entries.slice(1).map(([, row]) => Object.fromEntries(
     headers.map((header, index) => [header, sourceCell(row.get(columns[index]))]),
   ));
+  const formattedRows: ParsedRow[] = entries.slice(1).map(([, row]) => Object.fromEntries(
+    headers.map((header, index) => {
+      const cell = row.get(columns[index]);
+      const value = cell ? String(cell.w ?? XLSX.utils.format_cell(cell)) : "";
+      return [header, value.replaceAll(/\u00A0/g, " ").replaceAll(/\s+/g, " ").trim()];
+    }),
+  ));
   const rows: ParsedRow[] = sourceCells.map((row) => Object.fromEntries(
     headers.map((header) => [header, String(row[header].value)]),
   ));
   return {
-    sourceType: "excel", fileName: file.name, headers, rows, rowCount: rows.length, sourceCells,
+    sourceType: "excel", fileName: file.name, headers, rows, rowCount: rows.length, sourceCells, formattedRows,
     capabilities: { hasHeaders: headers.length > 0, hasRows: rows.length > 0, supportsMultipleSheets: workbook.SheetNames.length > 1, supportsCellFormatting: true, supportsTextExtraction: false },
     metadata: { sheetName: selected.name, sheetCount: workbook.SheetNames.length, availableSheets: workbook.SheetNames },
   };

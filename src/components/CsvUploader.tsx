@@ -4,17 +4,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   getInputAdapter,
-  getReadableExcelSheetNames,
-  type ParsedDataSet,
 } from "@/lib/parseCsv";
 import type { ValidationIssue } from "@/lib/validateRows";
+import { parseExactSourceFile, getExactReadableExcelSheetNames, type ExactParsedDataSet } from "@/lib/exactDataInput";
+import { runInvoiceSourceValidation } from "@/lib/validation/invoiceValidation";
+import type { DecimalNotation } from "@/lib/strictDecimal";
+import { DecimalNotationControls } from "@/components/data-preflight/DecimalNotationControls";
 import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
-import {
-  mapRowsToProfile,
-  runValidationProfile,
-} from "@/lib/validation/validationProfile";
 import {
   downloadCsv,
   downloadErrorCsv,
@@ -56,7 +54,8 @@ export function CsvUploader() {
 
   const [activeDomain, setActiveDomain] = useState<DataDomain | null>(null);
   const [profilePrompt, setProfilePrompt] = useState(false);
-  const [parsedDataSet, setParsedDataSet] = useState<ParsedDataSet | null>(null);
+  const [parsedDataSet, setParsedDataSet] = useState<ExactParsedDataSet | null>(null);
+  const [invoiceNotation, setInvoiceNotation] = useState<DecimalNotation | null>(null);
   const [pendingExcelSheets, setPendingExcelSheets] = useState<{
     file: File;
     names: string[];
@@ -73,13 +72,14 @@ export function CsvUploader() {
   const [isFieldMappingOpen, setIsFieldMappingOpen] = useState(false);
   const [activeReviewTab, setActiveReviewTab] = useState<ReviewTab | null>(null);
 
-  const rows = useMemo(() => parsedDataSet?.rows ?? [], [parsedDataSet]);
+  const rows = useMemo(() => parsedDataSet?.formattedRows ?? parsedDataSet?.rows ?? [], [parsedDataSet]);
   const headers = useMemo(() => parsedDataSet?.headers ?? [], [parsedDataSet]);
   const fileName = parsedDataSet?.fileName ?? "";
 
   async function loadSource(
     source: Promise<File>,
     selectedSheetName?: string,
+    exampleNotation?: DecimalNotation,
   ) {
     if (!activeDomain) {
       setProfilePrompt(true);
@@ -90,6 +90,7 @@ export function CsvUploader() {
 
     setError(null);
     setParsedDataSet(null);
+    setInvoiceNotation(null);
     setFieldMapping(createEmptyMapping());
     setPendingExcelSheets(null);
     setIsLoading(true);
@@ -108,7 +109,7 @@ export function CsvUploader() {
       if (!adapter) throw new Error("Choose a CSV, XLSX, or XLS file.");
 
       if (adapter.sourceType === "excel" && !selectedSheetName) {
-        const sheetNames = await getReadableExcelSheetNames(file);
+        const sheetNames = await getExactReadableExcelSheetNames(file);
         if (requestId !== loadRequestId.current) return;
 
         if (sheetNames.length > 1) {
@@ -117,7 +118,7 @@ export function CsvUploader() {
         }
       }
 
-      const nextParsedDataSet = await adapter.parse(file, selectedSheetName);
+      const nextParsedDataSet = await parseExactSourceFile(file, selectedSheetName);
       if (requestId !== loadRequestId.current) return;
 
       if (nextParsedDataSet.rows.length === 0) {
@@ -135,12 +136,13 @@ export function CsvUploader() {
 
       const suggestedMapping = createSuggestedMapping(
         nextParsedDataSet.headers,
-        nextParsedDataSet.rows,
+        nextParsedDataSet.formattedRows ?? nextParsedDataSet.rows,
       );
       const { mappingReady: suggestedMappingReady } =
         getMappingStatus(invoiceValidationProfile, suggestedMapping);
 
       setParsedDataSet(nextParsedDataSet);
+      setInvoiceNotation(exampleNotation ?? null);
       setFieldMapping(suggestedMapping);
       setIsFieldMappingOpen(!suggestedMappingReady);
     } catch (caught) {
@@ -200,6 +202,8 @@ export function CsvUploader() {
           type: "text/csv",
         });
       }),
+      undefined,
+      "point",
     );
   }
 
@@ -207,6 +211,7 @@ export function CsvUploader() {
     loadRequestId.current += 1;
     setPendingExcelSheets(null);
     setParsedDataSet(null);
+    setInvoiceNotation(null);
     setFieldMapping(createEmptyMapping());
     setError(null);
     setIsLoading(false);
@@ -251,26 +256,14 @@ export function CsvUploader() {
     [fieldMapping],
   );
 
-  const selectedRows = useMemo(
-    () => mappingReady
-      ? mapRowsToProfile(rows, fieldMapping, invoiceValidationProfile)
-      : [],
-    [rows, fieldMapping, mappingReady],
+  const validationRun = useMemo(
+    () => parsedDataSet
+      ? runInvoiceSourceValidation(parsedDataSet, fieldMapping, invoiceNotation)
+      : { available: false, normalizedRows: [], validationResult: { issues: [], cleanRows: [], errorRows: [] } },
+    [parsedDataSet, fieldMapping, invoiceNotation],
   );
-
-  const { normalizedRows, validationResult } = useMemo(
-    () => mappingReady
-      ? runValidationProfile(invoiceValidationProfile, selectedRows)
-      : {
-          normalizedRows: [],
-          validationResult: {
-            issues: [],
-            cleanRows: [],
-            errorRows: [],
-          },
-        },
-    [mappingReady, selectedRows],
-  );
+  const { normalizedRows, validationResult } = validationRun;
+  const resultsReady = mappingReady && validationRun.available;
 
   const issuesByRow = useMemo(
     () => validationResult.issues.reduce<Record<number, ValidationIssue[]>>(
@@ -320,7 +313,7 @@ export function CsvUploader() {
   const blockedCount = blockedInvoiceItems.length;
   const warningCount = warningInvoiceItems.length;
   const cleanCount = cleanInvoiceItems.length;
-  const canExport = mappingReady && validationResult.cleanRows.length > 0;
+  const canExport = resultsReady && validationResult.cleanRows.length > 0;
   const hasUploadedRows = rows.length > 0;
   const hasHeaders = headers.length > 0;
 
@@ -431,9 +424,13 @@ export function CsvUploader() {
                 {mappingReady ? "Edit mapping" : "Complete mapping"}
               </button>
             </div>
+            <DecimalNotationControls label="Amount and VAT notation" appliesTo="amounts and VAT" value={invoiceNotation} onChange={(value) => {
+              setInvoiceNotation(value);
+              setSelectedPreviewRowIndex(null);
+            }} />
           </section>
 
-          {mappingReady && (
+          {resultsReady && (
             <>
               <InvoiceReviewSection
                 activeTab={activeReviewTab ?? undefined}
@@ -467,6 +464,7 @@ export function CsvUploader() {
 
                 <ValidationContextPanel
                   profile={invoiceValidationProfile}
+                  invoiceContext={invoiceNotation ? { invoiceNotation } : undefined}
                   fileName={fileName}
                   sheetName={parsedDataSet?.metadata?.sheetName}
                   mapping={fieldMapping}

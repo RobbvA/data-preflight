@@ -1,0 +1,36 @@
+import { useId } from "react";
+import { Check } from "lucide-react";
+import type { DecimalNotation } from "@/lib/strictDecimal";
+
+export function DecimalNotationControls({ label, appliesTo, value, onChange }: {
+  label: string;
+  appliesTo: string;
+  value: DecimalNotation | null;
+  onChange: (value: DecimalNotation) => void;
+}) {
+  const id = useId();
+  return (
+    <fieldset aria-label={label} aria-describedby={`${id}-help`} className="mt-4 border-t border-white/10 pt-3">
+      <legend className="float-left w-full text-sm font-semibold text-[var(--text-primary)]">
+        {label} <span className="font-normal text-[var(--text-secondary)]">· Required for this file</span>
+      </legend>
+      <div className="clear-both flex flex-wrap gap-x-6 gap-y-2 pt-2">
+        {([['point', 'Decimal point (12.50)'], ['comma', 'Decimal comma (12,50)']] as const).map(([notation, text]) => (
+          <label key={notation} className="flex min-h-11 cursor-pointer items-center gap-2.5 text-sm text-[var(--text-primary)]">
+            <span className="relative flex items-center justify-center">
+              <input type="radio" name={id} value={notation} checked={value === notation} required
+                onChange={() => onChange(notation)}
+                className="h-5 w-5 appearance-none rounded border border-white/40 bg-[var(--surface-deep)] checked:border-[var(--brand-accent)] checked:bg-[var(--brand-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]" />
+              {value === notation && <Check aria-hidden="true" className="pointer-events-none absolute h-4 w-4 text-black" strokeWidth={3} />}
+            </span>
+            {text}
+          </label>
+        ))}
+      </div>
+      <p id={`${id}-help`} className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
+        Applies to text {appliesTo}. Excel number cells use their stored value. No thousands separators, symbols or scientific text.
+      </p>
+      {!value && <p role="status" className="mt-2 text-sm font-medium text-[var(--brand-accent-soft)]">Choose decimal notation to validate this file and enable export.</p>}
+    </fieldset>
+  );
+}

@@ -1,18 +1,4 @@
-import type { ValidationProfile } from "@/lib/validation/validationProfile";
-import {
-  normalizeInvoiceRows,
-  type NormalizedInvoiceRow,
-} from "@/lib/normalizeInvoice";
-import { validateRows, type ValidationResult } from "@/lib/validateRows";
-import { invoiceProfile, type InvoiceField } from "@/lib/profiles/invoiceProfile";
+import { invoiceProfile } from "@/lib/profiles/invoiceProfile";
 
-export const invoiceValidationProfile: ValidationProfile<
-  InvoiceField,
-  NormalizedInvoiceRow,
-  ValidationResult
-> = {
-  ...invoiceProfile,
-  version: "1.0.2",
-  normalizeRows: normalizeInvoiceRows,
-  validateRows,
-};
+// Descriptor only: Invoice must run through runInvoiceSourceValidation with notation/cell context.
+export const invoiceValidationProfile = { ...invoiceProfile, version: "1.1.0" };

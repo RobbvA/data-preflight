@@ -583,38 +583,27 @@ If scope must shrink, defer the reference-data experiment first and explicitly r
 - In-app source editing.
 - Large-file optimization without an observed need.
 
-## Milestone 7 — Professional UX, Price List & Stock Balances
+## Milestone 7 — Reliable six-profile workflow and commercial preparation
 
-Status: In progress. On 2026-10-26 Rob explicitly expanded M7 from five to six profiles. The previous five-profile target is superseded; no additional profile beyond these six is authorized by this plan.
+Status: in progress. Scope explicitly expanded by Rob on 29 October 2026. The former exclusions of one ERP template, bounded local references/custom rules, richer review/reporting and an independent usage test are superseded.
 
-Full executable plan and contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current work package, evidence and side-quest resume point: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md).
+Authoritative remaining plan: [docs/M7_REMAINING_PLAN.md](docs/M7_REMAINING_PLAN.md), v3.1, including multi-file with tabs and joint ZIP export. Original domain contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current checkpoint: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md).
 
-### Retained work
+Remote main verified on 29 October as 3fe3b2d: full Stock Balances workflow pushed. Historical preparation evidence: 86 passing tests, lint with two known warnings, production build and focused browser checks. No new full live acceptance claimed.
 
-The first accepted UX increment is pushed as 790f648: larger consistent step headings, supporting mapping text, compact optional Product unit controls, result/export readability and warmer off-white. The later subtle review-tab colors were separately accepted and pushed as 130ccaf. The 130ccaf application checkpoint had a successful Vercel deployment; planning was subsequently confirmed pushed as 66ab1b5. Compact Product cards were locally accepted on 2026-10-27; M7.3a extends this record presentation only and is locally accepted/pushed as 971b8f9. M7.3b feedback/recovery is locally accepted/pushed as f8e185b. M7.4a exact numeric primitives are locally confirmed/pushed as e09cb8e. M7.4b Price List domain is locally confirmed/pushed as b7e495b. M7.4c completes the Price workflow, locally accepted/pushed as 2984448. M7.4d Stock domain is locally confirmed/pushed as faed293. M7.4e full sixth-profile Stock workflow is tested in preparation; local acceptance/push/live remain open. The earlier broad header and review-card redesigns remain rejected and reverted. Do not repeat completed rollback instructions.
+Remaining sequence:
 
-### Delivery phases
+1. Baseline/docs; exact Invoice notation and financial comparisons; explicit checkbox-style notation choice.
+2. Shared CSV/XLSX export, followed by six-profile integration (M7.4f).
+3. Approved readability improvements, onboarding and searchable/filterable/sortable review.
+4. Consistent CSV/XLSX/PDF review reporting and bounded report branding.
+5. Specify and build one evidence-based ERP template with local reference checks and limited custom rules.
+6. Traceable warning acceptance, source-based correction and honest commercial offer/upgrade preparation.
+7. Multi-file with at most five isolated sessions, a controlled queue, file tabs and joint ZIP export, preserving individual exports.
+8. Extensive tests profile by profile, independent real-file usage task, fixes and final release verification.
 
-| Phase | Concrete result |
-| --- | --- |
-| M7.1 | Current baseline, six-profile scope, Price/Stock contracts, exact fixtures and progress register |
-| M7.2 | Focused Product workspace direction at desktop/390px, then accepted implementation |
-| M7.3 | Consistent UX and recoverable feedback across the existing four profiles |
-| M7.4 | Strict decimal/Excel foundation, complete Price List, complete Stock Balances, six-profile integration |
-| M7.5 | Comprehensive whole-app verification, fixes, documentation, local confirmation, push and separate live checks |
+Keep six generic profiles, accepted styling/layout, exact Price 8/1/2 and Stock 7/0/3 fixtures. New ERP template is an overlay, not a promise of universal ERP acceptance. All source-bound choices/decisions/references must be isolated and invalidated correctly.
 
-Price List v1.0.0 retains product, price list, currency, unit, strict price notation, complete composite-key duplicates and the exact 8 Blocked / 1 Needs review / 2 Ready example (3 exports).
+Commercial preparation does not silently include payment/account infrastructure. Live connectors, cloud collaboration, arbitrary rules/scripts, in-app cell editing and additional generic profiles remain outside scope. Open ERP/object and pricing/limit decisions are recorded before their implementation, not fabricated.
 
-Stock Balances v1.0.0 is a bounded non-negative quantity snapshot per product and warehouse with an explicit unit and notation. Zero quantity is valid. Duplicate product/warehouse pairs block, including conflicting units; no automatic summing or conversion. Its fixed fixture is 7 Blocked / 0 Needs review / 3 Ready (3 exports). These are DataPreflight contract choices, not universal ERP rules.
-
-### Execution and finish
-
-One concrete subgoal per build session. Record the precise resume point before a user-requested side quest. Preserve Step 1 → Step 2 → Step 3 and accepted branding. Reuse the existing workspaces and shared components; no broad speculative framework. Complete one new profile before starting the next.
-
-The final test covers all six profiles, own CSV/XLSX/XLS, worksheets, mapping and saved mappings, decimal/reference lifecycle, statuses, correction/reupload, exact downloads, report context, determinism, stale async state, desktop/390px, keyboard and local-processing observations. Record the tested commit and actual results; environment-blocked tests are not passes.
-
-M7 is complete only when its explicit criteria are met, the app checks pass, documents are accurate, and push/deployment/live behavior are separately verified. No automatic polish expansion after passing acceptance. AI, accounts/payments, cloud storage, ERP connectors, general rules/references, in-app editing, orders and a separate Warehouse/Location profile remain outside M7. Outreach and independent usage testing follow M7 and are not required technical completion gates.
-
-### Next build step
-
-M7.4e: locally review complete Stock Balances workflow: 7 Blocked / 0 Needs review / 3 Ready, three actual export rows including zero, and required notation on each own source. Six profiles are implemented in preparation. After acceptance, M7.4f six-profile integration and M7.5 whole-app verification. Preserve accepted presentation; no automatic new feature/polish round. Invoice 1.234 ambiguity remains an explicit pre-release issue. Evidence/resume: docs/M7_4E_STOCK_BALANCES_WORKFLOW.md and docs/M7_PROGRESS.md.
+R01/R02 are built/tested in preparation on 31 October: Invoice v1.1.0 exact financial source contract and shared square notation choices; 101 tests pass, lint retains only two known warnings, build/browser checks pass. Local application/push/live of this package remain open. Next build goal after confirmation: R03 CSV/XLSX export. Final completion follows v3 criteria, not the old smaller M7 checklist. Local confirmation, push, deployment and live function checks remain separate evidence stages.

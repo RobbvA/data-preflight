@@ -1002,3 +1002,19 @@ No application code changed and no new test/lint/build execution is claimed for 
 
 
 28 oktober 2026 — M7.4d lokaal bevestigd/gepusht als faed293 (remote gecontroleerd). M7.4e volledige Stock Balances-workflow gebouwd/getest in voorbereiding: zesde pickeroptie, gedeelde layout/records, verplichte quantity notation en exacte celmetadata, eigen snapshotrapportcontext. Voorbeeld exact 7/0/3, drie werkelijke exportrijen en zeven issues. 86 tests geslaagd, lint 0 fouten/2 bekende warnings, productiebuild/TypeScript geslaagd. Productiebrowser: nul/negatieve nul Ready zonder waarschuwing, EA/BOX-conflict, eigen CSV/XLS/XLSX/worksheets en ongewijzigde 12.3456 ondanks 0.00-opmaak, mapping/saved-mapping-gates, source/reset/switch/late-read, desktop/390px/toetsenbord, Price-contextisolatie en vier oorspronkelijke voorbeelden geslaagd. Geen page errors/onverwachte requests. Geen fysieke telefoon, volledige zesprofiel-eindtest of livecheck geclaimd. Pakket datapreflight-m7-4e-stock-balances-workflow.zip; lokale toepassing/beoordeling en push/live open. Hervatpunt daarna M7.4f en M7.5. Invoice-notatiepunt blijft afzonderlijke releasevoorwaarde.
+
+
+## 29 oktober 2026 — Uitgebreide M7 gepland
+
+Rob heeft de resterende productverbeteringen expliciet binnen M7 geplaatst. Uitvoeringsplan v3 toegevoegd met R00–R14, afhankelijkheden, concrete contracten, volledige profielmatrix en release-/praktijktestcriteria. Invoice-notatie eerst; daarna checkboxbediening, CSV/XLSX-export, integratie, leesbaarheid, review, rapporten, één ERP-template/referenties/beperkte regels, warningbesluiten en commerciële voorbereiding. Geen automatische betalings-/accountinfrastructuur.
+
+Remote Stock-push bevestigd: 3fe3b2dd92b70976d9eeb9f99ff680072b83b3a0. Windows-werkmap en nieuwe liveflow niet getest. Historische 86 tests niet opnieuw uitgevoerd. Alleen projectdocumentatie voorbereid; lokaal toepassen en push van dit pakket nog open. Volgende sessie: actuele baseline en R01 uitvoeren. Geen outreach verstuurd.
+
+
+## 31 oktober 2026 — Nieuwe bouwsessie, R01/R02
+
+Remote main opnieuw gecontroleerd op 3fe3b2d. Vorig planpakket is door Rob nog niet toegepast. Daarom bevat het R01/R02-pakket tevens de complete planupdate v3.1, inclusief de expliciet gevraagde multi-filewachtrij (max vijf), bestandstabs en gezamenlijke ZIP als R11a/R11b vóór de eindtest.
+
+Invoice v1.1.0: expliciete notatie, exacte financiële broncellen en exacte VAT-vergelijkingen; geformatteerde niet-financiële Excelvelden behouden. Nieuwe vierkante keuzebediening hergebruikt voor Invoice/Price/Stock, geen dropdown of verborgen standaard bij eigen bron. Profielversie gewijzigd; bestaande saved mapping-versiereview blijft actief. Planfout over optionele VAT gecorrigeerd: VAT blijft vereist.
+
+101 tests geslaagd (15 nieuwe); lint nul fouten en twee bestaande warnings; productiebuild/TS en gerichte browserketen met werkelijke downloads, lifecycle, XLS/XLSX, keyboard/1440/390 en zes voorbeelden geslaagd. Geen volledige eindtest of nieuwe liveacceptatie geclaimd. Gebruiker moet pakket nog lokaal toepassen/beoordelen; commit/push daarna. Volgende doel R03 CSV/XLSX-export. Geen outreach of remote writes uitgevoerd.

@@ -1,3 +1,5 @@
+> 2026-10-31 preparation update: Invoice v1.1.0 requires explicit decimal notation, preserves stored financial values and uses exact comparisons. Invoice/Price/Stock share square notation choices. 101 tests pass; local application/push/live of this package remain open. See [R01/R02 evidence](docs/M7_R01_INVOICE_NUMBERS.md) and [expanded M7 plan](docs/M7_REMAINING_PLAN.md), including planned file tabs and joint ZIP export. These future batch/export features are not implemented yet.
+
 # DataPreflight
 
 **Validate data before ERP import.**

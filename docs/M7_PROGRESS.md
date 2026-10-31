@@ -1,12 +1,25 @@
 # M7 — Voortgang en hervatpunt
 
-Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
+Bijgewerkt: 31 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 3.1. Resterende uitvoering: [M7_REMAINING_PLAN.md](M7_REMAINING_PLAN.md).
+
+## Actueel checkpoint — R01/R02 voorbereid en getest
+
+- Remote main op 31 oktober opnieuw gecontroleerd: `3fe3b2dd92b70976d9eeb9f99ff680072b83b3a0`, Stock-workflow gepusht. Windows-werkmapstatus en nieuwe liveflow niet rechtstreeks gecontroleerd.
+- R00: uitgebreid plan v3.1 bijgewerkt met Robs expliciete multi-filetoevoeging: maximaal vijf bestanden, eigen context per bestand, gecontroleerde wachtrij, tabs en gezamenlijke ZIP-export onder R11a/R11b vóór de eindtest. Nog geen multi-file-code.
+- R01: Invoice v1.1.0 vereist expliciete notatie en financiële broncelcontext. Geen scheidingstekenheuristiek; exacte financiële vergelijkingen zonder afronding. Excel amount/VAT gebruiken opgeslagen waarden; overige velden houden geformatteerde tekst voor datum/ID-compatibiliteit. VAT blijft verplicht.
+- R02: gedeelde vierkante één-uit-twee-bediening voor Invoice, Price en Stock. Toegankelijke radiogedragingen, geen vooraf gekozen notatie bij eigen bron. Voorbeeld heeft zichtbare puntpreset. Bestaande layouts behouden.
+- Bewijs: 101 tests geslaagd (86 behouden + 15 nieuwe Invoice-tests); lint 0 fouten/2 bekende warnings; productiebuild/TS geslaagd. Productiebrowser: echte downloads en rapportcontext, punt/komma, mixed-invalid, mappingguards/legacy version-review, XLS/XLSX met worksheets/precisie/ID/datum, cancel/late async, profielisolatie, keyboard en 1440/390px. Zes voorbeelden/export-smoke geslaagd. Geen onverwachte netwerkrequests of browserfouten gezien. Dit is geen volledige R12-eindtest of nieuwe liveacceptatie.
+- Pakket: `datapreflight-m7-r01-invoice-numbers.zip`. Bevat ook alle v3.1-plandocumenten: het eerdere planpakket hoeft niet eerst toegepast. Lokaal beoordelen/toepassen, commit/push en live staan nog open. Onbekende lokale wijzigingen worden niet overschreven.
+- Details: [M7_R01_INVOICE_NUMBERS.md](M7_R01_INVOICE_NUMBERS.md).
+- Exacte volgende actie: Rob past pakket toe; Invoice example controleren (1 Blocked / 2 Needs review / 1 Ready, export 3). Eigen CSV vereist nieuwe keuze; Price/Stock tonen dezelfde vierkante bediening. Na bevestiging gerichte commit/push; daarna R03 CSV/XLSX-export.
+- Open beslissingen ERP/object en commerciële grenzen horen bij R08/R11 en blokkeren R03 niet. Geen actieve side quest.
+- De onderstaande 28-oktoberstand en oorspronkelijke werkpakketten zijn historie; dit checkpoint is leidend.
 
 ## Eerst lezen bij een sessiestart
 
 "Bouwsessie start nu" betekent: actuele voortgang/code/remote controleren, één concreet subdoel noemen en dat uitvoeren. Geen nieuwe volledige audit of roadmapronde. Bij een side quest eerst hieronder het exacte hervatpunt vastleggen.
 
-## Actueel checkpoint — M7.4e
+## Historisch checkpoint — M7.4e (28 oktober)
 
 - M7.4d lokaal toegepast/bevestigd/gepusht. Remote main gecontroleerd op faed293328be6534fd98e2dc8896e800a330e753, `feat: add stock balance validation rules and fixtures`. Geen nieuwe live-workflowcontrole geclaimd.
 - Actieve stap: M7.4e — Stock Balances als zesde profiel volledig aangesloten, gebouwd/getest in voorbereiding. Lokale toepassing/beoordeling, commit/push en live van dit pakket nog open.
@@ -34,12 +47,12 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 | M7.4b | Price List-domein en exacte 8/1/2-fixture | Lokaal bevestigd/gepusht als b7e495b |
 | M7.4c | Price List volledige workflow | Lokaal bevestigd/gepusht als 2984448; livecontrole apart |
 | M7.4d | Stock-domein en exacte 7/0/3-fixture | Lokaal bevestigd/gepusht als faed293 |
-| M7.4e | Stock volledige workflow | Gebouwd/getest in voorbereiding; lokaal beoordelen/push/live open |
-| M7.4f | Zesprofielintegratie | Niet gestart |
-| M7.5a | Uitgebreide hele-app-test met testlog | Niet gestart |
-| M7.5b | Bevindingen herstellen/gericht hertesten | Niet gestart |
-| M7.5c | Definitieve docs, lokale checks, push en live | Niet gestart |
-| M7.5d | Acceptatiecriteria afvinken en afsluiten | Niet gestart |
+| M7.4e | Stock volledige workflow | Remote push op 29 oktober bevestigd als 3fe3b2d; nieuwe livecontrole open |
+| M7.4f | Zesprofielintegratie | Niet gestart; uitgevoerd onder R04 na getallen en export |
+| M7.5a | Uitgebreide hele-app-test met testlog | Niet gestart; uitgebreid onder R12 |
+| M7.5b | Bevindingen herstellen/gericht hertesten | Doorlopend per R-pakket en R12–R13 |
+| M7.5c | Definitieve docs, lokale checks, push en live | Niet gestart; definitief onder R14 |
+| M7.5d | Acceptatiecriteria afvinken en afsluiten | Niet gestart; nieuwe v3-criteria onder R14 |
 
 ## Checkpoint invullen bij verandering of einde sessie
 
@@ -54,10 +67,14 @@ Bijgewerkt: 28 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 2.0.
 
 Markeer stappen alleen afgerond met toepasselijk bewijs; voorbereid is niet lokaal toegepast. Een afgewezen pakket telt niet als behouden functionaliteit.
 
-## Backlog buiten M7
+## Scope en werkpakketten vanaf 29 oktober
 
-Foutgroepering per regel; geannoteerde herstelbestanden; eigen product-/leverancier-/magazijnreferenties; beperkte organisatiespecifieke regelinstellingen; een concrete ERP-importbestemming; Warehouse/Location en orderregels; betalingen/accounts; verdere marktvalidatie. Outreach na M7 gericht op één doelgroep en één concreet profiel.
+R00-documentatie en R01/R02 zijn voorbereid/getest; lokale toepassing/push van dit pakket nog open. R03–R14 inclusief R11a/R11b zijn gepland en niet geïmplementeerd. Zie het leidende resterende plan voor afhankelijkheden en per-pakket-acceptatie. Oude uitsluitingen van ERP-template, beperkte referenties/custom rules en praktijktest zijn vervallen door Robs expliciete scopewijziging. Accounts/betalingsinfrastructuur, live ERP-connectors, cloudopslag, algemene rule builder, broncelbewerking, orders en extra generieke profielen blijven buiten scope. Geen werk stil schrappen of automatisch toevoegen.
 
 ## Sessieregistratie
 
 26 oktober 2026 — planronde: remote gecontroleerd op 130ccaf. Zesprofielscope expliciet gevraagd door Rob. Plan en voortgang voorbereid; geen applicatiecode gewijzigd en geen brede controles herhaald. Remote/documentatiestatus vóór toepassing blijft ouder. Volgende stap M7.2a.
+
+29 oktober 2026 — uitgebreide M7 gepland op verzoek van Rob. Remote Stock-push bevestigd op 3fe3b2d. Documentatiepakket v3 voorbereid; geen applicatiecode of nieuwe tests. Hervatten bij R00 toepassen/baseline en R01 Invoice.
+
+31 oktober 2026 — bouwsessie R01/R02: Invoice-getalcontract en exacte financiële vergelijkingen gebouwd; gedeelde checkboxuitstraling voor notatie aangesloten. 101 tests, lint, build en browserbewijs in M7_R01_INVOICE_NUMBERS.md. Plan v3.1 bevat multi-file/tabs/ZIP. Lokale toepassing/push/live open; hervatten R03 na bevestiging van dit pakket.
