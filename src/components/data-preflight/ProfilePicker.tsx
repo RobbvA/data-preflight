@@ -9,6 +9,7 @@ import {
 } from "@/lib/profiles/profilePickerConfig";
 
 type ProfilePickerProps = {
+  compact?: boolean;
   domain: DataDomain | null;
   onDomainChange: (domain: DataDomain) => void;
   disabled?: boolean;
@@ -20,6 +21,7 @@ const focusStyle =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-accent-soft)]";
 
 export function ProfilePicker({
+  compact = false,
   domain,
   onDomainChange,
   disabled = false,
@@ -126,18 +128,18 @@ export function ProfilePicker({
             setIsOpen(true);
           }
         }}
-        className={`flex min-h-16 w-full cursor-pointer items-center gap-3 rounded-xl border border-white/15 bg-[var(--surface-deep)] p-3 text-left transition hover:border-[var(--brand-accent)] disabled:cursor-wait disabled:opacity-60 ${focusStyle}`}
+        className={`flex w-full cursor-pointer items-center rounded-xl border border-white/15 bg-[var(--surface-deep)] text-left ${compact ? "min-h-11 gap-2 p-2" : "min-h-16 gap-3 p-3"} transition hover:border-[var(--brand-accent)] disabled:cursor-wait disabled:opacity-60 ${focusStyle}`}
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[rgba(209,154,106,0.1)] text-[var(--brand-accent-soft)]">
+        <span className={`flex shrink-0 items-center justify-center rounded-lg bg-[rgba(209,154,106,0.1)] text-[var(--brand-accent-soft)] ${compact ? "h-8 w-8" : "h-10 w-10"}`}>
           <SelectedIcon aria-hidden="true" className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-[var(--text-primary)]">
             {selected?.name ?? "Choose a validation profile"}
           </span>
-          <span className="mt-1 block text-xs leading-5 text-[var(--text-secondary)]">
+          {!compact && <span className="mt-1 block text-xs leading-5 text-[var(--text-secondary)]">
             {selected?.description ?? "Select the data you want to validate."}
-          </span>
+          </span>}
         </span>
         <ChevronDown aria-hidden="true" className={`h-4 w-4 shrink-0 text-[var(--brand-accent-soft)] transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>

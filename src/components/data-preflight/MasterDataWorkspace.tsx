@@ -385,6 +385,7 @@ function MasterDataWorkspaceContent({
       ) : (
         <>
           <ActiveWorkspaceHeader
+            stage={resultsReady ? "review" : "mapping"}
             domain={domain}
             description={config.guidance ?? "Validate the mapping, inspect records that need attention, then export."}
             upload={

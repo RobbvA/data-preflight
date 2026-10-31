@@ -1,5 +1,6 @@
 "use client";
 
+import { WorkflowProgress, type WorkflowStage } from "@/components/data-preflight/WorkflowProgress";
 import { WorkflowHelpProvider, WorkflowGuideButton } from "@/components/data-preflight/WorkflowHelp";
 import type { ReactNode } from "react";
 import { HomeProductPreview } from "@/components/data-preflight/HomeProductPreview";
@@ -53,6 +54,8 @@ export function LandingWorkspace({
         </p>
       </div>
 
+      <div className="mt-5"><WorkflowProgress stage="upload" /></div>
+
       <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,1.05fr)] lg:items-stretch lg:gap-7">
         <div className="order-2 lg:order-1">
           <HomeProductPreview domain={domain} />
@@ -66,15 +69,17 @@ export function LandingWorkspace({
 
 export function ActiveWorkspaceHeader({
   domain,
-  description,
+  stage = "mapping",
   upload,
 }: {
   domain: DataDomain;
+  stage?: WorkflowStage;
   description: string;
   upload: ReactNode;
 }) {
   return (
-    <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_420px] lg:items-start">
+    <>
+    <section className="grid gap-5 pt-4 lg:grid-cols-[1fr_360px] lg:items-start">
       <div className="py-2">
         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--brand-accent)]">
           {workspaceTitles[domain]}
@@ -84,14 +89,13 @@ export function ActiveWorkspaceHeader({
           DataPreflight
         </h1>
 
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
-          {description}
-        </p>
         <div className="mt-2 -ml-2"><WorkflowGuideButton /></div>
       </div>
 
       {upload}
     </section>
+    <WorkflowProgress stage={stage} />
+    </>
   );
 }
 

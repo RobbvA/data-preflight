@@ -373,6 +373,7 @@ export function CsvUploader() {
       ) : (
         <>
           <ActiveWorkspaceHeader
+            stage={resultsReady ? "review" : "mapping"}
             domain="invoice"
             description="Inspect invoice rows that need attention, then export rows without blockers."
             upload={

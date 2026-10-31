@@ -55,9 +55,10 @@ export function UploadSection({
 
   if (hasActiveFile) {
     return (
-      <section data-guide="source" data-guide-text={`Current source: ${fileName}. This file is already loaded for the selected profile. Continue with field mapping below. Replace starts a fresh validation; Reset clears this source.`} className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-3 shadow-lg shadow-black/10">
-        <div style={{ width: "100%", maxWidth: 460 }}>
+      <section data-guide="source" data-guide-text={`Current source: ${fileName}. This file is already loaded for the selected profile. Continue with field mapping below. Replace starts a fresh validation; Reset clears this source.`} className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-2.5 shadow-lg shadow-black/10">
+        <div style={{ width: "100%", maxWidth: 360 }}>
           <ProfilePicker
+            compact
             domain={domain}
             onDomainChange={onDomainChange}
             disabled={isLoading}
@@ -65,8 +66,8 @@ export function UploadSection({
           />
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3">
-          <div className="min-w-0">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-2">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
               Current source
             </p>
