@@ -1,6 +1,6 @@
 # M7 — Uitgebreid uitvoeringsplan voor het resterende werk
 
-Versie 3.4 · 31 oktober 2026 · eigenaar Rob · status: gepland, niet geïmplementeerd.
+Versie 3.4 · 31 oktober 2026 · eigenaar Rob · status: deels uitgevoerd; actuele stand in M7_PROGRESS.md.
 
 Dit is de leidende aanvulling op M7_PLAN.md. Rob heeft de eerder buiten M7 geplaatste productverbeteringen expliciet naar M7 verplaatst. Bij strijd met oude uitsluitingen, volgorde of afsluitcriteria geldt dit document. Bestaande Price/Stock-contracten en geaccepteerde vormgeving blijven behouden. M7_PROGRESS.md bevat uitsluitend de actuele uitvoering en het hervatpunt.
 
@@ -37,8 +37,8 @@ Op 31 oktober heeft Rob gevraagd ook de bestaande rapportexports direct mee te n
 | R02 | Checkboxbediening getalnotatie | R01 | Expliciete keuze zonder dropdown voor Invoice/Price/Stock |
 | R03 | Eén exportbasis, gangbare bestandsformaten | R01–R02 | CSV (; of ,), XLSX, TXT/TSV-tab en JSON met dezelfde toegestane rijen |
 | R07a | Rapportformats aansluitend op R03 | R03 | Issue-CSV/XLSX, volledig review-XLSX/PDF en actuele runcontext |
-| R04 | Zesprofielintegratie, M7.4f | R03, R07a | Contextisolatie en ketenbewijs voor alle zes |
-| R05a | Export-UX en optionele workflowhulp | R07a; expliciet vervroegd | Tabs, vraagtekens, gids; lokale beoordeling open |
+| R04 | Zesprofielintegratie, M7.4f | R03, R07a | Voorbereidingscontrole geslaagd op 3a40d60; zie M7_R04_INTEGRATION.md |
+| R05a | Export-UX en optionele workflowhulp | R07a; expliciet vervroegd | Lokaal bevestigd/gepusht als 3a40d60; livebewijs apart |
 | R05 | Resterende leesbaarheid en onboarding | R04, R05a | Eén beoordeeld voorstel, daarna consistente uitrol |
 | R06 | Review zoeken/filteren/sorteren | R05 | Bruikbare grote lijsten zonder exportscopewijziging |
 | R08 | Eerste ERP-template specificeren | R04; onderzoek kan eerder | Versiegebonden contract met bronverwijzingen en fixtures |
