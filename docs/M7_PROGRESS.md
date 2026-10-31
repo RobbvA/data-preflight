@@ -1,18 +1,17 @@
 # M7 — Voortgang en hervatpunt
 
-Bijgewerkt: 31 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 3.2. Resterende uitvoering: [M7_REMAINING_PLAN.md](M7_REMAINING_PLAN.md).
+Bijgewerkt: 31 oktober 2026. Plan: [M7_PLAN.md](M7_PLAN.md), versie 3.4. Resterende uitvoering: [M7_REMAINING_PLAN.md](M7_REMAINING_PLAN.md).
 
-## Actueel checkpoint — R03 exportkeuzes voorbereid/getest
+## Actueel checkpoint — R05a export-UX en begeleide workflow voorbereid
 
-- R01/R02 lokaal bevestigd; Rob kiest behoud van de vierkante notatiekeuzen. Remote push onafhankelijk gecontroleerd op `2e5c65b4a073ce598ac87f42480c48e8271bcc5a`, `fix: make invoice numbers explicit and exact`. Geen nieuwe liveacceptatie geclaimd.
-- Rob vraagt meer relevante exportkeuzes, met onderzoek en toepassing. Officiële ERP-documentatie leidt tot CSV (puntkomma/komma), XLSX, tabgescheiden TXT/TSV en generiek JSON voor integraties. Ondersteuningsdocumentatie is geen marktaandeel- of vraagmeting. XML is schema/templategebonden; PDF blijft rapportwerk onder R07.
-- R03 gebouwd/getest in voorbereiding: gedeelde stabiele exportdataset/writers en gedeelde bediening in beide workspaces voor zes profielen. Exacte waarden en dezelfde toegestane rijen per formaat. Expliciete XLSX-tekstcellen, Excel-limieten, JSON-stringwaarden en geen stille formule-neutralisatie. CSV/TXT/TSV met formuleachtige tekst blokkeren; veilige tekstuitvoer via XLSX/JSON. Issue-rapportbesluit volgt de hele rij.
-- Bewijs: 121 tests geslaagd, lint 0 fouten/2 bekende warnings, productiebuild/TS geslaagd. Browser per profiel zes uitvoervarianten gedownload/teruggelezen; eigen exacte Invoice, formuleachtige Product-tekst, all-blocked, mapping/replace/reset, keyboard, 1440/390px en actuele CSV-rapporten. Geen onverwachte requests/page errors geobserveerd. Geen volledige R12-eindtest, ERP-proefimport of livecontrole.
-- Pakket `datapreflight-m7-r03-export-formats.zip`; basis 2e5c65b. Lokale toepassing/acceptatie, push en live van R03 nog open. Details: [M7_R03_EXPORT_FORMATS.md](M7_R03_EXPORT_FORMATS.md).
-- Exacte volgende actie: Rob past pakket toe en beoordeelt de vijf formaten in Step 3 (CSV heeft separatoroptie). Na bevestiging commit/push, vervolgens R04 zesprofielintegratie/gerichte bevindingen en R05 leesbaarheid. Geen nieuwe auditronde.
-- Plan v3.2 behoudt alle uitgebreid afgesproken M7-scope, inclusief multi-file/tabs/gezamenlijke ZIP onder R11a/R11b. Nog niet gebouwd.
-- Geen actieve side quest. ERP/object en commerciële grenzen worden bij R08/R11 besloten en blokkeren R04 niet.
-- De onderstaande 28-oktoberstand en oorspronkelijke pakketten zijn historische registratie; dit checkpoint is leidend.
+- Laatst geverifieerde remote: `efc917cc98135b529cf6eee0755bbefa74c0fa5d` (R03). Rob vindt R07a een mooie toevoeging, vraagt aansluitend om professionelere UI/UX en vraagtekenhulp met uitgelichte stappen. Geen R07a-push of liveacceptatie geclaimd.
+- Gerichte R05a: Data export/Reports-tabs, rustiger rapportkaarten, optionele organisatienaam ingeklapt. Contextuele vraagtekens bij profiel, mapping, notatie, review en export. Optionele Quick guide licht beschikbare onderdelen uit en dimt de rest; Back/Next/Done/Escape, focusbeheer en achtergrond tijdelijk inert. Geen auto-start of opgeslagen completionflag.
+- De gids wijzigt geen bron, mapping, notatie of resultaten. Nog niet beschikbare review/exportstappen worden niet getoond. Geen nieuwe verplichte workflowstap. Bestaande zwart/koper/off-white, bronkaart en compacte records behouden.
+- Cumulatief pakket `datapreflight-m7-r05a-guided-workflow.zip` bevat R07a plus R05a. Toepasbaar op bekende R03- of R07a-bestanden; onbekende lokale wijzigingen worden vóór kopiëren geblokkeerd. `npm install` blijft nodig voor de rapportdependencies.
+- Bewijs: 134 tests en productiebuild geslaagd; lint nul fouten/twee bekende warnings. Productiebrowser op 1440/390px: gids/focus/Escape, popovers, tabtoetsen, daadwerkelijke data-/issue-downloads bij zes profielen en annuleren van late PDF bij tabwissel. Geen volledige R12 of WCAG-certificering geclaimd.
+- Details: [M7_R05A_GUIDED_WORKFLOW.md](M7_R05A_GUIDED_WORKFLOW.md) en [M7_R07A_REPORT_EXPORTS.md](M7_R07A_REPORT_EXPORTS.md).
+- Exact hervatpunt: Rob past cumulatief pakket toe en beoordeelt exporttabs/vraagtekens/Quick guide. Daarna commit/push apart; vervolgens R04 zesprofielintegratie. R05a is een gericht vervroegd deel van R05, niet de volledige leesbaarheidsacceptatie. R07b en uitgebreide M7 inclusief multi-file/tabs/gezamenlijke ZIP blijven gepland.
+- Historische checkpointregels hieronder zijn geen actuele takenlijst.
 
 ## Eerst lezen bij een sessiestart
 
@@ -68,7 +67,7 @@ Markeer stappen alleen afgerond met toepasselijk bewijs; voorbereid is niet loka
 
 ## Scope en werkpakketten vanaf 29 oktober
 
-R00-plan en R01/R02 zijn lokaal bevestigd/gepusht als 2e5c65b. R03 is voorbereid/getest; lokale toepassing/push nog open. R04–R14 inclusief R11a/R11b zijn gepland en niet afgerond. Zie het leidende resterende plan voor afhankelijkheden en per-pakket-acceptatie. Oude uitsluitingen van ERP-template, beperkte referenties/custom rules en praktijktest zijn vervallen door Robs expliciete scopewijziging. Accounts/betalingsinfrastructuur, live ERP-connectors, cloudopslag, algemene rule builder, broncelbewerking, orders en extra generieke profielen blijven buiten scope. Geen werk stil schrappen of automatisch toevoegen.
+R00-plan en R01/R02 zijn bevestigd/gepusht als 2e5c65b; R03 als efc917c. R07a + R05a zijn cumulatief voorbereid/getest; lokaal toepassen/push open. R04–R14 inclusief R07b en R11a/R11b zijn nog niet afgerond. Zie het leidende resterende plan voor afhankelijkheden en per-pakket-acceptatie. Oude uitsluitingen van ERP-template, beperkte referenties/custom rules en praktijktest zijn vervallen door Robs expliciete scopewijziging. Accounts/betalingsinfrastructuur, live ERP-connectors, cloudopslag, algemene rule builder, broncelbewerking, orders en extra generieke profielen blijven buiten scope. Geen werk stil schrappen of automatisch toevoegen.
 
 ## Sessieregistratie
 
@@ -79,3 +78,7 @@ R00-plan en R01/R02 zijn lokaal bevestigd/gepusht als 2e5c65b. R03 is voorbereid
 31 oktober 2026 — bouwsessie R01/R02: Invoice-getalcontract en exacte financiële vergelijkingen gebouwd; gedeelde checkboxuitstraling voor notatie aangesloten. 101 tests, lint, build en browserbewijs in M7_R01_INVOICE_NUMBERS.md. Plan v3.1 bevat multi-file/tabs/ZIP. Lokale toepassing/push/live open; hervatten R03 na bevestiging van dit pakket.
 
 31 oktober 2026 — R03 na Robs exportverzoek: formats onderzocht, vijf uitvoerformaten plus CSV-separator gebouwd, 121 tests en echte zesprofiel-downloadchecks geslaagd. Lokaal toepassen/push/live nog open. Hervatten R04 na bevestiging.
+
+31 oktober 2026 — R03 lokaal voltooid/gepusht als efc917c. Op Robs verzoek R07a aansluitend gebouwd: issue-CSV/XLSX en volledig review-XLSX/PDF; 134 tests en browser-/PDFbewijs geslaagd. Lokaal toepassen/npm install/beoordelen/push nog open. Daarna R04/R05.
+
+31 oktober 2026 — R05a op Robs verzoek naar voren gehaald: exporttabs, contextuele hulp en optionele spotlightgids. Cumulatieve R07a/R05a-oplevering, lokaal/push/live open. Daarna R04 en resterende R05.

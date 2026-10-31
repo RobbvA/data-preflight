@@ -1,10 +1,10 @@
 # M7 — Professional UX, Price List & Stock Balances
 
-Planversie: 3.2 · 31 oktober 2026 · eigenaar: Rob.
+Planversie: 3.4 · 31 oktober 2026 · eigenaar: Rob.
 
 **Actuele resterende scope, volgorde en acceptatiecriteria:** [M7_REMAINING_PLAN.md](M7_REMAINING_PLAN.md). Rob heeft de productuitbreidingen op 29 oktober expliciet binnen M7 geplaatst. Inclusief Robs aanvulling van 30 oktober: multi-file (maximaal vijf), bestandstabs en gezamenlijke ZIP-export. Die aanvulling vervangt strijdige uitsluitingen, de oude afsluitvolgorde en het eerdere besluit om praktijktests pas na M7 te doen. De onderstaande versie-2-contracten en historie blijven als basis behouden; ze zijn geen actuele takenlijst.
 
-Actueel bewijs: remote main `3fe3b2d` bevat M7.4e. De 86 geslaagde tests zijn historisch voorbereidingsbewijs; deze documentatieronde draait geen nieuwe applicatiechecks.
+Actueel bewijs: R01/R02 gepusht als 2e5c65b; R03 als efc917c. R07a + gerichte R05a voorbereid/getest, cumulatieve lokale beoordeling/push/live nog open. Zie M7_PROGRESS.md voor het hervatpunt.
 
 Dit plan vervangt voor M7 de eerdere eindscope van vijf profielen. Rob heeft op 26 oktober expliciet zes profielen gevraagd. Het zesde profiel wordt in dit plan afgebakend als Stock Balances / Voorraadstanden. De reeds afgesproken Price List-regels blijven behouden. Dit document is een uitvoeringsplan, geen verklaring dat geplande functionaliteit al beschikbaar is.
 

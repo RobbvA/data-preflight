@@ -1,3 +1,4 @@
+import { HelpPopover, WorkflowGuideButton } from "@/components/data-preflight/WorkflowHelp";
 import { useRef } from "react";
 import { ProfilePicker } from "@/components/data-preflight/ProfilePicker";
 import type { DataDomain } from "@/components/data-preflight/WorkspaceLayout";
@@ -54,7 +55,7 @@ export function UploadSection({
 
   if (hasActiveFile) {
     return (
-      <section className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-3 shadow-lg shadow-black/10">
+      <section data-guide="source" className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-3 shadow-lg shadow-black/10">
         <div style={{ width: "100%", maxWidth: 460 }}>
           <ProfilePicker
             domain={domain}
@@ -113,18 +114,16 @@ export function UploadSection({
 
   return (
     <section className="flex h-full w-full flex-col rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20 sm:p-5">
-      <h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
-        Start validation
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Start validation</h2><WorkflowGuideButton /></div>
 
       <p className="mt-1 text-sm leading-6 text-[var(--text-secondary)]">
         Choose your data, then try an example or use your own file.
       </p>
 
-      <div className="mt-5" ref={profileChoicesRef}>
-        <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
+      <div data-guide="profile" className="mt-5" ref={profileChoicesRef}>
+        <div className="flex items-center gap-2"><h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
           Step 1 · Validation profile
-        </h3>
+        </h3><HelpPopover title="Validation profiles">Choose the type of data in your file. Each profile has its own fields and checks. No source rows are uploaded to a server for validation.</HelpPopover></div>
 
         <div
           style={{
@@ -151,7 +150,7 @@ export function UploadSection({
         )}
       </div>
 
-      <div className="mt-5 border-t border-white/10 pt-5">
+      <div data-guide="source" className="mt-5 border-t border-white/10 pt-5">
         <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-accent)]">
           Step 2 · Choose a file
         </h3>

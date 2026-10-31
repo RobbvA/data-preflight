@@ -1,3 +1,4 @@
+import { HelpPopover } from "@/components/data-preflight/WorkflowHelp";
 import { useMemo, useState } from "react";
 
 import {
@@ -129,14 +130,14 @@ export function InvoiceReviewSection({
   };
 
   return (
-    <section
+    <section data-guide="review"
       id="invoice-review-workspace"
       className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
     >
       <div className="border-b border-white/10 pb-3">
-        <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
+        <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
           Step 2 · Review
-        </h2>
+        </h2><HelpPopover title="Review results">Blocked rows cannot enter the data export. Needs review rows can export with warnings. Open Details for all issues, then correct your source file and upload it again.</HelpPopover></div>
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
           <p className="text-base font-medium text-[var(--text-secondary)]">

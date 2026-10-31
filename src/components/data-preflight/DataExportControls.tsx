@@ -1,16 +1,15 @@
 "use client";
+import { HelpPopover } from "@/components/data-preflight/WorkflowHelp";
 
 import { useId, useMemo, useState } from "react";
 import type { ParsedRow } from "@/lib/parseCsv";
 import { DATA_EXPORT_FORMATS, createExportDataSet, hasSpreadsheetFormulaText, type ExportFormat, type CsvDelimiter } from "@/lib/dataExport";
 import { downloadDataExport } from "@/lib/exportData";
 
-export function DataExportControls({ fileName, rows, disabled, hasIssues, onExportIssues }: {
+export function DataExportControls({ fileName, rows, disabled }: {
   fileName: string;
   rows: readonly ParsedRow[];
   disabled: boolean;
-  hasIssues: boolean;
-  onExportIssues: () => void;
 }) {
   const id = useId();
   const [format, setFormat] = useState<ExportFormat>("csv");
@@ -28,7 +27,8 @@ export function DataExportControls({ fileName, rows, disabled, hasIssues, onExpo
       ? "An array of records for scripts and integrations. Values remain strings, including IDs and decimals; this is not an ERP-specific API payload."
       : "UTF-8 with a header row and decimal points. Spreadsheet apps may change IDs or decimals when opening text files; choose Excel to preserve them. Match the format to your target import.";
   return (
-    <div className="mt-4">
+    <div className="mt-4 rounded-xl border border-white/10 bg-[var(--surface-deep)] p-4">
+      <div className="mb-3 flex items-center justify-between gap-2"><div><h3 className="text-base font-semibold text-[var(--text-primary)]">Rows without blockers</h3><p className="mt-1 text-sm text-[var(--text-secondary)]">Prepare your data for the next import.</p></div><HelpPopover title="Data export formats">CSV is configurable text, Excel preserves text cells, TXT and TSV use tabs, and JSON is for scripts. Match the format and column requirements to your target import. No format guarantees ERP acceptance.</HelpPopover></div>
       <div className="flex flex-wrap gap-3">
         <label className="block text-sm font-medium text-[var(--text-primary)]">
           Export format
@@ -53,10 +53,7 @@ export function DataExportControls({ fileName, rows, disabled, hasIssues, onExpo
           className="rounded-xl bg-[var(--brand-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--brand-accent-soft)] disabled:cursor-not-allowed disabled:opacity-35">
           Export rows without blockers
         </button>
-        <button type="button" disabled={!hasIssues} onClick={() => download(onExportIssues)}
-          className="rounded-xl border border-white/10 bg-[var(--surface-deep)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[color:rgba(182,111,58,0.45)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-35">
-          Download issue report
-        </button>
+
       </div>
     </div>
   );

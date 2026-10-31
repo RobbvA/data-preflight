@@ -10,7 +10,6 @@ import {
   getInputAdapter,
   getReadableExcelSheetNames,
   type ParsedDataSet,
-  type ParsedRow,
 } from "@/lib/parseCsv";
 import { getExactReadableExcelSheetNames, parseExactSourceFile, type ExactParsedDataSet } from "@/lib/exactDataInput";
 import type { DecimalNotation } from "@/lib/strictDecimal";
@@ -24,14 +23,14 @@ import { PriceNotationControls } from "@/components/data-preflight/PriceNotation
 import { PriceListReviewRecord } from "@/components/data-preflight/PriceListReviewRecord";
 import type { UnitReference } from "@/lib/unitReference";
 import { UnitReferenceControls } from "@/components/data-preflight/UnitReferenceControls";
-import { downloadCsv } from "@/lib/exportData";
 import {
   getProfileMappingCandidates,
   suggestProfileMapping,
 } from "@/lib/dataProfile";
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
-import { DataExportControls } from "@/components/data-preflight/DataExportControls";
+import { HelpPopover } from "@/components/data-preflight/WorkflowHelp";
+import { ExportPanel } from "@/components/data-preflight/ExportPanel";
 import { ExportSummary } from "@/components/data-preflight/ExportSummary";
 import { ReviewRecord } from "@/components/data-preflight/ReviewRecord";
 import { ProductReviewRecord } from "@/components/data-preflight/ProductReviewRecord";
@@ -342,20 +341,15 @@ function MasterDataWorkspaceContent({
     onDomainChange(nextDomain);
   }
 
-  function exportIssues() {
-    const blockedRows = new Set(validationResult.issues.filter((issue) => issue.severity === "critical").map((issue) => issue.rowIndex));
-    const report: ParsedRow[] = validationResult.issues.map((issue) => ({
-      row: String(issue.rowIndex),
-      field: issue.field,
-      severity: issue.severity,
-      rule: issue.ruleId,
-      problem: issue.problem,
-      why_it_matters: issue.why,
-      suggested_fix: issue.fix,
-      export_decision: blockedRows.has(issue.rowIndex) ? "excluded_from_clean_export" : "included_with_review_warning",
-    }));
-    downloadCsv(config.exports.issues, report);
-  }
+  const reportInput = useMemo(() => ({
+    profile, fileName: dataSet?.fileName ?? "", sheetName: dataSet?.metadata?.sheetName,
+    mapping, unitReference,
+    priceContext: domain === "price-list" && priceNotation ? { priceNotation } : undefined,
+    stockContext: domain === "stock-balances" && quantityNotation ? { quantityNotation } : undefined,
+    counts: { total: normalizedRows.length, blocked: blockedCount, needsReview: reviewCount, ready: readyCount },
+    sourceRows: dataSet?.rows ?? [], displayRows: isNumeric ? (dataSet as ExactParsedDataSet | null)?.formattedRows : undefined,
+    normalizedRows, issues: validationResult.issues,
+  }), [profile, dataSet, mapping, unitReference, domain, priceNotation, quantityNotation, normalizedRows, blockedCount, reviewCount, readyCount, isNumeric, validationResult.issues]);
 
   return (
     <WorkspaceLayout>
@@ -408,6 +402,7 @@ function MasterDataWorkspaceContent({
           <section
             id={`${domain}-mapping`}
             aria-label="Field mapping"
+            data-guide="mapping"
             className={`rounded-2xl border bg-[var(--surface-base)] ${
               mappingReady
                 ? "border-white/10 p-4"
@@ -416,13 +411,13 @@ function MasterDataWorkspaceContent({
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
+                <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 1 · Field mapping
-                </h2>
+                </h2><HelpPopover title="Field mapping">Match the source columns to the fields you want to check. Required fields and duplicate assignments must be resolved before validation can run.</HelpPopover></div>
                 <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
                   {mappedCount}/{profile.fields.length} fields mapped
                 </p>
-                <p className={mappingReady ? "mt-1 text-xs leading-5 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
+                <p className={mappingReady ? "mt-1 text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
                   {requiredUnmapped.length > 0
                     ? `Choose a column for: ${requiredUnmapped.join(", ")}.${
                         hasDuplicateMappings
@@ -478,12 +473,13 @@ function MasterDataWorkspaceContent({
             <>
               <section
                 id={`${domain}-review`}
+                data-guide="review"
                 className="rounded-[1.5rem] border border-white/10 bg-[var(--surface-base)] p-4 shadow-xl shadow-black/20"
               >
                 <div className="border-b border-white/10 pb-3">
-                  <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
+                  <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                     Step 2 · Review
-                  </h2>
+                  </h2><HelpPopover title="Review results">Blocked rows are excluded from data export. Needs review rows can export with warnings. Ready means the implemented checks passed; it is not an ERP acceptance guarantee.</HelpPopover></div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     <p className="text-base font-medium text-[var(--text-secondary)]">
                       {config.labels.results}
@@ -589,11 +585,12 @@ function MasterDataWorkspaceContent({
 
               <section
                 id={`${domain}-export`}
+                data-guide="export"
                 className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
-                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
+                <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 3 · Export
-                </h2>
+                </h2><HelpPopover title="Choose the right download">Data export contains rows without blockers. Reports include the findings and blocked rows so you can share the complete review. Review filters do not change the exported data.</HelpPopover></div>
                 <ExportSummary
                   exportCount={validationResult.cleanRows.length}
                   warningCount={reviewCount}
@@ -616,8 +613,7 @@ function MasterDataWorkspaceContent({
                   }}
                 />
 
-                <DataExportControls fileName={config.exports.rows} rows={validationResult.cleanRows}
-                  disabled={!canExport} hasIssues={validationResult.issues.length > 0} onExportIssues={exportIssues} />
+                <ExportPanel fileName={config.exports.rows} rows={validationResult.cleanRows} disabled={!canExport} input={reportInput} issueFileName={config.exports.issues} />
               </section>
             </>
           )}

@@ -1,6 +1,4 @@
-> 2026-10-31 export checkpoint: R03 preparation provides CSV separator choice, XLSX, TXT/TSV and JSON through one data export model. Format choice alone is not target-ERP compatibility; XML requires a template contract and PDF is for review. Local R03 acceptance/push/live pending. Multi-file/tabs/joint ZIP remain in M7 scope and are not implemented yet.
-
-> 2026-10-31 scope checkpoint: the expanded M7 includes up to five isolated file sessions with tabs, a controlled queue, individual exports and joint ZIP export. This remains planned. Current R01/R02 preparation delivers Invoice v1.1.0 exact numeric interpretation and shared notation choices; local acceptance/push/live still pending. See [remaining plan](docs/M7_REMAINING_PLAN.md).
+> 2026-10-31 checkpoint: data exports provide CSV/XLSX/TXT/TSV/JSON; R07a preparation adds consistent issue CSV/XLSX and full review XLSX/PDF with optional organization name. Report scope remains explicit, with no ERP/legal approval guarantee. R07b will include future template/rules/review decisions. Multi-file/tabs/joint ZIP remain in M7 scope and are not implemented yet.
 
 # DataPreflight Product Vision
 

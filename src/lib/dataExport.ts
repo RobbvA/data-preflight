@@ -39,6 +39,21 @@ function delimitedText(data: ExportDataSet, delimiter: string): string {
   return "\uFEFF" + [data.headers, ...data.rows].map((row) => row.map(escape).join(delimiter)).join("\n");
 }
 
+export function createTextWorksheet(data: ExportDataSet): XLSX.WorkSheet {
+  if (data.rows.length > 1_048_575 || data.headers.length > 16_384) throw new Error("This dataset exceeds Excel's sheet limits. Choose CSV, tab-separated text or JSON.");
+  if ([data.headers, ...data.rows].some((row) => row.some((value) => value.length > 32_767))) throw new Error("A value exceeds Excel's cell text limit. Choose CSV, tab-separated text or JSON.");
+  const sheet = XLSX.utils.aoa_to_sheet([data.headers, ...data.rows]);
+  for (const [address, cell] of Object.entries(sheet)) {
+    if (!address.startsWith("!")) {
+      // Every value is text, including numeric-looking IDs, dates and exact decimals.
+      cell.t = "s";
+      cell.z = "@";
+      delete cell.f;
+    }
+  }
+  return sheet;
+}
+
 export function serializeDataExport(data: ExportDataSet, options: DataExportOptions): ExportFile | null {
   if (!data.rows.length || !data.headers.length) return null;
   if (options.format === "csv") {
@@ -54,17 +69,7 @@ export function serializeDataExport(data: ExportDataSet, options: DataExportOpti
     return { extension: "json", mimeType: "application/json;charset=utf-8", content: JSON.stringify(rows, null, 2) };
   }
   if (options.format === "xlsx") {
-    if (data.rows.length > 1_048_575 || data.headers.length > 16_384) throw new Error("This dataset exceeds Excel's sheet limits. Choose CSV, tab-separated text or JSON.");
-    if ([data.headers, ...data.rows].some((row) => row.some((value) => value.length > 32_767))) throw new Error("A value exceeds Excel's cell text limit. Choose CSV, tab-separated text or JSON.");
-    const sheet = XLSX.utils.aoa_to_sheet([data.headers, ...data.rows]);
-    for (const [address, cell] of Object.entries(sheet)) {
-      if (!address.startsWith("!")) {
-        // Every value is text, including numeric-looking IDs, dates and exact decimals.
-        cell.t = "s";
-        cell.z = "@";
-        delete cell.f;
-      }
-    }
+    const sheet = createTextWorksheet(data);
     const book = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(book, sheet, "Data");
     return { extension: "xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", content: XLSX.write(book, { type: "array", bookType: "xlsx" }) as ArrayBuffer };

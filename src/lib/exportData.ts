@@ -15,7 +15,7 @@ export function downloadDataExport(filename: string, rows: readonly ParsedRow[],
   const file = serializeDataExport(createExportDataSet(rows), options);
   if (!file) return;
   const stem = filename.replace(/\.(?:csv|xlsx|txt|tsv|json)$/i, "");
-  downloadFile(`${stem}.${file.extension}`, file.content, file.mimeType);
+  downloadExportFile(`${stem}.${file.extension}`, file.content, file.mimeType);
 }
 
 export function downloadCsv(filename: string, rows: ParsedRow[]) {
@@ -125,7 +125,7 @@ export function getExportSafetyMessage({
   return "These rows passed the current profile checks. This does not guarantee acceptance by your target ERP.";
 }
 
-function downloadFile(
+export function downloadExportFile(
   filename: string,
   content: string | ArrayBuffer,
   type: string,

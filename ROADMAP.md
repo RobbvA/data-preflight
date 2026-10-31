@@ -587,7 +587,7 @@ If scope must shrink, defer the reference-data experiment first and explicitly r
 
 Status: in progress. Scope explicitly expanded by Rob on 29 October 2026. The former exclusions of one ERP template, bounded local references/custom rules, richer review/reporting and an independent usage test are superseded.
 
-Authoritative remaining plan: [docs/M7_REMAINING_PLAN.md](docs/M7_REMAINING_PLAN.md), v3.2, including multi-file with tabs and joint ZIP export. Original domain contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current checkpoint: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md).
+Authoritative remaining plan: [docs/M7_REMAINING_PLAN.md](docs/M7_REMAINING_PLAN.md), v3.4, including multi-file with tabs and joint ZIP export. Original domain contracts: [docs/M7_PLAN.md](docs/M7_PLAN.md). Current checkpoint: [docs/M7_PROGRESS.md](docs/M7_PROGRESS.md).
 
 Remote main verified on 29 October as 3fe3b2d: full Stock Balances workflow pushed. Historical preparation evidence: 86 passing tests, lint with two known warnings, production build and focused browser checks. No new full live acceptance claimed.
 
@@ -596,7 +596,7 @@ Remaining sequence:
 1. Baseline/docs; exact Invoice notation and financial comparisons; explicit checkbox-style notation choice.
 2. Shared CSV (semicolon/comma), XLSX, TXT/TSV and JSON export, followed by six-profile integration (M7.4f).
 3. Approved readability improvements, onboarding and searchable/filterable/sortable review.
-4. Consistent CSV/XLSX/PDF review reporting and bounded report branding.
+4. Consistent CSV/XLSX/PDF review reporting and bounded report branding. R07a is explicitly moved directly after R03; R07b extends context when template/rules/decisions arrive.
 5. Specify and build one evidence-based ERP template with local reference checks and limited custom rules.
 6. Traceable warning acceptance, source-based correction and honest commercial offer/upgrade preparation.
 7. Multi-file with at most five isolated sessions, a controlled queue, file tabs and joint ZIP export, preserving individual exports.
@@ -606,4 +606,6 @@ Keep six generic profiles, accepted styling/layout, exact Price 8/1/2 and Stock 
 
 Commercial preparation does not silently include payment/account infrastructure. Live connectors, cloud collaboration, arbitrary rules/scripts, in-app cell editing and additional generic profiles remain outside scope. Open ERP/object and pricing/limit decisions are recorded before their implementation, not fabricated.
 
-R01/R02 are locally accepted/pushed as 2e5c65b. R03 is built/tested in preparation: five data formats, explicit CSV separator, one stable dataset and precise text preservation; 121 tests, lint/build and real cross-profile downloads pass. Local application/push/live of R03 remain open. Next goal after confirmation: R04 six-profile integration and R05 readability. Final completion follows v3 criteria, not the old smaller M7 checklist. Local confirmation, push, deployment and live function checks remain separate evidence stages.
+R01/R02 is accepted/pushed as 2e5c65b; R03 as efc917c. R07a is built/tested in preparation: issue CSV/XLSX and complete review XLSX/PDF across six profiles. 134 tests, lint/build and real download/PDF checks pass. Local application/npm install/acceptance/push/live of R07a remain open. Next goal after confirmation: R04 six-profile integration and R05 readability. Final completion follows v3 criteria, not the old smaller M7 checklist. Local confirmation, push, deployment and live function checks remain separate evidence stages.
+
+31 oktober 2026 — Gerichte R05a op Robs verzoek vervroegd: exporttabs, vraagtekenhulp en optionele gids met spotlight. Cumulatief R07a/R05a-pakket voorbereid; lokale beoordeling/push/live open. Daarna R04 en resterende R05; geen verdere scopewijziging.

@@ -1027,3 +1027,18 @@ R01/R02 lokaal afgerond; checkboxuitstraling door Rob geaccepteerd. Remote 2e5c6
 Gebouwd: gedeelde dataset/writers, CSV met puntkomma/komma, XLSX-tekstcellen, TXT/TSV, JSON-stringwaarden en gedeelde exportbediening over alle zes. Formuleachtige tekst blokkeert delimited downloads zonder bronmutatie, met XLSX/JSON als alternatieven. Excel-limieten expliciet. Issuerapportbesluit volgt hele rij.
 
 121 tests geslaagd (20 nieuwe), lint zonder nieuwe warnings, build/TS en werkelijke downloads over zes profielen/zes varianten plus eigen precisie- en recoverycases geslaagd. Visueel 1440/390px gecontroleerd. Geen fysieke telefoon, rechtstreekse ERP-proefimport, volledige R12 of nieuwe liveacceptatie geclaimd. Pakket nog lokaal toepassen/beoordelen; daarna commit/push en R04/R05. Geen remote writes of outreach uitgevoerd.
+
+
+## 31 oktober 2026 — R07a rapportexports na R03
+
+R03 lokaal afgerond en remote efc917c bevestigd. Rob vraagt rapporten aansluitend mee te nemen. Eén compleet rapportmodel en gedeelde bediening gebouwd voor zes profielen: issue CSV/XLSX; volledig review XLSX/PDF, optionele organisatienaam, bron/display/genormaliseerde waarden en rijbrede besluiten. Legacy context-CSV blijft. R07a vervroegd; toekomstige template/rule/acceptancecontext onder R07b.
+
+PDF lokaal met dynamische pdf-lib/fontkit en gebundelde DejaVu-font/licentie. Expliciete grootte-/fontgrenzen, geen stille afkap/transliteratie. Cancel/source-change voorkomt late downloads. Bestaande dependencyversies ongewijzigd; twee nieuwe directe dependencies toegevoegd. Pakket vereist na apply eenmalig npm install.
+
+134 tests geslaagd, lint nul fouten/twee bekende warnings, build/TS en zesprofielbrowserdownloads/PDFextractie/rendering/visuele controle geslaagd. Portabele unit-tests zonder vaste outputmap. Geen Windows/fysieke telefoon/nieuwe liveacceptatie/full R12 geclaimd. Pakket lokaal toepassen/beoordelen/push nog open; daarna R04/R05. Geen remote writes of outreach.
+
+## 31 oktober 2026 — R05a gerichte UX en workflowhulp
+
+Rob vindt de rapportfunctie waardevol maar de UI/UX nog onvoldoende. Op expliciet verzoek gerichte exportindeling met Data export/Reports-tabs, optionele organisatie onder details, contextuele vraagtekens en optionele begeleide stappen toegevoegd. Actieve onderdeel uitgelicht, achtergrond gedimd/inert; focus en Escape, geen datamutatie. Gedeeld over zes profielen; bestaande stijl en compacte records behouden.
+
+134 tests, productiebuild en lint (twee bekende warnings) geslaagd. Productiebrowser 1440/390, gids/context/tabtoetsen, echte exports zes profielen en late-PDF-annulering gecontroleerd. Cumulatief R07a/R05a-pakket; lokale toepassing, beoordeling, push en live staan open. Na bevestiging R04 en resterende R05. Geen nieuwe audit of volledige eindtest herstarten.

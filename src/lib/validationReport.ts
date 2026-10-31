@@ -6,7 +6,7 @@ export type InvoiceValidationContext = { invoiceNotation: DecimalNotation };
 export type PriceValidationContext = { priceNotation: DecimalNotation };
 export type StockValidationContext = { quantityNotation: DecimalNotation };
 
-type ValidationReportInput<TField extends string> = {
+export type ValidationReportInput<TField extends string> = {
   profile: { id: string; name: string; version: string };
   fileName: string;
   sheetName?: string;

@@ -1,3 +1,4 @@
+import { HelpPopover } from "@/components/data-preflight/WorkflowHelp";
 import { useId } from "react";
 import { Check } from "lucide-react";
 import type { DecimalNotation } from "@/lib/strictDecimal";
@@ -10,9 +11,9 @@ export function DecimalNotationControls({ label, appliesTo, value, onChange }: {
 }) {
   const id = useId();
   return (
-    <fieldset aria-label={label} aria-describedby={`${id}-help`} className="mt-4 border-t border-white/10 pt-3">
+    <fieldset data-guide="notation" aria-label={label} aria-describedby={`${id}-help`} className="mt-4 border-t border-white/10 pt-3">
       <legend className="float-left w-full text-sm font-semibold text-[var(--text-primary)]">
-        {label} <span className="font-normal text-[var(--text-secondary)]">· Required for this file</span>
+        {label} <span className="font-normal text-[var(--text-secondary)]">· Required for this file</span><HelpPopover title="Decimal notation">Choose how decimal values are written in this file: 12.50 or 12,50. Do not use thousands separators. The choice applies to text values; Excel number cells use their stored value. A new file needs a new choice.</HelpPopover>
       </legend>
       <div className="clear-both flex flex-wrap gap-x-6 gap-y-2 pt-2">
         {([['point', 'Decimal point (12.50)'], ['comma', 'Decimal comma (12,50)']] as const).map(([notation, text]) => (

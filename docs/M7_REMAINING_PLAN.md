@@ -1,6 +1,6 @@
 # M7 — Uitgebreid uitvoeringsplan voor het resterende werk
 
-Versie 3.2 · 31 oktober 2026 · eigenaar Rob · status: gepland, niet geïmplementeerd.
+Versie 3.4 · 31 oktober 2026 · eigenaar Rob · status: gepland, niet geïmplementeerd.
 
 Dit is de leidende aanvulling op M7_PLAN.md. Rob heeft de eerder buiten M7 geplaatste productverbeteringen expliciet naar M7 verplaatst. Bij strijd met oude uitsluitingen, volgorde of afsluitcriteria geldt dit document. Bestaande Price/Stock-contracten en geaccepteerde vormgeving blijven behouden. M7_PROGRESS.md bevat uitsluitend de actuele uitvoering en het hervatpunt.
 
@@ -26,7 +26,9 @@ Commerciële voorbereiding betekent in M7 een aanbod, transparante limieten/enti
 
 ## 3. Volgorde, afhankelijkheden en opleveringen
 
-De oude M7.1–M7.4e blijven historische stappen. Onderstaande R-ID's zijn de resterende uitvoeringsvolgorde; M7.4f valt onder R04. De oude M7.5-eindtest verhuist naar R12–R14, na de nieuwe functies. Geen voltooiing van de oude eindtest gebruiken om de uitgebreide M7 af te sluiten.
+R05a is op 31 oktober op Robs verzoek vervroegd: exportbediening, contextuele hulp en optionele spotlightgids. Dit is een deeloplevering van R05; R04 en resterende leesbaarheidsacceptatie blijven open.
+
+Op 31 oktober heeft Rob gevraagd ook de bestaande rapportexports direct mee te nemen; R07a wordt daarom na R03 en vóór R04 uitgevoerd. R07b bewaakt latere contextuitbreidingen. De oude M7.1–M7.4e blijven historische stappen. Onderstaande R-ID's identificeren de resterende werkpakketten; de afhankelijkheden bepalen de volgorde en R07a is expliciet vervroegd; M7.4f valt onder R04. De oude M7.5-eindtest verhuist naar R12–R14, na de nieuwe functies. Geen voltooiing van de oude eindtest gebruiken om de uitgebreide M7 af te sluiten.
 
 | ID | Werkpakket | Afhankelijk van | Controleerbare oplevering |
 | --- | --- | --- | --- |
@@ -34,16 +36,18 @@ De oude M7.1–M7.4e blijven historische stappen. Onderstaande R-ID's zijn de re
 | R01 | Invoice exact getalcontract | R00 | Versiegewijzigd profiel, regressies, precieze bronroute |
 | R02 | Checkboxbediening getalnotatie | R01 | Expliciete keuze zonder dropdown voor Invoice/Price/Stock |
 | R03 | Eén exportbasis, gangbare bestandsformaten | R01–R02 | CSV (; of ,), XLSX, TXT/TSV-tab en JSON met dezelfde toegestane rijen |
-| R04 | Zesprofielintegratie, M7.4f | R03 | Contextisolatie en ketenbewijs voor alle zes |
-| R05 | Leesbaarheid en onboarding | R04 | Eén beoordeeld voorstel, daarna consistente uitrol |
+| R07a | Rapportformats aansluitend op R03 | R03 | Issue-CSV/XLSX, volledig review-XLSX/PDF en actuele runcontext |
+| R04 | Zesprofielintegratie, M7.4f | R03, R07a | Contextisolatie en ketenbewijs voor alle zes |
+| R05a | Export-UX en optionele workflowhulp | R07a; expliciet vervroegd | Tabs, vraagtekens, gids; lokale beoordeling open |
+| R05 | Resterende leesbaarheid en onboarding | R04, R05a | Eén beoordeeld voorstel, daarna consistente uitrol |
 | R06 | Review zoeken/filteren/sorteren | R05 | Bruikbare grote lijsten zonder exportscopewijziging |
-| R07 | Deelbaar reviewpakket | R03, R06 | XLSX/PDF plus bestaand CSV, volledige runcontext |
 | R08 | Eerste ERP-template specificeren | R04; onderzoek kan eerder | Versiegebonden contract met bronverwijzingen en fixtures |
-| R09 | Template, referenties en beperkte custom rules bouwen | R07–R08 | Uitvoerbare regels, juiste export en duidelijke grenzen |
+| R09 | Template, referenties en beperkte custom rules bouwen | R07a, R08 | Uitvoerbare regels, juiste export en duidelijke grenzen |
 | R10 | Reviewbesluiten en herstel | R06, R09 | Waarschuwing accepteren met traceerbare registratie |
-| R11 | Commercieel aanbod en eerlijke upgradeflow | R07, R09–R10 | Beschikbare meerwaarde, expliciete limieten, branded rapport |
+| R07b | Rapportcontext uitbreiden bij nieuwe functies | R06, R09, R10 | Templates/rules/reviewbesluiten meenemen zodra die bestaan |
+| R11 | Commercieel aanbod en eerlijke upgradeflow | R07b, R09–R10 | Beschikbare meerwaarde, expliciete limieten, branded rapport |
 | R11a | Multi-file wachtrij en bestandstabs | R04–R06, R10 | Maximaal vijf geisoleerde bestandssessies met individuele exports |
-| R11b | Gezamenlijke ZIP-export | R03, R07, R11a | Expliciet overzicht en volledige, actuele export per bestand |
+| R11b | Gezamenlijke ZIP-export | R03, R07b, R11a | Expliciet overzicht en volledige, actuele export per bestand |
 | R12 | Uitgebreide tests profiel voor profiel | Alle functies; gerichte tests lopen steeds mee | Testlog voor zes profielen plus ERP-template |
 | R13 | Onafhankelijke praktijktest en herstel | R12 | Observeerbare taakuitkomst en opgeloste belangrijke bevindingen |
 | R14 | Definitieve release en afsluiting | R13 | Docs, checks, lokale bevestiging, push, deployment en livebewijs |
@@ -105,7 +109,7 @@ R06: tekstzoekactie over record-ID/rij/bronveld/waarde/probleem, filters status/
 
 ## 8. R07 — Deelbaar reviewrapport
 
-Eén reportmodel voedt CSV, XLSX en PDF, zodat aantallen en uitleg overeenkomen. XLSX bevat Samenvatting, Issues en Controlecontext. PDF bevat leesbare samenvatting/context en gepagineerde issues met herhaalde kolomkoppen; nooit stil afkappen. Te grote PDF expliciet weigeren met XLSX-alternatief, op basis van geteste grens.
+Eén reportmodel voedt CSV, XLSX en PDF, zodat aantallen en uitleg overeenkomen. XLSX bevat Summary, Issues, Rows en Validation context. Ook een volledig geslaagde run zonder issues heeft een rapport en een expliciete lege Issues-sheet. PDF bevat leesbare samenvatting/context en gepagineerde issues met herhaalde kolomkoppen; nooit stil afkappen. Te grote PDF expliciet weigeren met XLSX-alternatief, op basis van geteste grens.
 
 Inhoud: bronnaam/worksheet, profiel- en templateversie, mapping, notatie, referentiecontext, toegepaste custom rules, rij-/statustellingen, exportbesluit per rij, bronrij/record/veld, oorspronkelijke en eventuele genormaliseerde waarde, problem/why/fix en bekende niet-uitgevoerde controles. Een warning-issue op een verder geblokkeerde rij mag niet ten onrechte melden dat die rij geëxporteerd wordt; rijbesluit is leidend.
 
@@ -211,3 +215,5 @@ M7 klaar wanneer alle R-pakketten hun acceptatiecriteria hebben, kritieke bevind
 - Rob, 30 oktober: multi-file expliciet binnen M7, met bestandstabs en gezamenlijke ZIP-export. Uitgewerkt op 31 oktober als R11a/R11b, vóór de eindtest. Geen multi-file-implementatie in het R01/R02-pakket.
 
 - Rob, 31 oktober: na R01/R02 meer relevante gangbare exportkeuzes onderzoeken en toepassen. R03 uitgebreid naar CSV met scheidingstekenkeuze, XLSX, tabgescheiden TXT/TSV en JSON voor integratiegebruik. Onderbouwing en bewijs: M7_R03_EXPORT_FORMATS.md. Geen generiek ERP-XML of import-PDF.
+
+- Rob, 31 oktober: na R03 ook rapportexports aanpassen; R07a naar voren gehaald. Issues CSV/Excel; volledig reviewrapport Excel/PDF. Bestaande context-CSV behouden. R07b volgt de nog te bouwen template/rules/reviewbesluiten.

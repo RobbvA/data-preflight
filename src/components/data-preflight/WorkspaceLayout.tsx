@@ -1,3 +1,6 @@
+"use client";
+
+import { WorkflowHelpProvider, WorkflowGuideButton } from "@/components/data-preflight/WorkflowHelp";
 import type { ReactNode } from "react";
 import { HomeProductPreview } from "@/components/data-preflight/HomeProductPreview";
 import type { MasterDataDomain } from "@/lib/profiles/masterDataWorkspaceConfig";
@@ -15,7 +18,7 @@ const workspaceTitles: Record<DataDomain, string> = {
 
 export function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="min-h-screen overflow-hidden bg-[var(--surface-deep)] px-4 py-6 text-[var(--text-primary)] sm:px-8 lg:px-10 xl:px-12">
+    <WorkflowHelpProvider><main data-workspace-root className="min-h-screen overflow-hidden bg-[var(--surface-deep)] px-4 py-6 text-[var(--text-primary)] sm:px-8 lg:px-10 xl:px-12">
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 top-[-260px] h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[rgba(182,111,58,0.1)] blur-3xl" />
         <div className="absolute right-[-240px] top-20 h-[500px] w-[620px] rounded-full bg-[rgba(182,111,58,0.07)] blur-3xl" />
@@ -27,7 +30,7 @@ export function WorkspaceLayout({ children }: { children: ReactNode }) {
         {children}
         <ProductFooter />
       </div>
-    </main>
+    </main></WorkflowHelpProvider>
   );
 }
 
@@ -84,6 +87,7 @@ export function ActiveWorkspaceHeader({
         <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
           {description}
         </p>
+        <div className="mt-2 -ml-2"><WorkflowGuideButton /></div>
       </div>
 
       {upload}

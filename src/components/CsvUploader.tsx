@@ -14,15 +14,13 @@ import { invoiceValidationProfile } from "@/lib/profiles/invoiceValidationProfil
 import { getProfileMismatchMessage } from "@/lib/profileCompatibility";
 import { getMappingStatus } from "@/lib/mappingStatus";
 import {
-  downloadErrorCsv,
-} from "@/lib/exportData";
-import {
   createEmptyMapping,
   createMappingSuggestions,
   createSuggestedMapping,
 } from "@/lib/fieldMapping";
 import type { FieldMapping, MappingSuggestion } from "@/lib/fieldMapping";
-import { DataExportControls } from "@/components/data-preflight/DataExportControls";
+import { HelpPopover } from "@/components/data-preflight/WorkflowHelp";
+import { ExportPanel } from "@/components/data-preflight/ExportPanel";
 import { ExportSummary } from "@/components/data-preflight/ExportSummary";
 import { ProfileMappingPanel } from "@/components/data-preflight/ProfileMappingPanel";
 import { MasterDataWorkspace } from "@/components/data-preflight/MasterDataWorkspace";
@@ -314,6 +312,13 @@ export function CsvUploader() {
   const warningCount = warningInvoiceItems.length;
   const cleanCount = cleanInvoiceItems.length;
   const canExport = resultsReady && validationResult.cleanRows.length > 0;
+  const reportInput = useMemo(() => ({
+    profile: invoiceValidationProfile, fileName, sheetName: parsedDataSet?.metadata?.sheetName,
+    mapping: fieldMapping, invoiceContext: invoiceNotation ? { invoiceNotation } : undefined,
+    counts: { total: normalizedRows.length, blocked: blockedCount, needsReview: warningCount, ready: cleanCount },
+    sourceRows: parsedDataSet?.rows ?? [], displayRows: parsedDataSet?.formattedRows,
+    normalizedRows, issues: validationResult.issues,
+  }), [fileName, parsedDataSet, fieldMapping, invoiceNotation, normalizedRows, blockedCount, warningCount, cleanCount, validationResult.issues]);
   const hasUploadedRows = rows.length > 0;
   const hasHeaders = headers.length > 0;
 
@@ -387,6 +392,7 @@ export function CsvUploader() {
 
           <section
             aria-label="Field mapping"
+            data-guide="mapping"
             className={`rounded-2xl border bg-[var(--surface-base)] ${
               mappingReady
                 ? "border-white/10 p-4"
@@ -395,13 +401,13 @@ export function CsvUploader() {
           >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
+                <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 1 · Field mapping
-                </h2>
+                </h2><HelpPopover title="Field mapping">Match the source columns to the fields you want to check. Required fields and duplicate assignments must be resolved before validation can run.</HelpPopover></div>
                 <p className="mt-2 text-base font-medium text-[var(--text-primary)]">
                   {mappedCount}/{mappingSuggestions.length} fields mapped
                 </p>
-                <p className={mappingReady ? "mt-1 text-xs leading-5 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
+                <p className={mappingReady ? "mt-1 text-sm leading-6 text-[var(--text-secondary)]" : "mt-1 text-sm leading-6 text-[var(--brand-accent-soft)]"}>
                   {hasIncompleteMapping
                     ? `Choose a column for: ${missingRequiredFields
                         .map((field) => field.label)
@@ -451,11 +457,12 @@ export function CsvUploader() {
 
               <section
                 id="invoice-export"
+                data-guide="export"
                 className="rounded-2xl border border-white/10 bg-[var(--surface-base)] p-5 sm:p-6"
               >
-                <h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
+                <div className="flex items-center gap-2"><h2 className="text-xl font-semibold leading-snug tracking-tight text-[var(--brand-accent)]">
                   Step 3 · Export
-                </h2>
+                </h2><HelpPopover title="Choose the right download">Data export contains rows without blockers. Reports include the findings and blocked rows so you can share the complete review. Review filters do not change the exported data.</HelpPopover></div>
                 <ExportSummary
                   exportCount={validationResult.cleanRows.length}
                   warningCount={warningCount}
@@ -476,9 +483,7 @@ export function CsvUploader() {
                   }}
                 />
 
-                <DataExportControls fileName="clean-invoices.csv" rows={validationResult.cleanRows}
-                  disabled={!canExport} hasIssues={validationResult.issues.length > 0}
-                  onExportIssues={() => downloadErrorCsv("invoice-errors.csv", validationResult.issues)} />
+                <ExportPanel fileName="clean-invoices.csv" rows={validationResult.cleanRows} disabled={!canExport} input={reportInput} issueFileName="invoice-errors.csv" />
               </section>
             </>
           )}
